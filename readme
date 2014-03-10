@@ -1,0 +1,51 @@
+Welcome to release 4.2.1
+========================
+
+This software is provided under the GNU Affero General Public License, 
+the terms of which can be referenced here: https://www.gnu.org/licenses/agpl.html
+
+We are asking you to be please give phpChess and its contributers credit when using, distributing, modifying otherwise working with the software.
+
+please ensure you read the intro.rtf, and visit http://www.phpchess.com/?page_id=425 - which is the installation and upgrade Q&A
+
+
+Quick Installation step for phpChess:
+=====================================
+
+a) copy all files and folders to you server using your favourite ftp program
+!!!!IMPORTANT!!!!
+b) rename the bin/config.txt file to config.php
+!!!!IMPORTANT!!!!
+c) Using a browser and open the installtion file http:///www.[your server address]/phpchess/install/
+d) follow the instructions
+
+Quick upgrade guide (4.1 or higher):
+====================================
+
+a) copy all files over the existing files using your favourite ftp program
+b) using your browser open the upgrade file http://www.[your server address]/phpchess/install/upgrade.php
+c) follow the instructions
+
+
+from a phpChess version older than 4.1:
+=======================================
+
+!!!! Please note that older games will be automatically finished as new fields are added to the database!!!!
+
+a) make a back-up of all your phpChess files on the server! - especially bin/config.php
+b) make sure you delete all existing phpChess files from the server!!!
+c) once you have copied the new files onto the server 
+--> copy from your back-up the config.php file from the bin directory back to the server into the bin directory
+--> rename the file bin/installed.old to bin/installed.txt
+d) now you can go on your server and open the install directory in your browser.
+
+
+
+If you upgrade without these steps you will get issues and you will likely waste additional time. 
+
+If you are installing phpChess new, there are no such issues to worry about.
+
+
+Have fun, all the best
+
+phpChess.com (c)phpchess 2001 - 2014
