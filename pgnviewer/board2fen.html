@@ -1,0 +1,132 @@
+<HTML>
+<HEAD>
+<META NAME="description" content="LT-PGN-VIEWER 3.4 is a free JavaScript PGN Viewer ">
+<META NAME="author" content="Lutz Tautenhahn">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<TITLE>LT-PGN-BOARD</TITLE>
+<script language="JavaScript" src="ltpgnviewer.js"></script>
+<style type='text/css'>
+body {background-color:#EEEEEE;color:#000000}
+a {color:#000000; text-decoration: none}
+a:hover {color:#FFFFFF; background-color:#808080}
+td {text-align:left; vertical-align:top; font-size:10pt; font-family:Verdana; }
+img {position:relative}
+</style>
+</HEAD>
+<BODY>
+<table border=0 cellpadding=0 cellspacing=0 align=center><tr><th>
+<FORM name=BoardForm>
+<table border=0><tr><td>
+<script language="JavaScript">
+//SetImagePath("alpha30/");//use this function when your images are in another directory
+EvalUrlString("SetImagePath");
+EvalUrlString("SetBGColor");
+if ((BGColor!="")&&(document.getElementsByTagName)) document.getElementsByTagName('BODY')[0].style.backgroundColor=BGColor;
+ImageOffset=document.images.length;
+var ImageStyle="";
+if (ImagePath!="") SetBorder(0);
+EvalUrlString("SetBorder");
+if (Border)
+{ if (document.layers) ImageStyle="border=1 ";
+  else ImageStyle="style='border-width:"+Border+"px; border-style:solid; border-color:#404040' ";
+}
+document.writeln("<table border=0 cellpadding=0 cellspacing=0><tr><td bgcolor=#404040>");
+if (!document.layers) document.writeln("<div id='Board'>");
+document.write("<TABLE border=0 cellpadding=0 cellspacing=0><TR>");
+for (var ii=0; ii<64; ii++)
+{ if ((9*ii-ii%8)%16==0) document.write("<TD background='"+ImagePath+"w.gif'>");
+  else document.write("<TD background='"+ImagePath+"b.gif'>");
+  document.write("<IMG SRC='"+ImagePath+"t.gif' "+ImageStyle+" id='"+ii+"' onMouseDown='BoardClick("+ii+")'></TD>");
+  if (ii%8==7)
+  { if (ii<63) document.write("</TR><TR>");
+    else document.writeln("</TR></TABLE>");
+  }    
+}
+if (!document.layers) document.writeln("</div><div id='Canvas' style='position:relative;z-index:100'></div>");
+document.writeln("</td><th width=32 align=left><img name='RightLabels' src='"+ImagePath+"1x1.gif' onMouseDown='RotateBoard(! isRotated)' title='rotate board' alt='rotate board'></th></tr>");
+document.writeln("<tr><th><img name='BottomLabels' src='"+ImagePath+"1x1.gif' onMouseDown='SetDragDrop(! isDragDrop)' title='piece animation on/off' alt='piece animation on/off'></th>");
+document.writeln("<td><img src='"+ImagePath+"1x1.gif' width=7 height=7 border=1 onMouseDown='SwitchLabels()' title='show/hide labels' alt='show/hide labels'></td></tr></table>");
+
+document.writeln("<input type=hidden name='Position' value='' size=16>");
+document.writeln("</td>");
+document.writeln("<td>");
+document.writeln("<table border=0 cellpadding=0 cellspacing=0><tr><th>");
+document.writeln("<TABLE border=0 cellpadding=0 cellspacing=0>");
+document.writeln("<TR><TD background='w.gif'><img src='wk.gif' id='64' "+ImageStyle+" onMouseDown='SetupPieceClick(0)'></TD><TD background='w.gif'><img src='bk.gif' id='65' "+ImageStyle+" onMouseDown='SetupPieceClick(1)'></TD></TR>");
+document.writeln("<TR><TD background='w.gif'><img src='wq.gif' id='66' "+ImageStyle+" onMouseDown='SetupPieceClick(2)'></TD><TD background='w.gif'><img src='bq.gif' id='67' "+ImageStyle+" onMouseDown='SetupPieceClick(3)'></TD></TR>");
+document.writeln("<TR><TD background='w.gif'><img src='wr.gif' id='68' "+ImageStyle+" onMouseDown='SetupPieceClick(4)'></TD><TD background='w.gif'><img src='br.gif' id='69' "+ImageStyle+" onMouseDown='SetupPieceClick(5)'></TD></TR>");
+document.writeln("<TR><TD background='w.gif'><img src='wb.gif' id='70' "+ImageStyle+" onMouseDown='SetupPieceClick(6)'></TD><TD background='w.gif'><img src='bb.gif' id='71' "+ImageStyle+" onMouseDown='SetupPieceClick(7)'></TD></TR>");
+document.writeln("<TR><TD background='w.gif'><img src='wn.gif' id='72' "+ImageStyle+" onMouseDown='SetupPieceClick(8)'></TD><TD background='w.gif'><img src='bn.gif' id='73' "+ImageStyle+" onMouseDown='SetupPieceClick(9)'></TD></TR>");
+document.writeln("<TR><TD background='w.gif'><img src='wp.gif' id='74' "+ImageStyle+" onMouseDown='SetupPieceClick(10)'></TD><TD background='w.gif'><img src='bp.gif' id='75' "+ImageStyle+" onMouseDown='SetupPieceClick(11)'></TD></TR>");
+document.writeln("<TR><TD><img src='t.gif'></TD><TD><img src='t.gif'></TD></TR>");
+document.writeln("<TR><TD><img src='trash.gif' id='76' onMouseDown='SetupPieceClick(12)'></TD><TD><img src='t.gif'></TD></TR>");
+document.writeln("</TABLE>");
+document.writeln("</th></tr></table>");
+</script>
+</td>
+</tr></table>
+</th></tr><tr><th>
+<input type=text name="FEN" value="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" size=56>
+</th></tr><tr><th>
+<table border=0 cellpadding=2 cellspacing=2><tr>
+<td><input type=button value="Apply FEN" name="ApplyButton" onClick="javascript:ApplyFEN(document.BoardForm.FEN.value); Init('');"></td>
+<td><input type=checkbox name="DragDrop" value=1 onClick="javascript:SetDragDrop(this.checked)">drag&drop</td>
+<td><input type=button value="Clear Board" name="ClearButton" onClick="javascript:Clear()"></td>
+<td><input type=button value="Setup Board" name="SetupBoard" onClick="javascript:SwitchSetupBoard(); UpdateButtons()"></td>
+</tr></table>
+<table border=0 cellpadding=2 cellspacing=2><tr><td>
+<input type=text name="Commands" value="" size=28>
+</td><td>
+<input type=button value="Apply Commands" onClick="javascript:ExecCommands(document.BoardForm.Commands.value)">
+</td></tr>
+<tr><td>example: Ae2e4R,Be7G,Ce5B</td>
+<th>
+<input type=button value="Make Link" name="MakeLinkButton" disabled onClick="javascript:MakeLink()">
+</th></tr>
+</table>
+</FORM>
+<script language="JavaScript">
+function MakeLink()
+{ var ww=window.open("", "", "width=640, height=480, menubar=no, locationbar=no, resizable=yes, status=no, scrollbars=yes"); 
+  ww.document.open();
+  ww.document.writeln('<HTML><HEAD></HEAD><BODY>');
+  var ff=document.BoardForm.FEN.value;
+  while (ff.indexOf("/")>0) ff=ff.replace("/","|");
+  var nn='ltpgnboard.html?Init='+ff;
+  if (isRotated) nn+='&RotateBoard=1';
+  if (isDragDrop) nn+='&SetDragDrop=1';
+  if (document.BoardForm.Commands.value) nn+='&ExecCommands='+document.BoardForm.Commands.value;
+  ww.document.writeln('<a href="'+nn+'">'+nn+'</a>');
+  ww.document.writeln('</BODY></HTML>');
+  ww.document.close();
+}
+function Clear()
+{ var ii, jj;
+  for (ii=0; ii<8; ii++)
+  { for (jj=0; jj<8; jj++)
+      Board[ii][jj]=0;
+  }
+  SetBoardSetupMode('delete');
+  BoardClick(0);
+  SetBoardSetupMode('move');  
+}
+function UpdateButtons()
+{ if (isSetupBoard)
+  { document.forms[0].ClearButton.disabled=false;
+    document.forms[0].ApplyButton.disabled=false;
+    document.forms[0].MakeLinkButton.disabled=true;
+  }
+  else
+  { document.forms[0].ClearButton.disabled=true;
+    document.forms[0].ApplyButton.disabled=true;
+    document.forms[0].MakeLinkButton.disabled=false;
+  }
+}
+SetBoardSetupMode('move');
+Init('');
+SwitchSetupBoard();
+setTimeout("RefreshBoard(true)",1000);
+</script>
+</th></tr></table>
+</BODY>
+</HTML>

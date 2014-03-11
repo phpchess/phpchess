@@ -1,0 +1,1531 @@
+IDS_LANGUAGE_PACK || English ||
+IDS_CONFIG_INTRO || Welcome to your command center configuration page. Please choose your management option below: ||
+IDS_MANAGE_OPTIONS_TABLE_HEADER || Management options ||
+IDS_MANAGE_OPTONS_LINK_CBC || Chessboard Colors ||
+IDS_MANAGE_OPTONS_LINK_BL || Manage Buddy List ||
+IDS_MANAGE_OPTONS_LINK_CP || Change Password ||
+IDS_MANAGE_OPTONS_LINK_A || Manage Avatars ||
+IDS_MANAGE_OPTONS_LINK_PI || Personal Information ||
+IDS_MANAGE_OPTONS_LINK_CA || Close Account ||
+IDS_MANAGE_OPTONS_LINK_CA_TXT || Close your chess account. ||
+IDS_MANAGE_OPTONS_LINK_CN || challenge Notification ||
+IDS_MANAGE_OPTONS_LINK_CBC_TXT || Choose your chessboard colors. ||
+IDS_MANAGE_OPTONS_LINK_BL_TXT || Maintain your buddy list. ||
+IDS_MANAGE_OPTONS_LINK_CP_TXT || Change your account's password. ||
+IDS_MANAGE_OPTONS_LINK_A_TXT || Create/Edit your current avatar. ||
+IDS_MANAGE_OPTONS_LINK_PI_TXT || Create/Edit your personal information. ||
+IDS_MANAGE_OPTONS_LINK_CN_TXT || Create/Edit your challenge notification settings. ||
+IDS_MANAGE_OPTONS_LINK_MBL || Manage Board Layout ||
+IDS_MANAGE_OPTONS_LINK_MBL_TXT || Configure your board layout. ||
+IDS_MANAGE_OPTONS_LINK_CO || Club Options ||
+IDS_MANAGE_OPTONS_LINK_CO_TXT || Join/Manage/Create you Clubs. ||
+IDS_NO_IMAGE_UPLOADED || You must specify a value for the \"Upload Avatar\" field. ||
+IDS_IMAGE_MOVE_ERROR || Internal error: Unable to move temporary file. ||
+IDS_IMAGE_TYPE_ERROR || Please, only GIF/JPG pictures are allowed. ||
+IDS_IMAGE_TOO_LARGE || Image file size is to large, please select a smaller image. ||
+IDS_IMAGE_RESIZE_ERROR || Could not resize the image. Please select another image and try again. ||
+IDS_MANAGE_AVATAR_TABLE_HEADER || Manage Avatar ||
+IDS_MANAGE_AVATAR_TABLE_HEADER_1 || Current Avatar ||
+IDS_MANAGE_AVATAR_BTN_UA || Upload Avatar ||
+IDS_MANAGE_OPTIONS_BTN_BACK || <- Back to Configuration Page ||
+IDS_MANAGE_AVATAR_TEXT_1 || Image stats: ||
+IDS_MANAGE_AVATAR_TEXT_2 || Upload Avatar: ||
+IDS_MANAGE_BUDDYLIST_TABLE_HEADER || Maintain Buddy List ||
+IDS_LIST_BTN_RIGHT || &gt;&gt; ||
+IDS_LIST_BTN_ALLRIGHT || All &gt;&gt; ||
+IDS_LIST_BTN_LEFT || &lt;&lt; ||
+IDS_LIST_BTN_ALLLEFT || All &lt;&lt; ||
+IDS_LIST_BTN_ALLRIGHT_1 ||&#124&gt;&gt; ||
+IDS_LIST_BTN_ALLLEFT_1 || &lt;&lt;&#124 ||
+IDS_MANAGE_BUDDYLIST_BTN_UPDATE || Update Buddy List ||
+IDS_MANAGE_BUDDYLIST_TEXT_1 || Buddy List Updated! ||
+IDS_MANAGE_INFORMATION_TABLE_HEADER || Manage Personal Information ||
+IDS_MANAGE_INFORMATION_TABLE_TXT_1 || Real Name: ||
+IDS_MANAGE_INFORMATION_TABLE_TXT_2 || Location: ||
+IDS_MANAGE_INFORMATION_TABLE_TXT_3 || Age: ||
+IDS_MANAGE_INFORMATION_TABLE_TXT_4 || (Chess) Self Rating: ||
+IDS_MANAGE_INFORMATION_TABLE_TXT_5 || Comment/Motto: ||
+IDS_MANAGE_INFORMATION_TABLE_TXT_6 || Favorite Chess Player: ||
+IDS_MANAGE_INFORMATION_TABLE_TXT_7 || Email Address: ||
+IDS_MANAGE_INFORMATION_BTN_SAVE || Save ||
+IDS_MANAGE_NOTIFICATION_TABLE_HEADER || Manage Move And challenge Notification ||
+IDS_MANAGE_NOTIFICATION_TABLE_TXT_1 || Move Notification By Email: ||
+IDS_MANAGE_NOTIFICATION_TABLE_TXT_2 || challenge Notification By Email: ||
+IDS_MANAGE_NOTIFICATION_BTN_SAVE || Save ||
+IDS_SELECT_YES || Yes ||
+IDS_SELECT_NO || No ||
+IDS_MANAGE_CHANGEPASSWORD_TABLE_HEADER || Change Password ||
+IDS_MANAGE_CHANGEPASSWORD_TABLE_TXT_1 || Old Password ||
+IDS_MANAGE_CHANGEPASSWORD_TABLE_TXT_2 || New Password ||
+IDS_MANAGE_CHANGEPASSWORD_TABLE_TXT_3 || Retype Password ||
+IDS_MANAGE_CHANGEPASSWORD_BTN_CHANGE || Change ||
+IDS_MANAGE_CHANGEPASSWORD_ERROR_TXT_1 || Your old password is wrong. Please try again. ||
+IDS_CHESS_MEMBER_GREETING || Welcome, ['user_name'] to your homepage ||
+IDS_CHESS_MEMBER_TABLE_BILLING_HEADER || Billing ||
+IDS_CHESS_MEMBER_TABLE_BILLING_TXT_1 || Current Bills ||
+IDS_CHESS_MEMBER_TABLE_BILLING_TXT_2 || Previous Bills ||
+IDS_CHESS_MEMBER_TABLE_BILLING_TXT_3 || View ||
+IDS_CHESS_MEMBER_TXT_1 || Help ||
+IDS_CHESS_MEMBER_TXT_2 || Select From Here: ||
+IDS_CHESS_MEMBER_TXT_3 || Start a New Game ||
+IDS_CHESS_MEMBER_TXT_4 || My Games ||
+IDS_CHESS_MEMBER_TXT_5 || My Settings ||
+IDS_CHESS_MEMBER_TXT_6 || Activities ||
+IDS_CHESS_MEMBER_TXT_7 || Club Homepage ||
+IDS_CHESS_MEMBER_TXT_8 || You need to be a member of a club to use this feature. ||
+IDS_CHESS_MEMBER_TXT_9 || Player Chat ||
+IDS_CHESS_MEMBER_TXT_10 || Player chat is currently disabled. ||
+IDS_CHESS_MEMBER_TXT_11 || challenge ||
+IDS_CHESS_MEMBER_MY_TOURNAMENTS || My Tournaments ||
+IDS_CHESS_REGISTER_GREETING || Please be aware that membership to this site is not free. ||
+IDS_CHESS_REGISTER_TABLE_HEADER || Register Player ||
+IDS_CHESS_REGISTER_TABLE_TXT_1 || User ID: ||
+IDS_CHESS_REGISTER_TABLE_TXT_2 || Email: ||
+IDS_CHESS_REGISTER_TABLE_TXT_3 || Validate: ||
+IDS_CHESS_REGISTER_BTN_REGISTER || Register ||
+IDS_CHESS_REGISTER_BTN_RESET || Reset ||
+IDS_CHESS_REGISTER_MESSAGE_TXT_1 || If your account is disabled and you want to pay your bill <a href='./renew_bill_login.php'>Click here</a> ||
+IDS_CHESS_REGISTER_MESSAGE_TXT_2 || Sorry, the user limit for this server has been reached, please come back later. ||
+IDS_PAYBYPAYPAL_JAVA_TXT_1 || Please enter a value for the \\\"First Name\\\" field. ||
+IDS_PAYBYPAYPAL_JAVA_TXT_2 || Please enter a value for the \\\"Last Name\\\" field. ||
+IDS_PAYBYPAYPAL_JAVA_TXT_3 || Please enter a value for the \\\"Email\\\" field. ||
+IDS_PAYBYPAYPAL_JAVA_TXT_4 || Please enter a value for the \\\"Phone\\\" field. ||
+IDS_PAYBYPAYPAL_JAVA_TXT_5 || Please enter only digit characters in the \\\"Phone\\\" field. ||
+IDS_PAYBYPAYPAL_JAVA_TXT_6 || Please enter a value for the \\\"Phone\\\" field. ||
+IDS_PAYBYPAYPAL_JAVA_TXT_7 || Please enter only digit characters in the \\\"Phone\\\" field. ||
+IDS_PAYBYPAYPAL_JAVA_TXT_8 || Please enter a value for the \\\"Phone\\\" field. ||
+IDS_PAYBYPAYPAL_JAVA_TXT_9 || Please enter only digit characters in the \\\"Phone\\\" field. ||
+IDS_PAYBYPAYPAL_JAVA_TXT_10 || Please enter a value for the \\\"Address\\\" field. ||
+IDS_PAYBYPAYPAL_JAVA_TXT_11 || Please enter a value for the \\\"City\\\" field. ||
+IDS_PAYBYPAYPAL_JAVA_TXT_12 || Please enter a value for the \\\"Zip\\\" field. ||
+IDS_PAYBYPAYPAL_JAVA_TXT_13 || Please select your country. ||
+IDS_PAYBYPAYPAL_BILLING_TABLE_HEADER || Billing Information ||
+IDS_PAYBYPAYPAL_BILLING_TABLE_TXT_1 || First Name: ||
+IDS_PAYBYPAYPAL_BILLING_TABLE_TXT_2 || Last Name: ||
+IDS_PAYBYPAYPAL_BILLING_TABLE_TXT_3 || Email: ||
+IDS_PAYBYPAYPAL_BILLING_TABLE_TXT_4 || Phone: ||
+IDS_PAYBYPAYPAL_BILLING_TABLE_TXT_5 || Address: ||
+IDS_PAYBYPAYPAL_BILLING_TABLE_TXT_6 || State/Province: ||
+IDS_PAYBYPAYPAL_BILLING_TABLE_TXT_7 || City: ||
+IDS_PAYBYPAYPAL_BILLING_TABLE_TXT_8 || Zip/Postal Code: ||
+IDS_PAYBYPAYPAL_BILLING_TABLE_TXT_9 || Country: ||
+IDS_PAYBYPAYPAL_BILLING_TABLE_TXT_10 || Term: ||
+IDS_SELECT_TERM_MONTHLY || Monthly ||
+IDS_SELECT_TERM_SEMIANNUAL || Semi-Annual ||
+IDS_SELECT_TERM_YEARLY || Yearly ||
+IDS_PAYBYPAYPAL_TXT_1 || Plan Price: $ ||
+IDS_PAYBYPAYPAL_TXT_2 || Monthy: $ ||
+IDS_PAYBYPAYPAL_TXT_3 || Semi-Annual: $ ||
+IDS_PAYBYPAYPAL_TXT_4 || Yearly: $ ||
+IDS_PAYBYPAYPAL_TXT_5 || Redemption Code: ||
+IDS_REGISTER_BTN_NEXT || NEXT ||
+IDS_VERIFYORDER_TXT_1 || Thank you, your order was recived. ||
+IDS_VERIFYORDER_TABLE_HEADER || Verify Order Information ||
+IDS_VERIFYORDER_TXT_2 || User Name: ||
+IDS_VERIFYORDER_TXT_3 || Sorry, the user name that you selected is already taken, please select another name. ||
+IDS_VERIFYORDER_TXT_4 || Redemption Code: ||
+IDS_VERIFYORDER_TXT_5 || for a free Month of service ||
+IDS_VERIFYORDER_TXT_6 || for a free Semi-annual term of service ||
+IDS_VERIFYORDER_TXT_7 || for a free year of service ||
+IDS_VERIFYORDER_TXT_8 || Redemption code issued to ||
+IDS_VERIFYORDER_TXT_9 || Sorry, the redemption code you selected is invalid. ||
+IDS_VERIFYORDER_BTN_UPDATE || Update Errors ||
+IDS_VERIFYORDER_BTN_PAYMENT || MAKE PAYMENT - PAYPAL ||
+IDS_RETRIEVEPASS_TABLE_HEADER || Retrieve Lost Password ||
+IDS_RETRIEVEPASS_TABLE_TXT_1 || User ID: ||
+IDS_RETRIEVEPASS_TABLE_TXT_2 || Email: ||
+IDS_RETRIEVEPASS_BTN_SUBMIT || Submit ||
+IDS_RETRIEVEPASS_BTN_RESET || Reset ||
+IDS_RETRIEVEPASS_TEXT_1 || Your password will be sent shortly. ||
+IDS_CHESS_STATISTICS_AVATAR_TABLE_HEADER || Avatar ||
+IDS_CHESS_STATISTICS_TXT_1 || Not Available ||
+IDS_CHESS_STATISTICS_PI_TABLE_HEADER || Personal Information ||
+IDS_CREATE_GAME_TABLE_HEADER || Create Game ||
+IDS_CREATE_GAME_TABLE_TXT_1_1 || Game settings for ||
+IDS_CREATE_GAME_TABLE_TXT_1_2 || vs ||
+IDS_CREATE_GAME_TABLE_TXT_2 || Pick Color: ||
+IDS_CREATE_GAME_TABLE_TXT_3 || FEN (Optional): ||
+IDS_CREATE_GAME_TABLE_TXT_4 || Sorry, you can't challenge yourself to a game. ||
+IDS_CREATE_GAME_TABLE_TXT_5 || Thank you, ['user_name']. Your challenged partner has been notified. ||
+IDS_CREATE_GAME_TABLE_TXT_6 || Pre Created Game (Optional)||
+IDS_CREATE_GAME_SELECT_COLOR_1 || White Chess Pieces ||
+IDS_CREATE_GAME_SELECT_COLOR_2 || Black Chess Pieces ||
+IDS_CREATE_GAME_BTN_CG || Create Game ||
+IDS_CREATE_GAME_BTN_CF || Create FEN ||
+IDS_CREATE_GAME_TXT_1 || Game Options: ||
+IDS_CREATE_GAME_TXT_2 || Active Real-Time ||
+IDS_CREATE_GAME_TXT_3 || Game Time Control ||
+IDS_CREATE_GAME_TXT_4 || Control 1: ||
+IDS_CREATE_GAME_TXT_5 || Control 2: ||
+IDS_CREATE_GAME_TXT_6 || Moves Adds ||
+IDS_CREATE_GAME_TXT_7 || Minutes. ||
+IDS_CREATE_GAME_TXT_8 || Game Type: ||
+IDS_CREATE_GAME_TXT_9 || Passive Real-Time ||
+IDS_CREATE_GAME_OPT_1 || Blitz ||
+IDS_CREATE_GAME_OPT_2 || Short ||
+IDS_CREATE_GAME_OPT_3 || Normal ||
+IDS_CREATE_GAME_OPT_4 || Slow ||
+IDS_CREATE_GAME_OPT_5 || Snail ||
+IDS_CREATE_GAME_OPT_6 || Custom ||
+IDS_CREATE_GAME_OPT_7 || Rated ||
+IDS_CREATE_GAME_OPT_8 || Unrated ||
+IDS_FIND_PLAYER_TABLE_HEADER || Search for a player ||
+IDS_FIND_PLAYER_JAVA_TXT_1 || % ||
+IDS_FIND_PLAYER_JAVA_TXT_2 || * ||
+IDS_FIND_PLAYER_JAVA_TXT_3 || A ||
+IDS_FIND_PLAYER_JAVA_TXT_4 || B ||
+IDS_FIND_PLAYER_JAVA_TXT_5 || C ||
+IDS_FIND_PLAYER_JAVA_TXT_6 || D ||
+IDS_FIND_PLAYER_JAVA_TXT_7 || E ||
+IDS_FIND_PLAYER_JAVA_TXT_8 || F ||
+IDS_FIND_PLAYER_JAVA_TXT_9 || G ||
+IDS_FIND_PLAYER_JAVA_TXT_10 || H ||
+IDS_FIND_PLAYER_JAVA_TXT_11 || I ||
+IDS_FIND_PLAYER_JAVA_TXT_12 || J ||
+IDS_FIND_PLAYER_JAVA_TXT_13 || K ||
+IDS_FIND_PLAYER_JAVA_TXT_14 || L ||
+IDS_FIND_PLAYER_JAVA_TXT_15 || M ||
+IDS_FIND_PLAYER_JAVA_TXT_16 || N ||
+IDS_FIND_PLAYER_JAVA_TXT_17 || O ||
+IDS_FIND_PLAYER_JAVA_TXT_18 || P ||
+IDS_FIND_PLAYER_JAVA_TXT_19 || Q ||
+IDS_FIND_PLAYER_JAVA_TXT_20 || R ||
+IDS_FIND_PLAYER_JAVA_TXT_21 || S ||
+IDS_FIND_PLAYER_JAVA_TXT_22 || T ||
+IDS_FIND_PLAYER_JAVA_TXT_23 || U ||
+IDS_FIND_PLAYER_JAVA_TXT_24 || V ||
+IDS_FIND_PLAYER_JAVA_TXT_25 || W ||
+IDS_FIND_PLAYER_JAVA_TXT_26 || X ||
+IDS_FIND_PLAYER_JAVA_TXT_27 || Y ||
+IDS_FIND_PLAYER_JAVA_TXT_28 || Z ||
+IDS_FIND_PLAYER_BTN_SEARCH || Search ||
+IDS_GAME_TXT_1 || The challenged player has not accepted the game yet. ||
+IDS_GAME_TXT_2 || If you wish to accept the challenge please press the "Accept Challenge" button below: ||
+IDS_GAME_TXT_3 || Please select a promotion figure below, using your mouse: ||
+IDS_GAME_TXT_4 || White wins. ||
+IDS_GAME_TXT_5 || Black wins. ||
+IDS_GAME_TXT_6 || Draw. ||
+IDS_GAME_TXT_7 || Your move is not valid. ||
+IDS_GAME_TXT_8 || You have requested a draw. ||
+IDS_GAME_TXT_9 || A draw request was made to you. ||
+IDS_GAME_TXT_10 || This game is in realtime mode. ||
+IDS_GAME_TXT_11 || You have requested a realtime game offer. ||
+IDS_GAME_TXT_12 || A real-time game request was made to you. ||
+IDS_GAME_CHESS_GAME_TABLE_HEADER || Chess Game ||
+IDS_GAME_CHESS_GAME_TABLE_TXT_1 || Invalid Game. ||
+IDS_GAME_TXT_13 || Game has been revoked. ||
+IDS_GAME_TXT_14 || Game Options/Stats ||
+IDS_GAME_BTN_REVOKE_CHALLANGE || Revoke Challenge ||
+IDS_GAME_BTN_ACCEPT_CHALLANGE || Accept Challenge ||
+IDS_GAME_BTN_REVOKE_DRAW || Decline ||
+IDS_GAME_BTN_ACCEPT_DRAW || Accept ||
+IDS_INDEX_TXT_1 || # of Members ||
+IDS_INDEX_TXT_2 || # of Games ||
+IDS_INDEX_TXT_3 || # of Tournament Games ||
+IDS_INDEX_TXT_4 || Who's Online ||
+IDS_MSGCENTER_TABLE_HEADER || Message Center ||
+IDS_MSGCENTER_LINK_TXT_1 || New Message ||
+IDS_MSGCENTER_LINK_TXT_2 || Inbox ||
+IDS_MSGCENTER_LINK_TXT_3 || Saved Messages ||
+IDS_MSGCENTER_BTN_DS || Delete Selected ||
+IDS_MSGCENTER_BTN_SA || Select All ||
+IDS_MSGCENTER_TXT_1 || New Message: ||
+IDS_MSGCENTER_BTN_SM || Send Message ||
+IDS_MSGCENTER_BTN_D || Delete ||
+IDS_MSGCENTER_BTN_S || Save ||
+IDS_MSGCENTER_TXT_2 || Message Sent! ||
+IDS_MSGCENTER_BTN_K || Keep ||
+IDS_MSGCENTER_TXT_3 || Message Center ||
+IDS_VIEW_GAMES_TABLE_HEADER || Search For Current/Past Games ||
+IDS_VIEW_GAMES_TABLE_TXT_1 || Search ||
+IDS_VIEW_GAMES_BTN_SEARCH || Search ||
+IDS_VIEW_GAMES_BTN_NPL || Now Playing Live ||
+IDS_ADMIN_EMAIL_TABLE_HEADER || Manage player billing term over ||
+IDS_ADMIN_EMAIL_BTN_UPDATE || Update ||
+IDS_ADMIN_LINK_TABLE_HEADER || Manage Link Settings ||
+IDS_ADMIN_LINK_TABLE_TXT_1 || Link Name: ||
+IDS_ADMIN_LINK_TABLE_TXT_2 || URL: ||
+IDS_ADMIN_LINK_BTN_CV || Change Value ||
+IDS_ADMIN_SKINS_TABLE_HEADER || Manage Skins ||
+IDS_ADMIN_SKINS_TABLE_TXT_1 || Skin Name: ||
+IDS_ADMIN_SKINS_BTN_1 || Change Skin ||
+IDS_ADMINTS_TABLE_HEADER || Manage Tournament Settings ||
+IDS_ADMINTS_SELECT_YES || Yes ||
+IDS_ADMINTS_SELECT_NO || No ||
+IDS_ADMINTS_TXT_1 || Tournament functionality is disabled for your account. ||
+IDS_ADMINTS_TXT_2 || New tournament requires approval: ||
+IDS_ADMINTS_BTN_CHANGE || Change Value ||
+IDS_ADMIN_USERREG_TABLE_HEADER || Manage User Registration ||
+IDS_ADMIN_USERREG_TXT_1 || New user requires approval: ||
+IDS_ADMIN_NEWSLETTER_TABLE_HEADER || Create Newsletter ||
+IDS_ADMIN_NEWSLETTER_TABLE_TXT_1 || Newsletter Subject: ||
+IDS_ADMIN_NEWSLETTER_BTN_1 || Send Newsletter ||
+IDS_ADMIN_LOGIN_TABLE_HEADER || Command Center Admin Login ||
+IDS_ADMIN_LOGIN_TABLE_TXT_1 || User Name: ||
+IDS_ADMIN_LOGIN_TABLE_TXT_2 || Password: ||
+IDS_ADMIN_LOGIN_BTN_LOGIN || Login ||
+IDS_ADMIN_LOGIN_BTN_RESET || Reset ||
+IDS_ADMIN_MAIN_TXT_1 || Welcome to the command center administration console. ||
+IDS_ADMIN_MAIN_TXT_2 || Version ||
+IDS_ADMIN_MAIN_TXT_3 || Activities other than those authorized is strictly prohibited on this site. Unauthorized use or access is regarded as a criminal act in the nature of theft. violators will be subjected to civil and criminal prosecution. ||
+IDS_ADMIN_MANAGE_TXT_1 || Welcome to your command center configuration page. Please choose your management option below: ||
+IDS_ADMIN_MANAGE_TXT_2 || Management options ||
+IDS_ADMIN_MANAGE_TXT_3 || View New Bills ||
+IDS_ADMIN_MANAGE_TXT_4 || View Previous Bills ||
+IDS_ADMIN_MANAGE_TXT_5 || Create Redemption Code ||
+IDS_ADMIN_MANAGE_TXT_6 || Manage Multi-Redemption Codes ||
+IDS_ADMIN_MANAGE_TXT_7 || View new bills. ||
+IDS_ADMIN_MANAGE_TXT_8 || View previous bills. ||
+IDS_ADMIN_MANAGE_TXT_9 || Create a redemption code for a player. ||
+IDS_ADMIN_MANAGE_TXT_10 || manage your multi-user redemption codes list. ||
+IDS_ADMIN_MANAGE_TXT_11 || View Credit Requests ||
+IDS_ADMIN_MANAGE_TXT_12 || View credit requests made by players. ||
+IDS_ADMIN_MANAGE_EBILLS_TABLE_1_HEADER || Enable/Disable Billing ||
+IDS_ADMIN_MANAGE_EBILLS_TABLE_1_TXT_1 || Billing functionality enabled: ||
+IDS_ADMIN_MANAGE_EBILLS_SELECT_YES || Yes ||
+IDS_ADMIN_MANAGE_EBILLS_SELECT_NO || No ||
+IDS_ADMIN_MANAGE_EBILLS_BTN_CV || Change Value ||
+IDS_ADMIN_MANAGE_EBILLS_TABLE_2_HEADER || Paypal Account Information ||
+IDS_ADMIN_MANAGE_EBILLS_TABLE_2_TXT_1 || Paypal Email: ||
+IDS_ADMIN_MANAGE_EBILLS_TABLE_2_TXT_2 || Currency: ||
+IDS_ADMIN_MANAGE_EBILLS_TABLE_2_TXT_3 || Monthly Charge: ||
+IDS_ADMIN_MANAGE_EBILLS_BTN_UPI || Update Paypal Info ||
+IDS_ADMIN_MANAGE_FRONTNEWS_BTN_NEW || New ||
+IDS_ADMIN_MANAGE_FRONTNEWS_BTN_EDIT || Edit ||
+IDS_ADMIN_MANAGE_FRONTNEWS_BTN_DELETE || Delete ||
+IDS_ADMIN_MANAGE_FRONTNEWS_TXT_1 || Title: ||
+IDS_ADMIN_MANAGE_FRONTNEWS_TXT_2 || News Text: ||
+IDS_ADMIN_MANAGE_FRONTNEWS_BTN_ANI || Add News Item ||
+IDS_ADMIN_MANAGE_FRONTNEWS_BTN_ENI || Edit News Item ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TXT_1 || Welcome to your command center configuration page. Please choose your management option below: ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_HEADER || Management options ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_LINK_1 || Manage Skins ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_LINK_2 || User Registration ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_LINK_3 || Tournament Settings ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_LINK_4 || Link Settings ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_LINK_5 || Enable/Disable Billing ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_LINK_6 || Billing Emails ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_TXT_1 || Change/configure your command center skin. ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_TXT_2 || Customize your user registration methods. ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_TXT_3 || Customize your tournament methods. ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_TXT_4 || Customize your links. ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_TXT_5 || Enable/Disable Command Center Billing. ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_TXT_6 || Configure the emails used for billing. ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_LINK_7 || Language Settings ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_TXT_7 || Configure your command center language. ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_LINK_8 || Rating System ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_LINK_9 || Email Settings ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_TXT_8 || Manage your rating system. ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_TXT_9 || Manage your server's email settings. ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_LINK_10 || Game Options ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_TXT_10 || Manage your server's game options. ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_LINK_11 || Language Filter ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_TXT_11 || Manage your language filters. ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_LINK_12 || Email Log ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_TXT_12 || View failed emails ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_LINK_13 || Pre-Created Games ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_TXT_13 || View your pre-created games. ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_LINK_14 || Chessboard Colors ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_TXT_14 || Manage your default chessboard colors. ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_LINK_15 || Avatar Settings ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_TXT_15 || Configure the server's avatar settings. ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_LINK_16 || Player Credits ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_TXT_16 || Configure the server's player credits settings. ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_LINK_17 || Activity Settings ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_TXT_17 || Configure the server's activities settings. ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_LINK_18 || Player Chat Settings ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_TXT_18 || Configure the server's player chat settings. ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_LINK_19 || Cron Job Settings ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_TXT_19 || Configure the server's cron job settings. ||
+IDS_ADMIN_MANAGE_MULTIREDEMPTION_TABLE_TXT_1 || Add Code: ||
+IDS_ADMIN_MANAGE_MULTIREDEMPTION_BTN_AC || Add Code ||
+IDS_ADMIN_MANAGE_MULTIREDEMPTION_TABLE_HEADER || Redemption Codes ||
+IDS_ADMIN_MANAGE_MULTIREDEMPTION_BTN_DC || Delete Code ||
+IDS_ADMIN_MANAGE_NEWBILLS_TABLE_HEADER || Payment Note ||
+IDS_ADMIN_MANAGE_NEWBILLS_TXT_1 || Please remember to enable ['other_user'] in the <a href='./admin_new_players.php'>\"Accept new user\"</a> Page. If user is already in the system, go to the <a href='./admin_player_list.php'>\"Manage Current Players\"</a> page and reenable the user. ||
+IDS_ADMIN_MANAGE_NEWSDATA_TXT_1 || Welcome to your command center configuration page. Please choose your management option below: ||
+IDS_ADMIN_MANAGE_NEWSDATA_TABLES_HEADER || Management options ||
+IDS_ADMIN_MANAGE_NEWSDATA_TABLE_LINK_1 || Front News ||
+IDS_ADMIN_MANAGE_NEWSDATA_TABLE_LINK_2 || Tip Of The Day ||
+IDS_ADMIN_MANAGE_NEWSDATA_TABLE_LINK_3 || Server Messages ||
+IDS_ADMIN_MANAGE_NEWSDATA_TABLE_TXT_1 || Manage the news text on the front page. ||
+IDS_ADMIN_MANAGE_NEWSDATA_TABLE_TXT_2 || Manage your tips of the day. ||
+IDS_ADMIN_MANAGE_NEWSDATA_TABLE_TXT_3 || Manage your server messages. ||
+IDS_ADMIN_MANAGE_PLAYERS_TXT_1 || Welcome to your command center configuration page. Please choose your maagement option below: ||
+IDS_ADMIN_MANAGE_PLAYERS_TABLE_HEADER || Management options ||
+IDS_ADMIN_MANAGE_PLAYERS_TABLE_LINK_1 || Accept New Players ||
+IDS_ADMIN_MANAGE_PLAYERS_TABLE_LINK_2 || Manage Current Players ||
+IDS_ADMIN_MANAGE_PLAYERS_TABLE_LINK_3 || Tournament Player Exporter ||
+IDS_ADMIN_MANAGE_PLAYERS_TABLE_LINK_4 || Tournament Player Importer ||
+IDS_ADMIN_MANAGE_PLAYERS_TABLE_TXT_1 || Accept new players. ||
+IDS_ADMIN_MANAGE_PLAYERS_TABLE_TXT_2 || Disable/enable and view current players. ||
+IDS_ADMIN_MANAGE_PLAYERS_TABLE_TXT_3 || Export players for tournament. ||
+IDS_ADMIN_MANAGE_PLAYERS_TABLE_TXT_4 || Import players for tournament. ||
+IDS_ADMIN_MANAGE_REDEMPTIONCODE_TABLE_TXT_1 || Redemption Code: ||
+IDS_ADMIN_MANAGE_REDEMPTIONCODE_TABLE_HEADER || Create Redemption Code ||
+IDS_ADMIN_MANAGE_REDEMPTIONCODE_TABLE_TXT_2 || Player User Name: ||
+IDS_ADMIN_MANAGE_REDEMPTIONCODE_TABLE_TXT_3 || Free Term Length: ||
+IDS_ADMIN_MANAGE_REDEMPTIONCODE_SELECT_M || Monthly ||
+IDS_ADMIN_MANAGE_REDEMPTIONCODE_SELECT_SA || Semi-Annual ||
+IDS_ADMIN_MANAGE_REDEMPTIONCODE_SELECT_Y || Yearly ||
+IDS_ADMIN_MANAGE_REDEMPTIONCODE_BTN_CC || Create Code ||
+IDS_ADMIN_MANAGE_SERVERMSG_TABLE_TXT_1 || Message Added! ||
+IDS_ADMIN_MANAGE_SERVERMSG_TABLE_TXT_2 || Message Removed! ||
+IDS_ADMIN_MANAGE_SERVERMSG_TABLE_TXT_3 || Message Updated! ||
+IDS_ADMIN_MANAGE_SERVERMSG_TABLE_HEADER_1 || Server Messages ||
+IDS_ADMIN_MANAGE_SERVERMSG_BTN_E || Edit ||
+IDS_ADMIN_MANAGE_SERVERMSG_BTN_D || Delete ||
+IDS_ADMIN_MANAGE_SERVERMSG_TABLE_HEADER_2 || Edit Server Message ||
+IDS_ADMIN_MANAGE_SERVERMSG_TABLE_HEADER_3 || New Server Message ||
+IDS_ADMIN_MANAGE_SERVERMSG_BTN_A || Add ||
+IDS_ADMIN_MANAGE_SERVERMSG_TABLE_TXT_4 || Text: ||
+IDS_ADMIN_MANAGE_TIPOFTHEDAY_TABLE_TXT_1 || Tip Added! ||
+IDS_ADMIN_MANAGE_TIPOFTHEDAY_TABLE_TXT_2 || Tip Removed! ||
+IDS_ADMIN_MANAGE_TIPOFTHEDAY_TABLE_TXT_3 || Tip Updated! ||
+IDS_ADMIN_MANAGE_TIPOFTHEDAY_TABLE_HEADER_1 || Tip Of The Day ||
+IDS_ADMIN_MANAGE_TIPOFTHEDAY_BTN_E || Edit ||
+IDS_ADMIN_MANAGE_TIPOFTHEDAY_BTN_D || Delete ||
+IDS_ADMIN_MANAGE_TIPOFTHEDAY_TABLE_HEADER_2 || Edit Tip Of The Day ||
+IDS_ADMIN_MANAGE_TIPOFTHEDAY_TABLE_TXT_4 || Text: ||
+IDS_ADMIN_MANAGE_TIPOFTHEDAY_TABLE_HEADER_3 || New Tip Of The Day ||
+IDS_ADMIN_MANAGE_TIPOFTHEDAY_BTN_A || Add ||
+IDS_ADMIN_MANAGE_NEWPLAYERS_TXT_1 || Sorry, your user limit has been reached, please disable some users, or purchase more user slots. ||
+IDS_ADMIN_MANAGE_EXPORTPLAYER_TABLE_HEADER || Select Players to export ||
+IDS_ADMIN_MANAGE_EXPORTPLAYER_TABLE_TXT_1 || List Of Players ||
+IDS_ADMIN_MANAGE_EXPORTPLAYER_BTN_EP || Export Players ||
+IDS_ADMIN_MANAGE_EXPORTPLAYER_TXT_1 || Tournament player export functionality is disabled for your account. ||
+IDS_ADMIN_MANAGE_IMPORTPLAYER_TABLE_HEADER || Import Tournament Players ||
+IDS_ADMIN_MANAGE_IMPORTPLAYER_BTN_IP || Import Players ||
+IDS_ADMIN_MANAGE_IMPORTPLAYER_TXT_1 || Tournament player import functionality is disabled for your account. ||
+IDS_ADMIN_MANAGE_IMPORTPLAYER_TXT_2 || The following users could not be added to the user list: ||
+IDS_ADMIN_MANAGE_PLAYERLIST_TXT_1 || Your user limit has been reached. ||
+IDS_ADMIN_MANAGE_PLAYERLIST_TABLE_HEADER_1 || Current User Count ||
+IDS_ADMIN_MANAGE_PLAYERLIST_TABLE_TXT_1 || Current Users: ||
+IDS_ADMIN_MANAGE_PLAYERLIST_TABLE_TXT_2 || Max Users ||
+IDS_ADMIN_MANAGE_PLAYERLIST_TABLE_HEADER_2 || Disable/Enable Players ||
+IDS_ADMIN_MANAGE_PLAYERLIST_TABLE_SELECT_D || Disable ||
+IDS_ADMIN_MANAGE_PLAYERLIST_TABLE_SELECT_E || Enable ||
+IDS_ADMIN_TOURNAMENTPROPOSAL_TXT_1 || Your tournament proposal was sent. ||
+IDS_ADMIN_TOURNAMENTPROPOSAL_TABLE_HEADER || Tournament Proposal ||
+IDS_ADMIN_TOURNAMENTPROPOSAL_TABLE_TXT_1 || Tournament Name ||
+IDS_ADMIN_TOURNAMENTPROPOSAL_TABLE_TXT_2 || Tournament Type ||
+IDS_ADMIN_TOURNAMENTPROPOSAL_TABLE_TXT_3 || League A ||
+IDS_ADMIN_TOURNAMENTPROPOSAL_TABLE_TXT_4 || League B ||
+IDS_ADMIN_TOURNAMENTPROPOSAL_TABLE_TXT_5 || Team vs. Team ||
+IDS_ADMIN_TOURNAMENTPROPOSAL_TABLE_TXT_6 || Round Robin ||
+IDS_ADMIN_TOURNAMENTPROPOSAL_TABLE_TXT_7 || # of Players Per Team ||
+IDS_ADMIN_TOURNAMENTPROPOSAL_TABLE_TXT_8 || Player Cut Off Date ||
+IDS_ADMIN_TOURNAMENTPROPOSAL_TABLE_TXT_9 || Tournament Start Date ||
+IDS_ADMIN_TOURNAMENTPROPOSAL_TABLE_TXT_10 || Comments ||
+IDS_ADMIN_TOURNAMENTPROPOSAL_TABLE_TXT_11 || List Of Players ||
+IDS_ADMIN_TOURNAMENTPROPOSAL_TABLE_BTN_VPG || View Player Groups ||
+IDS_ADMIN_TOURNAMENTPROPOSAL_TABLE_BTN_CP || Create Proposal ||
+IDS_ADMIN_TOURNAMENTPROPOSAL_TXT_2 || Functionality is disabled for your version. ||
+IDS_ADMIN_VIEWTOURNAMENTPROPOSAL_TXT_1 || Invalid date format, Must be (HH:mm:ss) ||
+IDS_ADMIN_VIEWTOURNAMENTPROPOSAL_TXT_2 || Tournament functionality is disabled for your account. ||
+IDS_CHESS_PREVIOUSBILLS_TXT_1 || Recently Paid Bills ||
+IDS_CHESS_PREVIOUSBILLS_TXT_2 || Finished Bills ||
+IDS_RENEWBILL_JAVA_TXT_1 || Please enter a value for the \\\"First Name\\\" field. ||
+IDS_RENEWBILL_JAVA_TXT_2 || Please enter a value for the \\\"Last Name\\\" field. ||
+IDS_RENEWBILL_JAVA_TXT_3 || Please enter a value for the \\\"Email\\\" field. ||
+IDS_RENEWBILL_JAVA_TXT_4 || Please enter a value for the \\\"Phone\\\" field. ||
+IDS_RENEWBILL_JAVA_TXT_5 || Please enter only digit characters in the \\\"Phone\\\" field. ||
+IDS_RENEWBILL_JAVA_TXT_6 || Please enter a value for the \\\"Phone\\\" field. ||
+IDS_RENEWBILL_JAVA_TXT_7 || Please enter only digit characters in the \\\"Phone\\\" field. ||
+IDS_RENEWBILL_JAVA_TXT_8 || Please enter a value for the \\\"Phone\\\" field. ||
+IDS_RENEWBILL_JAVA_TXT_9 || Please enter only digit characters in the \\\"Phone\\\" field. ||
+IDS_RENEWBILL_JAVA_TXT_10 || Please enter a value for the \\\"Address\\\" field. ||
+IDS_RENEWBILL_JAVA_TXT_11 || Please enter a value for the \\\"City\\\" field. ||
+IDS_RENEWBILL_JAVA_TXT_12 || Please enter a value for the \\\"Zip\\\" field. ||
+IDS_RENEWBILL_JAVA_TXT_13 || Please select your country. ||
+IDS_RENEWBILL_TABLE_HEADER || Billing Information ||
+IDS_RENEWBILL_TABLE_TXT_1 || First Name: ||
+IDS_RENEWBILL_TABLE_TXT_2 || Last Name: ||
+IDS_RENEWBILL_TABLE_TXT_3 || Email: ||
+IDS_RENEWBILL_TABLE_TXT_4 || Phone: ||
+IDS_RENEWBILL_TABLE_TXT_5 || Address: ||
+IDS_RENEWBILL_TABLE_TXT_6 || State/Province: ||
+IDS_RENEWBILL_TABLE_TXT_7 || City: ||
+IDS_RENEWBILL_TABLE_TXT_8 || Zip/Postal Code: ||
+IDS_RENEWBILL_TABLE_TXT_9 || Country: ||
+IDS_RENEWBILL_TABLE_TXT_10 || Term: ||
+IDS_RENEWBILL_TABLE_TXT_11 || User Name: ||
+IDS_RENEWBILL_TABLE_TXT_12 || Plan Price: $ ||
+IDS_RENEWBILL_TABLE_TXT_13 || Monthy: $ ||
+IDS_RENEWBILL_TABLE_TXT_14 || Semi-Annual: $ ||
+IDS_RENEWBILL_TABLE_TXT_15 || Yearly: $ ||
+IDS_RENEWBILL_TABLE_TXT_16 || Redemption Code: ||
+IDS_RENEWBILL_BTN_1 || NEXT ||
+IDS_RENEWBILLLOGIN_TABLE_HEADER || Login ||
+IDS_RENEWBILLLOGIN_TABLE_TXT_1 || User ID: ||
+IDS_RENEWBILLLOGIN_TABLE_TXT_2 || Password: ||
+IDS_RENEWBILLLOGIN_BTN_L || Login ||
+IDS_RENEWBILLLOGIN_BTN_R || Reset ||
+IDS_CHESS_TOURNAMENTPROPOSAL_TXT_1 || Your tournament proposal was sent. ||
+IDS_CHESS_TOURNAMENTPROPOSAL_TABLE_HEADER || Tournament Proposal ||
+IDS_CHESS_TOURNAMENTPROPOSAL_TABLE_TXT_1 || Tournament Name ||
+IDS_CHESS_TOURNAMENTPROPOSAL_TABLE_TXT_2 || Tournament Type ||
+IDS_CHESS_TOURNAMENTPROPOSAL_TABLE_TXT_3 || League A ||
+IDS_CHESS_TOURNAMENTPROPOSAL_TABLE_TXT_4 || League B ||
+IDS_CHESS_TOURNAMENTPROPOSAL_TABLE_TXT_5 || Team vs. Team ||
+IDS_CHESS_TOURNAMENTPROPOSAL_TABLE_TXT_6 || Round Robin ||
+IDS_CHESS_TOURNAMENTPROPOSAL_TABLE_TXT_7 || # of Players Per Team ||
+IDS_CHESS_TOURNAMENTPROPOSAL_TABLE_TXT_8 || Player Cut Off Date ||
+IDS_CHESS_TOURNAMENTPROPOSAL_TABLE_TXT_9 || Tournament Start Date ||
+IDS_CHESS_TOURNAMENTPROPOSAL_TABLE_TXT_10 || Comments ||
+IDS_CHESS_TOURNAMENTPROPOSAL_TABLE_TXT_11 || List Of Players ||
+IDS_CHESS_TOURNAMENTPROPOSAL_TABLE_BTN_VPG || View Player Groups ||
+IDS_CHESS_TOURNAMENTPROPOSAL_TABLE_BTN_CP || Create Proposal ||
+IDS_CHESS_TOURNAMENTPROPOSAL_TXT_2 || Tournament functionality is disabled for your account. ||
+IDS_CHESS_VIEWTOURNAMENTSTATUS_TXT_1 || Active/Accepted Tournamens ||
+IDS_CHESS_VIEWTOURNAMENTSTATUS_TXT_2 || Completed Tournaments ||
+IDS_CHESS_VIEWTOURNAMENTSTATUS_TXT_3 || Tournament functionality is disabled for your account. ||
+IDS_SELECT_MONTH_1 || January ||
+IDS_SELECT_MONTH_2 || February ||
+IDS_SELECT_MONTH_3 || March ||
+IDS_SELECT_MONTH_4 || April ||
+IDS_SELECT_MONTH_5 || May ||
+IDS_SELECT_MONTH_6 || June ||
+IDS_SELECT_MONTH_7 || July ||
+IDS_SELECT_MONTH_8 || August ||
+IDS_SELECT_MONTH_9 || September ||
+IDS_SELECT_MONTH_10 || October ||
+IDS_SELECT_MONTH_11 || November ||
+IDS_SELECT_MONTH_12 || December ||
+IDS_TOURNAMENTPROPOSAL_EMAIL_SUBJECT || ['site_name'] Tournament Proposal ||
+IDS_TOURNAMENTPROPOSAL_EMAIL_BODY || A tournament proposal has been created.<br><br>Name: ['txttname']<br>Start Time: ['slctsDateMonth']/['slctsDateDay']/['slctsDateYear'] - ['txtstime']<br>Player Signup Time: ['slctcpDateMonth']/['slctcpDateDay']/['slctcpDateYear'] - ['txtcptime']<br><br>To view more details, please login to your admin console. ||
+IDS_TOURNAMENTPROPOSAL_JAVA_TXT_1 || Negative values are not alowed! ||
+IDS_TOURNAMENTPROPOSAL_JAVA_TXT_2 || Please enter a numeric value! ||
+IDS_TOURNAMENTPROPOSAL_JAVA_TXT_3 || Your Tournament name must be filled out! ||
+IDS_TOURNAMENTPROPOSAL_JAVA_TXT_4 || Your Tournament player cutoff time must be filled out! ||
+IDS_TOURNAMENTPROPOSAL_JAVA_TXT_5 || Your Tournament start time must be filled out! ||
+IDS_TOURNAMENTPROPOSAL_JAVA_TXT_6 || Please enter a larger value in the number of players per team field ||
+IDS_TOURNAMENTPROPOSAL_JAVA_TXT_7 || Please enter a larger value in the number of players per team field ||
+IDS_TOURNAMENTPROPOSAL_JAVA_TXT_8 || Your player cutoff date must be larger than the current time! ||
+IDS_TOURNAMENTPROPOSAL_JAVA_TXT_9 || Your tournament start date must be larger than the current time! ||
+IDS_TOURNAMENTPROPOSAL_JAVA_TXT_10 || Your tournament start date must be larger than the player cutoff date! ||
+IDS_TOURNAMENTPROPOSAL_JAVA_TXT_11 || Please enter something about the tournament in the comments field! ||
+IDS_TOURNAMENTPROPOSAL_JAVA_TXT_12 || Please enter at least \" + document.frmTProposal.txtplayernum.value * 2 + \" player(s). ||
+IDS_TOURNAMENTPROPOSAL_JAVA_TXT_13 || Please enter at least 2 player(s). ||
+IDS_TOURNAMENTPROPOSAL_JAVA_TXT_14 || Groups Outlook ||
+IDS_TOURNAMENTPROPOSAL_JAVA_TXT_15 || Below is your group outlook. ||
+IDS_TOURNAMENTPROPOSAL_JAVA_TXT_16 || Please select a game type that is team enabled! ||
+IDS_TOURNAMENTPROPOSAL_JAVA_TXT_17 || <a href=\"javascript:self.close()\"> Close</a> the popup. ||
+IDS_VIEWGAMES_SELECT_SBP || Select By Player ||
+IDS_VIEWGAMES_SELECT_GID || Game ID ||
+IDS_VIEWGAMES_SELECT_D || Date ||
+IDS_NOTINSTALLED_TXT_1 || <font color='red'>Warning:</font> Your command center has not been installed yet. Please refer to your user manual if you require assistance. ||
+IDS_TCTRLS_TXT_1 || Game complete! ||
+IDS_TCTRLS_TXT_2 || Sorry You are not allowed to move yet! ||
+IDS_TCTRLS_TXT_3 || Chess Movement ||
+IDS_TCTRLS_TXT_4 || Move From: ||
+IDS_TCTRLS_TXT_5 || To: ||
+IDS_TCTRLS_TXT_6 || The game is suspended! ||
+IDS_TCTRLS_TXT_7 || You are currently spectating as: ['uname'] ||
+IDS_TCTRLS_TXT_8 || This game is currently suspended! ||
+IDS_TCTRLS_TXT_9 || Your move is not valid. ||
+IDS_TGAME_TXT_1 || This game is currently suspended! ||
+IDS_TGAME_TXT_2 || This game is now complete! ||
+IDS_TGAME_TXT_3 || Its, ['user'] turn to play. ||
+IDS_TCTRLS_BTN_PM || Process Move ||
+IDS_TCTRLS_BTN_R || Resign ||
+IDS_TIPOFTHEDAY_JAVA_TXT_1 || Your tip must be filled out! ||
+IDS_CADMIN_TABLE_HEADER_1 || Pending Players ||
+IDS_CADMIN_TABLE_1_TXT_1 || Name ||
+IDS_CADMIN_TABLE_1_TXT_2 || Email ||
+IDS_CADMIN_TABLE_1_TXT_3 || Date ||
+IDS_CADMIN_TABLE_1_BTN_A || Accept ||
+IDS_CADMIN_TABLE_1_BTN_R || Revoke ||
+IDS_CBILLING_EMAIL_1_1 || New Player Order ||
+IDS_CBILLING_EMAIL_1_2 || Hello admin,<br> The folowing user has made an account:<br>User Name: ['playerUName']<br> Order ID: ['orderid']<br> Please wait for a payment, then set the order to paid. ||
+IDS_CBILLING_TXT_1 || Order ID: ||
+IDS_CBILLING_TXT_2 || Name: ||
+IDS_CBILLING_TXT_3 || Email: ||
+IDS_CBILLING_TXT_4 || Mailing Address: ||
+IDS_CBILLING_TXT_5 || User Name: ||
+IDS_CBILLING_TXT_6 || for a free Month of service ||
+IDS_CBILLING_TXT_7 || for a free Semi-annual term of service ||
+IDS_CBILLING_TXT_8 || for a free year of service ||
+IDS_CBILLING_TXT_9 || Redemption Code: ||
+IDS_CBILLING_TXT_10 || Redemption code issued to ||
+IDS_CBILLING_TXT_11 || Month ||
+IDS_CBILLING_TXT_12 || Semi-Annual ||
+IDS_CBILLING_TXT_13 || year ||
+IDS_CBILLING_TXT_14 || Term: ||
+IDS_CBILLING_TXT_15 || Base Cost: ||
+IDS_CBILLING_TXT_16 || Total Cost: ||
+IDS_CBILLING_BTN_1 || Complete Order ||
+IDS_CBILLING_BTN_2 || Cancel Order ||
+IDS_CBILLING_TXT_17 || Sorry, there are no orders right now. ||
+IDS_CBILLING_TXT_18 || Next Bill Date: ||
+IDS_CBILLING_TXT_19 || Order Status: ||
+IDS_CBILLING_TXT_20 || Date Due: ||
+IDS_CBUDDYLIST_TABLE_HEADER_1 || Buddy List ||
+IDS_CBUDDYLIST_TABLE_1_TXT_1 || User ||
+IDS_CBUDDYLIST_TABLE_1_TXT_2 || Date ||
+IDS_CBUDDYLIST_TABLE_1_TXT_3 || Email ||
+IDS_CBUDDYLIST_TABLE_1_TXT_4 || Challenge ||
+IDS_CBUDDYLIST_TABLE_1_TXT_5 || Online ||
+IDS_CBUDDYLIST_TABLE_1_TXT_6 || Online ||
+IDS_CBUDDYLIST_TABLE_1_TXT_7 || Offline ||
+IDS_CBUDDYLIST_TABLE_1_TXT_8 || Create Game ||
+IDS_CBUDDYLIST_TABLE_1_TXT_9 || Mail ||
+IDS_CSRVMSG_TABLE_HEADER_1 || Server Messages ||
+IDS_CSRVMSG_TXT_1 || No Server Messages. ||
+IDS_CSRVMSG_TXT_2 || Text ||
+IDS_CSRVMSG_TXT_3 || Date ||
+IDS_CTIPOFTHEDAY_TXT_1 || Text ||
+IDS_CTIPOFTHEDAY_TXT_2 || Date ||
+IDS_CR3DCQUERY_TXT_1 || [ View the player list ] ||
+IDS_CR3DCQUERY_TXT_2 || Wins: ||
+IDS_CR3DCQUERY_TXT_3 || Loss: ||
+IDS_CR3DCQUERY_TXT_4 || Draws: ||
+IDS_CR3DCQUERY_TXT_5 || Move From: ||
+IDS_CR3DCQUERY_TXT_6 || To: ||
+IDS_CR3DCQUERY_BTN_PM || Process Move ||
+IDS_CR3DCQUERY_BTN_R || Resign ||
+IDS_CR3DCQUERY_BTN_D || Draw ||
+IDS_CR3DCQUERY_JAVA_1 || This game is over, unable to resign. ||
+IDS_CR3DCQUERY_JAVA_2 || This game is over, unable to draw. ||
+IDS_CR3DCQUERY_TXT_7 || Date: ||
+IDS_CR3DCQUERY_BTN_SVPGN || Save/View PGN ||
+IDS_CR3DCQUERY_BTN_EFR || Exit From Real-time ||
+IDS_CR3DCQUERY_BTN_STR || Switch To Real-time ||
+IDS_CR3DCQUERY_TXT_8 || White: ||
+IDS_CR3DCQUERY_TXT_9 || Black: ||
+IDS_CR3DCQUERY_TXT_10 || Static Game Chat: ||
+IDS_CR3DCQUERY_BTN_SND || Send ||
+IDS_CR3DCQUERY_JAVA_3 || This game is over, unable to send chat. ||
+IDS_CR3DCQUERY_JAVA_4 || Unable to switch to real-time mode. Please make sure that its your turn to move and/or the other player is online ||
+IDS_CR3DCQUERY_JAVA_5 || Unable to switch to real-time mode. This game is over. ||
+IDS_CR3DCQUERY_BTN_REPLAY || Replay ||
+IDS_CR3DCQUERY_TXT_11 || Chess Movement ||
+IDS_CR3DCQUERY_TXT_12 || Chessboard Colors ||
+IDS_CR3DCQUERY_TXT_13 || Light ||
+IDS_CR3DCQUERY_TXT_14 || Dark ||
+IDS_CR3DCQUERY_TXT_15 || Pick Color ||
+IDS_CR3DCQUERY_BTN_CNGCLR || Change Color ||
+IDS_CR3DCQUERY_TXT_16 || Date: ||
+IDS_CR3DCQUERY_TXT_17 || White Player: ||
+IDS_CR3DCQUERY_TXT_18 || Black Player: ||
+IDS_CR3DCQUERY_TXT_19 || Online ||
+IDS_CR3DCQUERY_TXT_20 || Offline ||
+IDS_CR3DCQUERY_TXT_21 || FEN: ||
+IDS_CR3DCQUERY_TXT_22 || Save/View PGN: ||
+IDS_CR3DCQUERY_TXT_23 || Move ||
+IDS_CR3DCQUERY_TXT_24 || White ||
+IDS_CR3DCQUERY_TXT_25 || Black ||
+IDS_CR3DCQUERY_TXT_26 || Previous Moves ||
+IDS_CR3DCQUERY_TXT_27 || Players ||
+IDS_CR3DCQUERY_TXT_28 || User ||
+IDS_CR3DCQUERY_TXT_29 || Date ||
+IDS_CR3DCQUERY_TXT_30 || Email ||
+IDS_CR3DCQUERY_TXT_31 || Points ||
+IDS_CR3DCQUERY_TXT_32 || Challenge ||
+IDS_CR3DCQUERY_TXT_33 || Online ||
+IDS_CR3DCQUERY_TXT_34 || Mail ||
+IDS_CR3DCQUERY_TXT_35 || Create Game ||
+IDS_CR3DCQUERY_TXT_36 || Online ||
+IDS_CR3DCQUERY_TXT_37 || Offline ||
+IDS_CR3DCQUERY_TXT_38 || --Select Player-- ||
+IDS_CR3DCQUERY_TXT_39 || No new messages. ||
+IDS_CR3DCQUERY_TXT_40 || Text Messages ||
+IDS_CR3DCQUERY_TXT_41 || Move Messages ||
+IDS_CR3DCQUERY_TXT_42 || Challenges ||
+IDS_CR3DCQUERY_TXT_43 || Tournament ||
+IDS_CR3DCQUERY_TXT_44 || sent the following message: ||
+IDS_CR3DCQUERY_TXT_45 || from game id: ||
+IDS_CR3DCQUERY_TXT_46 || made the following move: ||
+IDS_CR3DCQUERY_TXT_47 || has created a game and invites you to accept. ||
+IDS_CR3DCQUERY_TXT_48 || Game ID: ||
+IDS_CR3DCQUERY_TXT_49 || You have been invited to the ||
+IDS_CR3DCQUERY_TXT_50 || tournament game. ||
+IDS_CR3DCQUERY_TXT_51 || Error. ||
+IDS_CR3DCQUERY_TXT_52 || No saved messages. ||
+IDS_CR3DCQUERY_TXT_53 || Past Games ||
+IDS_CR3DCQUERY_TXT_54 || Game ||
+IDS_CR3DCQUERY_TXT_55 || White ||
+IDS_CR3DCQUERY_TXT_56 || Black ||
+IDS_CR3DCQUERY_TXT_57 || Winner ||
+IDS_CR3DCQUERY_TXT_58 || Start Date ||
+IDS_CR3DCQUERY_TXT_59 || View Game ||
+IDS_CR3DCQUERY_TXT_60 || No previous games. ||
+IDS_CR3DCQUERY_TXT_61 || Search Results ||
+IDS_CR3DCQUERY_TXT_62 || No players found using: ||
+IDS_CR3DCQUERY_TXT_63 || Current Statistics ||
+IDS_CR3DCQUERY_TXT_64 || Current Statistics For ||
+IDS_CR3DCQUERY_TXT_65 || Wins: ||
+IDS_CR3DCQUERY_TXT_66 || Loss: ||
+IDS_CR3DCQUERY_TXT_67 || Draws: ||
+IDS_CR3DCQUERY_TXT_68 || c4me rating: ||
+IDS_CR3DCQUERY_TXT_69 || Challenge Player To Game ||
+IDS_CR3DCQUERY_TXT_70 || Signed up on ||
+IDS_CR3DCQUERY_TXT_71 || Member for ||
+IDS_CR3DCQUERY_TXT_72 || Unrated with ||
+IDS_CR3DCQUERY_TXT_73 || Provisional with ||
+IDS_CR3DCQUERY_TXT_74 || Established with ||
+IDS_CR3DCQUERY_TXT_75 || points. ||
+IDS_CR3DCQUERY_TXT_76 || Current Games ||
+IDS_CR3DCQUERY_TXT_77 || Personal ||
+IDS_CR3DCQUERY_TXT_78 || All Games ||
+IDS_CR3DCQUERY_TXT_79 || Tournaments ||
+IDS_CR3DCQUERY_TXT_80 || Current Messages ||
+IDS_CR3DCQUERY_TXT_81 || Text Messages ||
+IDS_CR3DCQUERY_TXT_82 || Moves ||
+IDS_CR3DCQUERY_TXT_83 || Challenges ||
+IDS_CR3DCQUERY_TXT_84 || Tournament Messages ||
+IDS_CR3DCQUERY_TXT_85 || Password changed. ||
+IDS_CR3DCQUERY_TXT_86 || Your password does not match the retyped password! ||
+IDS_CR3DCQUERY_TXT_87 || [Propose Tournament V1] ||
+IDS_CR3DCQUERY_TXT_88 || Game Type ||
+IDS_CR3DCQUERY_TXT_89 || League A ||
+IDS_CR3DCQUERY_TXT_90 || League B ||
+IDS_CR3DCQUERY_TXT_91 || Team vs. Team ||
+IDS_CR3DCQUERY_TXT_92 || Round Robin ||
+IDS_CR3DCQUERY_TXT_93 || Player Cut Off Date ||
+IDS_CR3DCQUERY_TXT_94 || Tournament Start Date ||
+IDS_CR3DCQUERY_TXT_95 || Comment ||
+IDS_CR3DCQUERY_TXT_96 || Group # ||
+IDS_CR3DCQUERY_TXT_97 || Accept Challenge ||
+IDS_CR3DCQUERY_TXT_98 || Waiting For Acceptance. ||
+IDS_CR3DCQUERY_TXT_99 || Accepted. ||
+IDS_CR3DCQUERY_TXT_100 || Players ||
+IDS_CR3DCQUERY_TXT_101 || Removed Due To Loss ||
+IDS_CR3DCQUERY_TXT_102 || Dropped ||
+IDS_CR3DCQUERY_TXT_103 || Start Tournament ||
+IDS_CR3DCQUERY_TXT_104 || Next Game Start Date (Optional) ||
+IDS_CR3DCQUERY_TXT_105 || Start Date ||
+IDS_CR3DCQUERY_TXT_106 || Note: if you want the game to start at a different time, please enter the date and time above. ||
+IDS_CR3DCQUERY_TXT_107 || Start Round # ||
+IDS_CR3DCQUERY_TXT_108 || Game Completed ||
+IDS_CR3DCQUERY_TXT_109 || Accept Tournament ||
+IDS_CR3DCQUERY_TXT_110 || Revoke Tournament ||
+IDS_CR3DCQUERY_EMAIL_TVST_1 || ['sitename'] Tournament Game ||
+IDS_CR3DCQUERY_EMAIL_TVST_2 || Congratulations ['name'], your team is the winner of the Team VS Team tournament.<br>Thank you for playing.<br><br><a href='['siteurl']'>['siteurl']</a> <br>The home of ['sitename']<br> <br>If you wish to unsubscribe from the server please click the link below:<br><a href='['siteurl']/chess_close.php'>['siteurl']/chess_close.php</a> ||
+IDS_CR3DCQUERY_EMAIL_TVST_3 || Thank you ['userid'], for playing in the round robin tournament.<br>Unfortunately you were randomly selected to leave the game.<br>This will not injure your ['sitename'] Rating.<br><br><a href='['siteurl']'>['siteurl']</a> <br>The home of ['sitename']<br> <br>If you wish to unsubscribe from the server please click the link below:<br><a href='['siteurl']/chess_close.php'>['siteurl']/chess_close.php</a> ||
+IDS_CR3DCQUERY_EMAIL_TVST_4 || Hello, ['initname'].<br>Your tournament game is as follows:<br>Game Type: Round Robin<br>Game ID  : ['gameid']<br>['initname'] vs ['othername']<br><br><a href='['siteurl']'>['siteurl']</a> <br>The home of ['sitename']<br> <br>If you wish to unsubscribe from the server please click the link below:<br><a href='['siteurl']/chess_close.php'>['siteurl']/chess_close.php</a> ||
+IDS_CR3DCQUERY_EMAIL_TVST_5 || Hello, ['othername'].<br>Your tournament game is as follows:<br>Game Type: Round Robin<br>Game ID  : ['gameid']<br>['initname'] vs ['othername']<br><br><a href='['siteurl']'>['siteurl']</a> <br>The home of ['sitename']<br> <br>If you wish to unsubscribe from the server please click the link below:<br><a href='['siteurl']/chess_close.php'>['siteurl']/chess_close.php</a> ||
+IDS_CR3DCQUERY_TXT_111 || Unknown ||
+IDS_CR3DCQUERY_EMAIL_TVST_6 || Congratulations ['userid'], you are the winner of the round robin tournament.<br>Thank you for playing.<br><br><a href='['siteurl']'>['siteurl']</a> <br>The home of ['sitename']<br> <br>If you wish to unsubscribe from the server please click the link below:<br><a href='['siteurl']/chess_close.php'>['siteurl']/chess_close.php</a> ||
+IDS_CR3DCQUERY_EMAIL_TVST_7 || Hello, ['plrn1'].<br>Your tournament game is as follows:<br>Game Type: League A<br>Game ID  : ['gameid']<br>['plrn1'] vs ['plrn2']<br><br><a href='['siteurl']'>['siteurl']</a> <br>The home of ['sitename']<br> <br>If you wish to unsubscribe from the server please click the link below:<br><a href='['siteurl']/chess_close.php'>['siteurl']/chess_close.php</a> ||
+IDS_CR3DCQUERY_EMAIL_TVST_8 || Hello, ['plrn2'].<br>Your tournament game is as follows:<br>Game Type: League A<br>Game ID  : ['gameid']<br>['plrn1'] vs ['plrn2']<br><br><a href='['siteurl']'>['siteurl']</a> <br>The home of ['sitename']<br> <br>If you wish to unsubscribe from the server please click the link below:<br><a href='['siteurl']/chess_close.php'>['siteurl']/chess_close.php</a> ||
+IDS_CR3DCQUERY_EMAIL_TVST_9 || Hello, ['plrn1'].<br>Your tournament game is as follows:<br>Game Type: League B<br>Game ID  : ['gameid']<br>['plrn1'] vs ['plrn2']<br><br><a href='['siteurl']'>['siteurl']</a> <br>The home of ['sitename']<br> <br>If you wish to unsubscribe from the server please click the link below:<br><a href='['siteurl']/chess_close.php'>['siteurl']/chess_close.php</a> ||
+IDS_CR3DCQUERY_EMAIL_TVST_10 || Hello, ['plrn2'].<br>Your tournament game is as follows:<br>Game Type: League B<br>Game ID  : ['gameid']<br>['plrn1'] vs ['plrn2']<br><br><a href='['siteurl']'>['siteurl']</a> <br>The home of ['sitename']<br> <br>If you wish to unsubscribe from the server please click the link below:<br><a href='['siteurl']/chess_close.php'>['siteurl']/chess_close.php</a> ||
+IDS_CR3DCQUERY_TXT_112 || Name ||
+IDS_CR3DCQUERY_TXT_113 || Type ||
+IDS_CR3DCQUERY_TXT_114 || Start Date ||
+IDS_CR3DCQUERY_TXT_115 || Status ||
+IDS_CR3DCQUERY_TXT_116 || Accepted ||
+IDS_CR3DCQUERY_TXT_117 || Started ||
+IDS_CR3DCQUERY_TXT_118 || Completed ||
+IDS_CR3DCQUERY_TXT_119 || Revoked ||
+IDS_CR3DCQUERY_TXT_120 || Player List ||
+IDS_CR3DCQUERY_TXT_121 || View Players ||
+IDS_CR3DCQUERY_TXT_122 || Tournament Match Overview< ||
+IDS_CR3DCQUERY_TXT_123 || Match # ||
+IDS_CR3DCQUERY_TXT_124 || Start Time ||
+IDS_CR3DCQUERY_TXT_125 || End Time ||
+IDS_CR3DCQUERY_TXT_126 || Match is ||
+IDS_CR3DCQUERY_TXT_127 || Incomplete ||
+IDS_CR3DCQUERY_TXT_128 || Active ||
+IDS_CR3DCQUERY_TXT_129 || Completed ||
+IDS_CR3DCQUERY_TXT_130 || Player 1 ||
+IDS_CR3DCQUERY_TXT_131 || Player 2 ||
+IDS_CR3DCQUERY_TXT_132 || Status ||
+IDS_CR3DCQUERY_TXT_133 || View/Play ||
+IDS_CR3DCQUERY_TXT_134 || Tournament Information ||
+IDS_CR3DCQUERY_TXT_135 || This game is currently not active yet. Please come back at ['t_startdate'], to view the tournament progress. ||
+IDS_CR3DCQUERY_EMAIL_TVST_11 || ['sitename'] Password ||
+IDS_CR3DCQUERY_EMAIL_TVST_12 || Hello, ['UName'].<br>Your password is: ['password']<br><br><a href='['siteurl']'>['siteurl']</a> <br>The home of ['sitename']<br> <br>If you wish to unsubscribe from the server please click the link below:<br><a href='['siteurl']/chess_close.php'>['siteurl']/chess_close.php</a> ||
+IDS_CR3DCQUERY_EMAIL_TVST_13 || Game Draw Revoked ||
+IDS_CR3DCQUERY_EMAI_TVST_14 || Hello, ['plrn1'] and ['plrn2']<br>['plrn3'] has kindly revoked the draw request.<br>Game ID: ['gid']<br><br><a href='['siteurl']'>['siteurl']</a> <br>The home of ['sitename']<br> <br>If you wish to unsubscribe from the server please click the link below:<br><a href='['siteurl']/chess_close.php'>['siteurl']/chess_close.php</a> ||
+IDS_CR3DCQUERY_EMAIL_TVST_15 || Game Draw Requested ||
+IDS_CR3DCQUERY_EMAIL_TVST_16 || Hello, ['plrn1'].<br>['plrn2'] has kindly requested a draw.<br>Game ID: ['gid']<br><br><a href='['siteurl']'>['siteurl']</a> <br>The home of ['sitename']<br> <br>If you wish to unsubscribe from the server please click the link below:<br><a href='['siteurl']/chess_close.php'>['siteurl']/chess_close.php</a> ||
+IDS_CR3DCQUERY_TXT_136 || Game ||
+IDS_CR3DCQUERY_TXT_137 || Replay ||
+IDS_CR3DCQUERY_TXT_138 || White ||
+IDS_CR3DCQUERY_TXT_139 || Black ||
+IDS_CR3DCQUERY_TXT_140 || Winner ||
+IDS_CR3DCQUERY_TXT_141 || Start Date ||
+IDS_CR3DCQUERY_TXT_142 || View Game ||
+IDS_CR3DCQUERY_TXT_143 || Replay ||
+IDS_CR3DCQUERY_EMAIL_TVST_17 || Move Notification ||
+IDS_CR3DCQUERY_EMAIL_TVST_18 || Hello, ['otherguysname'].<br>['requestorname'], has made the following move (for gameid: ['gid']:<br>['move']<br><br><a href='['siteurl']'>['siteurl']</a> <br>The home of ['sitename']<br> <br>If you wish to unsubscribe from the server please click the link below:<br><a href='['siteurl']/chess_close.php'>['siteurl']/chess_close.php</a> ||
+IDS_CR3DCQUERY_EMAIL_TVST_19 || challenge Notification ||
+IDS_CR3DCQUERY_EMAIL_TVST_20 || Hello, ['otherguysname'].<br>['requestorname'], has challenged you to a game.<br>Game ID  : ['game_id']<br>['requestorname'] vs ['otherguysname']<br><br><a href='['siteurl']'>['siteurl']</a> <br>The home of ['sitename']<br> <br>If you wish to unsubscribe from the server please click the link below:<br><a href='['siteurl']/chess_close.php'>['siteurl']/chess_close.php</a> ||
+IDS_CR3DCQUERY_EMAIL_TVST_21 || ['sitename'] Chess Registration ||
+IDS_CR3DCQUERY_EMAIL_TVST_22 || Thank you for signing up for ['sitename'] Online!<br><br>Your username is: ['userid']<br>Your password is: ['pass']<br>Use these values in the client when logging on to play online.<br><br><a href='['siteurl']'>['siteurl']</a> <br>The home of ['sitename']<br> <br>If you wish to unsubscribe from the server please click the link below:<br><a href='['siteurl']/chess_close.php'>['siteurl']/chess_close.php</a> ||
+IDS_CR3DCQUERY_EMAIL_TVST_23 || ['sitename'] New Chess Registration ||
+IDS_CR3DCQUERY_EMAIL_TVST_24 || The following user has signed up for an account:<br><br>User Name: ['userid']<br>Email: ['email']<br><br>This user will be accepted automaticaly. ||
+IDS_CR3DCQUERY_EMAIL_TVST_25 || Game Timeout ||
+IDS_CR3DCQUERY_EMAIL_TVST_26 || Hello, your game (Game ID:  <a href='['siteurl']/chess_game.php?gameid=['gameid']'>['gameid']</a>) was timed out.<br><br><a href='['siteurl']'>['siteurl']</a> <br>The home of ['sitename']<br> <br>If you wish to unsubscribe from the server please click the link below:<br><a href='['siteurl']/chess_close.php'>['siteurl']/chess_close.php</a> ||
+IDS_CR3DCQUERY_EMAIL_TVST_27 ||  ||
+IDS_CR3DCQUERY_EMAIL_TVST_28 ||  ||
+IDS_CR3DCQUERY_TXT_144 || --Select Game Fen-- ||
+IDS_CR3DCQUERY_TXT_145 || No players are online. ||
+IDS_CR3DCQUERY_TXT_146 || Timed Game Stats: ||
+IDS_CR3DCQUERY_TXT_147 || <u>Time Control 1:</u><br>['moves1'] moves adds ['time1'] minutes ||
+IDS_CR3DCQUERY_TXT_148 || <u>Time Control 2:</u><br>['moves2'] moves adds ['time2'] minutes ||
+IDS_CR3DCQUERY_TXT_149 || FEN: ||
+IDS_CR3DCQUERY_TXT_150 || Days. ||
+IDS_CR3DCQUERY_TXT_151 || Day. ||
+IDS_CR3DCQUERY_TXT_152 || Failed Emails: ||
+IDS_CR3DCQUERY_TXT_153 || Active Games ||
+IDS_CR3DCQUERY_TXT_154 || Found ||
+IDS_ADMIN_LANGUAGE_TABLE_HEADER || Manage Languages ||
+IDS_ADMIN_LANGUAGE_TABLE_TXT_1 || Language Pack: ||
+IDS_ADMIN_LANGUAGE_BTN_INSTALL || Install Language ||
+IDS_MENU_TXT_1 || Game Information ||
+IDS_MENU_TXT_2 || Top Players ||
+IDS_MENU_TXT_3 || Tournament Requests ||
+IDS_MENU_TXT_4 || Accepted Tournaments ||
+IDS_MENU_TXT_5 || Started Tournaments ||
+IDS_MENU_TXT_6 || Player Status ||
+IDS_MENU_TXT_7 || Other Links ||
+IDS_MENU_TXT_8 || New Messages ||
+IDS_MENU_TXT_9 || Private Games ||
+IDS_MENU_TXT_10 || Player Login ||
+IDS_MENU_TXT_11 || Other Links ||
+IDS_MENU_TXT_12 || Current Games ||
+IDS_MENU_TXT_13 || Top 10 Players ||
+IDS_MENU_TXT_14 || Tournament Invites ||
+IDS_MENU_TXT_15 || Tip Of The Day ||
+IDS_MENU_TXT_16 || Newest Players ||
+IDS_MENU_TXT_17 || User ID: ||
+IDS_MENU_TXT_18 || Password: ||
+IDS_MENU_TXT_19 || Login Automaticaly ||
+IDS_MENU_TXT_20 || Login ||
+IDS_MENU_TXT_21 || Reset ||
+IDS_MENU_TXT_22 || I Lost My Password ||
+IDS_MENU_TXT_23 || Total Games: ||
+IDS_MENU_TXT_24 || Tournaments: ||
+IDS_MENU_TXT_25 || Language: ||
+IDS_MENU_TXT_26 || Activities Section ||
+IDS_MENU_TXT_27 || My Username Has Changed ||
+IDS_GAME_BTN_GAMEREFRESH || Refresh Game Display ||
+IDS_GAME_TXT_A1 || To prevent unwanted behavior please refrain from using your browsers refresh button. Instead use the following button: ||
+IDS_CFGSRVEMAIL_TXT_1 || Manage email settings ||
+IDS_CFGSRVEMAIL_TXT_2 || SMTP URL: ||
+IDS_CFGSRVEMAIL_TXT_3 || SMTP Port: ||
+IDS_CFGSRVEMAIL_TXT_4 || Update Settings ||
+IDS_CFGSRVEMAIL_TXT_5 || SMTP User: ||
+IDS_CFGSRVEMAIL_TXT_6 || SMTP Pass: ||
+IDS_CFGSRVEMAIL_TXT_7 || Reply To Email: ||
+IDS_CFGBOARD_TXT_1 || Simple ||
+IDS_CFGBOARD_TXT_2 || Medium ||
+IDS_CFGBOARD_TXT_3 || Everything ||
+IDS_CFGBOARD_TXT_4 || Configure Chessboard Layout ||
+IDS_CFGBOARD_TXT_5 || Board Layout: ||
+IDS_CFGBOARD_TXT_6 || Set Board Settings ||
+IDS_CFGBOARD_TXT_7 || Board Type: ||
+IDS_CFGBOARD_TXT_8 || Drag and Drop ||
+IDS_CFGBOARD_TXT_9 || Classic ||
+IDS_CFGRAITING_TXT_1 || Manage Rating Functionality ||
+IDS_CFGRAITING_TXT_2 || Enable Offical FIDE rules: ||
+IDS_CFGRAITING_TXT_3 || Manage Rating Starting Points ||
+IDS_CFGRAITING_TXT_4 || Point Value: ||
+IDS_PAGETITLES_1 || Administration Page ||
+IDS_PAGETITLES_2 || Administration Page - Main ||
+IDS_PAGETITLES_3 || Administration Page - Tournament Setup ||
+IDS_PAGETITLES_4 || Administration Page - Create News Letter ||
+IDS_PAGETITLES_5 || Administration Page - Players ||
+IDS_PAGETITLES_6 || Administration Page - Player Billing ||
+IDS_PAGETITLES_7 || Administration Page - News/Misc Data ||
+IDS_PAGETITLES_8 || Administration Page - Look & Feel ||
+IDS_PAGETITLES_9 || Home ||
+IDS_PAGETITLES_10 || Register Player ||
+IDS_PAGETITLES_11 || FAQ ||
+IDS_PAGETITLES_12 || Tournament Games ||
+IDS_PAGETITLES_13 || Java chess ||
+IDS_PAGETITLES_14 || Tournament Proposal ||
+IDS_PAGETITLES_15 || View Player List ||
+IDS_PAGETITLES_16 || Member Main ||
+IDS_PAGETITLES_17 || Message Center ||
+IDS_PAGETITLES_18 || View Games ||
+IDS_PAGETITLES_19 || Find Players ||
+IDS_PAGETITLES_20 || Buddy List ||
+IDS_PAGETITLES_21 || Statistics ||
+IDS_PAGETITLES_22 || Configuration ||
+IDS_PAGETITLES_23 || Chess Game ||
+IDS_PAGETITLES_24 || Create Game ||
+IDS_PAGETITLES_25 || Administration Page - View Tournament Info ||
+IDS_PAGETITLES_26 || Administration Page - Statistics ||
+IDS_PAGETITLES_27 || Administration Page - Game Options ||
+IDS_PAGETITLES_28 || Clubs ||
+IDS_PAGETITLES_29 || Club Members ||
+IDS_PAGETITLES_30 || Club Members Page ||
+IDS_PAGETITLES_31 || Administration Page - Language Filters ||
+IDS_PAGETITLES_32 || Administration Page - Email Log ||
+IDS_PAGETITLES_33 || Close Account ||
+IDS_PAGETITLES_34 || Create Fen ||
+IDS_PAGETITLES_35 || Administration Page - Pre-Created Games ||
+IDS_PAGETITLES_36 || Help ||
+IDS_PAGETITLES_37 || Administration Page - Default Chessboard Colors ||
+IDS_PAGETITLES_38 || Administration Page - Avatar Settings ||
+IDS_PAGETITLES_39 || Chess Club List ||
+IDS_PAGETITLES_40 || Renew Bill Login ||
+IDS_PAGETITLES_41 || Renew Bill ||
+IDS_PAGETITLES_42 || View/Save PGN ||
+IDS_PAGETITLES_43 || Register Player - Payment Options ||
+IDS_PAGETITLES_44 || Tournament Game ||
+IDS_PAGETITLES_45 || Real-time Game: ||
+IDS_PAGETITLES_46 || Real-time Game: ||
+IDS_PAGETITLES_47 || Register Player - Payment Options ||
+IDS_PAGETITLES_48 || Tournament Proposal ||
+IDS_PAGETITLES_49 || Activities ||
+IDS_PAGETITLES_50 || View Activities ||
+IDS_PAGETITLES_51 || Administration Page - Create Activity ||
+IDS_PAGETITLES_52 || Administration Page - Edit Activity ||
+IDS_PAGETITLES_53 || Administration Page - Create Resource ||
+IDS_PAGETITLES_54 || Administration Page - Create Page ||
+IDS_PAGETITLES_55 || Administration Page - Preview ||
+IDS_PAGETITLES_56 || Get Activities ||
+IDS_PAGETITLES_57 || Administration Page - Credit Requests ||
+IDS_PAGETITLES_58 || Administration Page - Activity Config ||
+IDS_PAGETITLES_59 || Buy Credits ||
+IDS_PAGETITLES_60 || Administration Page - Player Credit Config ||
+IDS_PAGETITLES_61 || Player List ||
+IDS_PAGETITLES_62 || Administration Page - Tournament V2 Setup ||
+IDS_PAGETITLES_63 || Administration Page - Tournament V2 Accept ||
+IDS_PAGETITLES_64 || Administration Page - Tournament V2 Info ||
+IDS_PAGETITLES_65 || View Closed v2 Tournament ||
+IDS_PAGETITLES_66 || View Open v2 Tournament ||
+IDS_PAGETITLES_67 || Administration Page - Bug Report ||
+IDS_PAGETITLES_68 || Administration Page - Player Chat Config ||
+IDS_PAGETITLES_69 || Administration Page - Cron Job Config ||
+IDS_PAGETITLES_70 || Download mobile client ||
+IDS_PAGETITLES_71 || View Player Games ||
+IDS_PAGETITLES_72 || View Top Ten Players ||
+IDS_PAGETITLES_73 || Administration Page - View Top Ten Players ||
+IDS_PAGETITLES_74 || Manage Username ||
+IDS_MENU_OTHER_1 || Register Player ||
+IDS_MENU_OTHER_2 || FAQ ||
+IDS_MENU_OTHER_3 || Tournament Games List ||
+IDS_MENU_OTHER_4 || Java Chess ||
+IDS_MENU_OTHER_5 || PGN Viewer ||
+IDS_MENU_OTHER_6 || Chess Clubs ||
+IDS_ADMIN_GAME_OPTS_TABLE_HEADER || Manage Game Options ||
+IDS_ADMIN_GAME_OPTS_TABLE_TXT_1 || Snail Game Timout (Days): ||
+IDS_ADMIN_GAME_OPTS_TABLE_TXT_2 || Slow Game Timout (Days): ||
+IDS_ADMIN_GAME_OPTS_TABLE_TXT_3 || Normal Game Timout (Days): ||
+IDS_ADMIN_GAME_OPTS_TABLE_TXT_4 || Fast Game Timout (Days): ||
+IDS_ADMIN_GAME_OPTS_TABLE_TXT_5 || Blitz Game Timout (Days): ||
+IDS_ADMIN_GAME_OPTS_BTN_CV || Update ||
+IDS_CHESS_CFG_CLUBS_TXT_1 || Create a Club ||
+IDS_CHESS_CFG_CLUBS_TXT_2 || Club Name: ||
+IDS_CHESS_CFG_CLUBS_BTN_1 || Create Club||
+IDS_CHESS_CFG_CLUBS_TXT_3 || Unable to create club: Club name already used. ||
+IDS_CHESS_CFG_CLUBS_TXT_4 || Join a Club ||
+IDS_CHESS_CFG_CLUBS_BTN_2 || Join Club ||
+IDS_CHESS_CFG_CLUBS_TXT_5 || Your membership is pending, please wait for the club leader to accept it. ||
+IDS_CHESS_CFG_CLUBS_TXT_6 || Club Membership Options ||
+IDS_CHESS_CFG_CLUBS_TXT_7 || Leave your current club. ||
+IDS_CHESS_CFG_CLUBS_BTN_3 || Leave Club ||
+IDS_CHESS_CFG_CLUBS_TXT_8 || Disband your current club. ||
+IDS_CHESS_CFG_CLUBS_BTN_4 || Disband Club ||
+IDS_CHESS_CFG_CLUBS_TXT_9 || Manage club members. ||
+IDS_CHESS_CFG_CLUBS_BTN_5 || Manage Members ||
+IDS_CHESS_CFG_CLUBS_TXT_10 || Manage club front page. ||
+IDS_CHESS_CFG_CLUBS_BTN_6 || Manage Front Page ||
+IDS_CHESS_CFG_CLUB_MEMBERS_TXT_1 || Manage Club Members ||
+IDS_CHESS_CFG_CLUB_MEMBERS_TXT_2 || Player ||
+IDS_CHESS_CFG_CLUB_MEMBERS_TXT_3 || Active ||
+IDS_CHESS_CFG_CLUB_MEMBERS_TXT_4 || Controls ||
+IDS_CHESS_CFG_CLUB_MEMBERS_BTN_1 || Activate ||
+IDS_CHESS_CFG_CLUB_MEMBERS_BTN_2 || Remove ||
+IDS_CHESS_CFG_CLUB_MEM_TXT_1 || Manage Club's Member Page ||
+IDS_CHESS_CFG_CLUB_MEM_BTN_1 || Update ||
+IDS_CHESS_CFG_FILTER_TXT_1 || Add Word To Filter ||
+IDS_CHESS_CFG_FILTER_TXT_2 || Word: ||
+IDS_CHESS_CFG_FILTER_BTN_1 || Add ||
+IDS_CHESS_CFG_FILTER_TXT_3 || Manage Filtered Words ||
+IDS_CHESS_CFG_FILTER_TXT_4 || Filtered Words: ||
+IDS_CHESS_CFG_FILTER_BTN_2 || Remove ||
+IDS_CFG_CLOSE_TABLE_HEADER || Close Account ||
+IDS_CFG_CLOSE_BTN_CLOSE || Close Account ||
+IDS_CHESS_CLOSE_TXT_1 || You have successfully unsubscribed from the server. ||
+IDS_NEWSLETTER_MAILER_TXT_1 || If you wish to unsubscribe from the server please click the link below: ||
+IDS_CFG_FEN_GAME_TXT_1 || Pre-Created Games ||
+IDS_CFG_FEN_GAME_TXT_2 || Add Game ||
+IDS_CFG_FEN_GAME_TXT_3 || Edit Game ||
+IDS_CFG_FEN_GAME_TXT_4 || Delete Game ||
+IDS_APPLICATION_HEADERS_1 || Main ||
+IDS_APPLICATION_HEADERS_2 || Tournament Setup ||
+IDS_APPLICATION_HEADERS_3 || Create Newsletter ||
+IDS_APPLICATION_HEADERS_4 || Players ||
+IDS_APPLICATION_HEADERS_5 || Player Billing ||
+IDS_APPLICATION_HEADERS_6 || News/Misc Data ||
+IDS_APPLICATION_HEADERS_7 || Server Management ||
+IDS_APPLICATION_HEADERS_8 || Logout ||
+IDS_APPLICATION_HEADERS_9 || Login ||
+IDS_APPLICATION_HEADERS_10 || Player Home ||
+IDS_APPLICATION_HEADERS_11 || Message Center ||
+IDS_APPLICATION_HEADERS_12 || View Games ||
+IDS_APPLICATION_HEADERS_13 || Find Player ||
+IDS_APPLICATION_HEADERS_14 || Buddy List ||
+IDS_APPLICATION_HEADERS_15 || Statistics ||
+IDS_APPLICATION_HEADERS_16 || Configuration ||
+IDS_APPLICATION_HEADERS_17 || Create Activity ||
+IDS_APPLICATION_HEADERS_18 || Games ||
+IDS_ADMIN_AVATAR_SETTINGS_TXT_1 || Manage Avatar Settings ||
+IDS_ADMIN_AVATAR_SETTINGS_TXT_2 || Please select your avatar setting below: ||
+IDS_ADMIN_AVATAR_SETTINGS_TXT_3 || Upload avatars only. ||
+IDS_ADMIN_AVATAR_SETTINGS_TXT_4 || Select avatars only ||
+IDS_ONLINE_GRAPH_TXT_1 || User Online Stats ||
+IDS_CR3DCQUERY_TXT_155 || Date of last login: ||
+IDS_CR3DCQUERY_TXT_156 || Date of last move: ||
+IDS_CR3DCQUERY_TXT_157 || Never ||
+IDS_CR3DCQUERY_TXT_158 || Current Clubs ||
+IDS_CR3DCQUERY_TXT_159 || Club Name||
+IDS_CR3DCQUERY_TXT_160 || Date Formed ||
+IDS_CR3DCQUERY_TXT_161 || Days till game timeout ||
+IDS_CR3DCQUERY_TXT_162 || Days ||
+IDS_CR3DCQUERY_TXT_163 || N/A ||
+IDS_CR3DCQUERY_TXT_164 || Credits: ||
+IDS_CR3DCQUERY_TXT_165 || Lessons Bought: ||
+IDS_CR3DCQUERY_TXT_166 || Puzzles Bought: ||
+IDS_CR3DCQUERY_TXT_167 || Misc Bought: ||
+IDS_CHESS_ACTIVITIES_TXT_1 || Chess Activities Area ||
+IDS_CHESS_ACTIVITIES_TXT_2 || Buy Credits ||
+IDS_CHESS_ACTIVITIES_TXT_3 || Cred: ||
+IDS_CHESS_ACTIVITIES_TXT_4 || Total: ||
+IDS_CHESS_ACTIVITIES_TXT_5 || Get a puzzle ||
+IDS_CHESS_ACTIVITIES_TXT_6 || Get a lesson ||
+IDS_CHESS_ACTIVITIES_TXT_7 || Get other ||
+IDS_CR3DCQUERY_TXT_168 || You have: ||
+IDS_CR3DCQUERY_TXT_169 || Objects ||
+IDS_CR3DCQUERY_TXT_170 || Open ||
+IDS_CR3DCQUERY_TXT_171 || Completed ||
+IDS_CR3DCQUERY_TXT_172 || Left to buy ||
+IDS_CR3DCQUERY_TXT_173 || Total ||
+IDS_CR3DCQUERY_TXT_174 || Puzzles ||
+IDS_CR3DCQUERY_TXT_175 || Lessons ||
+IDS_CR3DCQUERY_TXT_176 || Other items ||
+IDS_CR3DCQUERY_TXT_177 || Complete ||
+IDS_CR3DCQUERY_TXT_178 || Not Complete ||
+IDS_CR3DCQUERY_TXT_179 || [View Activity] ||
+IDS_ACTIVITY_CONFIG_TXT_1 || Activity Configuration ||
+IDS_ACTIVITY_CONFIG_TXT_2 || Activity Free: ||
+IDS_ACTIVITY_CONFIG_TXT_3 || Yes ||
+IDS_ACTIVITY_CONFIG_TXT_4 || No ||
+IDS_ACTIVITY_CONFIG_TXT_5 || Default Credit: ||
+IDS_ACTIVITY_CONFIG_TXT_6 || Update ||
+IDS_PLAYER_CREDITS_TXT_1 || Player Credit Configuration ||
+IDS_PLAYER_CREDITS_TXT_2 || Default Credit: ||
+IDS_PLAYER_CREDITS_TXT_3 || Exchange Rate ($): ||
+IDS_PLAYER_CREDITS_TXT_4 || Update ||
+IDS_CREATE_RESOURCE_TXT_1 || PGN: ||
+IDS_CREATE_RESOURCE_TXT_2 || FEN: ||
+IDS_CREATE_RESOURCE_TXT_3 || Width: ||
+IDS_CREATE_RESOURCE_TXT_4 || Height: ||
+IDS_CREATE_RESOURCE_TXT_5 || Add New Resource ||
+IDS_CREATE_RESOURCE_TXT_6 || Name: ||
+IDS_CREATE_RESOURCE_TXT_7 || Resource File: ||
+IDS_CREATE_RESOURCE_TXT_8 || Type: ||
+IDS_CREATE_RESOURCE_TXT_9 || Movie ||
+IDS_CREATE_RESOURCE_TXT_10 || Image ||
+IDS_CREATE_RESOURCE_TXT_11 || Sound ||
+IDS_CREATE_RESOURCE_TXT_12 || Flash ||
+IDS_CREATE_RESOURCE_TXT_13 || PGN/FEN ||
+IDS_CREATE_RESOURCE_TXT_14 || Text ||
+IDS_CREATE_RESOURCE_TXT_15 || HTML ||
+IDS_CREATE_RESOURCE_TXT_16 || Add Resource ||
+IDS_CREATE_RESOURCE_TXT_17 || Close Window ||
+IDS_CREATE_PAGE_TXT_1 || Add New Activity Page ||
+IDS_CREATE_PAGE_TXT_2 || Select Resource: ||
+IDS_CREATE_PAGE_TXT_3 || Content: ||
+IDS_CREATE_PAGE_TXT_4 || Page Type: ||
+IDS_CREATE_PAGE_TXT_5 || Information Page ||
+IDS_CREATE_PAGE_TXT_6 || Long Answer ||
+IDS_CREATE_PAGE_TXT_7 || True And False ||
+IDS_CREATE_PAGE_TXT_8 || Solution: ||
+IDS_CREATE_PAGE_TXT_9 || Add Page ||
+IDS_CREATE_PAGE_TXT_10 || Close Window ||
+IDS_CREATE_ACTIVITY_TXT_1 || Create New Activity ||
+IDS_CREATE_ACTIVITY_TXT_2 || Name: ||
+IDS_CREATE_ACTIVITY_TXT_3 || Description: ||
+IDS_CREATE_ACTIVITY_TXT_4 || Created By: ||
+IDS_CREATE_ACTIVITY_TXT_5 || Credit (Optional): ||
+IDS_CREATE_ACTIVITY_TXT_6 || Type: ||
+IDS_CREATE_ACTIVITY_TXT_7 || Puzzle ||
+IDS_CREATE_ACTIVITY_TXT_8 || Lesson ||
+IDS_CREATE_ACTIVITY_TXT_9 || Create Activity ||
+IDS_EDIT_ACTIVITY_TXT_1 || Create New Activity ||
+IDS_EDIT_ACTIVITY_TXT_2 || Add Resource ||
+IDS_EDIT_ACTIVITY_TXT_3 || Create Page ||
+IDS_EDIT_ACTIVITY_TXT_4 || Preview ||
+IDS_EDIT_ACTIVITY_TXT_5 || Enable Activity ||
+IDS_EDIT_ACTIVITY_TXT_6 || Disable Activity ||
+IDS_PREVIEW_ACTIVITY_TXT_1 || Page: ||
+IDS_PREVIEW_ACTIVITY_TXT_2 || View Solution ||
+IDS_PREVIEW_ACTIVITY_TXT_3 || Back ||
+IDS_PREVIEW_ACTIVITY_TXT_4 || Next ||
+IDS_PREVIEW_ACTIVITY_TXT_5 || Move Page Left ||
+IDS_PREVIEW_ACTIVITY_TXT_6 || Move Page Right ||
+IDS_PREVIEW_ACTIVITY_TXT_7 || Delete ||
+IDS_BUY_CREDITS_TXT_1 || Sorry, untill the credit system is setup in the admin page, you will be unable to view this page. ||
+IDS_GET_ACTIVITIES_TXT_1 || Sorry, untill the credit system is setup in the admin page, you will be unable to view this page. ||
+IDS_GET_ACTIVITIES_TXT_2 || Activities ||
+IDS_GET_ACTIVITIES_TXT_3 || Purchase Activity ||
+IDS_GET_ACTIVITIES_TXT_4 || Purchase accepted. ||
+IDS_VIEW_ACTIVITIES_TXT_1 || Activities ||
+IDS_VIEW_ACTIVITIES_TXT_2 || View Lessons ||
+IDS_VIEW_ACTIVITIES_TXT_3 || View Puzzles ||
+IDS_VIEW_ACTIVITIES_TXT_4 || View Other ||
+IDS_VIEW_ACTIVITIES_TXT_5 || Page: ||
+IDS_VIEW_ACTIVITIES_TXT_6 || View Solution ||
+IDS_VIEW_ACTIVITIES_TXT_7 || Back ||
+IDS_VIEW_ACTIVITIES_TXT_8 || Next ||
+IDS_CR3DCQUERY_TXT_180 || Decline Request ||
+IDS_CR3DCQUERY_TXT_181 || Accept Request ||
+IDS_CR3DCQUERY_TXT_182 || Date ||
+IDS_CR3DCQUERY_TXT_183 || Total: ||
+IDS_CR3DCQUERY_TXT_184 || Credits Requested: ||
+IDS_CR3DCQUERY_TXT_185 || Email ||
+IDS_CR3DCQUERY_TXT_186 || User ID ||
+IDS_CR3DCQUERY_TXT_187 || Player ID: ||
+IDS_CR3DCQUERY_TXT_188 || Credit Request ID: ||
+IDS_CR3DCQUERY_TXT_189 || Please make sure that the players below have paid for their requested credit amount before accepting their request. ||
+IDS_CR3DCQUERY_TXT_190 || Purchase Additional Credits ||
+IDS_CR3DCQUERY_TXT_191 || Credit Amount: ||
+IDS_CR3DCQUERY_TXT_192 || Credit Exchange Rate: ||
+IDS_CR3DCQUERY_TXT_193 || Credit ||
+IDS_CR3DCQUERY_TXT_194 || Credit Information ||
+IDS_CR3DCQUERY_TXT_195 || Email: ||
+IDS_CR3DCQUERY_TXT_196 || User ID: ||
+IDS_CR3DCQUERY_TXT_197 || Player ID: ||
+IDS_CR3DCQUERY_TXT_198 || Account Information ||
+IDS_CR3DCQUERY_TXT_199 || Purchase Additional Credits ||
+IDS_CR3DCQUERY_TXT_200 || Get Activity ||
+IDS_CR3DCQUERY_TXT_201 || Name ||
+IDS_CR3DCQUERY_TXT_202 || Description ||
+IDS_CR3DCQUERY_TXT_203 || Credits ||
+IDS_CR3DCQUERY_TXT_204 || Purchase ||
+IDS_CR3DCQUERY_TXT_205 || other ||
+IDS_CR3DCQUERY_TXT_206 || Get Other ||
+IDS_CR3DCQUERY_TXT_207 || lesson ||
+IDS_CR3DCQUERY_TXT_208 || Get Lessons ||
+IDS_CR3DCQUERY_TXT_209 || puzzle ||
+IDS_CR3DCQUERY_TXT_210 || Get Puzzles ||
+IDS_CR3DCQUERY_TXT_211 || Submit ||
+IDS_CR3DCQUERY_TXT_212 || False ||
+IDS_CR3DCQUERY_TXT_213 || True ||
+IDS_CR3DCQUERY_TXT_214 || Answer: ||
+IDS_CR3DCQUERY_TXT_215 || No Resource Selected ||
+IDS_CR3DCQUERY_TXT_216 || Credit: ||
+IDS_CR3DCQUERY_TXT_217 || Type ||
+IDS_CR3DCQUERY_TXT_218 || Created By; ||
+IDS_CR3DCQUERY_TXT_219 || Description: ||
+IDS_CR3DCQUERY_TXT_220 || Name: ||
+IDS_CR3DCQUERY_TXT_221 || Activity Info ||
+IDS_CR3DCQUERY_TXT_222 || Enabled ||
+IDS_CR3DCQUERY_TXT_223 || Other ||
+IDS_CR3DCQUERY_TXT_224 || Lessons ||
+IDS_CR3DCQUERY_TXT_225 || Puzzles ||
+IDS_CR3DCQUERY_TXT_226 || Page # ||
+IDS_CR3DCQUERY_TXT_227 || You are incorrect, please try again. ||
+IDS_CR3DCQUERY_TXT_228 || Submit ||
+IDS_CR3DCQUERY_TXT_229 || You have chosen to view the solution.<br><b>Answer:</b> ||
+IDS_CR3DCQUERY_TXT_230 || From: ||
+IDS_CR3DCQUERY_TXT_231 || It's your move ||
+IDS_CR3DCQUERY_TXT_232 || By pressing the OK button, you confirm to draw the game. ||
+IDS_CR3DCQUERY_TXT_233 || By pressing the OK button, you confirm to resign the game. ||
+IDS_CR3DCQUERY_TXT_234 || [View Top Ten] ||
+IDS_CR3DCQUERY_TXT_235 || Club member of: ||
+IDS_CR3DCQUERY_TXT_236 || Club owner of: ||
+IDS_CHESS_TOURNAMENT_V2_TXT_0 || Tournament Time Information: ||
+IDS_CHESS_TOURNAMENT_V2_TXT_1 || Tournament Creation V2 ||
+IDS_CHESS_TOURNAMENT_V2_TXT_2 || Tournament Type: ||
+IDS_CHESS_TOURNAMENT_V2_TXT_3 || Select Tournament Type ||
+IDS_CHESS_TOURNAMENT_V2_TXT_4 || [1] One Against Many ||
+IDS_CHESS_TOURNAMENT_V2_TXT_5 || [2] Many Against Many  ||
+IDS_CHESS_TOURNAMENT_V2_TXT_6 || [3] Open League ||
+IDS_CHESS_TOURNAMENT_V2_TXT_7 || Continue ||
+IDS_CHESS_TOURNAMENT_V2_TXT_8 || Invalid tournament type selected. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_9 || Start Date/Time: ||
+IDS_CHESS_TOURNAMENT_V2_TXT_10 || End Date/Time: ||
+IDS_CHESS_TOURNAMENT_V2_TXT_11 || Tournament Role Information: ||
+IDS_CHESS_TOURNAMENT_V2_TXT_12 || Organizers ||
+IDS_CHESS_TOURNAMENT_V2_TXT_13 || Captains ||
+IDS_CHESS_TOURNAMENT_V2_TXT_14 || Players ||
+IDS_CHESS_TOURNAMENT_V2_TXT_15 || Player ||
+IDS_CHESS_TOURNAMENT_V2_TXT_16 || Invalid start time month. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_17 || Invalid start time day. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_18 || Invalid start time year. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_19 || Invalid start time hour. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_20 || Invalid start time minute. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_21 || Invalid start time second. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_22 || Invalid end time month. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_23 || Invalid end time day. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_24 || Invalid end time year. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_25 || Invalid end time hour. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_26 || Invalid end time minute. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_27 || Invalid end time second. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_28 || Organizer list needs to be filled out. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_29 || A player needs to be selected (Limit 1). ||
+IDS_CHESS_TOURNAMENT_V2_TXT_30 || Players list needs to be filled out. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_31 || Start date/time cannot equal the end date/time. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_32 || End date/time must be larger than the start date/time ||
+IDS_CHESS_TOURNAMENT_V2_TXT_33 || GMT ||
+IDS_CHESS_TOURNAMENT_V2_TXT_34 || Hours ||
+IDS_CHESS_TOURNAMENT_V2_TXT_35 || Time zone ||
+IDS_CHESS_TOURNAMENT_V2_TXT_36 || Invalid time zone selected. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_37 || Invalid start date or time. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_38 || Invalid end date or time. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_39 || Start date and time must be larger than the current date and time. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_40 || Player Cutoff Date/Time: ||
+IDS_CHESS_TOURNAMENT_V2_TXT_41 || Invalid player cutoff time month. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_42 || Invalid player cutoff time day. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_43 || Invalid player cutoff time year. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_44 || Invalid player cutoff time hour. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_45 || Invalid player cutoff time minute. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_46 || Invalid player cutoff time second. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_47 || Player cutoff date/time cannot equal the start date/time. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_48 || Player cutoff date/time must be less than the start date/time. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_49 || Invalid player cutoff date or time. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_50 || Player cutoff date and time must be larger than the current date and time. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_51 || Tournament Game Information: ||
+IDS_CHESS_TOURNAMENT_V2_TXT_52 || Max Vote Time: ||
+IDS_CHESS_TOURNAMENT_V2_TXT_53 || Invalid game time hour. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_54 || Invalid game time minute. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_55 || Invalid game time second. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_56 || Invalid max vote time inputted. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_57 || Tournament Information: ||
+IDS_CHESS_TOURNAMENT_V2_TXT_58 || Name: ||
+IDS_CHESS_TOURNAMENT_V2_TXT_59 || Description: ||
+IDS_CHESS_TOURNAMENT_V2_TXT_60 || Signup Type: ||
+IDS_CHESS_TOURNAMENT_V2_TXT_61 || Invalid tournament name. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_62 || Invalid tournament description. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_63 || Closed ||
+IDS_CHESS_TOURNAMENT_V2_TXT_64 || Open ||
+IDS_CHESS_TOURNAMENT_V2_TXT_65 || Error creating the tournament. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_66 || Tournament successfully created. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_67 || Tournament Management v2 ||
+IDS_CHESS_TOURNAMENT_V2_TXT_68 || One Against Many ||
+IDS_CHESS_TOURNAMENT_V2_TXT_69 || View Info ||
+IDS_CHESS_TOURNAMENT_V2_TXT_70 || Accept ||
+IDS_CHESS_TOURNAMENT_V2_TXT_71 || Tournament Information v2 ||
+IDS_CHESS_TOURNAMENT_V2_TXT_72 || Acceptance Status:  ||
+IDS_CHESS_TOURNAMENT_V2_TXT_73 || Pending ||
+IDS_CHESS_TOURNAMENT_V2_TXT_74 || Accepted ||
+IDS_CHESS_TOURNAMENT_V2_TXT_75 || Delete ||
+IDS_CHESS_TOURNAMENT_V2_TXT_76 || [View Tournaments] ||
+IDS_CHESS_TOURNAMENT_V2_TXT_77 || Join Tournament ||
+IDS_CHESS_TOURNAMENT_V2_TXT_78 || Join ||
+IDS_CHESS_TOURNAMENT_V2_TXT_79 || Tournament Management Console ||
+IDS_CHESS_TOURNAMENT_V2_TXT_80 || Organizer ||
+IDS_CHESS_TOURNAMENT_V2_TXT_81 || Captain ||
+IDS_CHESS_TOURNAMENT_V2_TXT_82 || Tournament ||
+IDS_CHESS_TOURNAMENT_V2_TXT_83 || Role ||
+IDS_CHESS_TOURNAMENT_V2_TXT_84 || Tournament Controls ||
+IDS_CHESS_TOURNAMENT_V2_TXT_85 || Create Games ||
+IDS_CHESS_TOURNAMENT_V2_TXT_86 || Game Start Date/Time: ||
+IDS_CHESS_TOURNAMENT_V2_TXT_87 || Invalid game time month. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_88 || Invalid game time day. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_89 || Invalid game time year. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_90 || Invalid game time hour. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_91 || Invalid game time minute. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_92 || Invalid game time second. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_93 || Games successfully created. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_94 || Please select your current time zone. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_95 || Time zone Selection ||
+IDS_CHESS_TOURNAMENT_V2_TXT_96 || Cutoff Day ||
+IDS_CHESS_TOURNAMENT_V2_TXT_97 || Start Day ||
+IDS_CHESS_TOURNAMENT_V2_TXT_98 || End Day ||
+IDS_CHESS_TOURNAMENT_V2_TXT_99 || Active/Accepted Tournaments V2 ||
+IDS_CHESS_TOURNAMENT_V2_TXT_100 || Completed Tournaments V2 ||
+IDS_CHESS_TOURNAMENT_V2_TXT_101 || One to Many ||
+IDS_CHESS_TOURNAMENT_V2_TXT_102 || Name ||
+IDS_CHESS_TOURNAMENT_V2_TXT_103 || Signup type ||
+IDS_CHESS_TOURNAMENT_V2_TXT_104 || Type ||
+IDS_CHESS_TOURNAMENT_V2_TXT_105 || Date Added ||
+IDS_CHESS_TOURNAMENT_V2_TXT_106 || Continue ||
+IDS_CHESS_TOURNAMENT_V2_TXT_107 || You are currently a game spectator. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_108 || This tournament game is not ready, please come back later. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_109 || This tournament game is over. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_110 || Games already created or cutoff date not over. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_111 || Finish and Close Tournament ||
+IDS_CHESS_TOURNAMENT_V2_TXT_112 || Begin tournament log ||
+IDS_CHESS_TOURNAMENT_V2_TXT_113 || Tournament games are not complete or thetournament is already complete. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_114 || Calculating game: ||
+IDS_CHESS_TOURNAMENT_V2_TXT_115 || Setting tournament status to complete. ||
+IDS_CHESS_TOURNAMENT_V2_TXT_116 || End tournament log||
+IDS_CHESS_TOURNAMENT_V2_TXT_117 || Tournament Results ||
+IDS_CHESS_TOURNAMENT_V2_TXT_118 || White Player ||
+IDS_CHESS_TOURNAMENT_V2_TXT_119 || Black Player ||
+IDS_CHESS_TOURNAMENT_V2_TXT_120 || Winner ||
+IDS_CHESS_TOURNAMENT_V2_TXT_121 || Vote Moves ||
+IDS_CHESS_TOURNAMENT_V2_TXT_122 || Server Time: ||
+IDS_CHESS_BUG_REPORT_TXT_0 || Thank you, your bug report was sent to phpchess.com. ||
+IDS_CHESS_BUG_REPORT_TXT_1 || Unable to send your bug report to phpchess.com. ||
+IDS_CHESS_BUG_REPORT_TXT_2 || Report Problems/Bugs. ||
+IDS_ADMIN_PCHAT_SETTINGS_TXT_1 || Player Chat Configuration ||
+IDS_ADMIN_PCHAT_SETTINGS_TXT_2 || Please select your player chat settings below. ||
+IDS_ADMIN_PCHAT_SETTINGS_TXT_3 || Enable Chat ||
+IDS_ADMIN_PCHAT_SETTINGS_TXT_4 || Disable Chat ||
+IDS_ADMIN_CJOB_SETTINGS_TXT_1 || Cron Job Configuration ||
+IDS_ADMIN_CJOB_SETTINGS_TXT_2 || Please select your cron job settings below. ||
+IDS_ADMIN_CJOB_SETTINGS_TXT_3 || Enable Cron Job Mode||
+IDS_ADMIN_CJOB_SETTINGS_TXT_4 || Disable Cron Job Mode ||
+IDS_INDEX_OPTS_TXT_1 || phpChess Yahoo Widget ||
+IDS_INDEX_OPTS_TXT_2 || phpChess Vista Gadget ||
+IDS_INDEX_OPTS_TXT_3 || phpchess mobile client ||
+IDS_MOBILE_DOWNLOAD_TXT_1 || Mobile Client Download ||
+IDS_MOBILE_DOWNLOAD_TXT_2 || The files listed below are associated with the mobile client: ||
+IDS_CHESS_STATS_BTN_TXT_1 || View Current Games ||
+IDS_CHESS_STATS_BTN_TXT_2 || View Past Games ||
+IDS_OTHER_GAMELIST_TXT_1 || View ||
+IDS_OTHER_GAMELIST_TXT_2 || In Real-Time ||
+IDS_OTHER_GAMELIST_TXT_3 || Not In Real-Time||
+IDS_OTHER_GAMELIST_TXT_4 || White ||
+IDS_OTHER_GAMELIST_TXT_5 || Black ||
+IDS_OTHER_GAMELIST_TXT_6 || Game Status ||
+IDS_OTHER_GAMELIST_TXT_7 || Winner ||
+IDS_OTHER_GAMELIST_TXT_8 || White ||
+IDS_OTHER_GAMELIST_TXT_9 || Black ||
+IDS_OTHER_GAMELIST_TXT_10 || Draw ||
+IDS_OTHER_GAMELIST_TXT_11 || PGN ||
+IDS_NAV_BUTTONS_TXT_1 || Back To Main Page ||
+IDS_NAV_BUTTONS_TXT_2 || Back To Managing Players ||
+IDS_NAV_BUTTONS_TXT_3 || Back To Server Management ||
+IDS_NAV_BUTTONS_TXT_4 || Back To Managing Front News ||
+IDS_NAV_BUTTONS_TXT_5 || Back To Managing Billing Data ||
+IDS_NAV_BUTTONS_TXT_6 || Back To Managing Activities ||
+IDS_NAV_BUTTONS_TXT_7 || Manage Buddy List ||
+IDS_NAV_BUTTONS_TXT_8 || Back To Buddy List ||
+IDS_NAV_BUTTONS_TXT_9 || Back To Configuration ||
+IDS_NAV_BUTTONS_TXT_10 || Back To Club Configuration ||
+IDS_NAV_BUTTONS_TXT_11 || Back To Tournament List ||
+IDS_NAV_BUTTONS_TXT_12 || Back To Statistics Page ||
+IDS_NAV_BUTTONS_TXT_13 || View/Accept Your Tournament ||
+IDS_NAV_BUTTONS_TXT_14 ||  ||
+IDS_TOP_TEN_TXT_1 || Top 10 Players ||
+IDS_CHESS_MAIN_STIME || Current Server Time: ||
+IDS_CHESS_CREAT_GAME_TXT_1 || Create Game Options ||
+IDS_CHESS_CREAT_GAME_TXT_2 || Normal ||
+IDS_CHESS_CREAT_GAME_TXT_3 || Passive Real-Time ||
+IDS_CHESS_CREAT_GAME_TXT_4 || Active Real-Time ||
+IDS_CHESS_CREAT_GAME_TXT_2a || Create a normal game. ||
+IDS_CHESS_CREAT_GAME_TXT_3a || Create a passive real-time game. ||
+IDS_CHESS_CREAT_GAME_TXT_4a || Create an active real-time game. ||
+IDS_CHESS_CREAT_GAME_TXT_5 || Create Normal Game ||
+IDS_CHESS_CREAT_GAME_TXT_6 || Create Passive Real-Time Game ||
+IDS_CHESS_CREAT_GAME_TXT_7 || Create Active Real-Time Game ||
+IDS_USERNAME_TXT_1 || Old User name: ||
+IDS_USERNAME_TXT_2 || Password: ||
+IDS_USERNAME_TXT_3 || View/Change User name ||
+IDS_USERNAME_TXT_4 || Current User name ||
+IDS_USERNAME_TXT_5 || New User name ||
+IDS_USERNAME_TXT_6 || Change User Name ||
+IDS_USERNAME_TXT_7 || The user name you selected already exists. ||
+IDS_USERNAME_TXT_8 || The user name you selected contains invalid characters. ||
+IDS_USERNAME_TXT_9 || Your user name was changed. ||
+IDS_USERNAME_TXT_10 || Close Window ||
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_TXT_20 || Archiving
+IDS_ADMIN_MANAGE_LOOKANFEEL_TABLE_LINK_20 || Archiving
+IDS_ADMIN_ARCHIVE_BUTTON_ARCHIVE || Archive ||
+IDS_ADMIN_ARCHIVE_BUTTON_UNARCHIVE || Unarchive ||
+IDS_ADMIN_ARCHIVE_BUTTON_DELETE || Delete ||
+IDS_ADMIN_ARCHIVE_BUTTON_CONTINUE || Continue ||
+IDS_ADMIN_ARCHIVE_BUTTON_ABORT || Abort ||
+IDS_ADMIN_ARCHIVE_TXT_KEYFIG || Key Database Figures ||
+IDS_ADMIN_ARCHIVE_TXT_MNGDB || Manage Databases ||
+IDS_ADMIN_ARCHIVE_TXT_REP01 || Number of players: ||
+IDS_ADMIN_ARCHIVE_TXT_REP02 || Number of archived players: ||
+IDS_ADMIN_ARCHIVE_TXT_REP03 || Number of challenges: ||
+IDS_ADMIN_ARCHIVE_TXT_REP04 || Number of active games: ||
+IDS_ADMIN_ARCHIVE_TXT_REP05 || Number of completed games: ||
+IDS_ADMIN_ARCHIVE_TXT_REP06 || Number of archived games: ||
+IDS_ADMIN_ARCHIVE_TXT_REP07 || Number of active Moves: ||
+IDS_ADMIN_ARCHIVE_TXT_REP08 || Number of active messages:  ||
+IDS_ADMIN_ARCHIVE_TXT_REP09 || Who is online history count: ||
+IDS_ADMIN_ARCHIVE_TXT_WARNING ||   Warning: This operation cannot be undone, any data-loss is permanent. Back up your database before proceeding. ||
+IDS_ADMIN_ARCHIVE_TXT_RESULT1 || Operation was successful ||
+IDS_ADMIN_ARCHIVE_TXT_RESULT2 || Sorry, this operation could not be completed, an error occured. ||
+IDS_ADMIN_ARCHIVE_TXT_BACK || Return to Archiving ||
+IDS_GAME_TXT_OC_ACCEPT || ACCEPT||
+IDS_GAME_TXT_OC_REVOKE || REVOKE||
+IDS_MAIN_GAMEBOX_ID || ID: ||
+IDS_MAIN_GAMEBOX_PLAY || Play ||
+IDS_MAIN_GAMEBOX_ANYONE || ANYONE ||
+IDS_MAIN_GAMEBOX_HOVER_RATED || Rated: ||
+IDS_MAIN_GAMEBOX_HOVER_YES || Yes ||
+IDS_MAIN_GAMEBOX_HOVER_NO || No ||
+IDS_MAIN_GAMEBOX_HOVER_DATE || Date Created: ||
+IDS_MAIN_GAMEBOX_HOVER_TO || Timeout: ||
+IDS_MAIN_GAMEBOX_HOVER_TC1 || Time Control 1: ||
+IDS_MAIN_GAMEBOX_HOVER_TC2 || Time Control 2: ||
+IDS_MAIN_GAMEBOX_HOVER_NONE ||None||
+IDS_MAIN_PLAYER_RATING || Rating:  ||
+IDS_MAIN_PLAYER_ADD_BUDDY || Add To Buddy List ||
+IDS_MAIN_PLAYER_ADDED_BUDDY || {player} is now your buddy ||
+IDS_MAIN_PLAYER_REMOVE_BUDDY || Remove From Buddy List ||
+IDS_MAIN_PLAYER_REMOVED_BUDDY || {player} is no longer your buddy ||
+IDS_MAIN_PLAYER_STATISTICS || View Statistics ||
+IDS_MAIN_PLAYER_HOVER || Click to view information on player: {player} ||
+IDS_MAIN_PLAY_COMPUTER || Play against computer ||
+IDS_MAIN_COMPUTER_NAME || AI Bob ||
+IDS_PlayerTournament_Tournaments_NAME ||Name||
+IDS_PlayerTournament_Tournaments_STATUS ||Status||
+IDS_PlayerTournament_Tournaments_CUTOFF ||Cut Off||
+IDS_PlayerTournament_Tournaments_START ||Start||
+IDS_PlayerTournament_Tournaments_COMMENT ||Description||
+IDS_PlayerTournament_Tournaments_VIEW_GAMES || Click to view games ||
+IDS_PlayerTournament_TGAMES_WHITE || White ||
+IDS_PlayerTournament_TGAMES_BLACK || Black ||
+IDS_PlayerTournament_TGAMES_TURN || Next Move ||
+IDS_PlayerTournament_TGAMES_STATUS || Status ||
+IDS_PlayerTournament_TGAMES_STARTED || Started ||
+IDS_PlayerTournament_TGAMES_CLICK_PLAY || Click to play game ||
+IDS_PlayerTournament_TGAMES_CLICK_VIEW || Click to view game ||
+IDS_PlayerTournament_TGAMES_CLICK_REPLAY || Click to replay game ||
+IDS_PlayerTournament_ALL_TOURNAMENTS || All Tournaments ||
+IDS_Tournament_Status_NEW || New ||
+IDS_Tournament_Status_PLANNED || Planned ||
+IDS_Tournament_Status_ACCEPTED || Accepted ||
+IDS_Tournament_Status_STARTED || Started ||
+IDS_Tournament_Status_COMPLETED || Completed ||
+IDS_Tournament_Status_FINALISED || Finalised ||
+
+IDS_Admin_Tournament_Filter_ALL || All ||
+IDS_Admin_Tournament_Filter_NEW || New ||
+IDS_Admin_Tournament_Filter_PLANNED || Planned ||
+IDS_Admin_Tournament_Filter_ACCEPTED || Accepted ||
+IDS_Admin_Tournament_Filter_STARTED || Started ||
+IDS_Admin_Tournament_Filter_COMPLETED || Completed ||
+IDS_Admin_Tournament_Filter_FINALISED || Finalised ||
+
+IDS_Admin_Tournament_Type_DUEL || Duel ||
+IDS_Admin_Tournament_Type_LEAGUE || League ||
+IDS_Admin_Tournament_Type_SWISS || Swiss ||
+IDS_Admin_Tournament_Type_KNOCKOUT || Knock-out ||
+IDS_Admin_Tournament_Type_ROUNDROBIN || Round Robin ||
+IDS_Admin_Tournament_Type_BESTOF || Best Of ||
+
+IDS_Admin_Tournament_Main_FILTER || Filter Tournaments ||
+IDS_Admin_Tournament_Main_ID || ID ||
+IDS_Admin_Tournament_Main_NAME || Name ||
+IDS_Admin_Tournament_Main_TYPE || Type ||
+IDS_Admin_Tournament_Main_COUNT || Count ||
+IDS_Admin_Tournament_Main_CUTOFF || Cutoff ||
+IDS_Admin_Tournament_Main_START || Start ||
+IDS_Admin_Tournament_Main_COMMENT || Comment ||
+IDS_Admin_Tournament_Main_STATUS || Status ||
+IDS_Admin_Tournament_Main_MANAGEINFO || Manage tournament information ||
+IDS_Admin_Tournament_Main_MANAGEGAMES || Manage tournament games ||
+IDS_Admin_Tournament_Main_NORECORDS || No records exist that match the filter ||
+IDS_Admin_Tournament_Main_ADD || Add Tournament ||
+IDS_Admin_Tournament_Table_EDIT || Edit ||
+IDS_Admin_Tournament_Table_GAMES || Games ||
+
+IDS_Form_Button_CREATE || Create ||
+IDS_Form_Button_BACK || Back ||
+IDS_Form_Button_UPDATE || Update ||
+IDS_Form_Message_REQUIRED || Must provide a value. ||
+IDS_Form_Message_FIELDREQUIRED || This field is required. ||
+IDS_Form_Message_LENGTH || Value can not be longer than {max_length} characters ||
+IDS_Form_Message_SUBMITERROR || Errors submitting form ||
+
+IDS_Admin_Tournament_Add_CREATE || Create Tournament ||
+IDS_Admin_Tournament_Add_NAME || Name ||
+IDS_Admin_Tournament_Add_TYPE || Type ||
+IDS_Admin_Tournament_Add_COUNT || No. Players ||
+IDS_Admin_Tournament_Add_CUTOFF || Cutoff Date ||
+IDS_Admin_Tournament_Add_START || Start Date ||
+IDS_Admin_Tournament_Add_COMMENT || Comment/Description ||
+IDS_Admin_Tournament_Add_STATUS || Status ||
+IDS_Admin_Tournament_Add_CREATED || Tournament was created ||
+IDS_Admin_Tournament_Add_CREATEFAILED || Database query to create tournament failed. ||
+
+IDS_Admin_Tournament_Edit_UPDATE || Update Tournament ||
+IDS_Admin_Tournament_Edit_NAME || Name ||
+IDS_Admin_Tournament_Edit_TYPE || Type ||
+IDS_Admin_Tournament_Edit_COUNT || No. Players ||
+IDS_Admin_Tournament_Edit_CUTOFF || Cutoff Date ||
+IDS_Admin_Tournament_Edit_START || Start Date ||
+IDS_Admin_Tournament_Edit_COMMENT || Comment/Description ||
+IDS_Admin_Tournament_Edit_STATUS || Status ||
+IDS_Admin_Tournament_Edit_UPDATED || Tournament was updated ||
+IDS_Admin_Tournament_Edit_UPDATEFAILED || Database query to update tournament failed. ||
+IDS_Admin_Tournament_Edit_IDMISSING || Error: Tournament ID is missing. ||
+IDS_Admin_Tournament_Edit_QUERYFAILED || Query to find tournament failed. ||
+IDS_Admin_Tournament_Edit_IDINVALID || Error: Tournament id is invalid! No record found to match it. ||
+
+IDS_Admin_Tournament_Games_ADD || Add Game||
+IDS_Admin_Tournament_Games_EDIT || Edit ||
+IDS_Admin_Tournament_Games_DELETE || Delete ||
+IDS_Admin_Tournament_Games_ID || Game ID ||
+IDS_Admin_Tournament_Games_WHITE || White ||
+IDS_Admin_Tournament_Games_BLACK || Black ||
+IDS_Admin_Tournament_Games_STATUS || Status ||
+IDS_Admin_Tournament_Games_COMPLETION || Completion Status ||
+IDS_Admin_Tournament_Games_TURN || Turn ||
+IDS_Admin_Tournament_Games_UDPATEGAME || Update Game ||
+IDS_Admin_Tournament_Games_CONFIRMDELETE || Do you really want to delete this game? ||
+IDS_Admin_Tournament_Games_IDMISSING || Error: Tournament ID is not provided! ||
+IDS_Admin_Tournament_Games_IDQUERYFAILED || Error: Query to find tournament failed. ||
+IDS_Admin_Tournament_Games_GAMEDELETED || Game with id '{id}' was deleted. ||
+IDS_Admin_Tournament_Games_GAMEDELETEERROR || Errors occurred while deleting game with id '{id}'.<br />{error} ||
+IDS_Admin_Tournament_Games_GAMESQUERYFAILED || Query to find games for this tournament failed. ||
+IDS_Admin_Tournament_Games_GAMEQUERYFAILED || Query to find game for this tournament failed. ||
+IDS_Admin_Tournament_Games_QUERYERROR1 || Query to delete c4m_tournamentgames from 'game' table failed. ||
+IDS_Admin_Tournament_Games_QUERYERROR2 || Query to delete game reference from 'c4m_tournamentgames' table failed. ||
+IDS_Admin_Tournament_Games_QUERYERROR3 || Query to delete game reference from 'cfm_game_options' table failed. ||
+IDS_Admin_Tournament_Games_QUERYERROR4 || Query to delete game references from 'moves_history' table failed. ||
+IDS_Admin_Tournament_Games_QUERYERROR5 || Query to delete game reference from 'cfm_gamesrealtime' table failed. ||
+IDS_Admin_Tournament_Games_QUERYERROR6 || Query to delete game reference from 'c4m_gamechat' table failed. ||
+IDS_Admin_Tournament_Games_QUERYERROR7 || Query to delete game reference from 'c4m_gamedraws' table failed. ||
+IDS_Admin_Tournament_Games_QUERYERROR8 || Query to delete game reference from 'c4m_newgameotherfen' table failed. ||
+IDS_Admin_Tournament_Games_GAMEIDINVALID || Error: Game id is invalid. No record found to match the requested game id and tournament id. ||
+
+
+IDS_Admin_Tournament_Games_Add_IDMISSING || Error: Tournament ID is not provided. ||
+IDS_Admin_Tournament_Games_Add_QUERYFAILED || Query to find tournament failed. ||
+IDS_Admin_Tournament_Games_Add_IDINVALID || Error: Tournament ID is invalid! No record found to match it. ||
+IDS_Admin_Tournament_Games_Add_WHITE || White ||
+IDS_Admin_Tournament_Games_Add_BLACK || Black ||
+IDS_Admin_Tournament_Games_Add_FEN || FEN ||
+IDS_Admin_Tournament_Games_Add_TIMING || Timing Mode ||
+IDS_Admin_Tournament_Games_Add_CREATED || Game with ID({id}) was created. ||
+IDS_Admin_Tournament_Games_Add_SAMEPLAYER || Same player selected for both sides. ||
+IDS_Admin_Tournament_Games_Add_ERRORINSERTGAME || Error inserting record into the 'game' table. ||
+IDS_Admin_Tournament_Games_Add_ERRORINSERTASSOC || Error inserting record into 'tournamentgames' table. ||
+IDS_Admin_Tournament_Games_Add_ERRORFEN || Error inserting custom FEN into table. ||
+IDS_Admin_Tournament_Games_Add_ERROROPTIONS || Error inserting record into game_options table. ||
+IDS_Admin_Tournament_Games_Add_ERRORDISABLED || Error retrieving the disabled users list. ||
+IDS_Admin_Tournament_Games_Add_ERRORUSERS || Error getting the user list. ||
+IDS_Admin_Tournament_Games_Add_CREATE || Create Game ||
+IDS_Admin_Tournament_Games_Add_NAME || Name ||
+IDS_Admin_Tournament_Games_Add_COMMENT || Comment ||
+IDS_Admin_Tournament_Games_Add_START || Start Date ||
+IDS_Admin_Tournament_Games_Add_SETUP || Setup Board ||
+
+IDS_Admin_Tournament_Games_Edit_IDMISSING || Error: Tournament ID is not provided. ||
+IDS_Admin_Tournament_Games_Edit_QUERYFAILED || Query to find tournament failed. ||
+IDS_Admin_Tournament_Games_Edit_IDINVALID || Error: Tournament ID is invalid! No record found to match it. ||
+IDS_Admin_Tournament_Games_Edit_GAMEIDQUERYFAILED || Query to find game failed. ||
+IDS_Admin_Tournament_Games_Edit_GAMEIDINVALID || Error: Game ID is invalid. No record found to match the requested game ID for this tournament. ||
+IDS_Admin_Tournament_Games_Edit_STATUS || STATUS ||
+IDS_Admin_Tournament_Games_Edit_COMPLETION || Completion Status ||
+IDS_Admin_Tournament_Games_Edit_UPDATED || Game was updated. ||
+IDS_Admin_Tournament_Games_Edit_ERRORUPDATING || Error updating record. ({mysql_err}) ||
+IDS_Admin_Tournament_Games_Edit_ERRORDISABLED || Error retrieving the disabled users list. ||
+IDS_Admin_Tournament_Games_Edit_ERRORUSERS || Error getting the user list. ||
+IDS_Admin_Tournament_Games_Edit_UPDATE || Update Game ||
+IDS_Admin_Tournament_Games_Edit_NAME || Name ||
+IDS_Admin_Tournament_Games_Edit_COMMENT || Comment ||
+IDS_Admin_Tournament_Games_Edit_START || Start Date ||
+IDS_Admin_Tournament_Games_Edit_SETUP || Setup Board ||
+
+IDS_Game_Status_ACTIVE || Active ||
+IDS_Game_Status_COMPLETED || Completed ||
+IDS_Game_Status_WAITING || Waiting to be accepted ||
+IDS_Game_Status_PENDING || Pending ||
+
+IDS_GAME_CompletionStatus_BLACK || Black Won ||
+IDS_GAME_CompletionStatus_WHITE || White Won ||
+IDS_GAME_CompletionStatus_DRAW || Game was drawn ||
+IDS_GAME_CompletionStatus_INCOMPLETE || Incomplete ||
+IDS_GAME_CompletionStatus_BLACK || Black Won ||
+
+IDS_COMPUTER_GAME_TITLE || Against Computer ||

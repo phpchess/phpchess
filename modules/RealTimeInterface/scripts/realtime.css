@@ -1,0 +1,272 @@
+
+.mainoption {
+	cursor: pointer;
+	color: #7E7E7E;
+	border: 1px solid #8FAE75;
+	margin: 2px;
+	width: 100px;
+}
+.mainoption:hover {
+	color: black;
+}
+
+
+
+#wrapper{
+	position:relative;
+	top:0px;
+	left:0px;
+	width:680px;
+	height:750px;
+}
+
+#pgnview{
+	position:absolute;
+	left:560px;
+	top:10px;
+	width:180px;
+}
+
+#pgntext {
+	height: 400px;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+#board{
+	position:absolute;
+	top:20px;
+	left:20px;
+	width:400px;
+	height:400px;
+	padding:0px;
+	margin:auto;
+	z-index:0;
+}
+
+#boardblock{
+	position:absolute;
+	top:20px;
+	left:20px;
+	width:400px;
+	height:400px;
+	padding:0px;
+	margin:auto;
+	background:#444444 url("../images/ajax-loader.gif") no-repeat center;
+	filter:alpha(opacity=25);
+	-moz-opacity:.25;
+	opacity:.25;
+	z-index:2;
+}
+
+#boardleft{
+	position:absolute;
+	top:0px;
+	left:0px;
+	width:20px;
+	height:400px;
+}
+
+#boardright{
+	position:absolute;
+	top:0px;
+	left:420px;
+	width:20px;
+	height:400px;
+}
+
+#boardtop{
+	position:absolute;
+	top:0px;
+	left:0px;
+	width:400px;
+	height:20px;
+}
+
+#boardbottom{
+	position:absolute;
+	top:420px;
+	left:0px;
+	width:400px;
+	height:20px;
+	padding-top:3px;
+}
+
+#boardwrapper{
+	background: #ffeebb;
+	width:440px;
+	height:440px;
+}
+
+#board_mask {
+	background-color: #888;
+	opacity: 0.6;
+	filter: alpha(opacity=60);
+}
+#board_mask2 {
+	background-color: #888;
+	opacity: 0.1;
+	filter: alpha(opacity=10);
+}
+
+#chatbox{
+	position:absolute;
+	left:0px;
+	top:500px;
+	width:440px;
+	height:140px;
+	overflow:auto;
+}
+
+#sendmsg{
+	position:absolute;
+	left:0px;
+	top:460px;
+	height:30px;
+	width:440px;
+	padding:0px;
+	margin:0px;
+}
+
+
+
+#topdiv{
+	position:absolute;
+	left:450px;
+	top:10px;
+	-width:150px;
+}
+
+#bottomdiv{
+	position:absolute;
+	left:450px;
+	top:300px;
+	-width:150px;
+}
+#clock_w {
+	-position: absolute;
+	-left: 0px;
+	-top: 460px;
+	-width: 440px;
+	width: 100%;
+	margin: 0px;
+	padding: 0px;
+	text-align: center;
+}
+#clock_b {
+	-position: absolute;
+	-left: 0px;
+	-top: 480px;
+	-width: 440px;
+	width: 100%;
+	margin: 0px;
+	padding: 0px;
+	text-align: center;
+}
+.clock_active {
+	font-weight: bold;
+}
+#topdiv div.userid {
+	text-align: center;
+}
+#bottomdiv div.userid {
+	text-align: center;
+}
+
+#controls{
+	position:absolute;
+	left:450px;
+	top:200px;
+	width:150px;
+}
+
+#taken_pieces {
+	position: absolute;
+	left: 450px;
+	top: 450px;
+	width: 200px;
+	height: auto;
+}
+
+input.sendbox{
+	margin-left:5px;
+	margin-top:0px;
+	width:285px;
+	height:30px;
+}
+#sendmsgbtn{
+	width: auto;
+}
+
+div.cellblack{
+	float:left;
+	background:#000000;
+	width:50px;
+	height:50px;
+}
+
+div.cellwhite{
+	float:left;
+	background:#FFFFFF;
+	width:50px;
+	height:50px;
+}
+
+#promptwrapper{
+	position:absolute;
+	left:0px;
+	top:0px;
+	width:400px;
+	height:500px;
+	padding-top:200px;
+	visibility:hidden;
+	display:none;
+	margin:auto;
+	text-align:center;
+	filter:alpha(opacity=25);
+	-moz-opacity:.25;
+	opacity:.25;
+	z-index:1;
+	background:#000000;
+}
+
+#prompt{
+	position:absolute;
+	visibility:hidden;
+	background:#ffffff;
+	padding:20px;
+	display:none;
+	z-index:4;
+}
+
+#_chess_board_container {
+	position: absolute;
+	width: 440px;
+	height: 440px;
+	background-color: #ddd;
+}
+
+.board_border {
+	text-align: center;
+	background-color: #B9D7A0;
+}
+
+#game_status_container {
+	width: 440px;
+}
+
+#game_status_message {
+	text-align: center;
+	padding: 5px;
+	height: 20px;
+	display: none;
+}
+
+#game_finished_options {
+	display: none;
+	text-align: center;
+}
+
+#game_finished_options .mainoption {
+	width: auto;
+}

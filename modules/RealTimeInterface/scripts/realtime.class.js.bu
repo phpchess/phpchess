@@ -1,0 +1,935 @@
+/**************************************************************************
+*	
+**************************************************************************/
+
+//variables that hold string data retrieved from the language file
+var lostgame, wongame, gamedraw, connectionproblem, draw, resign, revoke, warndraw, warnresign, warnrevoke;
+
+//variables to set piece type
+var pawn=0, rook=1, knight=2, bishop=3, queen=4, king=5;
+
+//variables to set piece and player colors
+var white=1, black=2;
+
+//variable that holds piece width
+var w=50;
+
+//variable that holds browser type
+var ie=false;
+
+//global variables used by a few functions to set the position of pieces
+var offx=0, offy=0;
+
+//default player type is white
+var player=white;
+
+//array to hold board letters
+var letters=['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+//corresponding integer values for letters
+var a=0, b=1, c=2, d=3, e=4, f=5, g=6, h=7;
+
+//corresponding integer values for rows
+var r1=0, r2=1, r3=2, r4=3, r5=4, r6=5, r7=6, r8=7;
+
+//main objects used by all the pieces for collaboration
+var divWrapper, divBoard, cells, pieces;
+
+//variable to hold the current turn
+var turn;
+
+//arrays to store colors for each cells. 0 if no piece is on the cells
+var board = new Array();
+
+//variables that keep a reference to last element used and session id
+var lastpiece, oldpiece, sessionid;
+
+//variables that are used to define the current state
+var init=false, direct=true, processing=false, checkmove=false, castling=false, errorcount=0;
+
+//chat update frequency
+var chatfrequency;
+
+//any suffix to the move made. only used for promotion
+var movesuffix='';
+
+function increaseError(){
+	errorcount+=5;
+	if(errorcount>10){
+		document.getElementById('warning').style.visibility='visible';
+	}
+}
+
+function decreaseError(){
+	if(errorcount>0){
+		errorcount--;
+	}
+	if(errorcount<=10){
+		document.getElementById('warning').style.visibility='hidden';
+	}
+}
+
+function initChat(frequency){
+	chatfrequency=frequency*1000;
+	var url='mobile.php?action=getgamechat&sid='+sessionid+'&gameid='+gameid;
+	new Ajax.Request(url,  {  method: 'get', onSuccess: function(transport){
+			decreaseError();
+			updateChat(transport);
+		}, 
+		onFailure:function(){
+			increaseError();
+			requestChat();
+		}
+	});
+}
+
+function requestChat(){
+	var url='mobile.php?action=getgamechat&sid='+sessionid+'&gameid='+gameid;
+	new Ajax.Request(url,  {  method: 'get', onSuccess: function(transport){
+			decreaseError();
+			updateChat(transport);
+			}, 
+		onFailure:function(){
+			increaseError();
+			requestChat();
+		}
+	});
+}
+
+function updateChat(transport){
+	var i, cb, msglist, msg='';
+	
+	window.setTimeout('requestChat()', chatfrequency);
+	
+	cb=document.getElementById('chatbox');
+	msglist=transport.responseXML.getElementsByTagName('MSG').item(0).firstChild.data.split('\n');
+	for(i=msglist.length-1; i>=0; i--){
+		if(msglist[i]!=''){
+			msglist[i]=msglist[i].replace(/<(\w+)>/, "<strong>&lt;$1&gt;</strong>");
+			msg=msg+msglist[i]+'<br>';
+		}
+	}
+	cb.innerHTML=msg;
+	cb.scrollTop = cb.scrollHeight;
+
+}
+
+function sendGameMsg(inid){
+	var ib=document.getElementById(inid);
+	var url='mobile.php?action=sendgamechat&sid='+sessionid+'&gameid='+gameid+'&msg='+escape(ib.value);
+	ib.value="";
+	new Ajax.Request(url,  { method: 'get', onFailure:function(){
+			increaseError();
+		}, 
+	onSuccess:function(transport){
+		decreaseError();
+		}
+	});
+}
+
+function processPGN(transport){
+	var pgn=transport.responseXML.getElementsByTagName('PGN').item(0).firstChild.data;
+	pgn=pgn.replace(/\[\w*\W*\w*\W*\w*\W*\]/g, "");
+	pgn=pgn.replace(/(\w*\.[0-9]*)/g, "\n<br>$1");
+	document.getElementById('pgnview').innerHTML=pgn;
+}
+
+function requestPGN(){
+		var url='mobile.php?action=pgn&sid='+sessionid+'&gameid='+gameid;
+		new Ajax.Request(url,  { method: 'get', onFailure:function(){
+			increaseError();
+			requestPGN();
+			}, 
+		onSuccess:function(transport){
+			decreaseError();
+			processPGN(transport);
+			}
+		});
+}
+
+function acceptDraw(d){
+	if(confirm('Are you sure you want to accept the draw?')){
+		var url='mobile.php?action=drawgame&sid='+sessionid+'&gameid='+gameid;
+		d.onclick='';
+		new Ajax.Request(url,  { method: 'get', onFailure:function(){
+			increaseError();
+			acceptDraw();
+			}, 
+		onSuccess:function(transport){
+			decreaseError();
+			moveRequest();
+			}
+		});
+		disableDragging();
+	}
+}
+
+function requestDraw(d){
+	if(confirm(warndraw)){
+		var url='mobile.php?action=drawgame&sid='+sessionid+'&gameid='+gameid;
+		d.onclick='';
+		new Ajax.Request(url,  { method: 'get', onFailure:function(){
+			increaseError();
+			requestDraw(d);
+			}, 
+		onSuccess:function(){
+			decreaseError();
+			d.innerHTML=revoke;
+			d.onclick=new Function("revokeDraw(this)");
+		}
+		});
+	}
+}
+
+function revokeDraw(d){
+	if(confirm(warnrevoke)){
+		var url='mobile.php?action=revokedrawgame&sid='+sessionid+'&gameid='+gameid;
+		d.onclick='';
+		new Ajax.Request(url,  { method: 'get', onFailure:function(){
+			increaseError();
+			revokeDraw(d);
+			}, 
+		onSuccess:function(){
+			decreaseError();
+			d.innerHTML=draw;
+			d.onclick=new Function("requestDraw(this)");
+		}
+		});	
+	}
+}
+
+function resignGame(d){
+	if(confirm(warnresign)){
+		d.onclick='';
+		var url='mobile.php?action=resigngame&sid='+sessionid+'&gameid='+gameid;
+		new Ajax.Request(url,  { method: 'get', onFailure:function(){
+			increaseError();
+			resignGame(d);
+			}, 
+		onSuccess:function(transport){
+			decreaseError();
+			moveRequest();
+			}
+		});	
+		disableDragging();
+	}
+}
+
+function initBoard(p, t){
+	player=p;
+	turn=t;
+	if(player!=turn){
+		checkmove=true;
+	}else{
+		checkmove=false;
+	}
+	if(player==white){
+		a=0;
+		b=1;
+		c=2;
+		d=3;
+		e=4;
+		f=5;
+		g=6;
+		h=7;
+		r1=1;
+		r2=2;
+		r3=3;
+		r4=4;
+		r5=5;
+		r6=6;
+		r7=7;
+		r8=8;
+	}else{
+		a=7;
+		b=6;
+		c=5;
+		d=4;
+		e=3;
+		f=2;
+		g=1;
+		h=0;
+		r1=8;
+		r2=7;
+		r3=6;
+		r4=5;
+		r5=4;
+		r6=3;
+		r7=2;
+		r8=1;
+	}
+}
+
+if(navigator.appName.indexOf('Microsoft')>-1){
+		ie=true;
+}
+
+function getIndex(r){
+	switch(r){
+		case 'a':
+			return 0;
+			break;
+		case 'b':
+			return 1;
+			break;
+		case 'c':
+			return 2;
+			break;
+		case 'd':
+			return 3;
+			break;
+		case 'e':
+			return 4;
+			break;
+		case 'f':
+			return 5;
+			break;
+		case 'g':
+			return 6;
+			break;
+		case 'h':
+			return 7;
+			break;
+	}
+}
+
+//variables to hold the draw request and turn status
+var drawrequest=false, turn=true;
+
+function checkMove(transport){
+	if(transport.responseXML.getElementsByTagName('ERROR').length>0){
+		alert(connectionproblem);
+	}else{
+	
+		var draw;
+		draw=transport.responseXML.getElementsByTagName('DRAWCODE').item(0).firstChild.data;
+
+		if(draw=='IDS_DRAW_REQUESTED'){
+			document.getElementById('draw').innerHTML='Accept Draw';
+			document.getElementById('draw').onclick=new Function("acceptDraw(this)");
+			drawrequest=true;
+			//alert(draw);
+		}else if(drawrequest){
+			document.getElementById('draw').innerHTML='Request Draw';
+			document.getElementById('draw').onclick=new Function("requestDraw(this)");
+			drawrequest=false;
+		}else if(draw=='IDS_USER_REQUESTED_DRAW'){
+			document.getElementById('draw').innerHTML='Revoke Draw';
+			document.getElementById('draw').onclick=new Function("revokeDraw(this)");
+		}else if(draw=='IDS_DRAW'){
+			alert(gamedraw);
+			parent.location='chess_view_games_rt.php';
+			return;
+		}
+		var move;
+		move=transport.responseXML.getElementsByTagName('MOVECOMMA').item(0).firstChild.data;
+		if(move.length>4){
+      // Get start/end positions from move received. p is for the promotion tile.
+			var xb, yb, xe, ye, xp, yp;
+			xb=getIndex(move.charAt(0));
+			xe=getIndex(move.charAt(3));
+			yb=parseInt(move.charAt(1))-1;
+			ye=parseInt(move.charAt(4))-1;
+      // Adjust board coords for black player's perspective.
+			if(player==black){
+				xb=7-xb;
+				xe=7-xe;
+				yb=7-yb;
+				ye=7-ye;
+			}
+      // For promotions.
+			if(move.length>6){
+				xp=parseInt(move.charAt(7));
+				yp=parseInt(move.charAt(6));	
+				if(player==black){
+					xp=7-xp;
+					yp=7-yp;
+				}
+        // If promotion tile not empty then remove piece on that tile.
+				if(cells[xp*8+yp]!=0){
+					cells[xp*8+yp].destroy();	
+				}
+			}
+      // Start tile for move needs to have a piece on it
+			if(cells[xb*8+yb]!=0){
+        // that belongs to the opposite player.
+				if(cells[xb*8+yb].color!=player){
+          if(cells[xb*8+yb].type==king)
+          {
+            var msg = "Move string is: " + move + "\nMove to: " + xe + " : " + ye;
+            alert(msg);
+          }
+        
+					window.focus();
+					if(!ie){
+						self.focus();
+					}
+          // For promotions make sure the moved piece is a pawn. Then do the same thing as
+          // already done?
+					if(move.length>6 && cells[xb*8+yb].type==pawn){
+						xp=parseInt(move.charAt(7));
+						yp=parseInt(move.charAt(6));	
+						if(player==black){
+							xp=7-xp;
+							yp=7-yp;
+						}
+						if(cells[xp*8+yp]!=0){
+							cells[xp*8+yp].destroy();	
+						}
+					}
+          // Clear end tile of piece.
+					if(cells[xe*8+ye]!=0){
+						cells[xe*8+ye].destroy();
+					}
+					direct=false;
+          // Move piece to end tile.
+					cells[xb*8+yb].setLocation(xe, ye);
+          // For promotion moves.
+					if(move.length==6){
+						var t, p;
+						switch(move.charAt(5)){
+							case 'Q':
+								t=queen;
+								break;
+							case 'R':
+								t=rook;
+								break;
+							case 'B':
+								t=bishop;
+								break;
+							case 'N':
+								t=knight;
+								break;
+						}
+            // Destroy moved piece?
+						cells[xe*8+ye].destroy();
+            // Create a new piece
+						if(player==white){
+							p=new Piece(divBoard, t, xe, ye+1, black);
+						}else{
+							p=new Piece(divBoard, t, xe, ye+1, white);
+						}		
+					}
+					if(cells[xe*8+ye].type==king && Math.abs(xb-xe)==2){
+						// xe=Math.floor((xb+xe)/2);
+						// if(xe>=4){
+							// xb=7;
+						// }else{
+							// xb=0;
+						// }
+            // for white playing black:
+            // r--qk--r
+            // |      |
+            // R--QK--R
+            
+            // long: (4+2)/2 = 3 | 3 <= 4 | move left rook.
+            // short: (4+6)/2 = 5 | 5 > 4 | move right rook.
+            
+            // for black playing white:
+            // R--KQ--R
+            // |      |
+            // r--kq--r
+            
+            // short: (3+1)/2 = 2 | 2 <= 4 | move left rook.
+            // long: (3+5)/2 = 4 | 4 <= 4 | move left rook! 
+            if(player == black)  // White has castled.
+            {
+              if(xb > xe){  // Castling left (ie short)
+                xb = 0; xe++;
+              }
+              else{  // Castling right (ie long)
+                xb = 7; xe--;
+              }
+            }
+            else  // Black has castled.
+            {
+              if(xb > xe){  // Castling left (ie long)
+                xb = 0; xe++;
+              }
+              else{  // Castling right (ie short)
+                xb = 7; xe--;
+              }
+            }
+						cells[xb*8+yb].setLocation(xe, ye);						
+					}
+					direct=true;
+					enableDragging();
+					turn=true;
+				}
+			}
+		}
+		
+		var status, winner;
+		status=transport.responseXML.getElementsByTagName('STATUS').item(0).firstChild.data;
+		
+		if(status=='B' || status=='W'){
+			if(status=='B'){
+				winner=black;
+			}else{
+				winner=white;
+			}
+			
+			if(winner==player){
+				alert(wongame);
+			}else{
+				alert(lostgame);
+			}
+			parent.location='chess_view_games_rt.php';
+			return;
+		}
+		if(!turn){
+			window.setTimeout('moveRequest()', 3000);
+		}else{
+			requestPGN();
+		}
+	}
+}
+
+function moveRequest(){
+	var url='getlastmove.php?sid='+sessionid+'&gameid='+gameid;
+	new Ajax.Request(url,  {  method: 'get', onSuccess: function(transport){
+			decreaseError();
+			checkMove(transport);
+			}, 
+		onFailure:function(){
+			increaseError();
+			moveRequest();
+		}
+	});
+	turn=false;
+}
+
+function findLocation(o){
+	offx=o.offsetLeft, offy=o.offsetTop;
+		
+	while(o=o.offsetParent){
+		offx+=o.offsetLeft;
+		offy+=o.offsetTop;
+	}
+}
+
+function enableDragging(){
+	document.getElementById('boardblock').style.visibility='hidden';
+}
+
+function disableDragging(){
+	document.getElementById('boardblock').style.visibility='visible';
+}
+
+function processMove(transport){
+	if(transport.responseXML.getElementsByTagName('MOVE').item(0).firstChild.data=='false'){
+		var c, temp
+		processing=false;
+		
+		temp=oldpiece;
+		c=oldpiece.color;
+		
+		direct=false;
+		lastpiece.setLocation(lastpiece.oldx, lastpiece.oldy);
+		board[temp.x*8+temp.y]=c;
+		cells[temp.x*8+temp.y]=temp;
+		direct=true;
+		castling=false;
+		enableDragging();
+	}else{
+		if(oldpiece!=0){
+			oldpiece.destroy();
+		}	
+		processing=false;
+		direct=false;
+		if(castling && lastpiece.type==king){
+			if(lastpiece.x>3){
+				cells[8*7+lastpiece.y].setLocation((lastpiece.oldx+lastpiece.x)/2, lastpiece.y);
+			}else{
+				cells[lastpiece.y].setLocation((lastpiece.oldx+lastpiece.x)/2, lastpiece.y);				
+			}
+		}
+		if(movesuffix!=''){
+			var t, src='';
+			switch(player){
+				case white:
+					src=src+'w';
+					break;
+				case black:
+					src=src+'b';
+					break;
+			}
+			
+			switch(movesuffix){
+				case 'Q':
+					lastpiece.type=queen;
+					lastpiece.check = lastpiece.checkQueenMove;
+					src=src+'qw.gif';
+					break;
+				case 'R':
+					lastpiece.type=rook;
+					lastpiece.check = lastpiece.checkRookMove;
+					src=src+'rw.gif';
+					break;
+				case 'B':
+					lastpiece.type=bishop;
+					lastpiece.check = lastpiece.checkBishopMove;
+					src=src+'bw.gif';
+					break;
+				case 'N':
+					lastpiece.type=knight;
+					lastpiece.check = lastpiece.checkKnightMove;
+					src=src+'nw.gif';
+					break;
+			}
+			
+			lastpiece.div.innerHTML='<img src="modules/RealTimeInterface/img_chess/'+src+'" width="'+w+'px" />';
+		}
+		lastpiece.setLocation(lastpiece.x, lastpiece.y);
+		direct=true;
+		castling=false;
+		moveRequest();	
+		requestPGN();
+	}
+	movesuffix='';
+}
+
+function sendMove(p){
+	var url='mobile.php?action=move&sid='+sessionid+'&gameid='+gameid+'&from=';
+	if(player==white){
+		url=url+(letters[p.oldx]+''+(p.oldy+1))+'&to='+(letters[p.x]+''+(p.y+1));
+	}else{
+		url=url+(letters[7-p.oldx]+''+(8-p.oldy))+'&to='+(letters[7-p.x]+''+(8-p.y));
+	}
+	new Ajax.Request(url+movesuffix,  {  method: 'get', onSuccess: function(transport){
+			decreaseError();
+			processMove(transport);
+			}, 
+		onFailure:function(){
+			increaseError();
+		}
+	});
+	disableDragging();
+	
+}
+
+function sendUpgrade(t){
+	movesuffix=t;
+	sendMove(lastpiece);
+	processing=true;
+	document.getElementById('prompt').style.visibility='hidden';
+	document.getElementById('promptwrapper').style.visibility='hidden';
+	document.body.style.overflow="auto";
+}
+
+function cancelUpgrade(){
+	var x=lastpiece.x, y=lastpiece.y, c, temp;
+	document.getElementById('prompt').style.visibility='hidden';
+	document.getElementById('promptwrapper').style.visibility='hidden';
+	document.body.style.overflow="auto";
+	temp=oldpiece;
+	c=oldpiece.color;
+	direct=false;
+	enableDragging();
+	lastpiece.setLocation(lastpiece.oldx, lastpiece.oldy);
+	board[x*8+y]=c;
+	cells[x*8+y]=temp;
+	direct=true;
+	processing=false;
+	
+}
+
+function showUpgrade(p){
+	document.getElementById('prompt').style.visibility='visible';
+	document.getElementById('prompt').style.display='block';
+	document.getElementById('promptwrapper').style.visibility='visible';
+	document.getElementById('promptwrapper').style.display='block';
+	document.body.style.overflow="hidden";
+	if(ie){
+		document.getElementById('prompt').style.top=Math.floor((document.body.scrollTop+document.body.clientHeight)/2-100);
+		document.getElementById('prompt').style.left=Math.floor((document.body.scrollLeft+document.body.clientWidth)/2-100);
+		document.getElementById('promptwrapper').style.top=document.body.scrollTop;
+		document.getElementById('promptwrapper').style.left=document.body.scrollLeft;
+		document.getElementById('promptwrapper').style.width=document.body.clientWidth;
+		document.getElementById('promptwrapper').style.height=document.body.clientHeight;
+	}else{
+		document.getElementById('prompt').style.top=Math.floor((window.pageYOffset+window.innerHeight)/2-100)+'px';
+		document.getElementById('prompt').style.left=Math.floor((window.pageXOffset+window.innerWidth)/2-100)+'px';
+		document.getElementById('promptwrapper').style.top=window.pageYOffset+'px';
+		document.getElementById('promptwrapper').style.left=window.pageXOffset+'px';
+		document.getElementById('promptwrapper').style.width=window.innerWidth+'px';
+		document.getElementById('promptwrapper').style.height=window.innerHeight+'px';
+	}
+}
+
+function Piece(d, t, x, y, c){
+	var src='img_chess/';
+	this.container=d;
+	this.div=document.createElement('div');
+	this.type=t;
+	this.x=x;
+	this.y=y-1;
+	this.color=c;
+	this.w=w;
+	this.board=board;
+	this.player=player;
+	
+	cells[x*8+y-1]=this;
+	
+	switch(this.color){
+		case white:
+			src=src+'w';
+			break;
+		case black:
+			src=src+'b';
+			break;
+	}
+	
+	this.check=function(x, y){
+		return true;
+	}
+				
+	switch(this.type){
+		case pawn:
+			src=src+'pw.gif';
+			this.check = this.checkPawnMove;
+			break;
+		case rook:
+			this.check = this.checkRookMove;
+			src=src+'rw.gif';
+			break;
+		case knight:
+			this.check = this.checkKnightMove;
+			src=src+'nw.gif';
+			break;
+		case bishop:
+			this.check = this.checkBishopMove;
+			src=src+'bw.gif';
+			break;
+		case queen:
+			this.check = this.checkQueenMove;
+			src=src+'qw.gif';
+			break;
+		case king:
+			this.moved=false;
+			this.check = this.checkKingMove;
+			src=src+'kw.gif';
+			break;
+	}
+	
+	this.div.innerHTML='<img src="modules/RealTimeInterface/'+src+'" width="'+w+'px" />';
+	this.div.id='c'+x+''+y;
+	this.div.style.position='absolute';
+	this.setLocation(this.x, this.y);
+	this.setSize(this.w, this.w);
+	
+	this.container.appendChild(this.div);
+		
+	if(this.color==player){
+		findLocation(this.container);
+		
+		this.offx=offx;
+		this.offy=offy;
+		new Draggable(this.div, {notifyobj:this, onEnd:this.checkDrop});
+		
+	}
+
+}
+
+Piece.prototype.destroy = function(){
+	this.div.style.visibility='hidden';
+	this.board[this.x*8+this.y]=0;
+	cells[this.x*8+this.y]=0;
+}
+
+Piece.prototype.setLocation = function(x, y){
+	if(processing){
+		return;
+	}
+	lastpiece=this;
+	oldpiece=cells[8*x+y];
+	
+	this.board[this.x*8+this.y]=0;
+	this.board[x*8+y]=this.color;
+	this.oldx=this.x;
+	this.oldy=this.y;
+	this.x=x;
+	this.y=y;
+	if(init && direct && !processing){
+		disableDragging();
+		processing=true;
+		sendMove(this);
+	}
+	if(ie){
+		this.div.style.left=x*w;
+		this.div.style.top=(7-y)*w;
+	}else{
+		this.div.style.left=x*w+'px';
+		this.div.style.top=(7-y)*w+'px';
+	}
+	
+	cells[this.oldx*8+this.oldy]=0;
+	cells[this.x*8+this.y]=this;	
+}
+
+Piece.prototype.setSize = function(w, h){
+	if(ie){
+		this.div.style.width=w;
+		this.div.style.height=h;
+	}else{
+		this.div.style.width=w+'px';
+		this.div.style.height=h+'px';
+	}
+}
+
+Piece.prototype.checkDrop = function(c, e){
+	var w, h;
+		
+	x=e.pageX-c.offx;
+	y=e.pageY-c.offy;
+	
+	x=Math.floor(x/c.w);
+	y=7-Math.floor(y/c.w);
+	
+	if(x==c.x && y==c.y){
+		direct=false;
+		c.setLocation(x, y);
+		direct=true;
+		return;
+	}
+	if(c.checkMove(x,y)){
+		c.setLocation(x, y);
+	}else{
+		direct=false;
+		c.setLocation(c.x, c.y);
+		direct=true;
+	}
+}
+
+Piece.prototype.checkMove = function(x, y){
+
+	if(x<0 || x>7 || y<0 || y>7){
+		return false;
+	}else{
+		if(this.board[x*8+y]==this.color){
+			return false;
+		}else{
+			if(this.check(x, y)){
+				this.board[this.x*8+this.y]=0;
+				return true;						
+			}else{
+				return false
+			}
+		}
+	}
+	
+}
+
+Piece.prototype.checkPawnMove = function(x, y){
+	var relx=Math.abs(x-this.x), rely=y-this.y;
+	if(relx>1 || rely>2 || rely<0){
+		return false;
+	}
+	if(relx!=0 && rely ==0){
+		return false;
+	}
+	if(rely>2 && (this.board[x*8+y+1]>0)){
+		return false;
+	}
+	if(relx==1 && rely==1 && !(this.board[x*8+y]>0 || this.board[x*8+y-1]>0)){
+		return false;
+	}
+	if(relx==0 && this.board[x*8+y]>0){
+		return false;
+	}
+	if(rely>1 && (relx>0 || this.y!=1) ){
+		return false;
+	}
+	if(y==7){
+		direct=false;
+		showUpgrade(this);
+	}
+	return true;
+}
+
+Piece.prototype.checkRookMove = function(x, y){
+	var relx=x-this.x, rely=y-this.y, i, j;
+	if(relx!=0 && rely!=0){
+		return false;
+	}
+	if(relx!=0){
+		j=relx/Math.abs(relx);
+		for(i=this.x+j; i!=x; i+=j){
+			if(this.board[i*8+y]>0){
+				return false;
+			}
+		}
+	}
+	if(rely!=0){
+		j=rely/Math.abs(rely);
+		for(i=this.y+j; i!=y; i+=j){
+			if(this.board[this.x*8+i]>0){
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+Piece.prototype.checkKnightMove = function(x, y){
+	var relx=Math.abs(x-this.x), rely=Math.abs(y-this.y);
+	if((relx==1 && rely == 2) || rely==1 && relx==2){
+		return true;
+	}
+	return false;
+}
+
+Piece.prototype.checkBishopMove = function(x, y){
+	var relx=x-this.x, rely=y-this.y, i, j, k, m;
+	if(Math.abs(relx)!= Math.abs(rely)){
+		return false;
+	}
+	k=relx/Math.abs(relx);
+	m=rely/Math.abs(rely);
+	j=this.y+m;
+	for(i=this.x+k; i!=x; i+=k){
+		if(this.board[i*8+j]>0){
+			return false;
+		}
+		j+=m;
+	}
+	return true;
+}
+
+Piece.prototype.checkQueenMove = function(x, y){
+	var relx=x-this.x, rely=y-this.y, i, j, k, m;
+	if((Math.abs(relx)!= Math.abs(rely)) && rely!=0 && relx!=0){
+		return false;
+	}
+	
+	if(Math.abs(relx)>0){
+		k=relx/Math.abs(relx);
+	}else{
+		k=0;
+	}
+	if(Math.abs(rely)>0){
+		m=rely/Math.abs(rely);
+	}else{
+		m=0;
+	}
+	
+	j=this.y+m;
+	for(i=this.x+k; i!=x; i+=k){
+		if(this.board[i*8+j]>0){
+			return false;
+		}
+		j+=m;
+	}
+	return true;
+}
+
+Piece.prototype.checkKingMove = function(x, y){
+	var relx=Math.abs(x-this.x), rely=Math.abs(y-this.y);
+	if(rely>1 || relx>2){
+		return false;
+	}
+	castling=false;
+	if(relx>1){
+		castling=true;
+	}
+	return true;
+}

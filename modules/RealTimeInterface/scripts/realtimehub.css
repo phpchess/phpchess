@@ -1,0 +1,211 @@
+#wrapper{
+	width:100%;
+	color: black;
+}
+
+#playerswrapper{
+	clear:both;
+	overflow:auto;
+	padding:10px;
+}
+
+.player_list_item {
+	float:left;
+	margin:20px;
+	width:auto;
+	text-align: center;
+}
+
+.player_list_item img{
+	width: 50px;
+	height: 50px;
+	border: 3px solid white;
+}
+
+.player_list_item_buddy img{
+	border: 3px solid #5ea4b3;
+	border-radius: 3px 3px 3px 3px;
+}
+
+#player_actions_info {
+	width: auto;
+	height: auto;
+	padding: 10px;
+	background-color: white;
+	border: 1px solid black;
+	color: black;
+	position: absolute;
+	z-index: 3;
+	background-color: #E4F0DB;
+	font-size: 0.8em;
+}
+
+#player_actions_info .button{
+	color: #8FAE75;
+	font-weight: bold;
+	margin: 5px 0px 5px 0px;
+}
+
+#player_actions_info .button:hover{
+	color: white;
+	font-weight: bold;
+	cursor: pointer;
+}
+
+
+div.player{
+	float:left;
+	background:#ffffff;
+	margin:10px;
+	padding:5px;
+	cursor:pointer;
+	height:20px;
+	width:150px;
+}
+
+div.details{
+	border:1px solid #000000;
+	background:#ffffff;
+	padding:20px;
+	width:200px;
+	z-index:3;
+}
+
+div.game{
+	float:left;
+	//background:#d7e8ca;
+	margin:10px;
+	padding:5px;
+	//width:180px;
+	//height:90px;
+	width: 100px;
+	height: 70px;
+	overflow: hidden;
+	font-size: 11px;
+	border: 1px solid #666;
+	text-align: center;
+}
+
+div.game:hover
+{
+	border: 1px solid orange;
+}
+
+div.game_details
+{
+	background-color: white;
+	border: 1px solid #DDD;
+	-height: 250px;
+	width: 220px;
+}
+
+div.game_details tr
+{
+	font-size: 10px;
+}
+
+.game_details_close
+{
+	float: right;
+	font-size: 16px;
+	color: red;
+	font-weight: bold;
+}
+
+#challengeswrapper{
+	clear:both;
+	overflow:auto;
+	padding:10px;
+	color: #444;
+}
+
+#challenges a {
+	color: #444;
+}
+
+#opengameswrapper{
+	clear:both;
+	overflow:auto;
+	padding:10px;
+	color: #444;
+}
+#opengames a {
+	color: #444;
+}
+
+#challengewrapper{
+	position:absolute;
+	left:0px;
+	top:0px;
+	-width:400px;
+	-height:500px;
+	padding-top:200px;
+	-visibility:hidden;
+	-display:none;
+	margin:auto;
+	text-align:center;
+	filter:alpha(opacity=25);
+	-moz-opacity:.25;
+	opacity:.25;
+	z-index:1;
+	background:#000000;
+}
+
+#challenge{
+	position:absolute;
+	visibility:hidden;
+	padding:20px;
+	display:none;
+	border:1px solid #000000;
+	background:#FFFFFF;
+	width:300px;
+	z-index:4;
+	color: #222;
+}
+
+#recentgameswrapper{
+	clear:both;
+	overflow:auto;
+	padding:10px;
+	color: #444;
+}
+#recentgames a {
+	color: #444;
+}
+
+.opponent_online
+{
+	font-style: italic;
+	color: brown;
+}
+
+.not_accepted
+{
+	background-color: #DDDDDD;
+}
+
+.not_player_turn
+{
+	background-color: #DD8888;
+}
+
+.player_turn
+{
+	background-color: #d7e8ca;
+}
+
+.board
+{
+	cell-padding: 0px;
+	cell-spacing: 0px;
+	border-collapse: collapse;
+	border: 1px solid gray;
+}
+
+.tile
+{
+	width: 15px;
+	height: 15px;
+	cell-padding: 0px;
+	margin: 0px;
+}

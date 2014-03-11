@@ -1,0 +1,8 @@
+MIDlet-1: MobileChess,,mchess.Main
+MIDlet-Jar-Size: 96232
+MIDlet-Jar-URL: MobileChess.jar
+MIDlet-Name: MobileChess
+MIDlet-Vendor: Vendor
+MIDlet-Version: 1.0
+MicroEdition-Configuration: CLDC-1.1
+MicroEdition-Profile: MIDP-2.0
