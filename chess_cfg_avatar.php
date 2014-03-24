@@ -441,17 +441,17 @@
 		return $result;
 	}
 	
-	// Create temp file to check mime type is image/png
+	// // Create temp file to check mime type is image/png
 	// $temp = tmpfile();
 	// fwrite($temp, $file);
-	//$mime = mime_content_type($temp);
+	// //$mime = mime_content_type($temp);
 	// $finfo = new finfo(FILEINFO_MIME_TYPE);
 	// $mime = $finfo->buffer($file);
 	// if($mime != 'image/png')
 	// {
-	// 	$result['success'] = FALSE;
-	// 	$result['error'] = 'INVALID_FILE_TYPE';
-	// 	return $result;
+		// $result['success'] = FALSE;
+		// $result['error'] = 'INVALID_FILE_TYPE';
+		// return $result;
 	// }
 	// fclose($temp);
 	

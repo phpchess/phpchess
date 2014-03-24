@@ -24,11 +24,9 @@
 
 <html>
 <head>
-<title>Command Center - Not Installed</title>
+<title>PHPChess Not Installed</title>
 </head>
 <body>
-
-<h2>Command Center Status</h2>
 
 <table width="96%" cellpadding="0" cellspacing="0" border="0">
 <tr>

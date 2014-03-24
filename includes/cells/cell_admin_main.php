@@ -15,6 +15,12 @@
   <tr>
     <td>
 
+<?php
+	if(file_exists("../install"))
+	{
+		echo "<div style='border: 2px solid red; color: red; margin: 5px; padding: 10px; font-size: 1.4em; text-align: center'>The install folder exists. Please remove it.</div>";
+	}
+?>	
 
 <h2 class="title_h2"><?php echo GetStringFromStringTable("IDS_ADMIN_MAIN_TXT_1", $config);?></h2><br>
 

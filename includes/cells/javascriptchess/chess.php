@@ -9,7 +9,7 @@ if(!defined('CHECK_PHPCHESS')){
 <?php
 //require_once("rsslib.php");
 $white_colour = ""; $black_colour = "";
-$oR3DCQuery->GetChessBoardColors('', $_SESSION['id'], &$white_colour, &$black_colour);
+$oR3DCQuery->GetChessBoardColors('', $_SESSION['id'], $white_colour, $black_colour);
 ?>
 
 

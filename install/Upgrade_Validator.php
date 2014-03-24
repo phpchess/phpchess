@@ -231,7 +231,7 @@ qq;
 			$results = $this->dbh->query($q);
 			if(!$results)
 			{
-				$errors[] = "Error running query ($q): " . $this->error;
+				$errors[] = "Error running query ($q): " . $this->dbh->error;
 			}
 			else
 			{
@@ -281,7 +281,7 @@ qq;
 				{
 					if (!$this->dbh->query($q))
 					{
-						$errors[] = "Error running query ($q): " . $this->error;
+						$errors[] = "Error running query ($q): " . $this->dbh->error;
 					}
 				}
 				catch(mysqli_sql_exception $e)
@@ -323,7 +323,7 @@ qq;
 				}
 				if (!$this->dbh->query($q))
 				{
-					$errors[] = "Error running query ($q): " . $this->error;
+					$errors[] = "Error running query ($q): " . $this->dbh->error;
 					$result['success'] = FALSE;
 				}
 			}

@@ -258,7 +258,7 @@ foreach($times as $key => $time)
 	
 	<?php 
 		$white_colour = ""; $black_colour = "";
-		$oR3DCQuery->GetChessBoardColors('', $_SESSION['id'], &$white_colour, &$black_colour);
+		$oR3DCQuery->GetChessBoardColors('', $_SESSION['id'], $white_colour, $black_colour);
 		echo "var tile_colour_white = \"$white_colour;\"\n";
 		echo "var tile_colour_black = \"$black_colour;\"\n";
 	?>

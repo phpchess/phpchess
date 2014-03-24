@@ -36,18 +36,6 @@
 <br>
 <?php echo __l('Disable/Enable Players');?>
 </center>
-</td><td>
-<center>
-<a href='./player_export.php'><img src='<?php echo $Root_Path."skins/".$SkinName."/";?>images/cfg_2_3.gif' border='0' alt='<?php echo GetStringFromStringTable("IDS_ADMIN_MANAGE_PLAYERS_TABLE_TXT_3", $config);?>'></a>
-<br>
-<?php echo GetStringFromStringTable("IDS_ADMIN_MANAGE_PLAYERS_TABLE_LINK_3", $config);?>
-</center>
-</td><td>
-<center>
-<a href='./player_import.php'><img src='<?php echo $Root_Path."skins/".$SkinName."/";?>images/cfg_2_4.gif' border='0' alt='<?php echo GetStringFromStringTable("IDS_ADMIN_MANAGE_PLAYERS_TABLE_TXT_4", $config);?>'></a>
-<br>
-<?php echo GetStringFromStringTable("IDS_ADMIN_MANAGE_PLAYERS_TABLE_LINK_4", $config);?>
-</center>
 </td>
 </tr>
 </table>

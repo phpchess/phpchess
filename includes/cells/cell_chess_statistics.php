@@ -51,31 +51,31 @@
 		</tr>
 		<tr>
 			<td class='row1'>
-				<?php echo GetStringFromStringTable("IDS_MANAGE_INFORMATION_TABLE_TXT_1", $config);?></td><td class='row2'><?php echo $txtRealName;?>
+				<?php echo GetStringFromStringTable("IDS_MANAGE_INFORMATION_TABLE_TXT_1", $config);?></td><td class='row2'><?php echo htmlentities($txtRealName);?>
 			</td>
 		</tr>
 		<tr>
 			<td class='row1'>
-				<?php echo GetStringFromStringTable("IDS_MANAGE_INFORMATION_TABLE_TXT_2", $config);?></td><td class='row2'><?php echo $txtLocation;?>
+				<?php echo GetStringFromStringTable("IDS_MANAGE_INFORMATION_TABLE_TXT_2", $config);?></td><td class='row2'><?php echo htmlentities($txtLocation);?>
 			</td>
 		</tr>
 		<tr>
 			<td class='row1'>
-				<?php echo GetStringFromStringTable("IDS_MANAGE_INFORMATION_TABLE_TXT_3", $config);?></td><td class='row2'><?php echo $txtAge;?>
+				<?php echo GetStringFromStringTable("IDS_MANAGE_INFORMATION_TABLE_TXT_3", $config);?></td><td class='row2'><?php echo htmlentities($txtAge);?>
 			</td>
 		</tr>
 		<tr>
 			<td class='row1'>
-				<?php echo GetStringFromStringTable("IDS_MANAGE_INFORMATION_TABLE_TXT_4", $config);?></td><td class='row2'><?php echo $txtSelfRating;?>
+				<?php echo GetStringFromStringTable("IDS_MANAGE_INFORMATION_TABLE_TXT_4", $config);?></td><td class='row2'><?php echo htmlentities($txtSelfRating);?>
 			</td>
 		</tr>
 		<tr>
 			<td class='row1'>
-				<?php echo GetStringFromStringTable("IDS_MANAGE_INFORMATION_TABLE_TXT_5", $config);?></td><td class='row2'><?php echo $txtComment;?></td>
+				<?php echo GetStringFromStringTable("IDS_MANAGE_INFORMATION_TABLE_TXT_5", $config);?></td><td class='row2'><?php echo htmlentities($txtComment);?></td>
 		</tr>
 		<tr>
 			<td class='row1'>
-				<?php echo GetStringFromStringTable("IDS_MANAGE_INFORMATION_TABLE_TXT_6", $config);?></td><td class='row2'><?php echo $txtChessPlayer;?>
+				<?php echo GetStringFromStringTable("IDS_MANAGE_INFORMATION_TABLE_TXT_6", $config);?></td><td class='row2'><?php echo htmlentities($txtChessPlayer);?>
 			</td>
 		</tr>
 		</table>

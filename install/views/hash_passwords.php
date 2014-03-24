@@ -15,7 +15,7 @@ hr {
 	
 	<?php if(!isset($g_params['ran_hashing'])): ?>
 	
-		<p>The player passwords and the admin password will now be hashed.</p>
+		<p>The upgrade must check if the player and admin passwords are hashed. If they are not, the player passwords and the admin password will now be hashed.</p>
 		<br/>
 		<input type="submit" name="hash" value="Hash Passwords" />
 		
