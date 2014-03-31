@@ -1,0 +1,494 @@
+<CRV>
+<VERSION vers="FVP v4.2.0 Final - Tuesday, March 23, 2014">
+<CHANGELIST>
++ Amended dead links.\r\n
++ Deleted most avatars.\r\n
++ Fixed the upload of Avatar images.\r\n
++ Reworked reworked configfile.\r\n
++ Cleaned up dead links.\r\n
++ Hid the debug code display.\r\n
++ Fixed some Minor issues.\r\n
+</CHANGELIST>
+</VERSION>
+<CRV>
+
+<VERSION vers="FVP v4.2.0 RC4 - Tuesday, March 04, 2014">
+<CHANGELIST>
++ Real-time stability fix.\r\n
++ FIX some minor bugs.\r\n
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v4.2.0 RC3 - Tuesday, February 20, 2014">
+<CHANGELIST>
+Added Functionality:\r\n
++ Real-time timings now work.\r\n
++ New game creation improved.\r\n
++ Fixed Game Chat.\r\n
++ FIX a lot of minor bugs.\r\n
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v4.2.0 RC2 - Tuesday, January 30, 2014">
+<CHANGELIST>
++ FIX a couple of major bugs.\r\n
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v4.2.0 RC1 - Tuesday, December 31, 2013">
+<CHANGELIST>
+Added Functionality:\r\n
++ Added Java based player home.\r\n
++ Added Added Admin List for managing Players.\r\n
++ Added Added Admin List for Games.\r\n
++ Added Improved performance slightly\r\n
++ Added Improved game view including taken pieces\r\n
++ Added Admin FAQ Editing\r\n
++ Added User password encryption\r\n
++ FIX some minor bug fixes\r\n
++ FIX deprecated functions errors\r\n
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v4.1.1 - Monday, Februrary 03, 2013">
+<CHANGELIST>
++ Bug fixes\r\n
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v4.1.0 - Wednesday, May 30, 2012">
+<CHANGELIST>
++ updated front page to Javascript UI.\r\n
++ Re-Fixed url for deafult logo.\r\n
++ Created very basic Tournament management.\r\n
++ Improved compatibility with tablets and phones.\r\n
++ Major impact now on query volume on database.\r\n
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v4.0.2 - Monday, November 09, 2009">
+<CHANGELIST>
++ Fixed Escaping of text.\r\n
++ Fixed url for deafult logo.\r\n
++ Removed all links to phpChess.net.\r\n
++ Fixed Installation routine issues.\r\n
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v4.0.1 - Sunday, September 07, 2009">
+<CHANGELIST>
++ Fixed Security Gap on ajax.\r\n
++ Fixed url handling.\r\n
++ Fixed php5.3 support.\r\n
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v4.0.0 - Monday, April 07, 2009">
+<CHANGELIST>
+Added Functionality:\r\n
++ Developed new Java Ajax java UI for games.\r\n
++ Added Archiving.\r\n
++ Added Configurable game timings for all game types.\r\n
++ Added points for activity management.\r\n
++ Added Clubs.\r\n
++ Added PC Client IO.\r\n
++ Added and extended mobile commands.\r\n
++ Added realtime challange interval management\r\n
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v3.9.9 - Sunday, January 17, 2009">
+<CHANGELIST>
+Fixed:\r\n
++ Fixed Security Gap on fishing url.\r\n
++ Improved performance.\r\n
++ Fixed a few minor security flaws.
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v3.9.8 - Friday, July 04, 2007">
+<CHANGELIST>
+Fixed:\r\n
++ Fixed a few minor security flaws.
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v3.9.7 - Sunday, June 28, 2008">
+<CHANGELIST>
+Added Functionality:\r\n
++ updated php mailer.\r\n
++ Introduced new captcha.\r\n
+Fixed:\r\n
++ Fixed a few minor security flaws.
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v3.9.6 - Monday, April 07, 2008">
+<CHANGELIST>
+Added Functionality:\r\n
++ Updated the PGN viewer to the latest version(latest).\r\n
++ Integration with phpChess Mobile.\r\n
++ Improved Activities.\r\n
+Fixed:\r\n
++ Fixed Security Gap on fishing url.\r\n
++ Improved performance.\r\n
++ Fixed a few minor security flaws.
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v3.9.5 - Tuesday, November 04, 2007">
+<CHANGELIST>
+Added Functionality:\r\n
++ Updated the PGN viewer to the latest version(3.47).\r\n
++ Updated the FEN creation page to be more user friendly.\r\n
+Fixed:\r\n
++ Fixed the problem that may cause the PGN viewer from crashing.\r\n
++ Changed a few functions to be less processor intensive.\r\n
++ Fixed a few minor security flaws.
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v3.9.4 - Tuesday, October 09, 2007">
+<CHANGELIST>
+Fixed:\r\n
++ Fixed the problem that caused the FEN to be displayed incorrectly on the view pgn/fen popup.\r\n
++ The create FEN popup will now generate a correct FEN.\r\n
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v3.9.3 - Sunday, September 23, 2007">
+<CHANGELIST>
+Fixed:\r\n
++ Fixed a security problem with the server include files that may allow an attacker to run arbitrary code.\r\n
+ - This security problem only affects users with register_globals set to on (variable located in the php.ini file).
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v3.9.2 - Thursday, September 13, 2007">
+<CHANGELIST>
+Fixed:\r\n
++ Optimized some more MySQL code.\r\n
+\r\n
+Added Functionality:\r\n
++ Added constraints to all user names.\r\n
+ - User names are now limited to 11 alphanumeric characters without spaces.
+ - Non alphanumeric characters allowed are: -_.
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v3.9.1 - Wednesday, August 29, 2007">
+<CHANGELIST>
+Fixed:\r\n
++ Optimized the MySQL code related to the player point calculations.\r\n
++ Fix a few minor bugs related to the cron job.\r\n
+\r\n
+Added Functionality:\r\n
++ Player point caching.\r\n
++ Admin player list will now list 20 players per page.\r\n
++ Extend player details to display club memberships.\r\n
++ Added the following mobile commands.\r\n
+ - deletemsg (Params: action, sid, messageid, all).\r\n
+ - closeaccount (Params: action, sid, user, pass).\r\n
+ - createclub (Params: action, sid, clubname).\r\n
+ - joinclub (Params: action, sid, clubid).\r\n
+ - leaveclub (Params: action, sid).\r\n
+ - clubmembers (Params: action, sid).\r\n
+ - uploadclubpage (Params: action, sid, html).\r\n
++ Unused/inactive player purging.\r\n
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v3.9.0 - Friday, July 27, 2007">
+<CHANGELIST>
+Fixed:\r\n
++ Player emails are now hidden and require the player to use the message center when communicating  with other players.\r\n
++ The active games list will now display games that are accepted and active.\r\n
++ Fixed the timeout problem with all the player lists.\r\n
++ Updated a few functions to be more efficient.\r\n
+\r\n
+Added Functionality:\r\n
++ Add a new skin that will take over the default skin.\r\n
++ Added additional skin functionality to change the size of all html tables and popup windows.\r\n
++ Added additional mobile server functions to modify the buddy list and to retrieve player avatars.
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v3.8.9 - Wednesday, June 27, 2007">
+<CHANGELIST>
+Fixed:\r\n
++ Fixed a few minor bugs.\r\n
++ Modified the create game page to be more user friendly.\r\n
+\r\n
+Added Functionality:\r\n
++ Forum integration is now possible.
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v3.8.8 - Wednesday, May 23, 2007">
+<CHANGELIST>
+Fixed:\r\n
++ Fixed a few minor session bugs.\r\n
++ Solved the logout problem.\r\n
+\r\n
+Added Functionality:\r\n
++ Added the ability to customize the server cells.
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v3.8.7 - Saturday, May 19, 2007">
+<CHANGELIST>
+Fixed:\r\n
++ Improved the looks of multiple interfaces.\r\n
++ Fixed up the time problem with the tournaments.\r\n
++ Increased the performance of the server.
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v3.8.6 - Wednesday, May 16, 2007">
+<CHANGELIST>
+Fixed:\r\n
++ Fixed the problem that caused the license key problem in all install/upgrade scripts.\r\n
++ Fixed the errors in bug reporting tool.\r\n
+\r\n
+Added Functionality:\r\n
++ Added navigational buttons in all configuration pages.\r\n
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v3.8.5 - Wednesday, May 9, 2007">
+<CHANGELIST>
+Fixed:\r\n
++ Updated the install/upgrade scripts.\r\n
++ Fixed a few small issues with the cron.php file.\r\n
++ Players can no longer resign/draw other player's games.\r\n
+\r\n
+Added Functionality:\r\n
++ Added the ability to view other player's games.\r\n
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v3.7.5 - Tuesday, May 1, 2007">
+<CHANGELIST>
+Added Functionality:\r\n
++ Added links to additional client downloads.\r\n
+\r\n
+Fixed:\r\n
++ Fixed the install/upgrade scripts to be php 5 compatible.\r\n
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v3.7.4 - Wednesday, April 25, 2007">
+<CHANGELIST>
+Added Functionality:\r\n
++ Added additional mobile server files to support images.\r\n
+\r\n
+Fixed:\r\n
++ Fixed the xml returned by the mobile function: getclientip.\r\n
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v3.7.3 - Monday, April 23, 2007">
+<CHANGELIST>
+Fixed:\r\n
++ Repaired a few minor bugs with the logout proccess.\r\n
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v3.7.2 - Thursday, February 1, 2007">
+<CHANGELIST>
+Fixed:\r\n
++ Changed the One-To-Many tournament type to be vote based.\r\n
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v3.7.1 - Friday, January 19, 2007">
+<CHANGELIST>
+Added Functionality:\r\n
++ Added images in the skins directory for the mobile client.\r\n
++ Added the ability to pass a sid to some pages.\r\n
++ Added some new images to the phpchess skin.\r\n
++ Added the ability to enable/disable the player chat./r/n
++ Added the ability to enable/disable the server cron job feature./r/n
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v3.7.0 - Monday, January 8, 2007">
+<CHANGELIST>
+Added Functionality:\r\n
++ Added the new tournament functionality.\r\n
++ Added a way for the players to actively chat with each other.\r\n
++ Added a way for the admin to report bugs or problems.\r\n
+\r\n
+Fixed:\r\n
++ Repaired a few minor bugs.\r\n
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v3.6.8 - Thursday, December 28, 2006">
+<CHANGELIST>
+Fixed:\r\n
++ Removed the leading 0s from the "fen" mobile server command.\r\n
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v3.6.7 - Friday, December 21, 2006">
+<CHANGELIST>
+Added Functionality:\r\n
++ Added new mobile server commands.\r\n
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v3.6.6 - Friday, December 14, 2006">
+<CHANGELIST>
+Added Functionality:\r\n
++ Added confirmation boxes for the draw and resign buttons.\r\n
+\r\n
+Fixed:\r\n
++ Using the "enter" key while in a game will no longer resign/draw the game.
++ The server language page will no longer display the "help" directory in the select box.
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v3.6.5 - Thursday, December 07, 2006">
+<CHANGELIST>
+Fixed:\r\n
++ Fixed the bug that may add an extra slash in the unsubscribe link.\r\n
++ Fixed the database errors caused in the "Close Account" page.\r\n
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v3.6.4 - Monday, December 4, 2006">
+<CHANGELIST>
+Fixed:\r\n
++ Fixed the database errors caused in the "Accept New Players" page.\r\n
++ Fixed the database errors caused in the "Manage Current Players" page.\r\n
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v3.6.3 - Friday, November 24, 2006">
+<CHANGELIST>
+Added Functionality:\r\n
++ Added new mobile server commands.\r\n
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v3.6.2 - Monday, November 20, 2006">
+<CHANGELIST>
+Fixed:\r\n
++ Enhanced the code to decrease loading times.\r\n
+\r\n
+Added Functionality:\r\n
++ Added new mobile server commands.\r\n
++ Added Drag and Drop functionality.\r\n
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v3.6.1 - Monday, September 18, 2006">
+<CHANGELIST>
+Fixed:\r\n
++ Re-wrote all the timeout functions and associated database tables in hopes to solve the timeout problems for all game types.\r\n
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v3.6.0 - Thursday, September 07, 2006">
+<CHANGELIST>
+Fixed:\r\n
++ Added the missing "not_installed.php" page.\r\n
++ Tidied up the upgrade and install pages to look better.\r\n
++ Fixed a minor bug with the top ten players list.\r\n
++ Fixed up the pgn generation code.\r\n
+\r\n
+Added Functionality:\r\n
++ Updated a few more icons in the phpchess skins.\r\n
++ Last moves will now be highlighted on the chessboard.\r\n
++ Added the activities section.\r\n
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v3.5.2 - Saturday, August 26, 2006">
+<CHANGELIST>
+Fixed:\r\n
++ Fixed the email error, which prevented emails from being sent from the server.\r\n
+\r\n
+Added Functionality:\r\n
++ The statistics page will now show the player's date of last login and last move.\r\n
++ Added a way for the player to check when the game will timeout.\r\n
++ Added additional club options to the server.\r\n
++ Added a way for the player to change his or her email address.\r\n
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v3.5.1 - Tuesday, August 22, 2006">
+<CHANGELIST>
+Fixed:\r\n
++ Fixed the bug that caused active real-time games to prematurely end.\r\n
++ Changed the way normal game timeouts are handled.\r\n
+\r\n
+Added Functionality:\r\n
++ Added aditional help topics.\r\n
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v3.5.0 - Tuesday, August 22, 2006">
+<CHANGELIST>
+Fixed:\r\n
++ Fixed the avatars section to allow custom uploads depending on admin approval.\r\n
+\r\n
+Added Functionality:\r\n
++ Added an interactive help system.\r\n
++ Added another skin in the skins directory.\r\n
++ The admin can now change/set the default chessboard colors for all users.\r\n
++ An online graph has been implemented to show how many users logged on for a given date.\r\n
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v3.4.1 - Thursday, August 10, 2006">
+<CHANGELIST>
+Fixed:\r\n
++ Fixed the private games list to show realtime games all the time.\r\n
++ Fixed a few more multi-language bugs.\r\n
++ Cleaned up some code to increase performance.\r\n
+\r\n
+Added Functionality:\r\n
++ Added image varificaton to the register players form.\r\n
++ Added two new skins in the skins directory.\r\n
++ The View games list now displays a list of games that are active.\r\n
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v3.4.0 - Sunday, July 29, 2006">
+<CHANGELIST>
+Fixed:\r\n
++ Changed the unsubscribe link, in emails, to be more meaningful.\r\n
++ Fixed a small bug that caused the player list to crash.\r\n
+\r\n
+Added Functionality:\r\n
++ Players can now create there own FEN when they create a game.\r\n
++ The admin can now see actions to do directly after log on.\r\n
++ Enhanced the graphics of the old phpChess skin.\r\n
++ Added a select range of avatars for the user to select from.
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v3.3.9 - Sunday, July 23, 2006">
+<CHANGELIST>
+Fixed:\r\n
++ Startup FENs, when creating a game, will work properly now.\r\n
++ Server emails will now have an unsubscribe link in them.\r\n
+</CHANGELIST>
+</VERSION>
+
+<VERSION vers="FVP v3.3.8 - Wednesday, July 19, 2006">
+<CHANGELIST>
+Fixed:\r\n
++ Changed the default game type from Blitz to Normal in the create game page.\r\n
++ The private games list has been changed to omit games that are not on the players turn.\r\n
+\r\n
+Added Functionality:\r\n
++ Players now have the ability to close there accounts.\r\n
++ Updated the admin page to include a change log.\r\n
++ XML support has now been implemented.\r\n
+</CHANGELIST>
+</VERSION>
+
+</CRV>
