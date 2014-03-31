@@ -60,7 +60,7 @@ qq;
 				'o_id' => 1, 'o_setting' => 2
 			),
 			'admin_game_options' => array(
-				'o_id' => 1, 'o_snail' => 30, 'o_slow' => 10, 'o_normal' => 5, 'o_short' => 2, 'o_blitz' => 1
+				'o_id' => 1, 'o_snail' => 30, 'o_slow' => 10, 'o_normal' => 5, 'o_short' => 2, 'o_blitz' => 1, 'timing_mode' => 1
 			),
 			'c4m_admin' => array(
 				'a_id' => 1, 'a_username' => 'admin', 'a_password' => md5($salt . 'pass')
