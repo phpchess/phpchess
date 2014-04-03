@@ -39,7 +39,7 @@ if($isrealtime == "IDS_REAL_TIME"){
 		<ul class="mainmenu">
 		<li ><a href="<?php echo $Root_Path;?>chess_members.php"><?php echo GetStringFromStringTable("IDS_APPLICATION_HEADERS_10", $config);?></a></li>
 		<li><a href="<?php echo $Root_Path;?>chess_msg_center.php"><?php echo GetStringFromStringTable("IDS_APPLICATION_HEADERS_11", $config);?></a></li>
-		<li><a href="<?php echo $Root_Path;?>chess_view_games.php"><?php echo GetStringFromStringTable("IDS_APPLICATION_HEADERS_12", $config);?></a></li>
+		<li><a href="<?php echo $Root_Path;?>chess_view_games_rt.php"><?php echo GetStringFromStringTable("IDS_APPLICATION_HEADERS_12", $config);?></a></li>
 		<li><a href="<?php echo $Root_Path;?>chess_find_player.php"><?php echo GetStringFromStringTable("IDS_APPLICATION_HEADERS_13", $config);?></a></li>
 		<li><a href="<?php echo $Root_Path;?>chess_buddy_list.php"><?php echo GetStringFromStringTable("IDS_APPLICATION_HEADERS_14", $config);?></a></li>
 		<li><a href="<?php echo $Root_Path;?>chess_statistics.php"><?php echo GetStringFromStringTable("IDS_APPLICATION_HEADERS_15", $config);?></a></li>
