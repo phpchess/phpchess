@@ -39,7 +39,7 @@
   require($Root_Path."bin/CR3DCQuery.php");
   require($Root_Path."bin/config.php");
   require($Root_Path."includes/language.php");
-header("Cache-Control: public");
+  header("Cache-Control: public");
   header("Pragma: cache");
   //Instantiate theCR3DCQuery Class
   $oR3DCQuery = new CR3DCQuery($config);
