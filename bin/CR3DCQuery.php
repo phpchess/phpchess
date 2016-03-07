@@ -4732,11 +4732,9 @@ class CR3DCQuery{
 
       $GameID = substr($returncode, 0, 32);
 
-     //if(!$bRTGame){
-        $insert11 = "INSERT INTO cfm_game_options VALUES('".$GameID."', '".$Rating."', '".$GameTime."', " . $timing_mode .")";
-      //}else{
-      //  $insert11 = "INSERT INTO cfm_game_options VALUES('".$GameID."', '".$Rating."', '-', " . $timing_mode . ")";
-      //}
+
+        $insert11 = "INSERT INTO cfm_game_options VALUES('".$GameID."', '".$Rating."', '".$GameTime."', '" . $timing_mode ."')";
+
       mysql_query($insert11, $this->link) or die(mysql_error());
 
       if($move1 != "" && $time1 != "" && $move2 != "" && $time2 != ""){
