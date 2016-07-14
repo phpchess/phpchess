@@ -68,6 +68,8 @@ class CR3DCQuery{
       die("CR3DCQuery.php: ".mysql_error());
     }
 
+    mysql_set_charset('utf8', $this->link);
+
     $query = "SELECT * FROM c4m_skins LIMIT 1";
     $return = mysql_query($query, $this->link) or die(mysql_error());
     $num = mysql_numrows($return);
@@ -128,7 +130,7 @@ class CR3DCQuery{
 
           // We found the key
           list($Key, $strText, $junk) = explode("||", $lines[$x-1], 3);
-
+	  $strText = utf8_encode($strText);
           $text = trim($strText);
 
           // Exit loop
