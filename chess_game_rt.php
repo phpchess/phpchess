@@ -280,6 +280,7 @@
 
 <html>
 <head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title><?php echo __l('Game') . ': ' . substr($gid, 0, 4);?></title>
 
 <META NAME="keywords" CONTENT="">
