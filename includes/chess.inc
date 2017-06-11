@@ -1052,7 +1052,7 @@
     set_first_Position();
     $l = 0;
 
-    while ($row = mysql_fetch_array ($Moves)) {
+    while ($row = mysqli_fetch_array ($Moves)) {
         $l++;
         if (!add_Move($row["Move"]))
                return FALSE;

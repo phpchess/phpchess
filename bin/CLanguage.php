@@ -33,7 +33,7 @@ class CLanguage{
   * CLanguage (Constructor)
   *
   */
-  function CLanguage($ConfigFile){
+  function __construct($ConfigFile){
 
     ////////////////////////////////////////////////////////////////////////////
     // Sets the chess config file location (absolute location on the server)
@@ -48,11 +48,11 @@ class CLanguage{
     $this->user = $conf['database_login'];
     $this->pass = $conf['database_pass'];
 
-    $this->link1 = mysql_connect($this->host, $this->user, $this->pass);
-    mysql_select_db($this->dbnm);
+    $this->link1 = mysqli_connect($this->host, $this->user, $this->pass);
+    mysqli_select_db($this->link1,$this->dbnm);
 
     if(!$this->link1){
-      die("CLanguage.php: ".mysql_error());
+      die("CLanguage.php: ".mysqli_error($this->link1));
     }
 
   }
@@ -65,18 +65,18 @@ class CLanguage{
   function InstallLanguage($langfile){
 
     $query = "SELECT * FROM server_language WHERE o_id=1";
-    $return = mysql_query($query, $this->link1) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link1,$query) or die(mysqli_error($this->link1));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $update = "UPDATE server_language SET o_languagefile='".$langfile."' WHERE o_id=1";
-      mysql_query($update, $this->link1) or die(mysql_error());
+      mysqli_query($this->link1,$update) or die(mysqli_error($this->link1));
 
     }else{
 
       $insert = "INSERT INTO server_language VALUES(1, 'english.1.0.txt')";
-      mysql_query($insert, $this->link1) or die(mysql_error());
+      mysqli_query($this->link1,$insert) or die(mysqli_error($this->link1));
 
     }
 
@@ -88,7 +88,7 @@ class CLanguage{
   *
   */
   function Close(){
-    mysql_close($this->link1);
+    mysqli_close($this->link1);
   }
 
 } //end of class definition

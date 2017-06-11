@@ -1318,7 +1318,7 @@ class DBDefinition
 	* @param string $table     database table name
 	* @return array
 	*/
-	function mysql_defs_getConstraints($namespace, $table)
+	static function mysql_defs_getConstraints($namespace, $table)
 	{
 		$keyName = 'Key_name';
 		$nonUnique = 'Non_unique';
@@ -1356,7 +1356,7 @@ class Model
 	var $exists_in_db = FALSE;		// Flag to indicate if this instance has a matching record in the database.
 	var $old_values = array();		// Stores the model's properties as they are in the database. Updated when the model is saved.
 	
-	function Model($model)
+	function __construct($model)
 	{
 		$this->model_def = $def = ModelManager::get_model_definition($model);
 		
@@ -1578,7 +1578,7 @@ class ModelDefinition
 	var $namespace;
 	var $constraints = array();		// Constraints array
 	
-	function ModelDefinition($model)
+	function __construct($model)
 	{
 		list($this->namespace, $this->name) = preg_split('/::/', $model);
 		//echo "get $db, $tbl";

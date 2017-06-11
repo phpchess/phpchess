@@ -2,8 +2,7 @@
 
 class LanguageParser
 {
-
-	private $parse_data = array();
+	private $parse_data = array();	
 
 	public function ParseFiles($directory)
 	{
@@ -126,6 +125,12 @@ class LanguageFile
 	private static $loaded = FALSE;
 	private static $lang;
 
+	static function mysqli_result($result, $number, $field=0) {
+	    mysqli_data_seek($result, $number);
+	    $row = mysqli_fetch_array($result);
+	    return $row[$field];
+  	}
+  	
 	public static function load_language_file($file)
 	{
 		if(LanguageFile::$loaded) return;
@@ -145,15 +150,15 @@ class LanguageFile
 		$user = $conf['database_login'];
 		$pass = $conf['database_pass'];
 
-		$link = mysql_connect($host, $user, $pass);
-		mysql_select_db($dbnm);
+		$link = mysqli_connect($host, $user, $pass);
+		mysqli_select_db($link ,$dbnm);
 
 		$query = "SELECT * FROM server_language WHERE o_id=1";
-		$return = mysql_query($query, $link) or die(mysql_error());
-		$num = mysql_numrows($return);
+		$return = mysqli_query($link,$query) or die(mysqli_error($link));
+		$num = mysqli_num_rows($return);
 
 		if($num != 0){
-			$LanguageFile = $conf['absolute_directory_location']."includes/languages/".mysql_result($return, 0, "o_languagefile");
+			$LanguageFile = $conf['absolute_directory_location']."includes/languages/".LanguageFile::mysqli_result($return, 0, "o_languagefile");
 		}
 		
 		LanguageFile::load_language_file(preg_replace('/\.txt/', '.php', $LanguageFile));

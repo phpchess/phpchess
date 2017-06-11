@@ -195,9 +195,9 @@
 			// When not using ELO rating system, needs to calculate a self rating. This requires
 			// looking at how many games where won, lost and drawn.
 			// $query = "SELECT w_player_id AS w, b_player_id AS b, completion_status FROM game WHERE completion_status='W' OR completion_status='W' OR completion_status='B'";
-			// $result = mysql_query($query, $cr3d->link) or die(mysql_error());
+			// $result = mysqli_query($cr3d->link,$query) or die(mysqli_error($cr3d->link));
 			// $game_finishes = array();
-			// while($row = mysql_fetch_array($result))
+			// while($row = mysqli_fetch_array($result))
 			// {
 				// if($row['completion_status'] == 'D')
 				// {
@@ -231,9 +231,9 @@
 			
 			// Can just use the cfm_point_caching table to look up self rating points.
 			$query = "SELECT player_id, points FROM cfm_point_caching";
-			$result = mysql_query($query, $cr3d->link) or die (mysql_error());
+			$result = mysqli_query($cr3d->link,$query) or die (mysqli_error($cr3d->link));
 			$self_points = array();
-			while($row = mysql_fetch_array($result))
+			while($row = mysqli_fetch_array($result))
 			{
 				$self_points[$row['player_id']] = (int)$row['points'];
 			}
@@ -242,9 +242,9 @@
 		{
 			// elo_points stores the elo points for every player.
 			$query = "SELECT player_id, cpoints FROM elo_points";
-			$result = mysql_query($query, $cr3d->link) or die (mysql_error());
+			$result = mysqli_query($cr3d->link,$query) or die (mysqli_error($cr3d->link));
 			$elo_points = array();
-			while($row = mysql_fetch_array($result))
+			while($row = mysqli_fetch_array($result))
 			{
 				$elo_points[$row['player_id']] = (int)$row['cpoints'];
 			}
@@ -252,9 +252,9 @@
 		
 		// Get all buddy mappings
 		$query = "SELECT player_id, buddy_id FROM c4m_buddylist";
-		$result = mysql_query($query, $cr3d->link) or die (mysql_error());
+		$result = mysqli_query($cr3d->link,$query) or die (mysqli_error($cr3d->link));
 		$buddies = array();
-		while($row = mysql_fetch_array($result))
+		while($row = mysqli_fetch_array($result))
 		{
 			if(!isset($buddies[$row['player_id']]))
 				$buddies[$row['player_id']] = array();
@@ -264,9 +264,9 @@
 		
 		// Get all player info and add game finishes and buddy info to each player.
 		$query = "SELECT player.player_id, player.userid, player.signup_time, active_sessions.player_id AS online FROM player LEFT JOIN active_sessions ON player.player_id = active_sessions.player_id ORDER BY player.userid ASC";
-		$result = mysql_query($query, $cr3d->link) or die (mysql_error());
+		$result = mysqli_query($cr3d->link,$query) or die (mysqli_error($cr3d->link));
 		$players = array();
-		while($row = mysql_fetch_array($result))
+		while($row = mysqli_fetch_array($result))
 		{
 			$points = 0;
 			if($cr3d->ELOIsActive()){

@@ -33,7 +33,7 @@ class CSkins{
   * CSkins (Constructor)
   *
   */
-  function CSkins($ConfigFile){
+  function __construct($ConfigFile){
 
     ////////////////////////////////////////////////////////////////////////////
     // Sets the chess config file location (absolute location on the server)
@@ -49,28 +49,34 @@ class CSkins{
     $this->pass = $conf['database_pass'];
     $this->sitename = $conf['site_name'];
 
-    $this->link2 = mysql_connect($this->host, $this->user, $this->pass);
-    mysql_select_db($this->dbnm);
+    $this->link2 = mysqli_connect($this->host, $this->user, $this->pass);
+    mysqli_select_db($this->link2,$this->dbnm);
 
     if(!$this->link2){
-      die("CSkins.php: ".mysql_error());
+      die("CSkins.php: ".mysqli_error($this->link2));
     }
 
   }
 
+
+  function mysqli_result($result, $number, $field=0) {
+      mysqli_data_seek($result, $number);
+      $row = mysqli_fetch_array($result);
+      return $row[$field];
+  }
+  
 
   /**********************************************************************
   * getskinname
   *
   */
   function getskinname(){
-
     $query = "SELECT * FROM c4m_skins LIMIT 1";
-    $return = mysql_query($query, $this->link2) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link2,$query) or die(mysqli_error($this->link2));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-      $name = mysql_result($return,$i,"name");
+      $name = $this->mysqli_result($return,$i,"name");
     }
 
     return $name;
@@ -95,7 +101,7 @@ class CSkins{
   function setskinname($skinname){
 
     $Update = "update c4m_skins SET name = '".$skinname."' WHERE id=1";
-    mysql_query($Update, $this->link2) or die(mysql_error());
+    mysqli_query($this->link2,$Update) or die(mysqli_error($this->link2));
 
   }
 
@@ -105,7 +111,7 @@ class CSkins{
   *
   */
   function Close(){
-    mysql_close($this->link2);
+    mysqli_close($this->link2);
   }
 
 } //end of class definition

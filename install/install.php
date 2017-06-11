@@ -8,7 +8,7 @@ $query = !empty($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : null;
 $url = !empty($query) ? "http://$host$self?$query" : "http://$host$self";
 
 $nMajor = 4;
-$nMinor = 2;
+$nMinor = 3;
 $nBuild = 0;
 
 header("Content-Type: text/html; charset=utf-8");
@@ -334,13 +334,13 @@ function runSQL()
 	$progress = '';
 	$progress .= "Starting Install<br>";
 	$bError = false;
-	$link = @mysql_connect($_SESSION['dbcon']['host'], $_SESSION['dbcon']['user'], $_SESSION['dbcon']['pass']);
+	$link = @mysqli_connect($_SESSION['dbcon']['host'], $_SESSION['dbcon']['user'], $_SESSION['dbcon']['pass']);
 
 	if($link)
 	{
 		$progress .= "DB Connection<br>";
 		// Check if the Database exists
-		$db_selected = @mysql_select_db($_SESSION['dbcon']['db'], $link);
+		$db_selected = @mysqli_select_db($link,$_SESSION['dbcon']['db']);
 
 		if(!$db_selected)
 		{
@@ -372,8 +372,8 @@ function runSQL()
 
 					if(trim($insert) != "")
 					{
-						if(!mysql_query($insert, $link))
-							return array('success' => FALSE, 'error' => mysql_error(), 'progress' => $progress);
+						if(!mysqli_query($link,$insert))
+							return array('success' => FALSE, 'error' => mysqli_error($link), 'progress' => $progress);
 					}
 					$i++;
 				}
@@ -381,98 +381,98 @@ function runSQL()
 
 				// Create the admin user info
 				$insert = "INSERT INTO c4m_skins VALUES(1, 'default')";
-				if(!mysql_query($insert, $link))
-					return array('success' => FALSE, 'error' => mysql_error(), 'progress' => $progress);
+				if(!mysqli_query($link,$insert))
+					return array('success' => FALSE, 'error' => mysqli_error($link), 'progress' => $progress);
 				$progress .= "Create skin, ";
 
 				// Create the admin user info
 				$hash = md5($_SESSION['password_salt'] . $_SESSION['admin']['pass']);
 				$insert = "INSERT INTO c4m_admin VALUES(NULL, '" . $_SESSION['admin']['user'] . "', '" . $hash . "', 1)";
-				if(!mysql_query($insert, $link))
-					return array('success' => FALSE, 'error' => mysql_error(), 'progress' => $progress);
+				if(!mysqli_query($link,$insert))
+					return array('success' => FALSE, 'error' => mysqli_error($link), 'progress' => $progress);
 				$progress .= "AdminUser, ";
 
 				// Insert the temporary news item
 				$insert = "INSERT INTO c4m_frontnews VALUES(NULL, 'Command Center Installed', 'Welcome to your new command center installation. To set up your features please navigate over to your admin page.', NOW())";
-				if(!mysql_query($insert, $link))
-					return array('success' => FALSE, 'error' => mysql_error(), 'progress' => $progress);
+				if(!mysqli_query($link,$insert))
+					return array('success' => FALSE, 'error' => mysqli_error($link), 'progress' => $progress);
 				$progress .= "WelcomeMessage, ";
 
 				// Create the admin user info
 				$insert = "INSERT INTO c4m_commandconfig VALUES(1, 1000, 'y', 'y')";
-				if(!mysql_query($insert, $link))
-					return array('success' => FALSE, 'error' => mysql_error(), 'progress' => $progress);
+				if(!mysqli_query($link,$insert))
+					return array('success' => FALSE, 'error' => mysqli_error($link), 'progress' => $progress);
 				$progress .= "MaxUser, ";
 
 				// Create point values
 				$insert = "INSERT INTO chess_point_value VALUES(1, 1200)";
-				if(!mysql_query($insert, $link))
-					return array('success' => FALSE, 'error' => mysql_error(), 'progress' => $progress);
+				if(!mysqli_query($link,$insert))
+					return array('success' => FALSE, 'error' => mysqli_error($link), 'progress' => $progress);
 				$progress .= "Points, ";
 
 				// Create the admin user info
 				$insert = "INSERT INTO c4m_paypalaccount VALUES(1, 'email@email.com', 'USD', 5)";
-				if(!mysql_query($insert, $link))
-					return array('success' => FALSE, 'error' => mysql_error(), 'progress' => $progress);
+				if(!mysqli_query($link,$insert))
+					return array('success' => FALSE, 'error' => mysqli_error($link), 'progress' => $progress);
 				$progress .= "Payment, ";
 
 				// Insert the server language
 				$insert = "INSERT INTO server_language VALUES(1, 'english.txt')";
-				if(!mysql_query($insert, $link))
-					return array('success' => FALSE, 'error' => mysql_error(), 'progress' => $progress); 
+				if(!mysqli_query($link,$insert))
+					return array('success' => FALSE, 'error' => mysqli_error($link), 'progress' => $progress); 
 				$progress .= "Language, ";
 
 				// Insert the Initial Game Options
 				$insert = "INSERT INTO admin_game_options VALUES(1, 30, 10, 5, 2, 1, 1)";
-				if(!mysql_query($insert, $link))
-					return array('success' => FALSE, 'error' => mysql_error(), 'progress' => $progress);
+				if(!mysqli_query($link,$insert))
+					return array('success' => FALSE, 'error' => mysqli_error($link), 'progress' => $progress);
 				$progress .= "GameOptions, ";
 
 				// Create default chessboard colors
 				$insert = "INSERT INTO admin_chessboard_colors VALUES(1, '#CCFFCC', '#FFFFFF')";
-				if(!mysql_query($insert, $link))
-					return array('success' => FALSE, 'error' => mysql_error(), 'progress' => $progress); 
+				if(!mysqli_query($link,$insert))
+					return array('success' => FALSE, 'error' => mysqli_error($link), 'progress' => $progress); 
 				$progress .= "Boardcolors, ";
 
 				// Create default avatar settings
 				$insert = "INSERT INTO admin_avatar_settings VALUES(1, 2)";
-				if(!mysql_query($insert, $link))
-					return array('success' => FALSE, 'error' => mysql_error(), 'progress' => $progress);
+				if(!mysqli_query($link,$insert))
+					return array('success' => FALSE, 'error' => mysqli_error($link), 'progress' => $progress);
 				$progress .= "Avatars, ";
 
 				// Create default activity settings
 				$insert = "INSERT INTO activity_config VALUES(1, 'n', 10)";
-				if(!mysql_query($insert, $link))
-					return array('success' => FALSE, 'error' => mysql_error(), 'progress' => $progress);
+				if(!mysqli_query($link,$insert))
+					return array('success' => FALSE, 'error' => mysqli_error($link), 'progress' => $progress);
 				$progress .= "Activites, ";
 
 				// Create default player chat settings
 				$insert = "INSERT INTO cfg_player_chat VALUES(1, 1)";
-				if(!mysql_query($insert, $link))
-					return array('success' => FALSE, 'error' => mysql_error(), 'progress' => $progress);
+				if(!mysqli_query($link,$insert))
+					return array('success' => FALSE, 'error' => mysqli_error($link), 'progress' => $progress);
 				$progress .= "Chat, ";
 
 				// Create default cron job settings
 				$insert = "INSERT INTO cfg_cron_job VALUES(1, 2)";
-				if(!mysql_query($insert, $link))
-					return array('success' => FALSE, 'error' => mysql_error(), 'progress' => $progress);
+				if(!mysqli_query($link,$insert))
+					return array('success' => FALSE, 'error' => mysqli_error($link), 'progress' => $progress);
 				$progress .= "CronJob, ";
 
 				// Create default user for open challanges
 				$insert = 'INSERT INTO `player` (`player_id`, `userid`, `password`, `signup_time`, `status`, `email`) VALUES (0, "ANYONE", "20091111", 0, "F", "001@phpchess.com")';
-				if(!mysql_query($insert, $link))
-					return array('success' => FALSE, 'error' => mysql_error(), 'progress' => $progress);
+				if(!mysqli_query($link,$insert))
+					return array('success' => FALSE, 'error' => mysqli_error($link), 'progress' => $progress);
 				$insert = 'UPDATE `player` SET `player_id` = 0, `email` = "001@phpchess.com" WHERE `player_id` = 1 LIMIT 1';
-				if(!mysql_query($insert, $link))
-					return array('success' => FALSE, 'error' => mysql_error(), 'progress' => $progress);
+				if(!mysqli_query($link,$insert))
+					return array('success' => FALSE, 'error' => mysqli_error($link), 'progress' => $progress);
 				$progress .= "DefaultUser, ";
 
 				////////////////////////////////////////////////////////////////////////
 				// Insert the server version
 				////////////////////////////////////////////////////////////////////////
 				$insert = "INSERT INTO server_version VALUES(1, 'FVP', " . $GLOBALS['nMajor'] . ", " . $GLOBALS['nMinor'].", " . $GLOBALS['nBuild'] . ")";
-				if(!mysql_query($insert, $link))
-					return array('success' => FALSE, 'error' => mysql_error(), 'progress' => $progress);
+				if(!mysqli_query($link,$insert))
+					return array('success' => FALSE, 'error' => mysqli_error($link), 'progress' => $progress);
 				$progress .= "Server Version.";
 				////////////////////////////////////////////////////////////////////////
 				$progress .= "<br/>SQL Inserts completed";
@@ -490,7 +490,7 @@ function runSQL()
 
 	if($link)
 	{
-		mysql_close($link);
+		mysqli_close($link);
 	}
 
 	return array('success' => TRUE, 'progress' => $progress);
@@ -500,10 +500,10 @@ function update_settings($data)
 {
 	$result = array('success' => TRUE, 'errors' => array());
 	
-	$link = @mysql_connect($_SESSION['dbcon']['host'], $_SESSION['dbcon']['user'], $_SESSION['dbcon']['pass']);
+	$link = @mysqli_connect($_SESSION['dbcon']['host'], $_SESSION['dbcon']['user'], $_SESSION['dbcon']['pass']);
 	if($link)
 	{
-		$db_selected = @mysql_select_db($_SESSION['dbcon']['db'], $link);
+		$db_selected = @mysqli_select_db($link,$_SESSION['dbcon']['db']);
 		if(!$db_selected)
 		{
 			return array('success' => FALSE, 'errors' => array('Failed to select database (' . $_SESSION['dbcon']['db'] . ')'));
@@ -511,37 +511,37 @@ function update_settings($data)
 		else
 		{
 			$sql = "UPDATE admin_avatar_settings SET o_setting = '" . $data['allow_uploads'] . "' WHERE o_id = 1";
-			if(!mysql_query($sql, $link))
+			if(!mysqli_query($link,$sql))
 			{
 				$result['success'] = FALSE;
 				$result['errors'][] = 'Unable to set avatar upload setting.';
 			}
 			$sql = "UPDATE admin_game_options SET o_snail = " . $data['timeout_snail'] . ", o_slow = " . $data['timeout_slow'] . ", o_normal = " . $data['timeout_normal'] . ", o_short = " . $data['timeout_fast'] . ", o_blitz = " . $data['timeout_blitz'] . " WHERE o_id = 1";
-			if(!mysql_query($sql, $link))
+			if(!mysqli_query($link,$sql))
 			{
 				$result['success'] = FALSE;
 				$result['errors'][] = 'Unable to set default game timeouts.';
 			}
 			
 			$sql = "UPDATE `c4m_commandconfig` SET `o_userlimit` = '" . $data['max_players'] . "' WHERE o_id = 1";
-			if(!mysql_query($sql, $link))
+			if(!mysqli_query($link,$sql))
 			{
 				$result['success'] = FALSE;
-				$result['errors'][] = 'Unable to set player limit. Error: ' . mysql_error();
+				$result['errors'][] = 'Unable to set player limit. Error: ' . mysqli_error($link);
 			}
 			
 			$sql = "UPDATE `server_language` SET `o_languagefile` = '" . $data['language'] . "' WHERE o_id = 1";
-			if(!mysql_query($sql, $link))
+			if(!mysqli_query($link,$sql))
 			{
 				$result['success'] = FALSE;
-				$result['errors'][] = 'Unable to set the language. Error: ' . mysql_error();
+				$result['errors'][] = 'Unable to set the language. Error: ' . mysqli_error($link);
 			}
 		}
 	}
 	else
 	{
 		$result['success'] = FALSE;
-		$result['errors'] = array('Unable to connect to the database. Error: ' . mysql_error() );
+		$result['errors'] = array('Unable to connect to the database. Error: ' . mysqli_error($link) );
 	}
 	
 	return $result;

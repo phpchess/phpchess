@@ -33,7 +33,7 @@ class CBuddyList{
   * CBuddyList (Constructor)
   *
   */
-  function CBuddyList($ConfigFile){
+  function __construct($ConfigFile){
 
     ////////////////////////////////////////////////////////////////////////////
     // Sets the chess config file location (absolute location on the server)
@@ -48,15 +48,20 @@ class CBuddyList{
     $this->user = $conf['database_login'];
     $this->pass = $conf['database_pass'];
 
-    $this->linkBuddyList = mysql_connect($this->host, $this->user, $this->pass);
-    mysql_select_db($this->dbnm);
+    $this->linkBuddyList = mysqli_connect($this->host, $this->user, $this->pass);
+    mysqli_select_db($this->linkBuddyList,$this->dbnm);
 
     if(!$this->linkBuddyList){
-      die("CBuddyList.php: ".mysql_error());
+      die("CBuddyList.php: ".mysqli_error($this->linkBuddyList));
     }
 
   }
 
+  function mysqli_result($result, $number, $field=0) {
+      mysqli_data_seek($result, $number);
+      $row = mysqli_fetch_array($result);
+      return $row[$field];
+  }
 
   /**********************************************************************
   * GetStringFromStringTable
@@ -78,12 +83,12 @@ class CBuddyList{
     }else{
 
       $query = "SELECT * FROM server_language WHERE o_id=1";
-      $return = mysql_query($query, $this->linkBuddyList) or die(mysql_error());
-      $num = mysql_numrows($return);
+      $return = mysqli_query($this->linkBuddyList,$query) or die(mysqli_error($this->linkBuddyList));
+      $num = mysqli_num_rows($return);
 
       if($num != 0){
 
-        $LanguageFile = $conf['absolute_directory_location']."includes/languages/".mysql_result($return, 0, "o_languagefile");
+        $LanguageFile = $conf['absolute_directory_location']."includes/languages/".$this->mysqli_result($return, 0, "o_languagefile");
 
       }
 
@@ -134,8 +139,8 @@ class CBuddyList{
   function GetBuddyList($ConfigFile, $Player_ID){
 
     $query = "SELECT * FROM c4m_buddylist WHERE player_id = ".$Player_ID." ORDER BY bl_date DESC";
-    $return = mysql_query($query, $this->linkBuddyList) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->linkBuddyList,$query) or die(mysqli_error($this->linkBuddyList));
+    $num = mysqli_num_rows($return);
 
     // Skin table settings
     if(defined('CFG_GETBUDDYLIST_TABLE1_WIDTH') && defined('CFG_GETBUDDYLIST_TABLE1_BORDER') && defined('CFG_GETBUDDYLIST_TABLE1_CELLPADDING') && defined('CFG_GETBUDDYLIST_TABLE1_CELLSPACING') && defined('CFG_GETBUDDYLIST_TABLE1_ALIGN')){
@@ -153,19 +158,19 @@ class CBuddyList{
       While($i < $num){
         
         //Get the buddy's information by his ID
-        $query1 = "SELECT * FROM player WHERE player_id = ".mysql_result($return,$i,"buddy_id");
-        $return1 = mysql_query($query1, $this->linkBuddyList) or die(mysql_error());
-        $num1 = mysql_numrows($return1);
+        $query1 = "SELECT * FROM player WHERE player_id = ".$this->mysqli_result($return,$i,"buddy_id");
+        $return1 = mysqli_query($this->linkBuddyList,$query1) or die(mysqli_error($this->linkBuddyList));
+        $num1 = mysqli_num_rows($return1);
 
         if($num1 != 0){
 
           $ii = 0;
           while($ii < $num1){
 
-            $player_id = trim(mysql_result($return1,$ii,"player_id"));
-            $userid = trim(mysql_result($return1,$ii,"userid"));
-            $signup_time = trim(mysql_result($return1,$ii,"signup_time"));
-            $email = trim(mysql_result($return1,$ii,"email"));
+            $player_id = trim($this->mysqli_result($return1,$ii,"player_id"));
+            $userid = trim($this->mysqli_result($return1,$ii,"userid"));
+            $signup_time = trim($this->mysqli_result($return1,$ii,"signup_time"));
+            $email = trim($this->mysqli_result($return1,$ii,"email"));
 
             if($player_id != "" && $this->IsPlayerDisabled($player_id) == false){
               echo "<tr>";
@@ -212,8 +217,8 @@ class CBuddyList{
 
     //Get game info
     $query = "SELECT * FROM active_sessions WHERE player_id =".$ID;
-    $return = mysql_query($query, $this->linkBuddyList) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->linkBuddyList,$query) or die(mysqli_error($this->linkBuddyList));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
@@ -233,8 +238,8 @@ class CBuddyList{
   function GetPlayerListNotInBuddyListSelectBox($ConfigFile, $Player_ID){
 
     $query1 = "SELECT buddy_id FROM c4m_buddylist WHERE player_id =".$Player_ID;
-    $return1 = mysql_query($query1, $this->linkBuddyList) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($this->linkBuddyList,$query1) or die(mysqli_error($this->linkBuddyList));
+    $num1 = mysqli_num_rows($return1);
 
     $BuddyListIDs = "";
 
@@ -243,7 +248,7 @@ class CBuddyList{
       $i = 0;
       while($i < $num1){
 
-        $Buddy_id = trim(mysql_result($return1,$i,"buddy_id"));
+        $Buddy_id = trim($this->mysqli_result($return1,$i,"buddy_id"));
 
         $i++;
 
@@ -260,14 +265,14 @@ class CBuddyList{
     if($BuddyListIDs != ""){ 
 
       $query = "SELECT * FROM player WHERE player_id NOT IN(".$BuddyListIDs.") ORDER BY userid Asc";
-      $return = mysql_query($query, $this->linkBuddyList) or die(mysql_error());
-      $num = mysql_numrows($return);
+      $return = mysqli_query($this->linkBuddyList,$query) or die(mysqli_error($this->linkBuddyList));
+      $num = mysqli_num_rows($return);
 
     }else{
 
       $query = "SELECT * FROM player ORDER BY userid Asc";
-      $return = mysql_query($query, $this->linkBuddyList) or die(mysql_error());
-      $num = mysql_numrows($return);
+      $return = mysqli_query($this->linkBuddyList,$query) or die(mysqli_error($this->linkBuddyList));
+      $num = mysqli_num_rows($return);
 
     }
 
@@ -278,10 +283,10 @@ class CBuddyList{
       $i = 0;
       while($i < $num){
 
-        $player_id = trim(mysql_result($return,$i,"player_id"));
-        $userid = trim(mysql_result($return,$i,"userid"));
-        $signup_time  = trim(mysql_result($return,$i,"signup_time"));
-        $email = trim(mysql_result($return,$i,"email"));
+        $player_id = trim($this->mysqli_result($return,$i,"player_id"));
+        $userid = trim($this->mysqli_result($return,$i,"userid"));
+        $signup_time  = trim($this->mysqli_result($return,$i,"signup_time"));
+        $email = trim($this->mysqli_result($return,$i,"email"));
 
         if($this->IsPlayerDisabled($player_id) == false){
 
@@ -307,8 +312,8 @@ class CBuddyList{
   function GetBuddyListSelectBox($ConfigFile, $Player_ID){
 
     $query = "SELECT * FROM c4m_buddylist WHERE player_id = ".$Player_ID." ORDER BY bl_date DESC";
-    $return = mysql_query($query, $this->linkBuddyList) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->linkBuddyList,$query) or die(mysqli_error($this->linkBuddyList));
+    $num = mysqli_num_rows($return);
 
     echo "<select NAME='lstBuddy[]' multiple size='15' style='width:170'>";
 
@@ -318,19 +323,19 @@ class CBuddyList{
       While($i < $num){
         
         //Get the buddy's information by his ID
-        $query1 = "SELECT * FROM player WHERE player_id = ".mysql_result($return,$i,"buddy_id");
-        $return1 = mysql_query($query1, $this->linkBuddyList) or die(mysql_error());
-        $num1 = mysql_numrows($return1);
+        $query1 = "SELECT * FROM player WHERE player_id = ".$this->mysqli_result($return,$i,"buddy_id");
+        $return1 = mysqli_query($this->linkBuddyList,$query1) or die(mysqli_error($this->linkBuddyList));
+        $num1 = mysqli_num_rows($return1);
 
         if($num1 != 0){
 
           $ii = 0;
           while($ii < $num1){
 
-            $player_id = trim(mysql_result($return1,$ii,"player_id"));
-            $userid = trim(mysql_result($return1,$ii,"userid"));
-            $signup_time = trim(mysql_result($return1,$ii,"signup_time"));
-            $email = trim(mysql_result($return1,$ii,"email"));
+            $player_id = trim($this->mysqli_result($return1,$ii,"player_id"));
+            $userid = trim($this->mysqli_result($return1,$ii,"userid"));
+            $signup_time = trim($this->mysqli_result($return1,$ii,"signup_time"));
+            $email = trim($this->mysqli_result($return1,$ii,"email"));
 
             if($this->IsPlayerDisabled($player_id) == false){
               echo "<option VALUE='".$player_id."'>".$userid."</option>";
@@ -359,7 +364,7 @@ class CBuddyList{
   function ClearBuddyList($ConfigFile, $Player_ID){
 
     $query = "DELETE FROM c4m_buddylist WHERE player_id = ".$Player_ID;
-    mysql_query($query, $this->linkBuddyList) or die(mysql_error());
+    mysqli_query($this->linkBuddyList,$query) or die(mysqli_error($this->linkBuddyList));
 
   }
 
@@ -371,8 +376,8 @@ class CBuddyList{
   function IsPlayerDisabled($PID){
 
     $query = "SELECT * FROM player2 WHERE player_id = ".$PID;
-    $return = mysql_query($query, $this->linkBuddyList) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->linkBuddyList,$query) or die(mysqli_error($this->linkBuddyList));
+    $num = mysqli_num_rows($return);
 
     $bDisabled = false;
 
@@ -392,7 +397,7 @@ class CBuddyList{
   function AddBuddyToList($ConfigFile, $Player_ID, $Buddy_ID){
 
     $query = "INSERT INTO c4m_buddylist VALUES(NULL,".$Player_ID.",".$Buddy_ID.",NOW())";
-    mysql_query($query, $this->linkBuddyList) or die(mysql_error());
+    mysqli_query($this->linkBuddyList,$query) or die(mysqli_error($this->linkBuddyList));
 
   }
 
@@ -404,7 +409,7 @@ class CBuddyList{
   function DeleteBuddyFromBuddyList($ConfigFile, $Player_ID, $BuddyID){
 
     $query = "DELETE FROM c4m_buddylist WHERE player_id = ".$Player_ID." AND buddy_id=".$BuddyID."";
-    mysql_query($query, $this->linkBuddyList) or die(mysql_error());
+    mysqli_query($this->linkBuddyList,$query) or die(mysqli_error($this->linkBuddyList));
 
   }
 
@@ -415,8 +420,8 @@ class CBuddyList{
   function GetBuddyListForMobile($Player_ID){
 
     $query = "SELECT * FROM c4m_buddylist WHERE player_id = ".$Player_ID." ORDER BY bl_date DESC";
-    $return = mysql_query($query, $this->linkBuddyList) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->linkBuddyList,$query) or die(mysqli_error($this->linkBuddyList));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
@@ -424,19 +429,19 @@ class CBuddyList{
       While($i < $num){
         
         //Get the buddy's information by his ID
-        $query1 = "SELECT * FROM player WHERE player_id = ".mysql_result($return,$i,"buddy_id");
-        $return1 = mysql_query($query1, $this->linkBuddyList) or die(mysql_error());
-        $num1 = mysql_numrows($return1);
+        $query1 = "SELECT * FROM player WHERE player_id = ".$this->mysqli_result($return,$i,"buddy_id");
+        $return1 = mysqli_query($this->linkBuddyList,$query1) or die(mysqli_error($this->linkBuddyList));
+        $num1 = mysqli_num_rows($return1);
 
         if($num1 != 0){
 
           $ii = 0;
           while($ii < $num1){
 
-            $player_id = trim(mysql_result($return1,$ii,"player_id"));
-            $userid = trim(mysql_result($return1,$ii,"userid"));
-            $signup_time = trim(mysql_result($return1,$ii,"signup_time"));
-            $email = trim(mysql_result($return1,$ii,"email"));
+            $player_id = trim($this->mysqli_result($return1,$ii,"player_id"));
+            $userid = trim($this->mysqli_result($return1,$ii,"userid"));
+            $signup_time = trim($this->mysqli_result($return1,$ii,"signup_time"));
+            $email = trim($this->mysqli_result($return1,$ii,"email"));
 
             if($player_id != "" && $this->IsPlayerDisabled($player_id) == false){
 
@@ -475,7 +480,7 @@ class CBuddyList{
   *
   */
   function Close(){
-    mysql_close($this->linkBuddyList);
+    mysqli_close($this->linkBuddyList);
   }
 
 } //end of class definition

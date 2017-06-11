@@ -150,14 +150,14 @@
 		$_str_finalised = _T('IDS_Admin_Tournament_Filter_finalised', $config);
 		
 		if($status !== 'All')
-			$query = sprintf("SELECT * FROM c4m_tournament WHERE t_status = '%s'", mysql_real_escape_string($status));
+			$query = sprintf("SELECT * FROM c4m_tournament WHERE t_status = '%s'", mysqli_real_escape_string($main->link,$status));
 		else
 			$query = "SELECT * FROM c4m_tournament";
-		$return = mysql_query($query, $main->link) or die("Query to fetch tournaments failed");
-		$num = mysql_numrows($return);
+		$return = mysqli_query($main->link,$query) or die("Query to fetch tournaments failed");
+		$num = mysqli_num_rows($return);
 		$tournaments = array();
 		if($num != 0){
-			while($row = mysql_fetch_array($return, MYSQL_ASSOC)){
+			while($row = mysqli_fetch_array($return, MYSQLI_ASSOC)){
 				$t = array();
 				$t['id'] = $row["t_id"];
 				$t['name'] = $row["t_name"];

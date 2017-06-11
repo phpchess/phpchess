@@ -14,12 +14,22 @@
     exit;
   }
 
+  if (!function_exists('mysqli_result')) {
+    function mysqli_result($result, $number, $field=0) {
+        mysqli_data_seek($result, $number);
+        $row = mysqli_fetch_array($result);
+        return $row[$field];
+    }
+  }
+
+
   // Include this function after the $config declaration
 
   /**********************************************************************
   * GetStringFromStringTable
   *
   */
+
   function GetStringFromStringTable($strTag, $config){
 
     include($config);
@@ -40,15 +50,15 @@
       $user = $conf['database_login'];
       $pass = $conf['database_pass'];
 
-      $link = mysql_connect($host, $user, $pass);
-      mysql_select_db($dbnm);
+      $link = mysqli_connect($host, $user, $pass);
+      mysqli_select_db($link,$dbnm);
 
       $query = "SELECT * FROM server_language WHERE o_id=1";
-      $return = mysql_query($query, $link) or die(mysql_error());
-      $num = mysql_numrows($return);
+      $return = mysqli_query($link,$query) or die(mysqli_error($link));
+      $num = mysqli_num_rows($return);
 
       if($num != 0){
-        $LanguageFile = $conf['absolute_directory_location']."includes/languages/".mysql_result($return, 0, "o_languagefile");
+        $LanguageFile = $conf['absolute_directory_location']."includes/languages/".mysqli_result($return, 0, "o_languagefile");
       }
 
     }
@@ -111,17 +121,17 @@
     $user = $conf['database_login'];
     $pass = $conf['database_pass'];
 
-    $link2 = mysql_connect($host, $user, $pass);
-    mysql_select_db($dbnm);
+    $link2 = mysqli_connect($host, $user, $pass);
+    mysqli_select_db($link2,$dbnm);
  
     $query = "SELECT * FROM server_language";
-    $return = mysql_query($query, $link2) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($link2,$query) or die(mysqli_error($link));
+    $num = mysqli_num_rows($return);
 
     $text = error;
 
     if($num != 0){
-      $text = mysql_result($return, 0, "o_languagefile");
+      $text = mysqli_result($return, 0, "o_languagefile");
     }
 
     return $text;
@@ -226,15 +236,15 @@
       $user = $conf['database_login'];
       $pass = $conf['database_pass'];
 
-      $link = mysql_connect($host, $user, $pass);
-      mysql_select_db($dbnm);
+      $link = mysqli_connect($host, $user, $pass);
+      mysqli_select_db($link,$dbnm);
 
       $query = "SELECT * FROM server_language WHERE o_id=1";
-      $return = mysql_query($query, $link) or die(mysql_error());
-      $num = mysql_numrows($return);
+      $return = mysqli_query($link,$query) or die(mysqli_error($link));
+      $num = mysqli_num_rows($return);
 
       if($num != 0){
-        $LanguageFile = $conf['absolute_directory_location']."includes/languages/help/hlp_".mysql_result($return, 0, "o_languagefile");
+        $LanguageFile = $conf['absolute_directory_location']."includes/languages/help/hlp_".mysqli_result($return, 0, "o_languagefile");
       }
 
     }

@@ -1,4 +1,14 @@
 <CRV>
+<VERSION vers="FVP v4.3.0 Final - Tuesday, June 06, 2017">
+<CHANGELIST>
++ updated code to php version 7.1.\r\n
++ updated to mysqli support throughout.\r\n
++ Fixed add game in games admin view.\r\n
++ Fixed tournament error during create game.\r\n
++ Fixed some Minor issues.\r\n
+</CHANGELIST>
+</VERSION>
+
 <VERSION vers="FVP v4.2.0 Final - Tuesday, March 23, 2014">
 <CHANGELIST>
 + Amended dead links.\r\n

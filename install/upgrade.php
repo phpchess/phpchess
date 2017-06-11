@@ -8,7 +8,7 @@ $query = !empty($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : null;
 $url = !empty($query) ? "http://$host$self?$query" : "http://$host$self";
 
 $nMajor = 4;
-$nMinor = 2;
+$nMinor = 3;
 $nBuild = 0;
 
 header("Content-Type: text/html; charset=utf-8");

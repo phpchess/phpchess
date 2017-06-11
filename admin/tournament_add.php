@@ -179,15 +179,15 @@
 		if(count($errors) == 0)
 		{
 			$query = sprintf("INSERT INTO c4m_tournament (t_name, t_type, t_playernum, t_cutoffdate, t_startdate, t_comment, t_status) VALUES('%s','%s','%s','%s','%s','%s','%s')",
-				mysql_real_escape_string($new_values['t_name']),
-				mysql_real_escape_string($new_values['t_type']),
-				mysql_real_escape_string($new_values['t_playernum']),
-				mysql_real_escape_string($new_values['t_cutoffdate']),
-				mysql_real_escape_string($new_values['t_startdate']),
-				mysql_real_escape_string($new_values['t_comment']),
-				mysql_real_escape_string($new_values['t_status']));
+				mysqli_real_escape_string($oR3DCQuery->link,$new_values['t_name']),
+				mysqli_real_escape_string($oR3DCQuery->link,$new_values['t_type']),
+				mysqli_real_escape_string($oR3DCQuery->link,$new_values['t_playernum']),
+				mysqli_real_escape_string($oR3DCQuery->link,$new_values['t_cutoffdate']),
+				mysqli_real_escape_string($oR3DCQuery->link,$new_values['t_startdate']),
+				mysqli_real_escape_string($oR3DCQuery->link,$new_values['t_comment']),
+				mysqli_real_escape_string($oR3DCQuery->link,$new_values['t_status']));
 
-			$result = mysql_query($query, $oR3DCQuery->link);
+			$result = mysqli_query($oR3DCQuery->link,$query);
 			if($result === FALSE)
 			{
 				exit(_T('IDS_Admin_Tournament_Add_CREATEFAILED', $config));

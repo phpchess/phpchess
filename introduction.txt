@@ -1,0 +1,17 @@
+Date[2017/06/06]
+Source[phpchess.com]
+Author[Christian Blumhoff]
+Subject[phpChess release 4.3 introduction]
+Copyright [Christian Blumhoff, phpchess.com, (c)2017]
+
+Thank you for having a look at phpchess. phpChess has been going now for well over 15 years and has pretty much run it's course. We have coded it from php version 3 all the way up to finallyh version 7 support. phpChess has grown from pure turn based routes and manual page refreshes to now using javascript to give a almost realtime capability. But in order to bring chess further from our perspective wee will need a major step change, using serverside capabilities we cannot create with shared hosting capabilities. In short we are looking at different ways and that will (and has) taken some time. 
+
+phpChess is free for anyone to use and modify. please simply give phpChess some credit. If you use it you will by default agree to a license to do exactly that. Please note that we are using a number of libraries and capabilities in this software which have their own copyright, like TINYMCE, phpmailer, lt-pgn-viewer, jquery, js_chess, and others. please have a look into the include folder to find further items.
+
+phpchess is badly coded. it has grown over time and is not very efficient. Another reason why it is as far as we can take it. It really requires a major overhaul, and we are just not that way inclined. We rather would like to start something new. Having said that, you can do quite a few things. Including change the skin, replay games, organise tournaments, create learning activities (although that is tricky to master), and of course install it on most shared servers at very low cost. 
+
+Not all hosts work out of the box. GoDaddy for example has issues with the bin directory, which means some content has to be taken out of the bin directory and repointed, specifically the captcha part. I am happy to help. mail me at phpchess@gmail.com and I will do my best to support you.
+
+Have fun and let me know how you get on
+
+Christian

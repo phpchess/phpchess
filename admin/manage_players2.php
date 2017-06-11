@@ -102,7 +102,7 @@
 $query = "SELECT `player_id`,`userid`,`email` FROM `player` WHERE (`player_id` NOT IN (SELECT `b_player_id` FROM `game`)) AND (`player_id` NOT IN (SELECT `w_player_id` FROM `game`))";
 $result = @mysql_query($query);
 echo '<table align="Center" cellspacing="1" cellpadding="2"><tr><td align="left"><b>ID</b></td><td align="left"><b>USER</b></td><td align="left"><b>E-Mail</b></td></tr>';
-while ($row = mysql_fetch_array($result, MYSQL_NUM)) 
+while ($row = mysqli_fetch_array($result, MYSQLI_NUM)) 
 {
 echo "<tr><td align=\"left\">$row[0]</td><td align=\"left\">$row[1]</td><td align=\"left\">$row[2]</td></tr>\n";
 }

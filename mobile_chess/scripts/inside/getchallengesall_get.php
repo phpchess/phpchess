@@ -1,10 +1,10 @@
 <?
 	$sqlquery = "SELECT * FROM game WHERE (w_player_id = '".$_SESSION["id"]."' OR b_player_id = '".$_SESSION["id"]."') AND completion_status = 'I' AND status != 'W'";
 	$result = mysql_query($sqlquery) or die("Unable to execute query: ".mysql_error());
-  	header("var_games_no: ".mysql_numrows($result));
+  	header("var_games_no: ".mysqli_num_rows($result));
 
   	$i = 0;
-  	while ($challenge = mysql_fetch_array($result))
+  	while ($challenge = mysqli_fetch_array($result))
   	{
   		if ($challenge["w_player_id"] == $_SESSION["id"])
   			$sqlquery = "SELECT userid FROM player WHERE player_id = '".$challenge["b_player_id"]."'";
@@ -12,7 +12,7 @@
   			$sqlquery = "SELECT userid FROM player WHERE player_id = '".$challenge["w_player_id"]."'";
       	$result1 = mysql_query($sqlquery) or die("Unable to execute query: ".mysql_error());
 
-      	$player = mysql_fetch_array($result1);
+      	$player = mysqli_fetch_array($result1);
 
       	header("var_game_".$i."_id: ".$challenge["game_id"]);
       	header("var_player_".$i."_name: ".$player["userid"]);

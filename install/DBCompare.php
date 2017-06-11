@@ -7,7 +7,7 @@ class DBCompare
 	// Initialises class and database connection using the provided connection settings.
 	// $config: array containing:
 	//          hostname, username and password
-	function DBCompare($config)
+	function __construct($config)
 	{
 		$host = $config['hostname'];
 		$user = $config['username'];

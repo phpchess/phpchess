@@ -6,14 +6,14 @@ class Upgrade_Validator
 	private $dbh;
 	private $UV;
 
-	public function Upgrade_Validator($dbh)
+	public function __construct($dbh)
 	{
 		$this->dbh = $dbh;
 	}
 	
 	public function validate($version)
 	{
-		if($version == '4.2.0')
+		if($version == '4.2.0' or $version == '4.3.0')
 			$this->UV = new Upgrade_Validator_4_2_0();
 			
 		$this->UV->dbh = $this->dbh;
@@ -36,12 +36,12 @@ class Upgrade_Validator_4_2_0
 	private $correct_version;				// Boolean, indicates if the server version stored is correct.
 	private $player_anyone_exists;			// Indicates if player 'ANYONE' exists.
 	
-	public function Upgrade_Validator_4_2_0()
+	function __construct()
 	{
 		include('../bin/config.php');
 		$salt = $conf['password_salt'];
 	
-		$this->version = '4.2.0';
+		$this->version = '4.3.0';
 		// Entries listing records for tables that MUST exist. These records are inserted if they
 		// are found to be missing.
 		$this->list_required_records = array(

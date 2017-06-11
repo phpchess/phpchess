@@ -39,7 +39,7 @@ class CChess{
   * CChess (Constructor)
   *
   */
-  function CChess($config){
+  function __construct($config){
 
     ////////////////////////////////////////////////////////////////////////////
     // Sets the chess config file location (absolute location on the server)
@@ -48,7 +48,12 @@ class CChess{
 
   }
 
-
+  static function mysqli_result($result, $number, $field=0) {
+      mysqli_data_seek($result, $number);
+      $row = mysqli_fetch_array($result);
+      return $row[$field];
+  }
+    
   /**********************************************************************
   * GetStringFromStringTable
   *
@@ -73,16 +78,16 @@ class CChess{
       $user = $conf['database_login'];
       $pass = $conf['database_pass'];
 
-      $link = mysql_connect($host, $user, $pass);
-      mysql_select_db($dbnm);
+      $link = mysqli_connect($host, $user, $pass);
+      mysqli_select_db($link,$dbnm);
 
       $query = "SELECT * FROM server_language WHERE o_id=1";
-      $return = mysql_query($query, $link) or die(mysql_error());
-      $num = mysql_numrows($return);
+      $return = mysqli_query($link,$query) or die(mysqli_error($link));
+      $num = mysqli_num_rows($return);
 
       if($num != 0){
 
-        $LanguageFile = $conf['absolute_directory_location']."includes/languages/".mysql_result($return, 0, "o_languagefile");
+        $LanguageFile = $conf['absolute_directory_location']."includes/languages/".CChess::mysqli_result($return, 0, "o_languagefile");
 
       }
 
@@ -137,11 +142,11 @@ class CChess{
     include($ConfigFile);
 
     // connect to mysql and open database
-    $db_my = mysql_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
-    @mysql_select_db($conf['database_name']) or die("Unable to select database");
+    $db_my = mysqli_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
+    @mysqli_select_db($db_my,$conf['database_name']) or die("Unable to select database");
 
     $st = "SELECT * FROM move_history WHERE game_id='".$game_id."' ORDER BY time ASC";
-    $return = mysql_query($st) or die(mysql_error());
+    $return = mysqli_query($db_my,$st) or die(mysqli_error($db_my));
 
     return $this->process_history_result($return, $game_id);
 
@@ -159,11 +164,11 @@ class CChess{
     include($ConfigFile);
 
     // connect to mysql and open database
-    $db_my = mysql_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
-    @mysql_select_db($conf['database_name']) or die("Unable to select database");
+    $db_my = mysqli_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
+    @mysqli_select_db($db_my,$conf['database_name']) or die("Unable to select database");
 
     $st = "SELECT * FROM move_history WHERE game_id='".$game_id."' AND time <='".$time."' ORDER BY time ASC";
-    $return = mysql_query($st) or die(mysql_error());
+    $return = mysqli_query($db_my,$st) or die(mysqli_error($db_my));
 
     return $this->process_history_result($return, $game_id);
 
@@ -203,40 +208,40 @@ class CChess{
       include($ConfigFile);
 
       // connect to mysql and open database
-      $db_my = mysql_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
-      @mysql_select_db($conf['database_name']) or die("Unable to select database");
+      $db_my = mysqli_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
+      @mysqli_select_db($db_my,$conf['database_name']) or die("Unable to select database");
 
       $sti = "SELECT w_player_id, b_player_id, next_move, w_time_used, b_time_used, start_time FROM game WHERE game_id='".$gid."'";
-      $stireturn = mysql_query($sti) or die(mysql_error());
-      $stinum = mysql_numrows($stireturn);
+      $stireturn = mysqli_query($db_my,$sti) or die(mysqli_error($db_my));
+      $stinum = mysqli_num_rows($stireturn);
 
       if($stinum != 0)
 	  {
 
-        if($player_id == mysql_result($stireturn,0,"w_player_id")){
+        if($player_id == CChess::mysqli_result($stireturn,0,"w_player_id")){
           $next_color="b";
-          $other_player=mysql_result($stireturn,0,"b_player_id");
+          $other_player=CChess::mysqli_result($stireturn,0,"b_player_id");
         }else{
           $next_color="w";
-          $other_player=mysql_result($stireturn,0,"w_player_id");
+          $other_player=CChess::mysqli_result($stireturn,0,"w_player_id");
         }
-		$w_time_used = (int)mysql_result($stireturn, 0, 'w_time_used');
-		$b_time_used = (int)mysql_result($stireturn, 0, 'b_time_used');
-		$start_time = (int)mysql_result($stireturn, 0, 'start_time');
+		$w_time_used = (int)CChess::mysqli_result($stireturn, 0, 'w_time_used');
+		$b_time_used = (int)CChess::mysqli_result($stireturn, 0, 'b_time_used');
+		$start_time = (int)CChess::mysqli_result($stireturn, 0, 'start_time');
 
         //castling
 		if($move2 = checkCastling($move, $gid, $ConfigFile)){
 		  $st = "INSERT INTO move_history(game_id,player_id,move,time) VALUES('".$gid."',".$player_id.",'".$move2."',".time().")";
-			  mysql_query($st) or die(mysql_error()); 
+			  mysqli_query($db_my,$st) or die(mysqli_error($db_my)); 
 		}elseif($move2 = checkPromotion($move)){
 		  $st = "INSERT INTO move_history(game_id,player_id,move,time) VALUES('".$gid."',".$player_id.",'".$move2."',".time().")";
-			  mysql_query($st) or die(mysql_error());		
+			  mysqli_query($db_my,$st) or die(mysqli_error($db_my));		
 		}elseif($move2 = checkEnpassent($move)){			
 		  $st = "INSERT INTO move_history(game_id,player_id,move,time) VALUES('".$gid."',".$player_id.",'".$move2."',".time().")";
-			  mysql_query($st) or die(mysql_error());
+			  mysqli_query($db_my,$st) or die(mysqli_error($db_my));
 		}else{
 		  $st = "INSERT INTO move_history(game_id,player_id,move,time) VALUES('".$gid."',".$player_id.",'".$move."',".time().")";
-			  mysql_query($st) or die(mysql_error());    
+			  mysqli_query($db_my,$st) or die(mysqli_error($db_my));    
 		}
 		
 		// Get the game timing mode in use, along with any time controls
@@ -247,16 +252,16 @@ FROM cfm_game_options
 LEFT JOIN timed_games ON cfm_game_options.o_gameid = timed_games.id
 WHERE o_gameid = '$gid'
 qq;
-		$return = mysql_query($query) or die(mysql_error());
-		$num = mysql_numrows($return);
+		$return = mysqli_query($db_my,$query) or die(mysqli_error($db_my));
+		$num = mysqli_num_rows($return);
 		
-		$timing_mode = (int)mysql_result($return, 0, "time_mode");
-		$m1 = (int)@mysql_result($return, $i, 'moves1');
-		$m2 = (int)@mysql_result($return, $i, 'moves2');
-		$t1 = (int)@mysql_result($return, $i, 'time1') * 60;
-		$t2 = (int)@mysql_result($return, $i, 'time2') * 60;
+		$timing_mode = (int)CChess::mysqli_result($return, 0, "time_mode");
+		$m1 = (int)@CChess::mysqli_result($return, $i, 'moves1');
+		$m2 = (int)@CChess::mysqli_result($return, $i, 'moves2');
+		$t1 = (int)@CChess::mysqli_result($return, $i, 'time1') * 60;
+		$t2 = (int)@CChess::mysqli_result($return, $i, 'time2') * 60;
 		
-		//$timing_type = mysql_result($return, 0, "o_timetype");
+		//$timing_type = CChess::mysqli_result($return, 0, "o_timetype");
 		$game_update = array();
 		if($timing_mode == 1)	// Time recorded for both players.
 		{
@@ -269,8 +274,8 @@ qq;
 			if($m1)
 			{
 				$query = "SELECT count(*) as `count` FROM move_history WHERE game_id = '$gid' AND player_id = $player_id";
-				$return = mysql_query($query) or die(mysql_error());
-				$move_cnt = mysql_result($return, 0, 'count');
+				$return = mysqli_query($db_my,$query) or die(mysqli_error($db_my));
+				$move_cnt = CChess::mysqli_result($return, 0, 'count');
 				if($move_cnt == $m1)	// Reached first time control
 				{
 					if($next_color == 'b') $w_time_used -= $t1;
@@ -290,10 +295,10 @@ qq;
 			// out how long it took the player to make this move. The first move made doesn't
 			// attract any time usage.
 			$query = "SELECT `time` FROM move_history WHERE game_id = '$gid' ORDER BY `time` DESC LIMIT 1,1";
-			$return = mysql_query($query) or die(mysql_error());
-			$num = mysql_numrows($return);
+			$return = mysqli_query($db_my,$query) or die(mysqli_error($db_my));
+			$num = mysqli_num_rows($return);
 			if($num != 0)
-				$last_move_time = (int)trim(mysql_result($return, 0, "time"));
+				$last_move_time = (int)trim(CChess::mysqli_result($return, 0, "time"));
 			else			// For first move, update the game start time to be 'now'.
 			{
 				$last_move_time = $now;
@@ -312,10 +317,10 @@ qq;
         $st = "UPDATE game SET $game_update WHERE game_id='".$gid."'";
 		//echo "run $st";
 		//exit();
-        mysql_query($st) or die(mysql_error());    
+        mysqli_query($db_my,$st) or die(mysqli_error($db_my));    
 
         $st = "INSERT INTO message_queue(player_id, message, posted) VALUES(".$other_player.",'".$this->add_header("M",$move_stat.$this->zero_pad($player_id,8).$gid.$move,"0")."',".time().")";
-        mysql_query($st) or die(mysql_error());
+        mysqli_query($db_my,$st) or die(mysqli_error($db_my));
 
         //////////////////////////////////////////////
         //Instantiate theCR3DCQuery Class
@@ -358,7 +363,7 @@ qq;
         if($nwhitek === false){
 
           $st = "UPDATE game SET status='C', completion_status='B' WHERE game_id='".$gid."'";
-          mysql_query($st) or die(mysql_error());
+          mysqli_query($db_my,$st) or die(mysqli_error($db_my));
 
         }
 
@@ -367,7 +372,7 @@ qq;
         if($nblackk === false){
 
           $st = "UPDATE game SET status='C', completion_status='W' WHERE game_id='".$gid."'";
-          mysql_query($st) or die(mysql_error());
+          mysqli_query($db_my,$st) or die(mysqli_error($db_my));
 
         }	
 
@@ -418,14 +423,14 @@ qq;
 
     $moves=0;
     $i=0;
-    $num = mysql_numrows($results);
+    $num = mysqli_num_rows($results);
 
     if($num != 0){
       
       while($i < $num){
 
         $moves++; 
-        $move = mysql_result($results,$i,"move");
+        $move = CChess::mysqli_result($results,$i,"move");
 
         $start_col = substr($move,0,1);
         $start_row = substr($move,1,1);
@@ -551,16 +556,16 @@ qq;
     $next_to_move="w";
 
     // connect to mysql and open database
-    $db_my = mysql_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
-    @mysql_select_db($conf['database_name']) or die("Unable to select database");
+    $db_my = mysqli_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
+    @mysqli_select_db($db_my,$conf['database_name']) or die("Unable to select database");
 
     // before we create the pgn move string, gather info on the game itself for the PGN tags.
 
     $stt = "SELECT game.completion_status FROM game WHERE game_id='".$game_id."'";
-    $sttreturn = mysql_query($stt) or die(mysql_error());
-    $sttnum = mysql_numrows($sttreturn);    
+    $sttreturn = mysqli_query($db_my,$stt) or die(mysqli_error($db_my));
+    $sttnum = mysqli_num_rows($sttreturn);    
 
-    $status = mysql_result($sttreturn,0,0);; 
+    $status = CChess::mysqli_result($sttreturn,0,0);; 
     
     if($status == "W"){
       $result="1-0";
@@ -571,35 +576,35 @@ qq;
     }
 
     $sti = "SELECT * FROM move_history WHERE game_id='".$game_id."' ORDER BY time ASC";
-    $stireturn = mysql_query($sti) or die(mysql_error());
-    $stinum = mysql_numrows($stireturn); 
+    $stireturn = mysqli_query($db_my,$sti) or die(mysqli_error($db_my));
+    $stinum = mysqli_num_rows($stireturn); 
 
     $stt22 = "SELECT * FROM game WHERE game_id='".$game_id."'";
-    $sttreturn22 = mysql_query($stt22) or die(mysql_error());
-    $sttnum22 = mysql_numrows($sttreturn22);   
+    $sttreturn22 = mysqli_query($db_my,$stt22) or die(mysqli_error($db_my));
+    $sttnum22 = mysqli_num_rows($sttreturn22);   
 
     $ConfigFile = "";
 
     //Instantiate theCR3DCQuery Class
     $oR3DCQuery = new CR3DCQuery($this->ChessCFGFileLocation);
-    $blackname = $oR3DCQuery->GetUserIDByPlayerID($this->ChessCFGFileLocation,mysql_result($sttreturn22, 0, "b_player_id"));
-    $whitename = $oR3DCQuery->GetUserIDByPlayerID($this->ChessCFGFileLocation,mysql_result($sttreturn22, 0, "w_player_id"));
+    $blackname = $oR3DCQuery->GetUserIDByPlayerID($this->ChessCFGFileLocation,CChess::mysqli_result($sttreturn22, 0, "b_player_id"));
+    $whitename = $oR3DCQuery->GetUserIDByPlayerID($this->ChessCFGFileLocation,CChess::mysqli_result($sttreturn22, 0, "w_player_id"));
     unset($oR3DCQuery);
 
-    $stt23 = "SELECT * FROM c4m_personalinfo WHERE p_playerid=".mysql_result($sttreturn22, 0, "b_player_id")."";
-    $sttreturn23 = mysql_query($stt23) or die(mysql_error());
-    $sttnum23 = mysql_numrows($sttreturn23);   
+    $stt23 = "SELECT * FROM c4m_personalinfo WHERE p_playerid=".CChess::mysqli_result($sttreturn22, 0, "b_player_id")."";
+    $sttreturn23 = mysqli_query($db_my,$stt23) or die(mysqli_error($db_my));
+    $sttnum23 = mysqli_num_rows($sttreturn23);   
 
     if($sttnum23 != 0){
-      $blackELO = mysql_result($sttreturn23, 0, "p_selfrating");
+      $blackELO = CChess::mysqli_result($sttreturn23, 0, "p_selfrating");
     }
 
-    $stt24 = "SELECT * FROM c4m_personalinfo WHERE p_playerid=".mysql_result($sttreturn22, 0, "w_player_id")."";
-    $sttreturn24 = mysql_query($stt24) or die(mysql_error());
-    $sttnum24 = mysql_numrows($sttreturn24);   
+    $stt24 = "SELECT * FROM c4m_personalinfo WHERE p_playerid=".CChess::mysqli_result($sttreturn22, 0, "w_player_id")."";
+    $sttreturn24 = mysqli_query($db_my,$stt24) or die(mysqli_error($db_my));
+    $sttnum24 = mysqli_num_rows($sttreturn24);   
 
     if($sttnum24 != 0){
-      $whiteELO = mysql_result($sttreturn24, 0, "p_selfrating");
+      $whiteELO = CChess::mysqli_result($sttreturn24, 0, "p_selfrating");
     }
 
     //if(!isset($noGameInfo)){
@@ -636,7 +641,7 @@ qq;
     while($i < $stinum){
 
       $pgn_move="";
-      $move = mysql_result($stireturn,$i,"move");
+      $move = CChess::mysqli_result($stireturn,$i,"move");
 
       $start_col = substr($move,0,1);     // A to H
       $start_row = substr($move,1,1);     // From 1 to 8
@@ -1369,16 +1374,16 @@ qq;
     $next_to_move="w";
 
     // connect to mysql and open database
-    $db_my = mysql_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
-    @mysql_select_db($conf['database_name']) or die("Unable to select database");
+    $db_my = mysqli_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
+    @mysqli_select_db($db_my,$conf['database_name']) or die("Unable to select database");
 
     // before we create the PGN move string, gather info on the game itself for the PGN tags.
 
     $stt = "SELECT game.completion_status FROM game WHERE game_id='".$game_id."'";
-    $sttreturn = mysql_query($stt) or die(mysql_error());
-    $sttnum = mysql_numrows($sttreturn);    
+    $sttreturn = mysqli_query($db_my,$stt) or die(mysqli_error($db_my));
+    $sttnum = mysqli_num_rows($sttreturn);    
 
-    $status = mysql_result($sttreturn,0,0);; 
+    $status = CChess::mysqli_result($sttreturn,0,0);; 
     
     if($status == "W"){
       $result="1-0";
@@ -1389,35 +1394,35 @@ qq;
     }
 
     $sti = "SELECT * FROM move_history WHERE game_id='".$game_id."' ORDER BY time ASC";
-    $stireturn = mysql_query($sti) or die(mysql_error());
-    $stinum = mysql_numrows($stireturn); 
+    $stireturn = mysqli_query($db_my,$sti) or die(mysqli_error($db_my));
+    $stinum = mysqli_num_rows($stireturn); 
 
     $stt22 = "SELECT * FROM game WHERE game_id='".$game_id."'";
-    $sttreturn22 = mysql_query($stt22) or die(mysql_error());
-    $sttnum22 = mysql_numrows($sttreturn22);   
+    $sttreturn22 = mysqli_query($db_my,$stt22) or die(mysqli_error($db_my));
+    $sttnum22 = mysqli_num_rows($sttreturn22);   
 
     $ConfigFile = "";
 
     //Instantiate theCR3DCQuery Class
     $oR3DCQuery = new CR3DCQuery($this->ChessCFGFileLocation);
-    $blackname = $oR3DCQuery->GetUserIDByPlayerID($this->ChessCFGFileLocation,mysql_result($sttreturn22, 0, "b_player_id"));
-    $whitename = $oR3DCQuery->GetUserIDByPlayerID($this->ChessCFGFileLocation,mysql_result($sttreturn22, 0, "w_player_id"));
+    $blackname = $oR3DCQuery->GetUserIDByPlayerID($this->ChessCFGFileLocation,CChess::mysqli_result($sttreturn22, 0, "b_player_id"));
+    $whitename = $oR3DCQuery->GetUserIDByPlayerID($this->ChessCFGFileLocation,CChess::mysqli_result($sttreturn22, 0, "w_player_id"));
     unset($oR3DCQuery);
 
-    $stt23 = "SELECT * FROM c4m_personalinfo WHERE p_playerid=".mysql_result($sttreturn22, 0, "b_player_id")."";
-    $sttreturn23 = mysql_query($stt23) or die(mysql_error());
-    $sttnum23 = mysql_numrows($sttreturn23);   
+    $stt23 = "SELECT * FROM c4m_personalinfo WHERE p_playerid=".CChess::mysqli_result($sttreturn22, 0, "b_player_id")."";
+    $sttreturn23 = mysqli_query($db_my,$stt23) or die(mysqli_error($db_my));
+    $sttnum23 = mysqli_num_rows($sttreturn23);   
 
     if($sttnum23 != 0){
-      $blackELO = mysql_result($sttreturn23, 0, "p_selfrating");
+      $blackELO = CChess::mysqli_result($sttreturn23, 0, "p_selfrating");
     }
 
-    $stt24 = "SELECT * FROM c4m_personalinfo WHERE p_playerid=".mysql_result($sttreturn22, 0, "w_player_id")."";
-    $sttreturn24 = mysql_query($stt24) or die(mysql_error());
-    $sttnum24 = mysql_numrows($sttreturn24);   
+    $stt24 = "SELECT * FROM c4m_personalinfo WHERE p_playerid=".CChess::mysqli_result($sttreturn22, 0, "w_player_id")."";
+    $sttreturn24 = mysqli_query($db_my,$stt24) or die(mysqli_error($db_my));
+    $sttnum24 = mysqli_num_rows($sttreturn24);   
 
     if($sttnum24 != 0){
-      $whiteELO = mysql_result($sttreturn24, 0, "p_selfrating");
+      $whiteELO = CChess::mysqli_result($sttreturn24, 0, "p_selfrating");
     }
 
     //$hist .= "[Round \"".($stinum/2)."\"]\n[White \"".$whitename."\"]\n[Black \"".$blackname."\"]\n[WhiteELO \"".$whiteELO."\"]\n[BlackELO \"".$blackELO."\"]\n[Result \"".$result."\"]\n\n";
@@ -1452,7 +1457,7 @@ qq;
     while($i < $stinum){
 
       $pgn_move="";
-      $move = mysql_result($stireturn,$i,"move");
+      $move = CChess::mysqli_result($stireturn,$i,"move");
 
       $start_col = substr($move,0,1);     // A to H
       $start_row = substr($move,1,1);     // From 1 to 8
@@ -2186,28 +2191,28 @@ qq;
       $game_id = $this->gen_unique();
 
       // connect to mysql and open database
-      $db_my = mysql_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
-      @mysql_select_db($conf['database_name']) or die("Unable to select database");
+      $db_my = mysqli_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
+      @mysqli_select_db($db_my,$conf['database_name']) or die("Unable to select database");
 
       $st = "INSERT INTO game(game_id, initiator, w_player_id, b_player_id, start_time) VALUES('".$game_id."',".$requestor.",".$w_player_id.",".$b_player_id.",".time().")";
-      mysql_query($st) or die(mysql_error());
+      mysqli_query($db_my,$st) or die(mysqli_error($db_my));
 
       //if fen is included insert it
       if(trim($FEN) != ""){
 
          $st = "INSERT INTO c4m_newgameotherfen VALUES('".$game_id."', '".trim($FEN)."')";
-         mysql_query($st) or die(mysql_error());
+         mysqli_query($db_my,$st) or die(mysqli_error($db_my));
 
       }
   
       // immediately update the status of the requestor
       $st = "UPDATE player SET status='E' WHERE player_id=".$requestor."";
-      mysql_query($st) or die(mysql_error());
+      mysqli_query($db_my,$st) or die(mysqli_error($db_my));
 
       //////////////////////////////////////////////
       // notify the challenged
       $st = "INSERT INTO message_queue(player_id, message, posted) VALUES(".$other.",'".$this->add_header("G",$game_id.$this->zero_pad($requestor,8),"C")."',".time().")";
-      mysql_query($st) or die(mysql_error());
+      mysqli_query($db_my,$st) or die(mysqli_error($db_my));
 
       //Instantiate theCR3DCQuery Class
       $oR3DCQuery = new CR3DCQuery($this->ChessCFGFileLocation);
@@ -2254,17 +2259,17 @@ qq;
     include($this->ChessCFGFileLocation);
 
     // connect to mysql and open database
-    $db_my = mysql_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
-    @mysql_select_db($conf['database_name']) or die("Unable to select database");
+    $db_my = mysqli_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
+    @mysqli_select_db($db_my,$conf['database_name']) or die("Unable to select database");
 
     // Advanced email configuration
     $query1 = "SELECT * FROM server_email_settings WHERE o_id='1'";
-    $return1 = mysql_query($query1) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($db_my,$query1) or die(mysqli_error($db_my));
+    $num1 = mysqli_num_rows($return1);
 
     $query2 = "SELECT * FROM smtp_settings WHERE o_id='1'";
-    $return2 = mysql_query($query2) or die(mysql_error());
-    $num2 = mysql_numrows($return2);
+    $return2 = mysqli_query($db_my,$query2) or die(mysqli_error($db_my));
+    $num2 = mysqli_num_rows($return2);
 
     $bOld = true;
 
@@ -2275,17 +2280,17 @@ qq;
     $xdomain= "";
 
     if($num1 != 0){
-      $smtp = trim(mysql_result($return1,0,"o_smtp"));
-      $port = trim(mysql_result($return1,0,"o_smtp_port"));
+      $smtp = trim(CChess::mysqli_result($return1,0,"o_smtp"));
+      $port = trim(CChess::mysqli_result($return1,0,"o_smtp_port"));
 
       $user = "";
       $pass = "";
       $domain = "";
 
       if($num2 != 0){
-        $user = trim(mysql_result($return2,0,"o_user"));
-        $pass = trim(mysql_result($return2,0,"o_pass"));
-        $domain = trim(mysql_result($return2,0,"o_domain"));
+        $user = trim(CChess::mysqli_result($return2,0,"o_user"));
+        $pass = trim(CChess::mysqli_result($return2,0,"o_pass"));
+        $domain = trim(CChess::mysqli_result($return2,0,"o_domain"));
 
       }
 
@@ -2344,7 +2349,7 @@ qq;
 
       if(!$mail->Send()){
         $insert = "INSERT INTO email_log VALUES(NULL, '".$to."', '".$fromemail."', '".$fromname."', '".addslashes($subject)."', '".addslashes($body)."', '".addslashes($mail->ErrorInfo)."', NOW())";
-        mysql_query($insert) or die(mysql_error());
+        mysqli_query($db_my,$insert) or die(mysqli_error($db_my));
       }
 
     }
@@ -2367,12 +2372,12 @@ qq;
     include($ConfigFile);
 
     // connect to mysql and open database
-    $db_my = mysql_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
-    @mysql_select_db($conf['database_name']) or die("Unable to select database");
+    $db_my = mysqli_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
+    @mysqli_select_db($db_my,$conf['database_name']) or die("Unable to select database");
  
     $st = "SELECT player_id FROM player WHERE userid='".$userid."'";
-    $return = mysql_query($st) or die(mysql_error());
-    $num = mysql_numrows($return); 
+    $return = mysqli_query($db_my,$st) or die(mysqli_error($db_my));
+    $num = mysqli_num_rows($return); 
 
     if($num>0){
       return array('success' => FALSE, 'msg' => "That userid is taken, please reregister with a different id!");
@@ -2385,7 +2390,7 @@ qq;
 	$hash = md5($salt . $pass);
  
     $st = "INSERT INTO player(userid, password, signup_time, email) VALUES('".$userid."','".$hash."',".time().",'".$email."')";
-    mysql_query($st) or die(mysql_error());
+    mysqli_query($db_my,$st) or die(mysqli_error($db_my));
 
     // send an email about registration...
 
@@ -2426,13 +2431,13 @@ qq;
     $bExists = false;
 
     // connect to mysql and open database
-    $db_my = mysql_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
-    @mysql_select_db($conf['database_name']) or die("Unable to select database");
+    $db_my = mysqli_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
+    @mysqli_select_db($db_my,$conf['database_name']) or die("Unable to select database");
 
     // check to see if that user id is in use...
     $st = "SELECT player_id FROM player WHERE userid='".$userid."'";
-    $return = mysql_query($st) or die(mysql_error());
-    $num = mysql_numrows($return); 
+    $return = mysqli_query($db_my,$st) or die(mysqli_error($db_my));
+    $num = mysqli_num_rows($return); 
 
     if($num > 0){
      $bExists = true;
@@ -2440,8 +2445,8 @@ qq;
 
       // check to see if that user id is in use...
       $st = "SELECT player_id FROM pendingplayer WHERE userid='".$userid."'";
-      $return = mysql_query($st) or die(mysql_error());
-      $num = mysql_numrows($return); 
+      $return = mysqli_query($db_my,$st) or die(mysqli_error($db_my));
+      $num = mysqli_num_rows($return); 
 
       if($num >0){
         $bExists = true;
@@ -2468,13 +2473,13 @@ qq;
     include($ConfigFile);
 
     // connect to mysql and open database
-    $db_my = mysql_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
-    @mysql_select_db($conf['database_name']) or die("Unable to select database");
+    $db_my = mysqli_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
+    @mysqli_select_db($db_my,$conf['database_name']) or die("Unable to select database");
 
     // check to see if that user id is in use...
     $st = "SELECT player_id FROM player WHERE userid='".$userid."'";
-    $return = mysql_query($st) or die(mysql_error());
-    $num = mysql_numrows($return); 
+    $return = mysqli_query($db_my,$st) or die(mysqli_error($db_my));
+    $num = mysqli_num_rows($return); 
 
     if($num >0){
      return array('success'=> FALSE, 'msg' => "That userid is taken, please reregister with a different id");
@@ -2482,8 +2487,8 @@ qq;
 
       // check to see if that user id is in use...
       $st = "SELECT player_id FROM pendingplayer WHERE userid='".$userid."'";
-      $return = mysql_query($st) or die(mysql_error());
-      $num = mysql_numrows($return); 
+      $return = mysqli_query($db_my,$st) or die(mysqli_error($db_my));
+      $num = mysqli_num_rows($return); 
 
       if($num >0){
         return array('success' => FALSE, 'msg' => "That userid is taken, please reregister with a different id!");
@@ -2494,7 +2499,7 @@ qq;
         $hash = md5($salt . $pass);
  
         $st = "INSERT INTO pendingplayer(userid, password, signup_time, email) VALUES('".$userid."','".$hash."',".time().",'".$email."')";
-        mysql_query($st) or die(mysql_error());
+        mysqli_query($db_my,$st) or die(mysqli_error($db_my));
 
         // send an email about registration...
 
@@ -2541,16 +2546,16 @@ qq;
     include($ConfigFile);
 
     // connect to mysql and open database
-    $db_my = mysql_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
-    @mysql_select_db($conf['database_name']) or die("Unable to select database-".$conf['database_name']);
+    $db_my = mysqli_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
+    @mysqli_select_db($db_my,$conf['database_name']) or die("Unable to select database-".$conf['database_name']);
 
     $st = "SELECT player_id FROM player WHERE userid='".$userid."' AND password='".$pw."'";
-    $return = mysql_query($st) or die(mysql_error());
-    $num = mysql_numrows($return); 
+    $return = mysqli_query($db_my,$st) or die(mysqli_error($db_my));
+    $num = mysqli_num_rows($return); 
 
     if($num != 0){
       
-      $player_id = mysql_result($return,0,0);
+      $player_id = CChess::mysqli_result($return,0,0);
 
       //Instantiate theCR3DCQuery Class
       //$oR3DCQuery = new CR3DCQuery($ConfigFile);
@@ -2560,7 +2565,7 @@ qq;
         // they succeeded security checks, so update info
         // set status to online
         $st = "UPDATE player SET status='N' WHERE player_id=".$player_id."";
-        mysql_query($st) or die(mysql_error());
+        mysqli_query($db_my,$st) or die(mysqli_error($db_my));
 
         //and create a new session
         $the_time = time();
@@ -2568,7 +2573,7 @@ qq;
         $session = base64_encode($session);
  
         $st = "INSERT INTO active_sessions(session, player_id, session_time) VALUES('".$session."',".$player_id.",".$the_time.")";
-        mysql_query($st) or die(mysql_error());
+        mysqli_query($db_my,$st) or die(mysqli_error($db_my));
 
       //}
 
@@ -2601,22 +2606,22 @@ qq;
       list($uniq,$player_id) = preg_split("/\|/", $session);
 
       // connect to mysql and open database
-      $db_my = mysql_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
-      @mysql_select_db($conf['database_name']) or die("Unable to select database");
+      $db_my = mysqli_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
+      @mysqli_select_db($db_my,$conf['database_name']) or die("Unable to select database");
 
       $st = "SELECT session_time FROM active_sessions WHERE session LIKE '".$orig_session."%' and player_id=".$player_id." ORDER BY session_time ASC";
-      $return = mysql_query($st) or die(mysql_error());
-      $num = mysql_numrows($return); 
+      $return = mysqli_query($db_my,$st) or die(mysqli_error($db_my));
+      $num = mysqli_num_rows($return); 
 
       if($num != 0){
 
-        $time = mysql_result($return,0,0);
+        $time = CChess::mysqli_result($return,0,0);
 
         if((time() - $this->$conf['session_timeout_sec']) > $time){
 
           // the session has timed out, so remove it and return failure (0)
           $st = "DELETE FROM active_sessions WHERE session='".$orig_session."'";
-          mysql_query($st) or die(mysql_error());
+          mysqli_query($db_my,$st) or die(mysqli_error($db_my));
 
           $ret=0;
 
@@ -2624,14 +2629,14 @@ qq;
 
           // update the session time (like a touch)
           $st = "UPDATE active_sessions SET session_time=".time()." WHERE session LIKE '".$orig_session."%'";
-          mysql_query($st) or die(mysql_error());
+          mysqli_query($db_my,$st) or die(mysqli_error($db_my));
 
           $online_status="N";
 
         }
 
         $st = "UPDATE player SET status='".$online_status."' WHERE player_id=".$player_id."";
-        mysql_query($st) or die(mysql_error());
+        mysqli_query($db_my,$st) or die(mysqli_error($db_my));
 
       }else{
         $ret=0;
@@ -2664,14 +2669,14 @@ qq;
     list($uniq, $player_id) = preg_split("/\|/", $session);
 
     // connect to mysql and open database
-    $db_my = mysql_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
-    @mysql_select_db($conf['database_name']) or die("Unable to select database");
+    $db_my = mysqli_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
+    @mysqli_select_db($db_my,$conf['database_name']) or die("Unable to select database");
 
     $st = "DELETE FROM active_sessions WHERE session LIKE '".$orig_session."%'";
-    mysql_query($st) or die(mysql_error());
+    mysqli_query($db_my,$st) or die(mysqli_error($db_my));
 
     $st = "UPDATE player SET status='F' WHERE player_id=".$player_id."";
-    mysql_query($st) or die(mysql_error());
+    mysqli_query($db_my,$st) or die(mysqli_error($db_my));
 
     return 1;
   }
@@ -2692,13 +2697,13 @@ qq;
 
     // verify this is the person whom should be playing...
     $st = "SELECT game_id FROM game where game_id='".$game_id."' AND (w_player_id=".$player_id." OR b_player_id=".$player_id.") AND initiator!=".$player_id."";
-    $return = mysql_query($st) or die(mysql_error());
-    $num = mysql_numrows($return); 
+    $return = mysqli_query($db_my,$st) or die(mysqli_error($db_my));
+    $num = mysqli_num_rows($return); 
 
     if($num != 0){
 
       $stg = "UPDATE game SET status='A', start_time=".time()." WHERE game_id='".$game_id."'";
-      mysql_query($stg) or die(mysql_error());
+      mysqli_query($db_my,$stg) or die(mysqli_error($db_my));
 
       $ret=1;
     }
@@ -2720,26 +2725,26 @@ qq;
     include($ConfigFile);
 
     // connect to mysql and open database
-    $db_my = mysql_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
-    @mysql_select_db($conf['database_name']) or die("Unable to select database");
+    $db_my = mysqli_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
+    @mysqli_select_db($db_my,$conf['database_name']) or die("Unable to select database");
 
     // verify this is the person whom should be playing...
     //modified for OC    $st = "SELECT game_id FROM game where game_id='".$game_id."' AND (w_player_id=".$player_id." OR b_player_id=".$player_id.") AND initiator!=".$player_id."";
     $st = "SELECT game_id, w_player_id, b_player_id FROM game where game_id='".$game_id."' AND (w_player_id=".$player_id." OR b_player_id=".$player_id." OR w_player_id=0 OR b_player_id=0) AND (initiator!=".$player_id." OR w_player_id=0 or b_player_id=0)";
-    $return = mysql_query($st) or die(mysql_error());
-    $num = mysql_numrows($return); 
+    $return = mysqli_query($db_my,$st) or die(mysqli_error($db_my));
+    $num = mysqli_num_rows($return); 
 
     if($num != 0){
 
       $stg = "UPDATE game SET status='A', start_time=".time()." WHERE game_id='".$game_id."'";
-      mysql_query($stg) or die(mysql_error());
+      mysqli_query($db_my,$stg) or die(mysqli_error($db_my));
 
 	//cb try shortcut to setting the right variable
       $stg = "UPDATE game SET w_player_id='".$player_id."' WHERE game_id='".$game_id."' AND w_player_id=0";
-      mysql_query($stg) or die(mysql_error());
+      mysqli_query($db_my,$stg) or die(mysqli_error($db_my));
 
       $stg = "UPDATE game SET b_player_id='".$player_id."' WHERE game_id='".$game_id."' AND b_player_id=0";
-      mysql_query($stg) or die(mysql_error());
+      mysqli_query($db_my,$stg) or die(mysqli_error($db_my));
 
     }
 
@@ -2759,26 +2764,26 @@ qq;
     $next_move = "w";
 
     // connect to mysql and open database
-    $db_my = mysql_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
-    @mysql_select_db($conf['database_name']) or die("Unable to select database");
+    $db_my = mysqli_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
+    @mysqli_select_db($db_my,$conf['database_name']) or die("Unable to select database");
 
     $st = "SELECT initiator, w_player_id, b_player_id, status, completion_status, start_time, next_move FROM game WHERE game_id='".$game_id."'";
-    $streturn = mysql_query($st) or die(mysql_error());
-    $stnum = mysql_numrows($streturn); 
+    $streturn = mysqli_query($db_my,$st) or die(mysqli_error($db_my));
+    $stnum = mysqli_num_rows($streturn); 
 
     if($stnum != 0){
 
       $sg = "SELECT time FROM move_history WHERE game_id='".$game_id."' ORDER BY time DESC LIMIT 1";
-      $sgreturn = mysql_query($sg) or die(mysql_error());
-      $sgnum = mysql_numrows($sgreturn);
+      $sgreturn = mysqli_query($db_my,$sg) or die(mysqli_error($db_my));
+      $sgnum = mysqli_num_rows($sgreturn);
  
       $lm_time = 0;
 
       if($sgnum != 0){
-        $lm_time = mysql_result($sgreturn,0,0);
+        $lm_time = CChess::mysqli_result($sgreturn,0,0);
       }
 
-      $status="".$game_id.$this->zero_pad(mysql_result($streturn,0,0),8).$this->zero_pad(mysql_result($streturn,0,1),8).$this->zero_pad(mysql_result($streturn,0,2),8).mysql_result($streturn,0,3).mysql_result($streturn,0,4).mysql_result($streturn,0,6).mysql_result($streturn,0,5).$this->zero_pad($lm_time,10);
+      $status="".$game_id.$this->zero_pad(CChess::mysqli_result($streturn,0,0),8).$this->zero_pad(CChess::mysqli_result($streturn,0,1),8).$this->zero_pad(CChess::mysqli_result($streturn,0,2),8).CChess::mysqli_result($streturn,0,3).CChess::mysqli_result($streturn,0,4).CChess::mysqli_result($streturn,0,6).CChess::mysqli_result($streturn,0,5).$this->zero_pad($lm_time,10);
 
     }
 
@@ -2804,26 +2809,26 @@ qq;
     include($ConfigFile);
 
     // connect to mysql and open database
-    $db_my = mysql_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
-    @mysql_select_db($conf['database_name']) or die("Unable to select database");
+    $db_my = mysqli_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
+    @mysqli_select_db($db_my,$conf['database_name']) or die("Unable to select database");
 
     $st = "SELECT mid,message FROM message_queue WHERE player_id='".$player_id."' ORDER BY posted ASC ".$limit."";
-    $streturn = mysql_query($st) or die(mysql_error());
-    $stnum = mysql_numrows($streturn); 
+    $streturn = mysqli_query($db_my,$st) or die(mysqli_error($db_my));
+    $stnum = mysqli_num_rows($streturn); 
 
     $del_str="DELETE FROM message_queue WHERE 1=0 ";
 
     $i=0;
     while($i < $stnum){
-      //print mysql_result($streturn,$i,1)."\n";
-      $del_str=$del_str."OR mid='".mysql_result($streturn,$i,0)."' ";
+      //print CChess::mysqli_result($streturn,$i,1)."\n";
+      $del_str=$del_str."OR mid='".CChess::mysqli_result($streturn,$i,0)."' ";
       $i++;
     }
 
     if($peek == "y"){
     }else{
       $sto = $del_str;
-      mysql_query($sto) or die(mysql_error());
+      mysqli_query($db_my,$sto) or die(mysqli_error($db_my));
     }
 
   }
@@ -2840,19 +2845,19 @@ qq;
     include($ConfigFile);
 
     // connect to mysql and open database
-    $db_my = mysql_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
-    @mysql_select_db($conf['database_name']) or die("Unable to select database");
+    $db_my = mysqli_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
+    @mysqli_select_db($db_my,$conf['database_name']) or die("Unable to select database");
 
     $stp = "SELECT userid FROM player WHERE player_id=".$sender_id."";
-    $stpreturn = mysql_query($stp) or die(mysql_error());
-    $stpnum = mysql_numrows($stpreturn); 
+    $stpreturn = mysqli_query($db_my,$stp) or die(mysqli_error($db_my));
+    $stpnum = mysqli_num_rows($stpreturn); 
 
     if($stpnum != 0){
 
-      $message = $this->add_header("C",mysql_result($stpreturn,0,0)."-".$msg,"0"); 
+      $message = $this->add_header("C",CChess::mysqli_result($stpreturn,0,0)."-".$msg,"0"); 
 
       $st = "INSERT INTO message_queue (player_id, message, posted) VALUES(".$for_player_id.",'".$message."',".time().")";
-      mysql_query($st) or die(mysql_error());
+      mysqli_query($db_my,$st) or die(mysqli_error($db_my));
 
     }
 
@@ -2869,16 +2874,16 @@ qq;
     $user_id = "";
 
     // connect to mysql and open database
-    $db_my = mysql_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
-    @mysql_select_db($conf['database_name']) or die("Unable to select database");
+    $db_my = mysqli_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
+    @mysqli_select_db($db_my,$conf['database_name']) or die("Unable to select database");
 
     $st = "SELECT userid FROM player WHERE player_id='".$player_id."'";
-    $streturn = mysql_query($st) or die(mysql_error());
-    $stnum = mysql_numrows($streturn); 
+    $streturn = mysqli_query($db_my,$st) or die(mysqli_error($db_my));
+    $stnum = mysqli_num_rows($streturn); 
 
     if($stnum != 0){
 
-      $user_id = mysql_result($streturn,0,0);
+      $user_id = CChess::mysqli_result($streturn,0,0);
 
     }
 
@@ -2990,18 +2995,18 @@ qq;
     include($ConfigFile);
 
     // connect to mysql and open database
-    $db_my = mysql_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
-    @mysql_select_db($conf['database_name']) or die("Unable to select database");
+    $db_my = mysqli_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
+    @mysqli_select_db($db_my,$conf['database_name']) or die("Unable to select database");
 
     // delete sessions that have timed out and not logged out or 
     // deleted by check_session() and mark the user offline 
     $st = "SELECT session FROM active_sessions WHERE session_time<=".(time() - $conf['session_timeout_sec'])."";
-    $streturn = mysql_query($st) or die(mysql_error());
-    $stnum = mysql_numrows($streturn); 
+    $streturn = mysqli_query($db_my,$st) or die(mysqli_error($db_my));
+    $stnum = mysqli_num_rows($streturn); 
 
     $i=0;
     while($i < $stnum){
-      $this->check_session(mysql_result($streturn,0,0)); 
+      $this->check_session(CChess::mysqli_result($streturn,0,0)); 
 
       $i++;
     }
@@ -3019,23 +3024,23 @@ qq;
     include($ConfigFile);
 
     // connect to mysql and open database
-    $db_my = mysql_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
-    @mysql_select_db($conf['database_name']) or die("Unable to select database");
+    $db_my = mysqli_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
+    @mysqli_select_db($db_my,$conf['database_name']) or die("Unable to select database");
 
     // delete sessions that have timed out and not logged out or 
     // deleted by check_session() and mark the user offline 
     $st = "SELECT session FROM active_sessions WHERE session_time<=".(time() - $conf['session_timeout_sec'])."";
-    $streturn = mysql_query($st) or die(mysql_error());
-    $stnum = mysql_numrows($streturn); 
+    $streturn = mysqli_query($db_my,$st) or die(mysqli_error($db_my));
+    $stnum = mysqli_num_rows($streturn); 
 
     $i=0;
     while($i < $stnum){
 
-      $orig_session = mysql_result($streturn, $i, "session");
+      $orig_session = CChess::mysqli_result($streturn, $i, "session");
 
       // the session has timed out, so remove it and return failure (0)
       $st = "DELETE FROM active_sessions WHERE session='".$orig_session."'";
-      mysql_query($st) or die(mysql_error()); 
+      mysqli_query($db_my,$st) or die(mysqli_error($db_my)); 
 
 
       $i++;
@@ -3054,11 +3059,11 @@ qq;
     include($ConfigFile);
 
     // connect to mysql and open database
-    $db_my = mysql_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
-    @mysql_select_db($conf['database_name']) or die("Unable to select database");
+    $db_my = mysqli_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
+    @mysqli_select_db($db_my,$conf['database_name']) or die("Unable to select database");
 
     $st = "UPDATE active_sessions SET session_time =".time()." WHERE session='".$orig_session."'";
-    mysql_query($st) or die(mysql_error());
+    mysqli_query($db_my,$st) or die(mysqli_error($db_my));
     
   }
 
@@ -3074,17 +3079,17 @@ qq;
     include($ConfigFile);
 
     // connect to mysql and open database
-    $db_my = mysql_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
-    @mysql_select_db($conf['database_name']) or die("Unable to select database");
+    $db_my = mysqli_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
+    @mysqli_select_db($db_my,$conf['database_name']) or die("Unable to select database");
 
     $query = "SELECT * FROM c4m_newgameotherfen WHERE gameid = '".$game_id."'";
-    $return = mysql_query($query) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($db_my,$query) or die(mysqli_error($db_my));
+    $num = mysqli_num_rows($return);
 
     $Error = "";
 
     if($num != 0){
-      $fen = mysql_result($return, 0, "fen");
+      $fen = CChess::mysqli_result($return, 0, "fen");
     }
 
     return $fen;
@@ -3103,18 +3108,18 @@ qq;
     include($ConfigFile);
 
     // connect to mysql and open database
-    $db_my = mysql_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
-    @mysql_select_db($conf['database_name']) or die("Unable to select database");
+    $db_my = mysqli_connect($conf['database_host'],$conf['database_login'],$conf['database_pass']) or die("Couldn't connect to the database.");
+    @mysqli_select_db($db_my,$conf['database_name']) or die("Unable to select database");
 
     $query = "SELECT * FROM c4m_newgameotherfen WHERE gameid = '".$game_id."'";
-    $return = mysql_query($query) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($db_my,$query) or die(mysqli_error($db_my));
+    $num = mysqli_num_rows($return);
 
     $Error = "";
 
     if($num != 0){
 
-      $fen = mysql_result($return, 0, "fen");
+      $fen = CChess::mysqli_result($return, 0, "fen");
 
       // Format/Decode the FEN
       list($one, $Other1, $Other2, $Other3, $Other4, $Round) = explode(" ", $fen, 6);
@@ -3316,10 +3321,10 @@ class ChessHelper
 		$info = "[Event \"$game_id\"]\n[CustomFEN \"" . ChessHelper::get_custom_fen(ChessHelper::$game_id) . "\"]\n[Mode \"ICS\"]\n";
 
 		$stt = "SELECT `completion_status` FROM `game` WHERE `game_id`='" . ChessHelper::$game_id . "'";
-		$sttreturn = mysql_query($stt, CSession::$db_link) or die(mysql_error());
-		$sttnum = mysql_numrows($sttreturn);
+		$sttreturn = mysqli_query(CSession::$db_link,$stt) or die(mysqli_error(CSession::$db_link));
+		$sttnum = mysqli_num_rows($sttreturn);
 
-		$status = mysql_result($sttreturn, 0, 0);
+		$status = CChess::mysqli_result($sttreturn, 0, 0);
 		
 		if($status == "W"){
 		  $result = "1-0";
@@ -3330,31 +3335,31 @@ class ChessHelper
 		}
 
 		// $sti = "SELECT * FROM move_history WHERE game_id='" . $game_id . "' ORDER BY time ASC";
-		// $stireturn = mysql_query($sti, CSession::$db_link) or die(mysql_error());
-		// $stinum = mysql_numrows($stireturn); 
+		// $stireturn = mysqli_query(CSession::$db_link,$sti) or die(mysqli_error(CSession::$db_link));
+		// $stinum = mysqli_num_rows($stireturn); 
 
 		$stt22 = "SELECT `w_player_id`, `b_player_id` FROM `game` WHERE `game_id`='" . ChessHelper::$game_id . "'";
-		$sttreturn22 = mysql_query($stt22, CSession::$db_link) or die(mysql_error());
-		$sttnum22 = mysql_numrows($sttreturn22);
-		$w_player_id = mysql_result($sttreturn22, 0, 'w_player_id');
-		$b_player_id = mysql_result($sttreturn22, 0, 'b_player_id');
+		$sttreturn22 = mysqli_query(CSession::$db_link,$stt22) or die(mysqli_error(CSession::$db_link));
+		$sttnum22 = mysqli_num_rows($sttreturn22);
+		$w_player_id = CChess::mysqli_result($sttreturn22, 0, 'w_player_id');
+		$b_player_id = CChess::mysqli_result($sttreturn22, 0, 'b_player_id');
 		
 		$query = "SELECT `userid` FROM `player` WHERE `player_id` IN ($w_player_id, $b_player_id)";
-		$return = mysql_query($query, CSession::$db_link) or die(mysql_error());
-		$num = mysql_numrows($return);
+		$return = mysqli_query(CSession::$db_link,$query) or die(mysqli_error(CSession::$db_link));
+		$num = mysqli_num_rows($return);
 		if($num == 2)
 		{
-			$whitename = trim(mysql_result($return, 0, 'userid'));
-			$blackname = trim(mysql_result($return, 1, 'userid'));
+			$whitename = trim(CChess::mysqli_result($return, 0, 'userid'));
+			$blackname = trim(CChess::mysqli_result($return, 1, 'userid'));
 		}
 		
 		// Self rating may not exist. Should something else be used?
 		// $query = "SELECT `p_selfrating` FROM c4m_personalinfo WHERE p_playerid IN ($w_player_id, $b_player_id)";
-		// $return = mysql_query($query, CSession::$db_link) or die(mysql_error());
+		// $return = mysqli_query(CSession::$db_link,$query) or die(mysqli_error(CSession::$db_link));
 		// if($num == 2)
 		// {
-			// $whiteELO = mysql_result($return, 0, 'p_selfrating');
-			// $blackELO = mysql_result($return, 1, 'p_selfrating');
+			// $whiteELO = CChess::mysqli_result($return, 0, 'p_selfrating');
+			// $blackELO = CChess::mysqli_result($return, 1, 'p_selfrating');
 		// }
 		$whiteELO = $blackELO = 0;
 		$info .= "[Round \"" . ChessHelper::$CB->GetFullMoves() . "\"]\n[White \"$whitename\"]\n[Black \"$blackname\"]\n[WhiteELO \"$whiteELO\"]\n[BlackELO \"$blackELO\"]\n[Result \"$result\"]\n\n";
@@ -3397,13 +3402,13 @@ class ChessHelper
 	static function get_custom_fen($game_id)
 	{
 		$query = "SELECT * FROM c4m_newgameotherfen WHERE gameid = '".$game_id."'";
-		$return = mysql_query($query, CSession::$db_link) or die(mysql_error());
-		$num = mysql_numrows($return);
+		$return = mysqli_query(CSession::$db_link,$query) or die(mysqli_error(CSession::$db_link));
+		$num = mysqli_num_rows($return);
 
 		$fen = "";
 
 		if($num != 0){
-			$fen = mysql_result($return, 0, "fen");
+			$fen = CChess::mysqli_result($return, 0, "fen");
 			// Fix up the board section of the FEN. For some reason the board ranks are stored 
 			// the opposite way they should be in the database. To make things worse the piece
 			// colours are swapped too. Need to turn white into black and vice versa.
@@ -3439,10 +3444,10 @@ class ChessHelper
 	static function get_game_result()
 	{
 		$stt = "SELECT `completion_status` FROM `game` WHERE `game_id`='" . ChessHelper::$game_id . "'";
-		$sttreturn = mysql_query($stt, CSession::$db_link) or die(mysql_error());
-		$sttnum = mysql_numrows($sttreturn);
+		$sttreturn = mysqli_query(CSession::$db_link,$stt) or die(mysqli_error(CSession::$db_link));
+		$sttnum = mysqli_num_rows($sttreturn);
 
-		$status = mysql_result($sttreturn, 0, 0);
+		$status = CChess::mysqli_result($sttreturn, 0, 0);
 		if($status == "W"){
 			return 1; //CHESS_GAME_RESULT::WHITE;
 		}elseif($status == "B"){
@@ -3491,27 +3496,27 @@ class ChessHelper
 		$result = array('started' => NULL, 'type' => 'UNKNOWN', 'duration' => NULL);
 		$timeouts = array('snail' => NULL, 'slow' => NULL, 'normal' => NULL, 'short' => NULL, 'blitz' => NULL);
 		$query = "SELECT * FROM admin_game_options WHERE o_id = 1";
-		$return = mysql_query($query, CSession::$db_link) or die(mysql_error());
-		$num = mysql_numrows($return);
+		$return = mysqli_query(CSession::$db_link,$query) or die(mysqli_error(CSession::$db_link));
+		$num = mysqli_num_rows($return);
 
 		if($num != 0)
 		{
-			$timeouts['snail'] = trim(mysql_result($return,0,"o_snail"));
-			$timeouts['slow'] = trim(mysql_result($return,0,"o_slow"));
-			$timeouts['normal'] = trim(mysql_result($return,0,"o_normal"));
-			$timeouts['short'] = trim(mysql_result($return,0,"o_short"));
-			$timeouts['blitz'] = trim(mysql_result($return,0,"o_blitz"));
+			$timeouts['snail'] = trim(CChess::mysqli_result($return,0,"o_snail"));
+			$timeouts['slow'] = trim(CChess::mysqli_result($return,0,"o_slow"));
+			$timeouts['normal'] = trim(CChess::mysqli_result($return,0,"o_normal"));
+			$timeouts['short'] = trim(CChess::mysqli_result($return,0,"o_short"));
+			$timeouts['blitz'] = trim(CChess::mysqli_result($return,0,"o_blitz"));
 		}
 	
 		$query = "SELECT * FROM cfm_game_options WHERE o_gameid='" . ChessHelper::$game_id . "'";
-		$return = mysql_query($query, CSession::$db_link) or die(mysql_error());
-		$num = mysql_numrows($return);
+		$return = mysqli_query(CSession::$db_link,$query) or die(mysqli_error(CSession::$db_link));
+		$num = mysqli_num_rows($return);
 
 		if($num == 0)
 			return $result;
 		
-		$timing_mode = (int)mysql_result($return, 0, "time_mode");
-		$timing_type = mysql_result($return, 0, "o_timetype");
+		$timing_mode = (int)CChess::mysqli_result($return, 0, "time_mode");
+		$timing_type = CChess::mysqli_result($return, 0, "o_timetype");
 		
 		if($timing_mode == 1)	// Time recorded for both players.
 		{
@@ -3522,11 +3527,11 @@ class ChessHelper
 			$duration = (int)($timeouts[$timetype] * 86400);
 			// Find out the time taken by both players so far and calculate the time remaining.
 			$query = "SELECT start_time, w_time_used, b_time_used, next_move FROM game WHERE game_id = '" . ChessHelper::$game_id . "'";
-			$return = mysql_query($query, CSession::$db_link) or die(mysql_error());
-			$result['started'] = (int)trim(mysql_result($return, 0, "start_time"));
-			$w_time_left = $duration - (int)trim(mysql_result($return, 0, "w_time_used"));
-			$b_time_left = $duration - (int)trim(mysql_result($return, 0, "b_time_used"));
-			$turn = mysql_result($return, 0, "next_move");
+			$return = mysqli_query(CSession::$db_link,$query) or die(mysqli_error(CSession::$db_link));
+			$result['started'] = (int)trim(CChess::mysqli_result($return, 0, "start_time"));
+			$w_time_left = $duration - (int)trim(CChess::mysqli_result($return, 0, "w_time_used"));
+			$b_time_left = $duration - (int)trim(CChess::mysqli_result($return, 0, "b_time_used"));
+			$turn = CChess::mysqli_result($return, 0, "next_move");
 			if($turn == NULL) $turn = 'w';	// initially games have the player turn set to NULL.
 			// Get the time since the last move (elapsed time for the current player). If no move has
 			// been made then no time has elapsed. 
@@ -3558,27 +3563,27 @@ class ChessHelper
 			$result['duration'] = $duration * 86400;
 			
 			$query = "SELECT start_time FROM game WHERE game_id = '" . ChessHelper::$game_id . "'";
-			$return = mysql_query($query, CSession::$db_link) or die(mysql_error());
-			$result['started'] = trim(mysql_result($return, 0, "start_time"));
+			$return = mysqli_query(CSession::$db_link,$query) or die(mysqli_error(CSession::$db_link));
+			$result['started'] = trim(CChess::mysqli_result($return, 0, "start_time"));
 			
 			//old
 			// $query = "SELECT * FROM move_history WHERE game_id='" . ChessHelper::$game_id . "' ORDER BY move_id DESC";
-			// $return = mysql_query($query, CSession::$db_link) or die(mysql_error());
-			// $move_cnt = mysql_numrows($return);
+			// $return = mysqli_query(CSession::$db_link,$query) or die(mysqli_error(CSession::$db_link));
+			// $move_cnt = mysqli_num_rows($return);
 
 			// if($move_cnt != 0)
 			// {
-				// $move_time = trim(mysql_result($return, 0, "time"));
+				// $move_time = trim(CChess::mysqli_result($return, 0, "time"));
 				// $time_diff = strtotime("+" . $duration * 86400 . " sec", $move_time) - time();
 				// $result['remaining'] = $time_diff;
 			// }
 			// else
 			// {
 				// $query = "SELECT start_time FROM game WHERE game_id = '" . ChessHelper::$game_id . "'";
-				// $return = mysql_query($query, CSession::$db_link) or die(mysql_error());
-				// if(mysql_numrows($return))
+				// $return = mysqli_query($db_my,$query, CSession::$db_link) or die(mysqli_error($db_my));
+				// if(mysqli_num_rows($return))
 				// {
-					// $time_started = trim(mysql_result($return, 0, "start_time"));
+					// $time_started = trim(CChess::mysqli_result($return, 0, "start_time"));
 					// $time_diff = strtotime("+" . $duration * 86400 . " sec", $time_started) - time();
 					// $result['remaining'] = $time_diff;
 				// }

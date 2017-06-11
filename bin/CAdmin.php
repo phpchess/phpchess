@@ -37,7 +37,7 @@ class CAdmin{
    * CAdmin (Constructor)
    *
    */
-  function CAdmin($ConfigFile){
+  function __construct($ConfigFile){
 
     ////////////////////////////////////////////////////////////////////////////
     // Sets the chess config file location (absolute location on the server)
@@ -52,15 +52,21 @@ class CAdmin{
     $this->user = $conf['database_login'];
     $this->pass = $conf['database_pass'];
 
-    $this->linkCAdmin = mysql_connect($this->host, $this->user, $this->pass);
-    mysql_select_db($this->dbnm);
+    $this->linkCAdmin = mysqli_connect($this->host, $this->user, $this->pass);
+    mysqli_select_db($this->linkCAdmin,$this->dbnm);
 
     if(!$this->linkCAdmin){
-      die("CAdmin.php: ".mysql_error());
+      die("CAdmin.php: ".mysqli_error($this->linkCAdmin));
     }
 
   }
 
+  
+  function mysqli_result($result, $number, $field=0) {
+    mysqli_data_seek($result, $number);
+    $row = mysqli_fetch_array($result);
+    return $row[$field];
+  }
 
   /**********************************************************************
    * GetStringFromStringTable
@@ -82,11 +88,11 @@ class CAdmin{
     }else{
 
       $query = "SELECT * FROM server_language WHERE o_id=1";
-      $return = mysql_query($query, $this->linkCAdmin) or die(mysql_error());
-      $num = mysql_numrows($return);
+      $return = mysqli_query($this->linkCAdmin,$query) or die(mysqli_error($this->linkCAdmin));
+      $num = mysqli_num_rows($return);
 
       if($num != 0){
-        $LanguageFile = $conf['absolute_directory_location']."includes/languages/".mysql_result($return, 0, "o_languagefile");
+        $LanguageFile = $conf['absolute_directory_location']."includes/languages/".$this->mysqli_result($return, 0, "o_languagefile");
       }
 
     }
@@ -136,8 +142,8 @@ class CAdmin{
   function GetNewPlayers($ConfigFile){
 
     $query = "SELECT * FROM pendingplayer ORDER BY signup_time";
-    $return = mysql_query($query, $this->linkCAdmin) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->linkCAdmin,$query) or die(mysqli_error($this->linkCAdmin));
+    $num = mysqli_num_rows($return);
 
     echo "<table border='0' align='center' class='forumline' cellpadding='3' cellspacing='1' width='95%'>";
     echo "<tr>";
@@ -152,10 +158,10 @@ class CAdmin{
       $i = 0;
 
       while($i < $num){
-        $player_id = trim(mysql_result($return,$i,"player_id"));
-        $userid = trim(mysql_result($return,$i,"userid"));
-        $email = trim(mysql_result($return,$i,"email"));
-        $signuptime  = trim(mysql_result($return,$i,"signup_time"));
+        $player_id = trim($this->mysqli_result($return,$i,"player_id"));
+        $userid = trim($this->mysqli_result($return,$i,"userid"));
+        $email = trim($this->mysqli_result($return,$i,"email"));
+        $signuptime  = trim($this->mysqli_result($return,$i,"signup_time"));
 
         echo "<tr>";
         echo "<td class='row2'><input type='radio' name='rdoPendingPlayer' value='".$player_id."'></td><td class='row2'>".$userid."</td><td class='row2'>".$email."</td><td class='row2'>".date("m-d-Y",$signuptime)."</td>";
@@ -185,18 +191,18 @@ class CAdmin{
   function AcceptNewPlayer($ConfigFile, $NewPlayerid){
 
     $query = "SELECT * FROM pendingplayer WHERE player_id =".$NewPlayerid;
-    $return = mysql_query($query, $this->linkCAdmin) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->linkCAdmin,$query) or die(mysqli_error($this->linkCAdmin));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $userid = trim(mysql_result($return,0,"userid"));
-      $email = trim(mysql_result($return,0,"email"));
+      $userid = trim($this->mysqli_result($return,0,"userid"));
+      $email = trim($this->mysqli_result($return,0,"email"));
 
       $this->RegisterNewPlayer($userid, $email);
 
       $delete = "DELETE FROM pendingplayer WHERE player_id =".$NewPlayerid;
-      mysql_query($delete, $this->linkCAdmin) or die(mysql_error());
+      mysqli_query($this->linkCAdmin,$delete) or die(mysqli_error($this->linkCAdmin));
 
     }
 
@@ -228,7 +234,7 @@ class CAdmin{
   function RevokeNewPlayer($ConfigFile, $NewPlayerid){
 
     $delete = "DELETE FROM pendingplayer WHERE player_id =".$NewPlayerid;
-    mysql_query($delete, $this->linkCAdmin) or die(mysql_error());
+    mysqli_query($this->linkCAdmin,$delete) or die(mysqli_error($this->linkCAdmin));
 
   }
 
@@ -240,8 +246,8 @@ class CAdmin{
   function AdminLogin($uname, $pass){
 
     $query = "SELECT * FROM c4m_admin WHERE a_username='".$uname."' AND a_password='".$this->hash_password($pass)."'";
-    $return = mysql_query($query, $this->linkCAdmin) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->linkCAdmin,$query) or die(mysqli_error($this->linkCAdmin));
+    $num = mysqli_num_rows($return);
  
     $login = false;
 
@@ -271,43 +277,43 @@ class CAdmin{
   function DisablePlayer($PID){
 
     $query = "SELECT * FROM player WHERE player_id = ".$PID;
-    $return = mysql_query($query, $this->linkCAdmin) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->linkCAdmin,$query) or die(mysqli_error($this->linkCAdmin));
+    $num = mysqli_num_rows($return);
  
     if($num != 0){
       
-      $userid = mysql_result($return, 0, "userid");
+      $userid = $this->mysqli_result($return, 0, "userid");
 
       $query1 = "SELECT * FROM player2 WHERE player_id = ".$PID;
-      $return1 = mysql_query($query1, $this->linkCAdmin) or die(mysql_error());
-      $num1 = mysql_numrows($return1);
+      $return1 = mysqli_query($this->linkCAdmin,$query1) or die(mysqli_error($this->linkCAdmin));
+      $num1 = mysqli_num_rows($return1);
 
       if($num1 == 0){
 
         $insert = "INSERT INTO player2 VALUES(".$PID.", '".$userid."')";
-        mysql_query($insert, $this->linkCAdmin) or die(mysql_error());
+        mysqli_query($this->linkCAdmin,$insert) or die(mysqli_error($this->linkCAdmin));
 
         // Leave club
         $delete = "DELETE FROM chess_club_members WHERE o_playerid = '".$PID."'";
-        mysql_query($delete, $this->linkCAdmin) or die(mysql_error());
+        mysqli_query($this->linkCAdmin,$delete) or die(mysqli_error($this->linkCAdmin));
 
         // Remove all messages
         $delete = "DELETE FROM c4m_msginbox WHERE player_id =".$PID;
-        mysql_query($delete, $this->linkCAdmin) or die(mysql_error());
+        mysqli_query($this->linkCAdmin,$delete) or die(mysqli_error($this->linkCAdmin));
 
         $delete = "DELETE FROM c4m_msgsaved  WHERE player_id =".$PID;
-        mysql_query($delete, $this->linkCAdmin) or die(mysql_error());
+        mysqli_query($this->linkCAdmin,$delete) or die(mysqli_error($this->linkCAdmin));
 
         // Clear buddy list
         $delete = "DELETE FROM c4m_buddylist WHERE player_id =".$PID;
-        mysql_query($delete, $this->linkCAdmin) or die(mysql_error());
+        mysqli_query($this->linkCAdmin,$delete) or die(mysqli_error($this->linkCAdmin));
    
         // Set all active games to draw
         $update = "UPDATE game SET status='C', completion_status='B' WHERE w_player_id =".$PID." AND completion_status = 'I'";
-        mysql_query($update, $this->linkCAdmin) or die(mysql_error());
+        mysqli_query($this->linkCAdmin,$update) or die(mysqli_error($this->linkCAdmin));
 
         $update = "UPDATE game SET status='C', completion_status='W' WHERE b_player_id =".$PID." AND completion_status = 'I'";
-        mysql_query($update, $this->linkCAdmin) or die(mysql_error());
+        mysqli_query($this->linkCAdmin,$update) or die(mysqli_error($this->linkCAdmin));
 
       }
 
@@ -323,13 +329,13 @@ class CAdmin{
   function EnablePlayer($PID){
 
     $query = "SELECT * FROM player2 WHERE player_id = ".$PID;
-    $return = mysql_query($query, $this->linkCAdmin) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->linkCAdmin,$query) or die(mysqli_error($this->linkCAdmin));
+    $num = mysqli_num_rows($return);
  
     if($num != 0){
       
       $delete = "DELETE FROM player2 WHERE player_id = ".$PID;
-      mysql_query($delete, $this->linkCAdmin) or die(mysql_error());
+      mysqli_query($this->linkCAdmin,$delete) or die(mysqli_error($this->linkCAdmin));
 
     }
 
@@ -341,12 +347,12 @@ class CAdmin{
    *
    */
   function Close(){
-    mysql_close($this->linkCAdmin);
+    mysqli_close($this->linkCAdmin);
   }
 
   function get_count($query) {
     global $db_link;
-    $x = mysql_fetch_array(mysql_query($query, $db_link));
+    $x = mysqli_fetch_array(mysqli_query($db_link,$query));
     return $x[0];
   }
 
@@ -389,9 +395,9 @@ class CAdmin{
 
   function one_to_many_blob($query) {
     global $db_link;
-    $items = mysql_query($query, $db_link);
+    $items = mysqli_query($db_link,$query);
     $items_array = array();
-    while ($item = mysql_fetch_assoc($items)) {
+    while ($item = mysqli_fetch_assoc($items)) {
       $items_array[] = $item; }
     $itemsblob = serialize($items_array);
     return $itemsblob; }
@@ -412,7 +418,7 @@ class CAdmin{
 
   function query_or_fail($query) {
     global $db_link;
-    $r = mysql_query($query, $db_link);
+    $r = mysqli_query($db_link,$query);
     if (!$r) { echo "query failed on \"".$query."\""; exit(); }
     return $r; }
 
@@ -420,10 +426,10 @@ class CAdmin{
     global $db_link;
     $date = time() - $olderthan * (24*60*60);
     $query = "SELECT * FROM game WHERE start_time < ".$date.";";
-    $results = mysql_query($query, $db_link);
+    $results = mysqli_query($db_link,$query);
     $rows = array();
 
-    while ($row = mysql_fetch_array($results)) {
+    while ($row = mysqli_fetch_array($results)) {
       $row['moves'] = $this->one_to_many_blob("SELECT * FROM move_history WHERE game_id = '".$row['game_id']."';");
       $row['messages'] = $this->one_to_many_blob("SELECT * FROM c4m_gamechat WHERE tgc_gameid = '".$row['game_id']."';");
       $this->db_array_insert($row, "game_fin", array('game_id' => "string", 'initiator' => "int", 'w_player_id' => "int", 'b_player_id' => "int", 'status' => "string", 'completion_status' => "string", 'start_time' => "int", 'cast_ws' => "string", 'cast_wl' => "string", 'cast_bs' => "string", 'cast_bl' => "string", 'moves' => "string", 'messages' => "string"));
@@ -432,7 +438,7 @@ class CAdmin{
 
   function mysql_fetch_rows($result) {
     $ar = array();
-    while ($row = mysql_fetch_array($result)) {
+    while ($row = mysqli_fetch_array($result)) {
       $ar[] = $row; }
     return $ar; }
   
@@ -440,14 +446,14 @@ class CAdmin{
     global $db_link;
     $date = time() - $olderthan * (24*60*60);
     $query = "SELECT * FROM game WHERE start_time < ".$date.($status == "*" ? "" : " AND status='".$status."'").";";	
-    $results = mysql_query($query, $db_link);
+    $results = mysqli_query($db_link,$query);
 
     return $this->delete_games_in_array($this->mysql_fetch_rows($results)); }
 
   function delete_games_missing_player_info() {
     global $db_link;
     $query = "SELECT * FROM game WHERE w_player_id = 0 OR b_player_id = 0;";
-    $results = mysql_query($query, $db_link);
+    $results = mysqli_query($db_link,$query);
 
     return $this->delete_games_in_array($this->mysql_fetch_rows($results)); }
 
@@ -508,7 +514,7 @@ class CAdmin{
 	  ."LEFT JOIN elo_points ON elo_points.player_id = player.player_id "
 	  ."LEFT JOIN player_credits ON player_credits.o_playerid = player.player_id "
 	  ."WHERE player.player_id = ".$player['player_id'].";";
-	$row = mysql_fetch_assoc(mysql_query($row, $db_link));
+	$row = mysqli_fetch_assoc(mysqli_query($db_link,$row));
 	$this->db_array_insert($row, "player_archive", array("player_id" => "int", "userid" => "varchar", "password" => "varchar", "signup_time" => "int", "status" => "enum", "email" => "varchar", "a_imgname" => "varchar", "cc_dcolor" => "varchar", "cc_lcolor" => "varchar", "p_move" => "char", "p_challange" => "char", "p_fullname" => "varchar", "p_location" => "varchar", "p_age" => "char", "p_selfrating" => "varchar", "p_commentmotto" => "varchar", "p_favouritechessplayer" => "varchar", "points" => "int", "style" => "int", "o_isdragdrop" => "int", "cpoints" => "int", "opoints" => "int", "o_credits" => "int")); }}
     $this->delete_players_in_array($rows);
     return true; }
@@ -517,19 +523,19 @@ class CAdmin{
     global $db_link;
     $time = time() - $days*24*60*60;
     $query = "SELECT * FROM player LEFT JOIN game ON (game.w_player_id = player.player_id OR game.b_player_id = player.player_id) WHERE game.game_id IS NULL AND player.signup_time < ".$time.";";
-    $players = $this->mysql_fetch_rows(mysql_query($query, $db_link)); 
+    $players = $this->mysql_fetch_rows(mysqli_query($db_link,$query)); 
     return  $this->archive_players_in_array($players); }
 
   function delete_players_with_0_games($days) {
     global $db_link;
     $time = time() - $days*24*60*60;
     $query = "SELECT * FROM player LEFT JOIN game ON (game.w_player_id = player.player_id OR game.b_player_id = player.player_id) WHERE game.game_id IS NULL AND player.signup_time < ".$time.";";
-    $players = $this->mysql_fetch_rows(mysql_query($query, $db_link)); 
+    $players = $this->mysql_fetch_rows(mysqli_query($db_link,$query)); 
     return $this->delete_players_in_array($players); }
 
   function unarchive_player($playername) {
     global $db_link;
-    $archive = mysql_fetch_array(mysql_query("SELECT * FROM player_archive WHERE userid='".addslashes($playername)."' LIMIT 1;", $db_link));
+    $archive = mysqli_fetch_array(mysqli_query($db_link,"SELECT * FROM player_archive WHERE userid='".addslashes($playername)."' LIMIT 1;"));
     if (!$archive) {
       echo "Sorry, that player does not exist in the archives.";
       exit(); }
@@ -549,14 +555,14 @@ class CAdmin{
   function delete_messages_older($days, $including_saved) {
     global $db_link;
     $time = time() - $days*24*60*60;
-    return mysql_query("DELETE FROM message_queue WHERE posted < ".$time."; ", $db_link) &&
-      mysql_query("DELETE FROM c4m_msginbox WHERE msg_posted < ".$time."; ", $db_link) &&
-      ($including_saved ? mysql_query("DELETE FROM c4m_msgsaved WHERE msg_posted < ".$time.";", $db_link) : true); }
+    return mysqli_query($db_link,"DELETE FROM message_queue WHERE posted < ".$time."; ") &&
+      mysqli_query($db_link,"DELETE FROM c4m_msginbox WHERE msg_posted < ".$time."; ") &&
+      ($including_saved ? mysqli_query($db_link,"DELETE FROM c4m_msgsaved WHERE msg_posted < ".$time.";") : true); }
 
   function clean_up_history($days) {
     global $db_link;
     $query = "DELETE FROM whos_online_graph WHERE o_date < DATE_SUB(NOW(), INTERVAL ".$days." DAY);";
-    return mysql_query($query, $db_link); }
+    return mysqli_query($db_link,$query); }
 
 
 } //end of class definition

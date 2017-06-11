@@ -18,6 +18,14 @@
   // Functions
   ///////////////////////////////////////////////////////////////////////
 
+  if (!function_exists('mysqli_result')) {
+    function mysqli_result($result, $number, $field=0) {
+        mysqli_data_seek($result, $number);
+        $row = mysqli_fetch_array($result);
+        return $row[$field];
+    }
+  }
+
   /**********************************************************************
   * CheckPlayerBillingTerm
   * 
@@ -26,68 +34,68 @@
 
     include($config);
 
-    $db = mysql_connect($conf['database_host'], $conf['database_login'], $conf['database_pass']) or die("Couldn't connect to the database."); 
-    mysql_select_db($conf['database_name']) or die("Couldn't select the database"); 
+    $db = mysqli_connect($conf['database_host'], $conf['database_login'], $conf['database_pass']) or die("Couldn't connect to the database."); 
+    mysqli_select_db($db,$conf['database_name']) or die("Couldn't select the database"); 
 
     /************/
-    //$result = mysql_query("SELECT * FROM c4m_playerorders WHERE o_orderstatus = 'p' AND DATE_FORMAT('2005-05-07 18:18:18','%Y-%m-%d') >= DATE_FORMAT(o_datedue,'%Y-%m-%d')") or die("Couldn't Check The End Dates.");
-    $result = mysql_query("SELECT * FROM c4m_playerorders WHERE o_orderstatus = 'p' AND DATE_FORMAT(NOW(),'%Y-%m-%d') >= DATE_FORMAT(o_datedue,'%Y-%m-%d')") or die("Couldn't Check The End Dates.");
+    //$result = mysqli_query($db,"SELECT * FROM c4m_playerorders WHERE o_orderstatus = 'p' AND DATE_FORMAT('2005-05-07 18:18:18','%Y-%m-%d') >= DATE_FORMAT(o_datedue,'%Y-%m-%d')") or die("Couldn't Check The End Dates.");
+    $result = mysqli_query($db,"SELECT * FROM c4m_playerorders WHERE o_orderstatus = 'p' AND DATE_FORMAT(NOW(),'%Y-%m-%d') >= DATE_FORMAT(o_datedue,'%Y-%m-%d')") or die("Couldn't Check The End Dates.");
     /***********/
 
-    $num = mysql_numrows($result);
+    $num = mysqli_num_rows($result);
   
     $i = 0;
     while($i < $num){
 
-      $o_id = mysql_result($result,$i,"o_id");
-      $o_username = mysql_result($result,$i,"o_username");
-      $o_firstname = mysql_result($result,$i,"o_firstname");
-      $o_lastname = mysql_result($result,$i,"o_lastname");
-      $o_address = mysql_result($result,$i,"o_address");
-      $o_citytown = mysql_result($result,$i,"o_citytown");
-      $o_country = mysql_result($result,$i,"o_country");
-      $o_provincestatearea = mysql_result($result,$i,"o_provincestatearea");
-      $o_postalcode = mysql_result($result,$i,"o_postalcode");
-      $o_email = mysql_result($result,$i,"o_email");
-      $o_phonea = mysql_result($result,$i,"o_phonea");
-      $o_phoneb = mysql_result($result,$i,"o_phoneb");
-      $o_phonec = mysql_result($result,$i,"o_phonec");
-      $o_redemptioncode = mysql_result($result,$i,"o_redemptioncode");
-      $o_dateoforder = mysql_result($result,$i,"o_dateoforder");
-      $o_paymentterm = mysql_result($result,$i,"o_paymentterm");
-      $o_datepaid = mysql_result($result,$i,"o_datepaid");
-      $o_datedue = mysql_result($result,$i,"o_datedue");
-      $o_orderstatus = mysql_result($result,$i,"o_orderstatus");
+      $o_id = mysqli_result($result,$i,"o_id");
+      $o_username = mysqli_result($result,$i,"o_username");
+      $o_firstname = mysqli_result($result,$i,"o_firstname");
+      $o_lastname = mysqli_result($result,$i,"o_lastname");
+      $o_address = mysqli_result($result,$i,"o_address");
+      $o_citytown = mysqli_result($result,$i,"o_citytown");
+      $o_country = mysqli_result($result,$i,"o_country");
+      $o_provincestatearea = mysqli_result($result,$i,"o_provincestatearea");
+      $o_postalcode = mysqli_result($result,$i,"o_postalcode");
+      $o_email = mysqli_result($result,$i,"o_email");
+      $o_phonea = mysqli_result($result,$i,"o_phonea");
+      $o_phoneb = mysqli_result($result,$i,"o_phoneb");
+      $o_phonec = mysqli_result($result,$i,"o_phonec");
+      $o_redemptioncode = mysqli_result($result,$i,"o_redemptioncode");
+      $o_dateoforder = mysqli_result($result,$i,"o_dateoforder");
+      $o_paymentterm = mysqli_result($result,$i,"o_paymentterm");
+      $o_datepaid = mysqli_result($result,$i,"o_datepaid");
+      $o_datedue = mysqli_result($result,$i,"o_datedue");
+      $o_orderstatus = mysqli_result($result,$i,"o_orderstatus");
 
       //echo "[".$o_id."] ".$o_username." - ".$o_datedue." - ".$o_orderstatus."<br>";
 
       // set order to finished
       $update = "UPDATE c4m_playerorders SET o_orderstatus = 'f' WHERE o_id=".$o_id;
-      mysql_query($update, $db) or die(mysql_error());
+      mysqli_query($db,$update) or die(mysqli_error($db));
 
       // create new order
       $insert = "INSERT INTO c4m_playerorders VALUES(NULL, '".$o_username."',  '".$o_firstname."', '".$o_lastname."', '".$o_address."', '".$o_citytown."', '".$o_country."', '".$o_provincestatearea."', '".$o_postalcode."', '".$o_email."', '".$o_phonea."', '".$o_phoneb."', '".$o_phonec."', '', NOW(), '".$o_paymentterm."', NULL, NULL, 'u')";
-      mysql_query($insert, $db) or die(mysql_error());
+      mysqli_query($db,$insert) or die(mysqli_error($db));
 
       //Select the new Order ID
       $query1 = "SELECT o_id FROM c4m_playerorders WHERE o_username = '".$o_username."' AND o_orderstatus='u' ORDER BY o_id DESC LIMIT 1";
-      $return1 = mysql_query($query1, $db) or die(mysql_error());
-      $num1 = mysql_numrows($return1);
+      $return1 = mysqli_query($db,$query1) or die(mysqli_error($db));
+      $num1 = mysqli_num_rows($return1);
 
       $orderid = 0;
 
       if($num1 != 0){
-         $orderid = mysql_result($return1,0,0);
+         $orderid = mysqli_result($return1,0,0);
       }
 
       // Send email
       $query2 = "SELECT * FROM c4m_emailmessageconfig";
-      $return2 = mysql_query($query2, $db) or die(mysql_error());
-      $num2 = mysql_numrows($return2);
+      $return2 = mysqli_query($db,$query2) or die(mysqli_error($db));
+      $num2 = mysqli_num_rows($return2);
 
       if($num2 != 0){
 
-        $o_regover = mysql_result($return2,0,"o_regover");
+        $o_regover = mysqli_result($return2,0,"o_regover");
         $subject = "Chess Membership Renewal";
 
         // configure message body

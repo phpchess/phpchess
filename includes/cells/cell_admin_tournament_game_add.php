@@ -143,10 +143,10 @@ if(isset($__pd['success']))
 				$id_m2 = $opts['id'] . '_m2';
 				$id_t1 = $opts['id'] . '_t1';
 				$id_t2 = $opts['id'] . '_t2';
-				$m1 = $value['m1'];
-				$m2 = $value['m2'];
-				$t1 = $value['t1'];
-				$t2 = $value['t2'];
+				$m1 = isset($value['m1']) ? $value['m1'] : '';
+				$m2 = isset($value['m2']) ? $value['m2'] : '';
+				$t1 = isset($value['t1']) ? $value['t1'] : '';
+				$t2 = isset($value['t2']) ? $value['t2'] : '';
 				$size = $opts['width'];
 				$min = isset($opts['txt_min']) ? $opts['txt_min'] : 'minutes';
 				$moves = isset($opts['txt_moves']) ? $opts['txt_moves'] : 'moves adds';

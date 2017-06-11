@@ -5,13 +5,13 @@
 
 	$sqlquery = "SELECT COUNT(move_id) FROM move_history WHERE game_id = '".$_SERVER["HTTP_VAR_GAMEID"]."'";
 	$result = mysql_query($sqlquery) or die("Unable to execute query: ".mysql_error(3));
-	$move = mysql_fetch_array($result);
+	$move = mysqli_fetch_array($result);
 
 	if ($moves != $move["COUNT(move_id)"])
 	{
 		$sqlquery = "SELECT * FROM move_history WHERE game_id = '".$_SERVER["HTTP_VAR_GAMEID"]."' ORDER BY time DESC LIMIT 1";
 		$result = mysql_query($sqlquery) or die("Unable to execute query: ".mysql_error(3));
-		$move = mysql_fetch_array($result);
+		$move = mysqli_fetch_array($result);
 		
 		if (strstr($move["move"], "O-O w")){
 			header("var_move: e1,g1");

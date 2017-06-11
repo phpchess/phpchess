@@ -111,8 +111,8 @@
 	$players = ModelManager::get_all("$db::player");
 	$player_list = array();
 	foreach($players as $player)
-		$player_list[$player->player_id] = $player->userid;
-	
+		$player_list[(string)$player->player_id] = $player->userid;
+	$player_list['____'] = '';  // Hack to force the playerlist to be treated as an object by json_encode().
 	$tbl_opts = array(
 		'url' => 'admin_game_list.php',
 		'model' => "$db::game",

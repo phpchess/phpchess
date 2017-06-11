@@ -46,7 +46,7 @@ class phpmailerTest extends TestCase
     /**
      * Class constuctor.
      */
-    function phpmailerTest($name) {
+    function __construct($name) {
         /* must define this constructor */
         $this->TestCase( $name );
     }

@@ -4,7 +4,7 @@
 	$sqlquery = "SELECT * FROM player, c4m_personalinfo WHERE player_id = '".$_SERVER["HTTP_VAR_PLAYER_ID"]."' AND player_id = p_playerid";
 	$result = mysql_query($sqlquery) or die("Unable to execute query: ".mysql_error());
 
-	$player = mysql_fetch_array($result);
+	$player = mysqli_fetch_array($result);
 
 
 	$wins = 0;
@@ -14,38 +14,38 @@
 	$sqlquery = "SELECT COUNT(*) FROM game WHERE b_player_id = '".$player["player_id"]."' AND completion_status  = 'B'";
 	$result = mysql_query($sqlquery) or die("Unable to execute query: ".mysql_error());
 
-	$game = mysql_fetch_array($result);
+	$game = mysqli_fetch_array($result);
 	$wins += $game["COUNT(*)"];
 
 	$sqlquery = "SELECT COUNT(*) FROM game WHERE w_player_id = '".$player["player_id"]."' AND completion_status  = 'W'";
 	$result = mysql_query($sqlquery) or die("Unable to execute query: ".mysql_error());
 
-	$game = mysql_fetch_array($result);
+	$game = mysqli_fetch_array($result);
 	$wins += $game["COUNT(*)"];
 
 	$sqlquery = "SELECT COUNT(*) FROM game WHERE b_player_id = '".$player["player_id"]."' AND completion_status  = 'W'";
 	$result = mysql_query($sqlquery) or die("Unable to execute query: ".mysql_error());
 
-	$game = mysql_fetch_array($result);
+	$game = mysqli_fetch_array($result);
 	$losses += $game["COUNT(*)"];
 
 	$sqlquery = "SELECT COUNT(*) FROM game WHERE w_player_id = '".$player["player_id"]."' AND completion_status  = 'B'";
 	$result = mysql_query($sqlquery) or die("Unable to execute query: ".mysql_error());
 
-	$game = mysql_fetch_array($result);
+	$game = mysqli_fetch_array($result);
 	$losses += $game["COUNT(*)"];
 
 
 	$sqlquery = "SELECT COUNT(*) FROM game WHERE b_player_id = '".$player["player_id"]."' AND completion_status  = 'D'";
 	$result = mysql_query($sqlquery) or die("Unable to execute query: ".mysql_error());
 
-	$game = mysql_fetch_array($result);
+	$game = mysqli_fetch_array($result);
 	$draws += $game["COUNT(*)"];
 
  	$sqlquery = "SELECT COUNT(*) FROM game WHERE w_player_id = '".$player["player_id"]."' AND completion_status  = 'D'";
 	$result = mysql_query($sqlquery) or die("Unable to execute query: ".mysql_error());
 
-	$game = mysql_fetch_array($result);
+	$game = mysqli_fetch_array($result);
 	$draws += $game["COUNT(*)"];
 
     $points = 1200 + ($wins * 10) - ($losses * 5);

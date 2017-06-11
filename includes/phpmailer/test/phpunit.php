@@ -49,7 +49,7 @@ function trace($msg) {
 class Exception {
     /* Emulate a Java exception, sort of... */
   var $message;
-  function Exception($message) {
+  function __construct($message) {
     $this->message = $message;
   }
   function getMessage() {
@@ -58,7 +58,7 @@ class Exception {
 }
 
 class Assert {
-  function assert($boolean, $message=0) {
+  function __construct($boolean, $message=0) {
     if (! $boolean)
       $this->fail($message);
   }
@@ -97,7 +97,7 @@ class TestCase extends Assert /* implements Test */ {
   var $fResult;
   var $fExceptions = array();
 
-  function TestCase($name) {
+  function __construct($name) {
     $this->fName = $name;
   }
 
@@ -182,7 +182,7 @@ class TestSuite /* implements Test */ {
      run them all. */
   var $fTests = array();
 
-  function TestSuite($classname=false) {
+  function __construct($classname=false) {
     if ($classname) {
       // Find all methods of the given class whose name starts with
       // "test" and add them to the test suite.  We are just _barely_
@@ -251,7 +251,7 @@ class TestFailure {
   var $fFailedTestName;
   var $fExceptions;
 
-  function TestFailure(&$test, &$exceptions) {
+  function __construct(&$test, &$exceptions) {
     $this->fFailedTestName = $test->name();
     $this->fExceptions = $exceptions;
   }
@@ -271,7 +271,7 @@ class TestResult {
   var $fRunTests = 0;
   var $fStop = false;
 
-  function TestResult() { }
+  function __construct() { }
 
   function _endTest($test) /* protected */ {
       /* specialize this for end-of-test action, such as progress
@@ -321,7 +321,7 @@ class TestResult {
 
 class TextTestResult extends TestResult {
   /* Specialize TestResult to produce text/html report */
-  function TextTestResult() {
+  function __construct() {
     $this->TestResult();  // call superclass constructor
   }
   

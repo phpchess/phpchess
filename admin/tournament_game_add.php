@@ -107,20 +107,20 @@
 	else
 	{
 		$id = (int)$_GET['id'];
-		$query = sprintf("SELECT t_id, t_name, t_comment, t_startdate FROM c4m_tournament WHERE t_id = '%s'", mysql_real_escape_string($id));
-		$result = mysql_query($query, $oR3DCQuery->link);
+		$query = sprintf("SELECT t_id, t_name, t_comment, t_startdate FROM c4m_tournament WHERE t_id = '%s'", mysqli_real_escape_string($oR3DCQuery->link,$id));
+		$result = mysqli_query($oR3DCQuery->link,$query);
 		if($result === false)
 		{
 			exit(_T('IDS_Admin_Tournament_Games_Add_QUERYFAILED', $config));
 		}
-		$cnt = mysql_num_rows($result);
+		$cnt = mysqli_num_rows($result);
 		if($cnt == 0)
 		{
 			$__pd['error'] = _T('IDS_Admin_Tournament_Games_Add_IDINVALID', $config);
 		}
 		else
 		{
-			$t = mysql_fetch_array($result, MYSQL_ASSOC);
+			$t = mysqli_fetch_array($result, MYSQLI_ASSOC);
 			$__pd['tournament'] = $t;
 		}
 		
@@ -253,57 +253,57 @@
 			$cast_bl = strstr($parts[2], 'q') ? 1 : 0;
 			
 			$query = sprintf("INSERT INTO game (game_id, initiator, w_player_id, b_player_id, status, completion_status, start_time, next_move, cast_ws, cast_wl, cast_bs, cast_bl) VALUES('%s', '0', '%s', '%s', 'A', 'I', '%s', '%s', '%s', '%s', '%s', '%s')",
-				mysql_real_escape_string($game_id),
-				mysql_real_escape_string($new_values['w_player_id']),
-				mysql_real_escape_string($new_values['b_player_id']),
-				mysql_real_escape_string(time()),
-				mysql_real_escape_string($next_move),
-				mysql_real_escape_string($cast_ws),
-				mysql_real_escape_string($cast_wl),
-				mysql_real_escape_string($cast_bs),
-				mysql_real_escape_string($cast_bl)
+				mysqli_real_escape_string($main->link,$game_id),
+				mysqli_real_escape_string($main->link,$new_values['w_player_id']),
+				mysqli_real_escape_string($main->link,$new_values['b_player_id']),
+				mysqli_real_escape_string($main->link,time()),
+				mysqli_real_escape_string($main->link,$next_move),
+				mysqli_real_escape_string($main->link,$cast_ws),
+				mysqli_real_escape_string($main->link,$cast_wl),
+				mysqli_real_escape_string($main->link,$cast_bs),
+				mysqli_real_escape_string($main->link,$cast_bl)
 			);
-			mysql_query($query, $main->link) or die(_T('IDS_Admin_Tournament_Games_Add_ERRORINSERTGAME', $main->ChessCFGFileLocation) . '<br>' . mysql_error());
+			mysqli_query($main->link,$query) or die(_T('IDS_Admin_Tournament_Games_Add_ERRORINSERTGAME', $main->ChessCFGFileLocation) . '<br>' . mysqli_error($main->link));
 			
 			// When using a custom FEN need to store it here.
 			if($new_values['fen'] != 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
 			{
 				$query = $query = sprintf("INSERT INTO c4m_newgameotherfen VALUES('%s', '%s')",
-					mysql_real_escape_string($game_id),
-					mysql_real_escape_string($new_values['fen'])
+					mysqli_real_escape_string($main->link,$game_id),
+					mysqli_real_escape_string($main->link,$new_values['fen'])
 				);
-				mysql_query($query, $main->link) or die(_T('IDS_Admin_Tournament_Games_Add_ERRORFEN', $main->ChessCFGFileLocation) . '<br>' . mysql_error());
+				mysqli_query($main->link,$query) or die(_T('IDS_Admin_Tournament_Games_Add_ERRORFEN', $main->ChessCFGFileLocation) . '<br>' . mysqli_error($main->link));
 			}
 			
 			// Store the game timing mode (snail, slow, normal, fast or blitz)
 			$query = sprintf("INSERT INTO cfm_game_options VALUES('%s', 'grated', '%s', 1)",
-				mysql_real_escape_string($game_id),
-				mysql_real_escape_string($new_values['timing_mode'])
+				mysqli_real_escape_string($main->link,$game_id),
+				mysqli_real_escape_string($main->link,$new_values['timing_mode'])
 			);
-			mysql_query($query, $main->link) or die(_T('IDS_Admin_Tournament_Games_Add_ERROROPTIONS', $main->ChessCFGFileLocation) . '<br>' . mysql_error());
+			mysqli_query($main->link,$query) or die(_T('IDS_Admin_Tournament_Games_Add_ERROROPTIONS', $main->ChessCFGFileLocation) . '<br>' . mysqli_error($main->link));
 			
 			// Store the time controls if they have been set.
 			$tc = $new_values['time_controls'];
 			if($tc['m1'] !== '')
 			{
 				$query = sprintf("INSERT INTO timed_games VALUES('%s', %s, %s, %s, %s)",
-					mysql_real_escape_string($game_id),
-					mysql_real_escape_string((int)$tc['m1']),
-					mysql_real_escape_string((int)$tc['t1']),
-					mysql_real_escape_string((int)$tc['m2']),
-					mysql_real_escape_string((int)$tc['t2'])
+					mysqli_real_escape_string($main->link,$game_id),
+					mysqli_real_escape_string($main->link,(int)$tc['m1']),
+					mysqli_real_escape_string($main->link,(int)$tc['t1']),
+					mysqli_real_escape_string($main->link,(int)$tc['m2']),
+					mysqli_real_escape_string($main->link,(int)$tc['t2'])
 				);
-				mysql_query($query, $main->link) or die(__l('Error inserting record into timed_games table') . '<br>' . mysql_error());
+				mysqli_query($main->link,$query) or die(__l('Error inserting record into timed_games table') . '<br>' . mysqli_error($main->link));
 			}
 			
 			// Associates the game with the tournament.
 			$query = sprintf("INSERT INTO c4m_tournamentgames VALUES(NULL, '%s', '%s', '%s', '%s', '', '', '' )",
-				mysql_real_escape_string($tid),
-				mysql_real_escape_string($game_id),
-				mysql_real_escape_string($new_values['w_player_id']),
-				mysql_real_escape_string($new_values['b_player_id'])
+				mysqli_real_escape_string($main->link,$tid),
+				mysqli_real_escape_string($main->link,$game_id),
+				mysqli_real_escape_string($main->link,$new_values['w_player_id']),
+				mysqli_real_escape_string($main->link,$new_values['b_player_id'])
 			);
-			mysql_query($query, $main->link) or die(_T('IDS_Admin_Tournament_Games_Add_ERRORINSERTASSOC', $main->ChessCFGFileLocation) . '<br>' . mysql_error());
+			mysqli_query($main->link,$query) or die(_T('IDS_Admin_Tournament_Games_Add_ERRORINSERTASSOC', $main->ChessCFGFileLocation) . '<br>' . mysqli_error($main->link));
 		}
 		return array('submit' => TRUE, 'errors' => $errors, 'new_values' => $new_values, 'game_id' => $game_id);
 		
@@ -364,17 +364,17 @@
 		// Get disabled players and then all players. Any player that is disabled will be ignored.
 		// Is there a way to do this using one query?
 		$query = "SELECT player_id FROM player2";
-		$result = mysql_query($query, $main->link) or die(_T('IDS_Admin_Tournament_Games_Add_ERRORDISABLED', $main->ChessCFGFileLocation));
+		$result = mysqli_query($main->link,$query) or die(_T('IDS_Admin_Tournament_Games_Add_ERRORDISABLED', $main->ChessCFGFileLocation));
 		$disabled = array();
-		while($row = mysql_fetch_array($result, MYSQL_ASSOC))
+		while($row = mysqli_fetch_array($result, MYSQLI_ASSOC))
 		{
 			$disabled[] = $row['player_id'];
 		}
 		$query = "SELECT player_id, userid FROM player ORDER BY userid Asc";
-		$result = mysql_query($query, $main->link) or die(_T('IDS_Admin_Tournament_Games_Add_ERRORUSERS', $main->ChessCFGFileLocation));
+		$result = mysqli_query($main->link,$query) or die(_T('IDS_Admin_Tournament_Games_Add_ERRORUSERS', $main->ChessCFGFileLocation));
 		
 		$players = array();
-		while($row = mysql_fetch_array($result, MYSQL_ASSOC))
+		while($row = mysqli_fetch_array($result, MYSQLI_ASSOC))
 		{
 			if(!in_array($row['player_id'], $disabled))
 			{

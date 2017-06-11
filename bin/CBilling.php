@@ -35,7 +35,7 @@ class CBilling{
   * CBilling (Constructor)
   *
   */
-  function CBilling($ConfigFile){
+  function __construct($ConfigFile){
 
     ////////////////////////////////////////////////////////////////////////////
     // Sets the chess config file location (absolute location on the server)
@@ -53,16 +53,21 @@ class CBilling{
     $this->mail = $conf['registration_email'];
     $this->ename = $conf['site_name'];
 
-    $this->linkBilling = mysql_connect($this->host, $this->user, $this->pass);
-    mysql_select_db($this->dbnm);
+    $this->linkBilling = mysqli_connect($this->host, $this->user, $this->pass);
+    mysqli_select_db($this->linkBilling,$this->dbnm);
 
     if(!$this->linkBilling){
-      die("CBilling.php: ".mysql_error());
+      die("CBilling.php: ".mysqli_error($this->linkBilling));
     }
 
   }
 
-
+  function mysqli_result($result, $number, $field=0) {
+      mysqli_data_seek($result, $number);
+      $row = mysqli_fetch_array($result);
+      return $row[$field];
+  }  
+  
   /**********************************************************************
   * GetStringFromStringTable
   *
@@ -83,12 +88,12 @@ class CBilling{
     }else{
 
       $query = "SELECT * FROM server_language WHERE o_id=1";
-      $return = mysql_query($query, $this->linkBilling) or die(mysql_error());
-      $num = mysql_numrows($return);
+      $return = mysqli_query($this->linkBilling,$query) or die(mysqli_error($this->linkBilling));
+      $num = mysqli_num_rows($return);
 
       if($num != 0){
 
-        $LanguageFile = $conf['absolute_directory_location']."includes/languages/".mysql_result($return, 0, "o_languagefile");
+        $LanguageFile = $conf['absolute_directory_location']."includes/languages/".$this->mysqli_result($return, 0, "o_languagefile");
 
       }
 
@@ -139,15 +144,15 @@ class CBilling{
   function IsPaymentEnabled(){
 
     $query = "SELECT * FROM c4m_paypal LIMIT 1";
-    $return = mysql_query($query, $this->linkBilling) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->linkBilling,$query) or die(mysqli_error($this->linkBilling));
+    $num = mysqli_num_rows($return);
 
     $bEnabled = false;
 
     if($num != 0){
 
       $i = 0;
-      $a_requirespayment = mysql_result($return,$i,"a_requirespayment");
+      $a_requirespayment = $this->mysqli_result($return,$i,"a_requirespayment");
 
       if($a_requirespayment == '1'){
         $bEnabled = true;
@@ -198,8 +203,8 @@ class CBilling{
 
       //Check if the redemption code is multi user
       $query = "SELECT * FROM c4m_multiuserredemptioncode WHERE o_redemptioncode like '".$Code1."'";
-      $return = mysql_query($query, $this->linkBilling) or die(mysql_error());
-      $num = mysql_numrows($return);
+      $return = mysqli_query($this->linkBilling,$query) or die(mysqli_error($this->linkBilling));
+      $num = mysqli_num_rows($return);
         
       if($num != 0){
          $bMultiUser = true;
@@ -209,8 +214,8 @@ class CBilling{
 
         //Check if the redemption code has been used already
         $query = "SELECT * FROM c4m_playerorders WHERE o_redemptioncode = '".$Code1."'";
-        $return = mysql_query($query, $this->linkBilling) or die(mysql_error());
-        $num = mysql_numrows($return);
+        $return = mysqli_query($this->linkBilling,$query) or die(mysqli_error($this->linkBilling));
+        $num = mysqli_num_rows($return);
 
         if($num == 0){
           $bIsGood = true;
@@ -218,8 +223,8 @@ class CBilling{
 
         //Check if the redemption code is multi user
         $query = "SELECT * FROM c4m_multiuserredemptioncode WHERE o_redemptioncode like '".$Code1."'";
-        $return = mysql_query($query, $this->linkBilling) or die(mysql_error());
-        $num = mysql_numrows($return);
+        $return = mysqli_query($this->linkBilling,$query) or die(mysqli_error($this->linkBilling));
+        $num = mysqli_num_rows($return);
         
         if($num != 0){
           $bIsGood = true;
@@ -251,15 +256,15 @@ class CBilling{
   function GetDefinedPrice(){
 
     $query = "SELECT * FROM c4m_paypalaccount LIMIT 1";
-    $return = mysql_query($query, $this->linkBilling) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->linkBilling,$query) or die(mysqli_error($this->linkBilling));
+    $num = mysqli_num_rows($return);
 
     $nPrice = 0;
 
     if($num != 0){
 
       $i = 0;
-      $nPrice = mysql_result($return,$i,"p_monthlycharge");
+      $nPrice = $this->mysqli_result($return,$i,"p_monthlycharge");
 
     }
 
@@ -275,14 +280,14 @@ class CBilling{
   function GetPaypalInfo(&$email, &$currency){
 
     $query = "SELECT * FROM c4m_paypalaccount LIMIT 1";
-    $return = mysql_query($query, $this->linkBilling) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->linkBilling,$query) or die(mysqli_error($this->linkBilling));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i = 0;
-      $email = mysql_result($return,$i,"p_email");
-      $currency = mysql_result($return,$i,"p_currency");
+      $email = $this->mysqli_result($return,$i,"p_email");
+      $currency = $this->mysqli_result($return,$i,"p_currency");
     }
 
   }
@@ -295,17 +300,17 @@ class CBilling{
   function CreateNewBill($playerUName, $firstname, $lastname, $address, $citytown, $country, $provincestatearea, $postalcode, $email, $phonea, $phoneb, $phonec, $redemptioncode, $paymentterm){
 
     $insert = "INSERT INTO c4m_playerorders VALUES(NULL, '".$playerUName."', '".$firstname."', '".$lastname."', '".$address."', '".$citytown."', '".$country."', '".$provincestatearea."', '".$postalcode."', '".$email."', '".$phonea."', '".$phoneb."', '".$phonec."', '".$redemptioncode."', NOW(), '".$paymentterm."', NULL, NULL, 'u')";
-    mysql_query($insert, $this->linkBilling) or die(mysql_error());
+    mysqli_query($this->linkBilling,$insert) or die(mysqli_error($this->linkBilling));
 
     //Select the new Order ID
     $query = "SELECT LAST_INSERT_ID()";
-    $return = mysql_query($query, $this->linkBilling) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->linkBilling,$query) or die(mysqli_error($this->linkBilling));
+    $num = mysqli_num_rows($return);
 
     $orderid = 0;
 
     if($num != 0){
-       $orderid = mysql_result($return,0,0);
+       $orderid = $this->mysqli_result($return,0,0);
     }
 
     // Send email
@@ -332,33 +337,33 @@ class CBilling{
 
     //Select the service items
     $query = "SELECT * FROM c4m_playerorders WHERE o_orderstatus='".$OrderStatus."' ORDER BY o_id ASC";
-    $return = mysql_query($query, $this->linkBilling) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->linkBilling,$query) or die(mysqli_error($this->linkBilling));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i=0;
       while($i < $num){
 
-        $o_id = trim(mysql_result($return, $i, "o_id"));
-        $o_username = trim(mysql_result($return, $i, "o_username"));
-        $o_firstname = trim(mysql_result($return, $i, "o_firstname"));
-        $o_lastname = trim(mysql_result($return, $i, "o_lastname"));
-        $o_address = trim(mysql_result($return, $i, "o_address"));
-        $o_citytown = trim(mysql_result($return, $i, "o_citytown"));
-        $o_country = trim(mysql_result($return, $i, "o_country"));
-        $o_provincestatearea = trim(mysql_result($return, $i, "o_provincestatearea"));
-        $o_postalcode = trim(mysql_result($return, $i, "o_postalcode"));
-        $o_email = trim(mysql_result($return, $i, "o_email"));
-        $o_phonea = trim(mysql_result($return, $i, "o_phonea"));
-        $o_phoneb = trim(mysql_result($return, $i, "o_phoneb"));
-        $o_phonec = trim(mysql_result($return, $i, "o_phonec"));
-        $o_redemptioncode = trim(mysql_result($return, $i, "o_redemptioncode"));
-        $o_dateoforder = trim(mysql_result($return, $i, "o_dateoforder"));
-        $o_paymentterm = trim(mysql_result($return, $i, "o_paymentterm"));
-        $o_datepaid = trim(mysql_result($return, $i, "o_datepaid"));
-        $o_datedue = trim(mysql_result($return, $i, "o_datedue"));
-        $o_orderstatus = trim(mysql_result($return, $i, "o_orderstatus"));
+        $o_id = trim($this->mysqli_result($return, $i, "o_id"));
+        $o_username = trim($this->mysqli_result($return, $i, "o_username"));
+        $o_firstname = trim($this->mysqli_result($return, $i, "o_firstname"));
+        $o_lastname = trim($this->mysqli_result($return, $i, "o_lastname"));
+        $o_address = trim($this->mysqli_result($return, $i, "o_address"));
+        $o_citytown = trim($this->mysqli_result($return, $i, "o_citytown"));
+        $o_country = trim($this->mysqli_result($return, $i, "o_country"));
+        $o_provincestatearea = trim($this->mysqli_result($return, $i, "o_provincestatearea"));
+        $o_postalcode = trim($this->mysqli_result($return, $i, "o_postalcode"));
+        $o_email = trim($this->mysqli_result($return, $i, "o_email"));
+        $o_phonea = trim($this->mysqli_result($return, $i, "o_phonea"));
+        $o_phoneb = trim($this->mysqli_result($return, $i, "o_phoneb"));
+        $o_phonec = trim($this->mysqli_result($return, $i, "o_phonec"));
+        $o_redemptioncode = trim($this->mysqli_result($return, $i, "o_redemptioncode"));
+        $o_dateoforder = trim($this->mysqli_result($return, $i, "o_dateoforder"));
+        $o_paymentterm = trim($this->mysqli_result($return, $i, "o_paymentterm"));
+        $o_datepaid = trim($this->mysqli_result($return, $i, "o_datepaid"));
+        $o_datedue = trim($this->mysqli_result($return, $i, "o_datedue"));
+        $o_orderstatus = trim($this->mysqli_result($return, $i, "o_orderstatus"));
 
         echo "<form name='frmBilling".$o_id."' method='post' action='./manage_new_bills.php'>";
 
@@ -508,20 +513,20 @@ class CBilling{
 
     //Select the service items
     $query = "SELECT * FROM c4m_playerorders WHERE o_id=".$OrderID."";
-    $return = mysql_query($query, $this->linkBilling) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->linkBilling,$query) or die(mysqli_error($this->linkBilling));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $o_username = trim(mysql_result($return, 0, "o_username"));
+      $o_username = trim($this->mysqli_result($return, 0, "o_username"));
 
       //Delete Username
       $delete = "DELETE FROM pendingplayer WHERE userid='".$o_username."'";
-      mysql_query($delete, $this->linkBilling) or die(mysql_error());
+      mysqli_query($this->linkBilling,$delete) or die(mysqli_error($this->linkBilling));
 
       //Delete bill
       $delete = "DELETE FROM c4m_playerorders WHERE o_id=".$OrderID."";
-      mysql_query($delete, $this->linkBilling) or die(mysql_error());
+      mysqli_query($this->linkBilling,$delete) or die(mysqli_error($this->linkBilling));
       
     }
 
@@ -538,13 +543,13 @@ class CBilling{
     // Select the order information
     //Select the service items
     $query = "SELECT * FROM c4m_playerorders WHERE o_id=".$OID;
-    $return = mysql_query($query, $this->linkBilling) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->linkBilling,$query) or die(mysqli_error($this->linkBilling));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i=0;
-      $o_paymentterm = trim(mysql_result($return, $i, "o_paymentterm"));
+      $o_paymentterm = trim($this->mysqli_result($return, $i, "o_paymentterm"));
 
       // Update the order
       if($o_paymentterm == 'y'){
@@ -554,7 +559,7 @@ class CBilling{
       }else{
         $update = "UPDATE c4m_playerorders SET o_orderstatus = 'p', o_datepaid=NOW(), o_datedue=DATE_ADD(NOW(), INTERVAL 1 MONTH) WHERE o_id=".$OID;
       }
-      mysql_query($update, $this->linkBilling) or die(mysql_error());
+      mysqli_query($this->linkBilling,$update) or die(mysqli_error($this->linkBilling));
 
     }
 
@@ -570,13 +575,13 @@ class CBilling{
 
     // Select the order information
     $query = "SELECT * FROM c4m_playerorders WHERE o_id=".$OID;
-    $return = mysql_query($query, $this->linkBilling) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->linkBilling,$query) or die(mysqli_error($this->linkBilling));
+    $num = mysqli_num_rows($return);
 
     $name = "";
 
     if($num != 0){
-      $name = trim(mysql_result($return, 0, "o_username"));
+      $name = trim($this->mysqli_result($return, 0, "o_username"));
     }
 
     return $name;
@@ -593,24 +598,24 @@ class CBilling{
 
     // Select the order information
     $query = "SELECT COUNT(*) FROM c4m_playerorders WHERE o_username='".$UName."' AND (o_orderstatus='p' OR o_orderstatus='f')";
-    $return = mysql_query($query, $this->linkBilling) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->linkBilling,$query) or die(mysqli_error($this->linkBilling));
+    $num = mysqli_num_rows($return);
 
     $Previous = 0;
 
     if($num != 0){
-      $Previous = trim(mysql_result($return, 0, 0));
+      $Previous = trim($this->mysqli_result($return, 0, 0));
     }
 
     // Select the order information
     $query = "SELECT COUNT(*) FROM c4m_playerorders WHERE o_username='".$UName."' AND o_orderstatus='u'";
-    $return = mysql_query($query, $this->linkBilling) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->linkBilling,$query) or die(mysqli_error($this->linkBilling));
+    $num = mysqli_num_rows($return);
 
     $Current = 0;
 
     if($num != 0){
-      $Current = trim(mysql_result($return, 0, 0));
+      $Current = trim($this->mysqli_result($return, 0, 0));
     }
 
   }
@@ -625,33 +630,33 @@ class CBilling{
 
     //Select the service items
     $query = "SELECT * FROM c4m_playerorders WHERE o_orderstatus='".$OrderStatus."' AND o_username='".$UserName."' ORDER BY o_id ASC";
-    $return = mysql_query($query, $this->linkBilling) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->linkBilling,$query) or die(mysqli_error($this->linkBilling));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i=0;
       while($i < $num){
 
-        $o_id = trim(mysql_result($return, $i, "o_id"));
-        $o_username = trim(mysql_result($return, $i, "o_username"));
-        $o_firstname = trim(mysql_result($return, $i, "o_firstname"));
-        $o_lastname = trim(mysql_result($return, $i, "o_lastname"));
-        $o_address = trim(mysql_result($return, $i, "o_address"));
-        $o_citytown = trim(mysql_result($return, $i, "o_citytown"));
-        $o_country = trim(mysql_result($return, $i, "o_country"));
-        $o_provincestatearea = trim(mysql_result($return, $i, "o_provincestatearea"));
-        $o_postalcode = trim(mysql_result($return, $i, "o_postalcode"));
-        $o_email = trim(mysql_result($return, $i, "o_email"));
-        $o_phonea = trim(mysql_result($return, $i, "o_phonea"));
-        $o_phoneb = trim(mysql_result($return, $i, "o_phoneb"));
-        $o_phonec = trim(mysql_result($return, $i, "o_phonec"));
-        $o_redemptioncode = trim(mysql_result($return, $i, "o_redemptioncode"));
-        $o_dateoforder = trim(mysql_result($return, $i, "o_dateoforder"));
-        $o_paymentterm = trim(mysql_result($return, $i, "o_paymentterm"));
-        $o_datepaid = trim(mysql_result($return, $i, "o_datepaid"));
-        $o_datedue = trim(mysql_result($return, $i, "o_datedue"));
-        $o_orderstatus = trim(mysql_result($return, $i, "o_orderstatus"));
+        $o_id = trim($this->mysqli_result($return, $i, "o_id"));
+        $o_username = trim($this->mysqli_result($return, $i, "o_username"));
+        $o_firstname = trim($this->mysqli_result($return, $i, "o_firstname"));
+        $o_lastname = trim($this->mysqli_result($return, $i, "o_lastname"));
+        $o_address = trim($this->mysqli_result($return, $i, "o_address"));
+        $o_citytown = trim($this->mysqli_result($return, $i, "o_citytown"));
+        $o_country = trim($this->mysqli_result($return, $i, "o_country"));
+        $o_provincestatearea = trim($this->mysqli_result($return, $i, "o_provincestatearea"));
+        $o_postalcode = trim($this->mysqli_result($return, $i, "o_postalcode"));
+        $o_email = trim($this->mysqli_result($return, $i, "o_email"));
+        $o_phonea = trim($this->mysqli_result($return, $i, "o_phonea"));
+        $o_phoneb = trim($this->mysqli_result($return, $i, "o_phoneb"));
+        $o_phonec = trim($this->mysqli_result($return, $i, "o_phonec"));
+        $o_redemptioncode = trim($this->mysqli_result($return, $i, "o_redemptioncode"));
+        $o_dateoforder = trim($this->mysqli_result($return, $i, "o_dateoforder"));
+        $o_paymentterm = trim($this->mysqli_result($return, $i, "o_paymentterm"));
+        $o_datepaid = trim($this->mysqli_result($return, $i, "o_datepaid"));
+        $o_datedue = trim($this->mysqli_result($return, $i, "o_datedue"));
+        $o_orderstatus = trim($this->mysqli_result($return, $i, "o_orderstatus"));
 
         echo "<form name='frmBilling".$o_id."' method='post' action='./manage_new_bills.php'>";
 
@@ -791,33 +796,33 @@ class CBilling{
 
     //Select the service items
     $query = "SELECT * FROM c4m_playerorders WHERE o_username='".$UserName."' AND o_orderstatus = 'u' ORDER BY o_id ASC LIMIT 1";
-    $return = mysql_query($query, $this->linkBilling) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->linkBilling,$query) or die(mysqli_error($this->linkBilling));
+    $num = mysqli_num_rows($return);
 
     $aBillInfo = array();
 
     if($num != 0){
 
       $i=0;
-      $o_id = trim(mysql_result($return, $i, "o_id"));
-      $o_username = trim(mysql_result($return, $i, "o_username"));
-      $o_firstname = trim(mysql_result($return, $i, "o_firstname"));
-      $o_lastname = trim(mysql_result($return, $i, "o_lastname"));
-      $o_address = trim(mysql_result($return, $i, "o_address"));
-      $o_citytown = trim(mysql_result($return, $i, "o_citytown"));
-      $o_country = trim(mysql_result($return, $i, "o_country"));
-      $o_provincestatearea = trim(mysql_result($return, $i, "o_provincestatearea"));
-      $o_postalcode = trim(mysql_result($return, $i, "o_postalcode"));
-      $o_email = trim(mysql_result($return, $i, "o_email"));
-      $o_phonea = trim(mysql_result($return, $i, "o_phonea"));
-      $o_phoneb = trim(mysql_result($return, $i, "o_phoneb"));
-      $o_phonec = trim(mysql_result($return, $i, "o_phonec"));
-      $o_redemptioncode = trim(mysql_result($return, $i, "o_redemptioncode"));
-      $o_dateoforder = trim(mysql_result($return, $i, "o_dateoforder"));
-      $o_paymentterm = trim(mysql_result($return, $i, "o_paymentterm"));
-      $o_datepaid = trim(mysql_result($return, $i, "o_datepaid"));
-      $o_datedue = trim(mysql_result($return, $i, "o_datedue"));
-      $o_orderstatus = trim(mysql_result($return, $i, "o_orderstatus"));
+      $o_id = trim($this->mysqli_result($return, $i, "o_id"));
+      $o_username = trim($this->mysqli_result($return, $i, "o_username"));
+      $o_firstname = trim($this->mysqli_result($return, $i, "o_firstname"));
+      $o_lastname = trim($this->mysqli_result($return, $i, "o_lastname"));
+      $o_address = trim($this->mysqli_result($return, $i, "o_address"));
+      $o_citytown = trim($this->mysqli_result($return, $i, "o_citytown"));
+      $o_country = trim($this->mysqli_result($return, $i, "o_country"));
+      $o_provincestatearea = trim($this->mysqli_result($return, $i, "o_provincestatearea"));
+      $o_postalcode = trim($this->mysqli_result($return, $i, "o_postalcode"));
+      $o_email = trim($this->mysqli_result($return, $i, "o_email"));
+      $o_phonea = trim($this->mysqli_result($return, $i, "o_phonea"));
+      $o_phoneb = trim($this->mysqli_result($return, $i, "o_phoneb"));
+      $o_phonec = trim($this->mysqli_result($return, $i, "o_phonec"));
+      $o_redemptioncode = trim($this->mysqli_result($return, $i, "o_redemptioncode"));
+      $o_dateoforder = trim($this->mysqli_result($return, $i, "o_dateoforder"));
+      $o_paymentterm = trim($this->mysqli_result($return, $i, "o_paymentterm"));
+      $o_datepaid = trim($this->mysqli_result($return, $i, "o_datepaid"));
+      $o_datedue = trim($this->mysqli_result($return, $i, "o_datedue"));
+      $o_orderstatus = trim($this->mysqli_result($return, $i, "o_orderstatus"));
 
 
       $aBillInfo = array($o_id, $o_username, $o_firstname, $o_lastname, $o_address, 
@@ -839,7 +844,7 @@ class CBilling{
   function UpdateBill($ID, $playerUName, $firstname, $lastname, $address, $citytown, $country, $provincestatearea, $postalcode, $email, $phonea, $phoneb, $phonec, $redemptioncode, $paymentterm){
 
     $update = "UPDATE c4m_playerorders SET o_username = '".$playerUName."', o_firstname = '".$firstname."', o_lastname = '".$lastname."', o_address = '".$address."', o_citytown = '".$citytown."', o_country = '".$country."', o_provincestatearea = '".$provincestatearea."', o_postalcode = '".$postalcode."', o_email = '".$email."', o_phonea = '".$phonea."', o_phoneb = '".$phoneb."', o_phonec = '".$phonec."', o_redemptioncode = '".$redemptioncode."', o_dateoforder = NOW(), o_paymentterm = '".$paymentterm."' WHERE o_id=".$ID;
-    mysql_query($update, $this->linkBilling) or die(mysql_error());
+    mysqli_query($this->linkBilling,$update) or die(mysqli_error($this->linkBilling));
 
     return $ID;
 
@@ -855,33 +860,33 @@ class CBilling{
 
     //Select the service items
     $query = "SELECT * FROM c4m_playerorders WHERE o_orderstatus IN('f', 'p') ORDER BY o_id DESC";
-    $return = mysql_query($query, $this->linkBilling) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->linkBilling,$query) or die(mysqli_error($this->linkBilling));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i=0;
       while($i < $num){
 
-        $o_id = trim(mysql_result($return, $i, "o_id"));
-        $o_username = trim(mysql_result($return, $i, "o_username"));
-        $o_firstname = trim(mysql_result($return, $i, "o_firstname"));
-        $o_lastname = trim(mysql_result($return, $i, "o_lastname"));
-        $o_address = trim(mysql_result($return, $i, "o_address"));
-        $o_citytown = trim(mysql_result($return, $i, "o_citytown"));
-        $o_country = trim(mysql_result($return, $i, "o_country"));
-        $o_provincestatearea = trim(mysql_result($return, $i, "o_provincestatearea"));
-        $o_postalcode = trim(mysql_result($return, $i, "o_postalcode"));
-        $o_email = trim(mysql_result($return, $i, "o_email"));
-        $o_phonea = trim(mysql_result($return, $i, "o_phonea"));
-        $o_phoneb = trim(mysql_result($return, $i, "o_phoneb"));
-        $o_phonec = trim(mysql_result($return, $i, "o_phonec"));
-        $o_redemptioncode = trim(mysql_result($return, $i, "o_redemptioncode"));
-        $o_dateoforder = trim(mysql_result($return, $i, "o_dateoforder"));
-        $o_paymentterm = trim(mysql_result($return, $i, "o_paymentterm"));
-        $o_datepaid = trim(mysql_result($return, $i, "o_datepaid"));
-        $o_datedue = trim(mysql_result($return, $i, "o_datedue"));
-        $o_orderstatus = trim(mysql_result($return, $i, "o_orderstatus"));
+        $o_id = trim($this->mysqli_result($return, $i, "o_id"));
+        $o_username = trim($this->mysqli_result($return, $i, "o_username"));
+        $o_firstname = trim($this->mysqli_result($return, $i, "o_firstname"));
+        $o_lastname = trim($this->mysqli_result($return, $i, "o_lastname"));
+        $o_address = trim($this->mysqli_result($return, $i, "o_address"));
+        $o_citytown = trim($this->mysqli_result($return, $i, "o_citytown"));
+        $o_country = trim($this->mysqli_result($return, $i, "o_country"));
+        $o_provincestatearea = trim($this->mysqli_result($return, $i, "o_provincestatearea"));
+        $o_postalcode = trim($this->mysqli_result($return, $i, "o_postalcode"));
+        $o_email = trim($this->mysqli_result($return, $i, "o_email"));
+        $o_phonea = trim($this->mysqli_result($return, $i, "o_phonea"));
+        $o_phoneb = trim($this->mysqli_result($return, $i, "o_phoneb"));
+        $o_phonec = trim($this->mysqli_result($return, $i, "o_phonec"));
+        $o_redemptioncode = trim($this->mysqli_result($return, $i, "o_redemptioncode"));
+        $o_dateoforder = trim($this->mysqli_result($return, $i, "o_dateoforder"));
+        $o_paymentterm = trim($this->mysqli_result($return, $i, "o_paymentterm"));
+        $o_datepaid = trim($this->mysqli_result($return, $i, "o_datepaid"));
+        $o_datedue = trim($this->mysqli_result($return, $i, "o_datedue"));
+        $o_orderstatus = trim($this->mysqli_result($return, $i, "o_orderstatus"));
 
         echo "<form name='frmBilling".$o_id."' method='post' action='./manage_new_bills.php'>";
 
@@ -1029,16 +1034,16 @@ class CBilling{
   function UpdatePaypalInfo($email, $currency, $price){
 
     $query = "SELECT * FROM c4m_paypalaccount LIMIT 1";
-    $return = mysql_query($query, $this->linkBilling) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->linkBilling,$query) or die(mysqli_error($this->linkBilling));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i = 0;
-      $p_id = mysql_result($return,$i,"p_id");
+      $p_id = $this->mysqli_result($return,$i,"p_id");
 
       $update = "UPDATE c4m_paypalaccount SET p_email='".$email."', p_currency='".$currency."', p_monthlycharge ='".$price."' WHERE p_id=".$p_id;
-      mysql_query($update, $this->linkBilling) or die(mysql_error());
+      mysqli_query($this->linkBilling,$update) or die(mysqli_error($this->linkBilling));
     }
 
   }
@@ -1053,12 +1058,12 @@ class CBilling{
 
     // Advanced email configuration
     $query1 = "SELECT * FROM server_email_settings WHERE o_id='1'";
-    $return1 = mysql_query($query1, $this->linkBilling) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($this->linkBilling,$query1) or die(mysqli_error($this->linkBilling));
+    $num1 = mysqli_num_rows($return1);
 
     $query2 = "SELECT * FROM smtp_settings WHERE o_id='1'";
-    $return2 = mysql_query($query2, $this->linkBilling) or die(mysql_error());
-    $num2 = mysql_numrows($return2);
+    $return2 = mysqli_query($this->linkBilling,$query2) or die(mysqli_error($this->linkBilling));
+    $num2 = mysqli_num_rows($return2);
 
     $bOld = true;
 
@@ -1069,17 +1074,17 @@ class CBilling{
     $xdomain= "";
 
     if($num1 != 0){
-      $smtp = trim(mysql_result($return1,0,"o_smtp"));
-      $port = trim(mysql_result($return1,0,"o_smtp_port"));
+      $smtp = trim($this->mysqli_result($return1,0,"o_smtp"));
+      $port = trim($this->mysqli_result($return1,0,"o_smtp_port"));
       
       $user = "";
       $pass = "";
       $domain = "";
 
       if($num2 != 0){
-        $user = trim(mysql_result($return2,0,"o_user"));
-        $pass = trim(mysql_result($return2,0,"o_pass"));
-        $domain = trim(mysql_result($return2,0,"o_domain"));
+        $user = trim($this->mysqli_result($return2,0,"o_user"));
+        $pass = trim($this->mysqli_result($return2,0,"o_pass"));
+        $domain = trim($this->mysqli_result($return2,0,"o_domain"));
         $bOld = false;
       }
 
@@ -1137,7 +1142,7 @@ class CBilling{
 
       if(!$mail->Send()){
         $insert = "INSERT INTO email_log VALUES(NULL, '".$to."', '".$fromemail."', '".$fromname."', '".addslashes($subject)."', '".addslashes($body)."', '".addslashes($mail->ErrorInfo)."', NOW())";
-        mysql_query($insert, $this->linkBilling) or die(mysql_error());
+        mysqli_query($this->linkBilling,$insert) or die(mysqli_error($this->linkBilling));
       }
 
     }
@@ -1150,7 +1155,7 @@ class CBilling{
   *
   */
   function Close(){
-    mysql_close($this->linkBilling);
+    mysqli_close($this->linkBilling);
   }
 
 } //end of class definition

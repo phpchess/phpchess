@@ -680,7 +680,7 @@ class BitBoard
 	public static $calls = 0;
 	public static $clones = 0;
 	
-	public function BitBoard($hex = "")
+	public function __construct($hex = "")
 	{
 		BitBoard::$calls++;
 		$this->num1 = 0;
@@ -1139,7 +1139,7 @@ class ChessMoveList
 	/// Initialises move list by supplying the starting state of the game.
 	/// </summary>
 	/// <param name="nStartPly">The move ply to start from when loading a FEN game. Else it can be just 1.</param>
-	public function ChessMoveList($nSideStarted, $fWCastleK, $fWCastleQ, 
+	public function __construct($nSideStarted, $fWCastleK, $fWCastleQ, 
 		$fBCastleK, $fBCastleQ, $nEnPassant, $nHalfMoves,
 		$boardStatus, $Boards)
 	{

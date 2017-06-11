@@ -50,7 +50,7 @@ class ChessBoard2
 	/// <summary>
 	/// Sets up the chessboard class to its default state.
 	/// </summary>
-	public function ChessBoard2()
+	function __construct()
 	{
 		$this->floor = array(0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7);
 		$this->ChessUtils = new ChessBoardUtilities();

@@ -5,6 +5,13 @@
     exit;
   }
 
+  if (!function_exists('mysqli_result')) {
+	function mysqli_result($result, $number, $field=0) {
+	  mysqli_data_seek($result, $number);
+	  $row = mysqli_fetch_array($result);
+	  return $row[$field];
+	}
+   }
 ?>
 
 <style>
@@ -78,17 +85,17 @@
 		$tid = $_GET['view_tournament'];
 		
 		$query = "SELECT player_id, userid FROM player";
-		$return = mysql_query($query, $oR3DCQuery->link) or die(mysql_error());
+		$return = mysqli_query($oR3DCQuery->link,$query) or die(mysqli_error($oR3DCQuery->link));
 		$players = array();
-		while($row = mysql_fetch_assoc($return))
+		while($row = mysqli_fetch_assoc($return))
 		{
 			$players[$row['player_id']] = $row['userid'];
 		}
 		
 		$query = sprintf("SELECT * FROM c4m_tournamentgames LEFT JOIN game ON game.game_id = c4m_tournamentgames.tg_gameid WHERE c4m_tournamentgames.tg_tmid = '%s'",
-					mysql_real_escape_string($tid));
-		$return = mysql_query($query, $oR3DCQuery->link) or die(mysql_error());
-		$num = mysql_numrows($return);
+					mysqli_real_escape_string($oR3DCQuery->link,$tid));
+		$return = mysqli_query($oR3DCQuery->link,$query) or die(mysqli_error($oR3DCQuery->link));
+		$num = mysqli_num_rows($return);
 		
 		// echo "<tr class='header_row' ><th>White</th><th>Black</th><th>Status</th><th>Turn</th><th>Started</th></tr>";
 		// echo "<table class='games_tbl'>";
@@ -97,17 +104,17 @@
 		echo "<tr class='header_row'><th>$_str_white</th><th>$_str_black</th><th>" . _T("IDS_PlayerTournament_TGAMES_TURN", $config) . "</th><th>$_str_status</th><th width='1%'>" . _T("IDS_PlayerTournament_TGAMES_STARTED", $config) . "</th></tr>";
 		for($i = 0; $i < $num; $i++)
 		{
-			$id = mysql_result($return, $i, "game_id");
-			$initiator = trim(mysql_result($return, $i, "initiator"));
-			$white = $players[trim(mysql_result($return, $i, "w_player_id"))];
-			$black = $players[trim(mysql_result($return, $i, "b_player_id"))];
-			//$status = mysql_result($return, $i, 'status');
-			$completion_status = mysql_result($return, $i, 'completion_status');
-			$start = trim(mysql_result($return, $i, "start_time"));
+			$id = mysqli_result($return, $i, "game_id");
+			$initiator = trim(mysqli_result($return, $i, "initiator"));
+			$white = $players[trim(mysqli_result($return, $i, "w_player_id"))];
+			$black = $players[trim(mysqli_result($return, $i, "b_player_id"))];
+			//$status = mysqli_result($return, $i, 'status');
+			$completion_status = mysqli_result($return, $i, 'completion_status');
+			$start = trim(mysqli_result($return, $i, "start_time"));
 			$start = date('Y-m-d', $start);
-			$turn = $completion_status == 'I' ? trim(mysql_result($return, $i, "next_move")) : '';
+			$turn = $completion_status == 'I' ? trim(mysqli_result($return, $i, "next_move")) : '';
 			$turn = $turn_mapping[$turn];
-			$game_id = mysql_result($return, $i, "tg_gameid");
+			$game_id = mysqli_result($return, $i, "tg_gameid");
 			
 			$onclick_action = '';
 			$title = '';
@@ -161,14 +168,14 @@
 			$tournaments_label = $_str_my_tour;
 		}
 		//$query = "SELECT * FROM c4m_tournament LEFT JOIN c4m_tournamentgames ON t_id = c4m_tournamentgames.tg_tmid WHERE c4m_tournament.t_id IN ($sub_query)";
-		$return = mysql_query($query, $oR3DCQuery->link) or die(mysql_error());
-		$num = mysql_numrows($return);
+		$return = mysqli_query($oR3DCQuery->link,$query) or die(mysqli_error($oR3DCQuery->link));
+		$num = mysqli_num_rows($return);
 		
 		// // Get all tournament games for the tournaments the user is in.
 		// $tournament_ids = array();
 		// for($i = 0; $i < $num; $i++)
 		// {
-			// $tournament_ids[] = mysql_result($return, $i, "t_id");
+			// $tournament_ids[] = mysqli_result($return, $i, "t_id");
 		// }
 		
 		
@@ -180,16 +187,16 @@
 		echo "<tr class='header_row' ><th>$_str_name</th><th>$_str_status</th><th>$_str_cutoff</th><th>$_str_start</th><th>$_str_comment</th></tr>";
 		while($i < $num)
 		{
-			$id = mysql_result($return, $i, "t_id");
-			$name = trim(mysql_result($return, $i, "t_name"));
-			//$type = trim(mysql_result($return, $i, "t_type"));
-			$players = trim(mysql_result($return, $i, "t_playernum"));
-			$cutoff = trim(mysql_result($return, $i, "t_cutoffdate"));
+			$id = mysqli_result($return, $i, "t_id");
+			$name = trim(mysqli_result($return, $i, "t_name"));
+			//$type = trim(mysqli_result($return, $i, "t_type"));
+			$players = trim(mysqli_result($return, $i, "t_playernum"));
+			$cutoff = trim(mysqli_result($return, $i, "t_cutoffdate"));
 			$cutoff = date_format(date_create($cutoff), 'Y-m-d');
-			$start = trim(mysql_result($return, $i, "t_startdate"));
+			$start = trim(mysqli_result($return, $i, "t_startdate"));
 			$start = date_format(date_create($start), 'Y-m-d');
-			$comment = trim(mysql_result($return, $i, "t_comment"));
-			$status = $tment_status_map[trim(mysql_result($return, $i, "t_status"))];
+			$comment = trim(mysqli_result($return, $i, "t_comment"));
+			$status = $tment_status_map[trim(mysqli_result($return, $i, "t_status"))];
 			echo "<tr class='tournament_row' title='$_str_click_view_games' onclick='window.location.href=(\"./chess_tournament_status.php?view_tournament=$id\")'><td>$name</td><td>$status</td><td>$cutoff</td><td>$start</td><td width='400'>$comment</td></tr>";
 			$i++;
 		}

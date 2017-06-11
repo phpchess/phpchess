@@ -129,6 +129,11 @@ var _input_controls = {
 				{
 					for(var key in items)
 					{
+						// HACK: Check if key equals '____' and ignore this item.
+						// Why? Because if the server defines an associative array with keys beginning at 0, 
+						// PHP json_encode will convert it to an array. Adding this dummy key means the items
+						// list is treated as an object.
+						if(key == '____') continue;
 						html += '<option value="' + key + '"';
 						if($.inArray(key, value) > -1) html += ' selected="selected" ';
 						html += '>' + items[key] + '</option>';

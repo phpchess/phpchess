@@ -3,7 +3,7 @@
 	$sqlquery = "SELECT * FROM c4m_msginbox WHERE inbox_id = '".$_SERVER["HTTP_VAR_MSG_ID"]."' AND player_id = '".$_SESSION["id"]."'";
     $result = mysql_query($sqlquery) or die("Unable to execute query: ".mysql_error());
 
-	$message = mysql_fetch_array($result);
+	$message = mysqli_fetch_array($result);
 
 	$message["inbox_id"] = trim($message["inbox_id"]);
 	$message["message"] = trim($message["message"]);
@@ -27,7 +27,7 @@
 
 		$sqlquery = "SELECT * FROM player WHERE player_id = '".$player_id."'";
 		$result = mysql_query($sqlquery) or die("Unable to execute query: ".mysql_error());
-        $player = mysql_fetch_array($result);
+        $player = mysqli_fetch_array($result);
 
 		header("var_sender_id: ".$player["player_id"]);
 		header("var_sender_name: ".$player["userid"]);
@@ -43,7 +43,7 @@
 
 		$sqlquery = "SELECT * FROM player WHERE player_id = '".$player_id."'";
 		$result = mysql_query($sqlquery) or die("Unable to execute query: ".mysql_error());
-        $player = mysql_fetch_array($result);
+        $player = mysqli_fetch_array($result);
 
 		header("var_sender_id: ".$player["player_id"]);
 		header("var_sender_name: ".$player["userid"]);
@@ -57,7 +57,7 @@
 
 		$sqlquery = "SELECT * FROM c4m_tournament WHERE t_id = '".$tid."'";
 		$result = mysql_query($sqlquery) or die("Unable to execute query: ".mysql_error());
-		$tournament = mysql_fetch_array($result);
+		$tournament = mysqli_fetch_array($result);
 
 		header("var_sender_id: 0");
 		header("var_sender_name: Tournament Invitation");

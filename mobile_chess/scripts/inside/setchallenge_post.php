@@ -20,7 +20,7 @@
 	$sqlquery = "SELECT * FROM player WHERE player_id = '".$_SERVER["HTTP_VAR_CHALLENGED_ID"]."' AND status != 'F'";
 	$result = mysql_query($sqlquery) or die("Unable to execute query: ".mysql_error());
 
-	if (!mysql_numrows($result))
+	if (!mysqli_num_rows($result))
 	{
 		header("var_error: Invalid player id.");
 		exit;

@@ -34,7 +34,7 @@ class CTipOfTheDay{
   * CTipOfTheDay (Constructor)
   *
   */
-  function CTipOfTheDay($ConfigFile){
+  function __construct($ConfigFile){
 
     ////////////////////////////////////////////////////////////////////////////
     // Sets the chess config file location (absolute location on the server)
@@ -49,15 +49,20 @@ class CTipOfTheDay{
     $this->user = $conf['database_login'];
     $this->pass = $conf['database_pass'];
 
-    $this->link3 = mysql_connect($this->host, $this->user, $this->pass);
-    mysql_select_db($this->dbnm);
+    $this->link3 = mysqli_connect($this->host, $this->user, $this->pass);
+    mysqli_select_db($this->link3,$this->dbnm);
 
     if(!$this->link3){
-      die("CTipOfTheDay.php: ".mysql_error());
+      die("CTipOfTheDay.php: ".mysqli_error($this->link3));
     }
 
   }
 
+  function mysqli_result($result, $number, $field=0) {
+      mysqli_data_seek($result, $number);
+      $row = mysqli_fetch_array($result);
+      return $row[$field];
+  }
 
   /**********************************************************************
   * GetStringFromStringTable
@@ -79,12 +84,12 @@ class CTipOfTheDay{
     }else{
 
       $query = "SELECT * FROM server_language WHERE o_id=1";
-      $return = mysql_query($query, $this->link3) or die(mysql_error());
-      $num = mysql_numrows($return);
+      $return = mysqli_query($this->link3,$query) or die(mysqli_error($this->link3));
+      $num = mysqli_num_rows($return);
 
       if($num != 0){
 
-        $LanguageFile = $conf['absolute_directory_location']."includes/languages/".mysql_result($return, 0, "o_languagefile");
+        $LanguageFile = $conf['absolute_directory_location']."includes/languages/".$this->mysqli_result($return, 0, "o_languagefile");
 
       }
 
@@ -137,13 +142,13 @@ class CTipOfTheDay{
     if ($_COOKIE["TipDayID"] != ""){
 
       $query = "SELECT * FROM c4m_tipoftheday WHERE tip_id =".$_COOKIE["TipDayID"];
-      $return = mysql_query($query, $this->link3) or die(mysql_error());
-      $num = mysql_numrows($return);
+      $return = mysqli_query($this->link3,$query) or die(mysqli_error($this->link3));
+      $num = mysqli_num_rows($return);
 
       if ($num != 0){
 
-        $tip_id = trim(mysql_result($return,0,"tip_id"));
-        $tip_tiptext  = trim(mysql_result($return,0,"tip_tiptext"));
+        $tip_id = trim($this->mysqli_result($return,0,"tip_id"));
+        $tip_tiptext  = trim($this->mysqli_result($return,0,"tip_tiptext"));
 
         echo "<br>";
         echo "<table width='95%' cellpadding='0' cellspacing='0' border='0' align='center'>";
@@ -158,13 +163,13 @@ class CTipOfTheDay{
     }else{
 
       $query = "SELECT * FROM c4m_tipoftheday ORDER BY RAND() LIMIT 1";
-      $return = mysql_query($query, $this->link3) or die(mysql_error());
-      $num = mysql_numrows($return);
+      $return = mysqli_query($this->link3,$query) or die(mysqli_error($this->link3));
+      $num = mysqli_num_rows($return);
 
       if ($num != 0){
 
-        $tip_id = trim(mysql_result($return,0,"tip_id"));
-        $tip_tiptext  = trim(mysql_result($return,0,"tip_tiptext"));
+        $tip_id = trim($this->mysqli_result($return,0,"tip_id"));
+        $tip_tiptext  = trim($this->mysqli_result($return,0,"tip_tiptext"));
 
         echo "<br>";
         echo "<table width='95%' cellpadding='0' cellspacing='0' border='0' align='center'>";
@@ -190,8 +195,8 @@ class CTipOfTheDay{
   function GetTips($ConfigFile){
 
     $query = "SELECT * FROM c4m_tipoftheday";
-    $return = mysql_query($query, $this->link3) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link3,$query) or die(mysqli_error($this->link3));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
@@ -211,9 +216,9 @@ class CTipOfTheDay{
       $i= 0;
       while($i < $num){
 
-        $tip_id = trim(mysql_result($return,$i,"tip_id"));
-        $tip_tiptext  = trim(mysql_result($return,$i,"tip_tiptext"));
-        $tip_dateadded  = trim(mysql_result($return,$i,"tip_dateadded"));
+        $tip_id = trim($this->mysqli_result($return,$i,"tip_id"));
+        $tip_tiptext  = trim($this->mysqli_result($return,$i,"tip_tiptext"));
+        $tip_dateadded  = trim($this->mysqli_result($return,$i,"tip_dateadded"));
 
         echo "<tr>";
         echo "<td valign='top'><input type='radio' value='".$tip_id."' name='rdodelete'></td>";
@@ -238,14 +243,14 @@ class CTipOfTheDay{
   function GetTipsByID($ConfigFile, $id, &$rid, &$rtext, &$rdate){
 
     $query = "SELECT * FROM c4m_tipoftheday WHERE tip_id =".$id;
-    $return = mysql_query($query, $this->link3) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link3,$query) or die(mysqli_error($this->link3));
+    $num = mysqli_num_rows($return);
 
     if ($num != 0){
 
-        $rid = trim(mysql_result($return,0,"tip_id"));
-        $rtext = trim(mysql_result($return,0,"tip_tiptext"));
-        $rdate = trim(mysql_result($return,0,"tip_dateadded"));
+        $rid = trim($this->mysqli_result($return,0,"tip_id"));
+        $rtext = trim($this->mysqli_result($return,0,"tip_tiptext"));
+        $rdate = trim($this->mysqli_result($return,0,"tip_dateadded"));
 
     }else{
 
@@ -265,7 +270,7 @@ class CTipOfTheDay{
   function AddTip($ConfigFile, $text){
 
     $query = "INSERT INTO c4m_tipoftheday VALUES(NULL,'".$text."',NOW())";
-    mysql_query($query, $this->link3) or die(mysql_error());
+    mysqli_query($this->link3,$query) or die(mysqli_error($this->link3));
     
   }
 
@@ -277,7 +282,7 @@ class CTipOfTheDay{
   function DeleteTip($ConfigFile, $tipid){
 
     $query = "DELETE FROM c4m_tipoftheday WHERE tip_id = ".$tipid;
-    mysql_query($query, $this->link3) or die(mysql_error());
+    mysqli_query($this->link3,$query) or die(mysqli_error($this->link3));
   }
 
 
@@ -288,7 +293,7 @@ class CTipOfTheDay{
   function EditTip($ConfigFile, $tipid, $tiptext){
 
     $query = "UPDATE c4m_tipoftheday SET tip_tiptext ='".$tiptext."' WHERE tip_id = ".$tipid;
-    mysql_query($query, $this->link3) or die(mysql_error());
+    mysqli_query($this->link3,$query) or die(mysqli_error($this->link3));
 
   }
 
@@ -298,7 +303,7 @@ class CTipOfTheDay{
   *
   */
   function Close(){
-    mysql_close($this->link3);
+    mysqli_close($this->link3);
   }
 
 

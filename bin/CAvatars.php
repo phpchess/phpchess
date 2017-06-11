@@ -34,7 +34,7 @@ class CAvatars{
   * CAvatars (Constructor)
   *
   */
-  function CAvatars($ConfigFile){
+  function __construct($ConfigFile){
 
     ////////////////////////////////////////////////////////////////////////////
     // Sets the chess config file location (absolute location on the server)
@@ -51,13 +51,20 @@ class CAvatars{
     $this->user = $conf['database_login'];
     $this->pass = $conf['database_pass'];
 
-    $this->linkCAvatars = mysql_connect($this->host, $this->user, $this->pass);
-    mysql_select_db($this->dbnm);
+    $this->linkCAvatars = mysqli_connect($this->host, $this->user, $this->pass);
+    mysqli_select_db($this->linkCAvatars,$this->dbnm);
 
     if(!$this->linkCAvatars){
-      die("CAvatars.php: ".mysql_error());
+      die("CAvatars.php: ".mysqli_error($this->linkCAvatars));
     }
 
+  }
+
+  
+  function mysqli_result($result, $number, $field=0) {
+      mysqli_data_seek($result, $number);
+      $row = mysqli_fetch_array($result);
+      return $row[$field];
   }
 
 
@@ -70,33 +77,33 @@ class CAvatars{
 
     // Check to see if the user has an avatar already
     $query = "SELECT * FROM c4m_avatars WHERE a_playerid = ".$pid."";
-    $return = mysql_query($query, $this->linkCAvatars) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->linkCAvatars,$query) or die(mysqli_error($this->linkCAvatars));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       // Avatar exists
       // delete the current avatar image
 
-      list($one, $two) = explode("/", mysql_result($return, 0, "a_imgname"));
+      list($one, $two) = explode("/", $this->mysqli_result($return, 0, "a_imgname"));
 
       if(trim($one) == "USER"){
-        @unlink($this->AvatarDirAbsLocation.mysql_result($return, 0, "a_imgname"));
+        @unlink($this->AvatarDirAbsLocation.$this->mysqli_result($return, 0, "a_imgname"));
       }
 
       // delete the current db record
       $delete = "DELETE FROM c4m_avatars WHERE a_playerid = ".$pid."";
-      mysql_query($delete, $this->linkCAvatars) or die(mysql_error());
+      mysqli_query($this->linkCAvatars,$delete) or die(mysqli_error($this->linkCAvatars));
 
       // Create the new db record
       $insert = "INSERT INTO c4m_avatars VALUES(".$pid.",'".$imagename."', NOW())";
-      mysql_query($insert, $this->linkCAvatars) or die(mysql_error());
+      mysqli_query($this->linkCAvatars,$insert) or die(mysqli_error($this->linkCAvatars));
 
     }else{
 
       // Avatar does not exist
       $insert = "INSERT INTO c4m_avatars VALUES(".$pid.",'".$imagename."', NOW())";
-      mysql_query($insert, $this->linkCAvatars) or die(mysql_error());
+      mysqli_query($this->linkCAvatars,$insert) or die(mysqli_error($this->linkCAvatars));
 
     }
 
@@ -114,11 +121,11 @@ class CAvatars{
 
     // Check to see if the user has an avatar already
     $query = "SELECT * FROM c4m_avatars WHERE a_playerid = ".$pid."";
-    $return = mysql_query($query, $this->linkCAvatars) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->linkCAvatars,$query) or die(mysqli_error($this->linkCAvatars));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-       $strImageName = mysql_result($return, 0, "a_imgname");
+       $strImageName = $this->mysqli_result($return, 0, "a_imgname");
     }
 
     return $strImageName;
@@ -223,8 +230,8 @@ class CAvatars{
 
     // Check to see if the user has an avatar already
     $query = "SELECT * FROM c4m_avatars WHERE a_playerid = ".$pid."";
-    $return = mysql_query($query, $this->linkCAvatars) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->linkCAvatars,$query) or die(mysqli_error($this->linkCAvatars));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
@@ -232,27 +239,27 @@ class CAvatars{
      
       // delete the current avatar image
      
-      list($one, $two) = explode("/", mysql_result($return, 0, "a_imgname"));
+      list($one, $two) = explode("/", $this->mysqli_result($return, 0, "a_imgname"));
 
       if(trim($one) == "USER"){
 
-        unlink($this->AvatarDirAbsLocation.mysql_result($return, 0, "a_imgname"));
+        unlink($this->AvatarDirAbsLocation.$this->mysqli_result($return, 0, "a_imgname"));
 
       }
 
       // delete the current db record
       $delete = "DELETE FROM c4m_avatars WHERE a_playerid = ".$pid."";
-      mysql_query($delete, $this->linkCAvatars) or die(mysql_error());
+      mysqli_query($this->linkCAvatars,$delete) or die(mysqli_error($this->linkCAvatars));
 
       // Create the new db record
       $insert = "INSERT INTO c4m_avatars VALUES(".$pid.",'".$imagename."', NOW())";
-      mysql_query($insert, $this->linkCAvatars) or die(mysql_error());
+      mysqli_query($this->linkCAvatars,$insert) or die(mysqli_error($this->linkCAvatars));
 
     }else{
 
       // Avatar does not exist
       $insert = "INSERT INTO c4m_avatars VALUES(".$pid.",'".$imagename."', NOW())";
-      mysql_query($insert, $this->linkCAvatars) or die(mysql_error());
+      mysqli_query($this->linkCAvatars,$insert) or die(mysqli_error($this->linkCAvatars));
 
     }
 
@@ -263,8 +270,8 @@ class CAvatars{
 
     // Check to see if the user has an avatar already
     $query = "SELECT * FROM c4m_avatars WHERE a_playerid = ".$pid."";
-    $return = mysql_query($query, $this->linkCAvatars) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->linkCAvatars,$query) or die(mysqli_error($this->linkCAvatars));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
@@ -273,22 +280,22 @@ class CAvatars{
       // If using a user uploaded avatar, and switching to a system avatar,
 	  // delete the user's avatar.
      
-      list($one, $two) = explode("/", mysql_result($return, 0, "a_imgname"));
+      list($one, $two) = explode("/", $this->mysqli_result($return, 0, "a_imgname"));
 
-      if(trim($one) == "USER" && mysql_result($return, 0, "a_imgname") != $imagename){
+      if(trim($one) == "USER" && $this->mysqli_result($return, 0, "a_imgname") != $imagename){
 
-        unlink($this->AvatarDirAbsLocation.mysql_result($return, 0, "a_imgname"));
+        unlink($this->AvatarDirAbsLocation.$this->mysqli_result($return, 0, "a_imgname"));
 
       }
 	  // Update the current db record
 	  $query = "UPDATE c4m_avatars SET `a_imgname` = \"$imagename\", `a_datechanges` = NOW() WHERE `a_playerid` = $pid";
-	  mysql_query($query, $this->linkCAvatars) or die(mysql_error());
+	  mysqli_query($this->linkCAvatars,$query) or die(mysqli_error($this->linkCAvatars));
 
     }else{
 
       // Avatar does not exist
       $insert = "INSERT INTO c4m_avatars VALUES(".$pid.",'".$imagename."', NOW())";
-      mysql_query($insert, $this->linkCAvatars) or die(mysql_error());
+      mysqli_query($this->linkCAvatars,$insert) or die(mysqli_error($this->linkCAvatars));
 
     }
 
@@ -302,13 +309,13 @@ class CAvatars{
   function GetAdminAvatarSettings(){
 
     $query = "SELECT * FROM admin_avatar_settings WHERE o_id = 1";
-    $return = mysql_query($query, $this->linkCAvatars) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->linkCAvatars,$query) or die(mysqli_error($this->linkCAvatars));
+    $num = mysqli_num_rows($return);
  
     $setting = 1;
 
     if($num != 0){
-      $setting = mysql_result($return, 0, "o_setting");
+      $setting = $this->mysqli_result($return, 0, "o_setting");
     }
 
     return $setting;
@@ -323,7 +330,7 @@ class CAvatars{
   function UpdateAdminAvatarSettings($value){
 
     $update = "UPDATE admin_avatar_settings SET o_setting = '".$value."' WHERE o_id = 1";
-    mysql_query($update, $this->linkCAvatars) or die(mysql_error());
+    mysqli_query($this->linkCAvatars,$update) or die(mysqli_error($this->linkCAvatars));
 
   }
 
@@ -333,7 +340,7 @@ class CAvatars{
   *
   */
   function Close(){
-    mysql_close($this->linkCAvatars);
+    mysqli_close($this->linkCAvatars);
   }
 
 

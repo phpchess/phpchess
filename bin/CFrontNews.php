@@ -32,7 +32,7 @@ class CFrontNews{
   * CFrontNews (Constructor)
   *
   */
-  function CFrontNews($ConfigFile){
+  function __construct($ConfigFile){
 
     ////////////////////////////////////////////////////////////////////////////
     // Sets the chess config file location (absolute location on the server)
@@ -47,15 +47,20 @@ class CFrontNews{
     $this->user = $conf['database_login'];
     $this->pass = $conf['database_pass'];
 
-    $this->linkFrontNews = mysql_connect($this->host, $this->user, $this->pass);
-    mysql_select_db($this->dbnm);
+    $this->linkFrontNews = mysqli_connect($this->host, $this->user, $this->pass);
+    mysqli_select_db($this->linkFrontNews,$this->dbnm);
 
     if(!$this->linkFrontNews){
-      die("CServMsg.php: ".mysql_error());
+      die("CServMsg.php: ".mysqli_error($this->linkFrontNews));
     }
 
   }
 
+  function mysqli_result($result, $number, $field=0) {
+      mysqli_data_seek($result, $number);
+      $row = mysqli_fetch_array($result);
+      return $row[$field];
+  }
 
   /**********************************************************************
   * GetFrontNews
@@ -64,18 +69,18 @@ class CFrontNews{
   function GetFrontNews(){
 
     $query = "SELECT * FROM c4m_frontnews ORDER BY f_id DESC";
-    $return = mysql_query($query, $this->linkFrontNews) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->linkFrontNews,$query) or die(mysqli_error($this->linkFrontNews));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i = 0;
       while($i < $num){
 
-        $f_id = mysql_result($return,$i,"f_id");
-        $f_title = mysql_result($return,$i,"f_title");
-        $f_msg = mysql_result($return,$i,"f_msg");
-        $f_date = mysql_result($return,$i,"f_date");
+        $f_id = $this->mysqli_result($return,$i,"f_id");
+        $f_title = $this->mysqli_result($return,$i,"f_title");
+        $f_msg = $this->mysqli_result($return,$i,"f_msg");
+        $f_date = $this->mysqli_result($return,$i,"f_date");
 
         //echo "<br>";
         echo "<table width='100%' cellpadding='3' cellspacing='1' border='0' align='center' class='forumline'>";
@@ -109,18 +114,18 @@ class CFrontNews{
   function GetFrontNewsAdmin(){
 
     $query = "SELECT * FROM c4m_frontnews ORDER BY f_id DESC";
-    $return = mysql_query($query, $this->linkFrontNews) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->linkFrontNews,$query) or die(mysqli_error($this->linkFrontNews));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i = 0;
       while($i < $num){
 
-        $f_id = mysql_result($return,$i,"f_id");
-        $f_title = mysql_result($return,$i,"f_title");
-        $f_msg = mysql_result($return,$i,"f_msg");
-        $f_date = mysql_result($return,$i,"f_date");
+        $f_id = $this->mysqli_result($return,$i,"f_id");
+        $f_title = $this->mysqli_result($return,$i,"f_title");
+        $f_msg = $this->mysqli_result($return,$i,"f_msg");
+        $f_date = $this->mysqli_result($return,$i,"f_date");
 
         echo "<br>";
 
@@ -165,7 +170,7 @@ class CFrontNews{
   function AddFrontNews($Title, $News){
 
     $insert = "INSERT INTO c4m_frontnews VALUES(NULL, '".$Title."', '".$News."', NOW())";
-    mysql_query($insert, $this->linkFrontNews) or die(mysql_error());
+    mysqli_query($this->linkFrontNews,$insert) or die(mysqli_error($this->linkFrontNews));
 
   }
 
@@ -177,15 +182,15 @@ class CFrontNews{
   function GetFrontNewsForEdit($id, &$Title, &$News){
 
     $query = "SELECT * FROM c4m_frontnews WHERE f_id =".$id;
-    $return = mysql_query($query, $this->linkFrontNews) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->linkFrontNews,$query) or die(mysqli_error($this->linkFrontNews));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $f_id = mysql_result($return,$i,"f_id");
-      $Title = mysql_result($return,$i,"f_title");
-      $News = mysql_result($return,$i,"f_msg");
-      $f_date = mysql_result($return,$i,"f_date");
+      $f_id = $this->mysqli_result($return,$i,"f_id");
+      $Title = $this->mysqli_result($return,$i,"f_title");
+      $News = $this->mysqli_result($return,$i,"f_msg");
+      $f_date = $this->mysqli_result($return,$i,"f_date");
 
     }
 
@@ -199,7 +204,7 @@ class CFrontNews{
   function EditFrontNews($id, $Title, $News){
 
     $update = "UPDATE c4m_frontnews SET f_title='".$Title."', f_msg='".$News."' WHERE f_id =".$id;
-    mysql_query($update, $this->linkFrontNews) or die(mysql_error());
+    mysqli_query($this->linkFrontNews,$update) or die(mysqli_error($this->linkFrontNews));
 
   }
 
@@ -211,7 +216,7 @@ class CFrontNews{
   function DeleteFrontNews($id){
 
     $delete = "DELETE FROM c4m_frontnews WHERE f_id =".$id;
-    mysql_query($delete, $this->linkFrontNews) or die(mysql_error());
+    mysqli_query($this->linkFrontNews,$delete) or die(mysqli_error($this->linkFrontNews));
 
   }
 
@@ -223,18 +228,18 @@ class CFrontNews{
   function GetFrontNewsForMobile(){
 
     $query = "SELECT * FROM c4m_frontnews ORDER BY f_id DESC";
-    $return = mysql_query($query, $this->linkFrontNews) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->linkFrontNews,$query) or die(mysqli_error($this->linkFrontNews));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i = 0;
       while($i < $num){
 
-        $f_id = mysql_result($return,$i,"f_id");
-        $f_title = mysql_result($return,$i,"f_title");
-        $f_msg = mysql_result($return,$i,"f_msg");
-        $f_date = mysql_result($return,$i,"f_date");
+        $f_id = $this->mysqli_result($return,$i,"f_id");
+        $f_title = $this->mysqli_result($return,$i,"f_title");
+        $f_msg = $this->mysqli_result($return,$i,"f_msg");
+        $f_date = $this->mysqli_result($return,$i,"f_date");
 
         echo "<NEWS>\n";
 
@@ -265,7 +270,7 @@ class CFrontNews{
   *
   */
   function Close(){
-    mysql_close($this->linkFrontNews);
+    mysqli_close($this->linkFrontNews);
   }
 
 } //end of class definition

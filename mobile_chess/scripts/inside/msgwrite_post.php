@@ -2,9 +2,9 @@
 	settype($_SERVER["HTTP_VAR_MSG_TARGET"], "integer");
 	$sqlquery = "SELECT userid FROM player WHERE player_id = '".$_SESSION["id"]."'";
 	$result = mysql_query($sqlquery) or die("Unable to execute query: ".mysql_error());
-	if (mysql_numrows($result))
+	if (mysqli_num_rows($result))
 	{
-		$player = mysql_fetch_array($result);
+		$player = mysqli_fetch_array($result);
 
     	$message = "C000000000".$player["userid"]."-".$_SERVER["HTTP_VAR_MSG_CONTENT"];
 

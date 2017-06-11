@@ -4,7 +4,14 @@
     die("Hacking attempt");
     exit;
   }
-
+  
+  if (!function_exists('mysqli_result')) {
+	  function mysqli_result($result, $number, $field=0) {
+	      mysqli_data_seek($result, $number);
+	      $row = mysqli_fetch_array($result);
+	      return $row[$field];
+	  }
+  }
 ?>
 
 
@@ -273,16 +280,16 @@ foreach($times as $key => $time)
 	<?php
 		$timeouts = array('snail' => NULL, 'slow' => NULL, 'normal' => NULL, 'short' => NULL, 'blitz' => NULL);
 		$query = "SELECT * FROM admin_game_options WHERE o_id = 1";
-		$return = mysql_query($query, $oR3DCQuery->link) or die(mysql_error());
-		$num = mysql_numrows($return);
+		$return = mysqli_query($oR3DCQuery->link,$query) or die(mysqli_error($oR3DCQuery->link));
+		$num = mysqli_num_rows($return);
 
 		if($num != 0)
 		{
-			$timeouts['snail'] = trim(mysql_result($return,0,"o_snail")) * 86400;
-			$timeouts['slow'] = trim(mysql_result($return,0,"o_slow")) * 86400;
-			$timeouts['normal'] = trim(mysql_result($return,0,"o_normal")) * 86400;
-			$timeouts['short'] = trim(mysql_result($return,0,"o_short")) * 86400;
-			$timeouts['blitz'] = trim(mysql_result($return,0,"o_blitz")) * 86400;
+			$timeouts['snail'] = trim(mysqli_result($return,0,"o_snail")) * 86400;
+			$timeouts['slow'] = trim(mysqli_result($return,0,"o_slow")) * 86400;
+			$timeouts['normal'] = trim(mysqli_result($return,0,"o_normal")) * 86400;
+			$timeouts['short'] = trim(mysqli_result($return,0,"o_short")) * 86400;
+			$timeouts['blitz'] = trim(mysqli_result($return,0,"o_blitz")) * 86400;
 		}
 	?>
 	var timeouts = <?php echo json_encode($timeouts); ?>;

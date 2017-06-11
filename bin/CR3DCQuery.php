@@ -41,16 +41,15 @@ class CR3DCQuery{
   * CR3DCQuery (Constructor)
   *
   */
-  function CR3DCQuery($ConfigFile){
+function __construct($ConfigFile){
 
     ////////////////////////////////////////////////////////////////////////////
     // Sets the chess config file location (absolute location on the server)
     ////////////////////////////////////////////////////////////////////////////
     $this->ChessCFGFileLocation = $ConfigFile;
-    ////////////////////////////////////////////////////////////////////////////
-
-    include($ConfigFile);
-    $this->conf = $conf;
+    ////////////////////////////////////////////////////////////////////////////    
+    include($ConfigFile);    
+    $this->conf = $conf;    
     $this->host = $conf['database_host'];
     $this->dbnm = $conf['database_name'];
     $this->user = $conf['database_login'];
@@ -60,21 +59,21 @@ class CR3DCQuery{
     $this->SiteName = $conf['site_name'];
     $this->RegistrationEmail = $conf['registration_email'];
     if(!defined(CONNECTED)) {
-      $this->link = mysql_connect($this->host, $this->user, $this->pass);
-      mysql_select_db($this->dbnm);
+      $this->link = mysqli_connect($this->host, $this->user, $this->pass);
+      mysqli_select_db($this->link,$this->dbnm);
       define('CONNECTED',1);
     }
     if(!$this->link){
-      die("CR3DCQuery.php: ".mysql_error());
+      die("CR3DCQuery.php: ".mysqli_error($this->link));
     }
 
     $query = "SELECT * FROM c4m_skins LIMIT 1";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $name = mysql_result($return,$i,"name");
+      $name = $this->mysqli_result($return,$i,"name");
 
     }
 
@@ -82,6 +81,11 @@ class CR3DCQuery{
 
   }
 
+  function mysqli_result($result, $number, $field=0) {
+    mysqli_data_seek($result, $number);
+    $row = mysqli_fetch_array($result);
+    return $row[$field];
+  }
 
   /**********************************************************************
   * GetStringFromStringTable
@@ -102,12 +106,12 @@ class CR3DCQuery{
     }else{
 
       $query = "SELECT * FROM server_language WHERE o_id=1";
-      $return = mysql_query($query, $this->link) or die(mysql_error());
-      $num = mysql_numrows($return);
+      $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+      $num = mysqli_num_rows($return);
 
       if($num != 0){
 
-        $LanguageFile = $conf['absolute_directory_location']."includes/languages/".mysql_result($return, 0, "o_languagefile");
+        $LanguageFile = $conf['absolute_directory_location']."includes/languages/".$this->mysqli_result($return, 0, "o_languagefile");
 
       }
 
@@ -157,8 +161,8 @@ class CR3DCQuery{
   function GetNewPlayers($ConfigFile){
 
     $query = "SELECT * FROM player ORDER BY signup_time DESC LIMIT 5";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     echo "<br>";
 
@@ -173,9 +177,9 @@ class CR3DCQuery{
 
       $i = 0;
       while($i < $num){
-        $player_id = trim(mysql_result($return,$i,"player_id"));
-        $userid = trim(mysql_result($return,$i,"userid"));
-        $signuptime  = trim(mysql_result($return,$i,"signup_time"));
+        $player_id = trim($this->mysqli_result($return,$i,"player_id"));
+        $userid = trim($this->mysqli_result($return,$i,"userid"));
+        $signuptime  = trim($this->mysqli_result($return,$i,"signup_time"));
 
         if($this->IsPlayerDisabled($player_id) == false){
 
@@ -249,7 +253,7 @@ class CR3DCQuery{
   function PurgeOldUserSessionData($PlayerID, $newSID){
 
     $delete = "DELETE FROM active_sessions WHERE session!='".$newSID."' AND player_id=".$PlayerID;
-    mysql_query($delete, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$delete) or die(mysqli_error($this->link));
 
   }
 
@@ -263,8 +267,8 @@ class CR3DCQuery{
     $bIsLoggedIn = false;
 
     $query = "SELECT * FROM active_sessions WHERE session Like '".$SID."%'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
       $bIsLoggedIn = true;
@@ -282,13 +286,13 @@ class CR3DCQuery{
   function GetIDByUserID($ConfigFile, $UserID){
 
     $query = "SELECT * FROM player WHERE userid = '".$UserID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $player_id = "";
 
     if($num != 0){
-       $player_id  = trim(mysql_result($return,0,"player_id"));
+       $player_id  = trim($this->mysqli_result($return,0,"player_id"));
     }
 
     return $player_id;
@@ -303,8 +307,8 @@ class CR3DCQuery{
   function GetUserIDByPlayerID($ConfigFile, $ID){
 
     $query = "SELECT * FROM player WHERE player_id = ".$ID;
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $user_id = "";
 
@@ -315,7 +319,7 @@ class CR3DCQuery{
     }
 
     if($num != 0){
-       $user_id  = trim(mysql_result($return,0,"userid"));
+       $user_id  = trim($this->mysqli_result($return,0,"userid"));
     }
 
     return $user_id;
@@ -331,13 +335,13 @@ class CR3DCQuery{
 
     //Get game where the player is white
     $queryw = "SELECT * FROM game WHERE w_player_id = ".$ID." AND completion_status IN('A','I')";
-    $returnw = mysql_query($queryw, $this->link) or die(mysql_error());
-    $numw = mysql_numrows($returnw);
+    $returnw = mysqli_query($this->link,$queryw) or die(mysqli_error($this->link));
+    $numw = mysqli_num_rows($returnw);
 
     //get all the games from the c4m_tournamentgames table
     $queryt = "SELECT tg_gameid FROM c4m_tournamentgames";
-    $returnt = mysql_query($queryt, $this->link) or die(mysql_error());
-    $numt = mysql_numrows($returnt);
+    $returnt = mysqli_query($this->link,$queryt) or die(mysqli_error($this->link));
+    $numt = mysqli_num_rows($returnt);
 
     echo "<br>";
 
@@ -348,14 +352,14 @@ class CR3DCQuery{
 
       while($i < $numw){
 
-        $game_id = trim(mysql_result($returnw,$i,"game_id"));
-        $initiator = trim(mysql_result($returnw,$i,"initiator"));
-        $w_player_id = trim(mysql_result($returnw,$i,"w_player_id"));
-        $b_player_id = trim(mysql_result($returnw,$i,"b_player_id"));
-        $next_move = trim(mysql_result($returnw,$i,"next_move"));
+        $game_id = trim($this->mysqli_result($returnw,$i,"game_id"));
+        $initiator = trim($this->mysqli_result($returnw,$i,"initiator"));
+        $w_player_id = trim($this->mysqli_result($returnw,$i,"w_player_id"));
+        $b_player_id = trim($this->mysqli_result($returnw,$i,"b_player_id"));
+        $next_move = trim($this->mysqli_result($returnw,$i,"next_move"));
 
-        $status = trim(mysql_result($returnw,$i,"status"));
-        $completion_status = trim(mysql_result($returnw,$i,"completion_status"));
+        $status = trim($this->mysqli_result($returnw,$i,"status"));
+        $completion_status = trim($this->mysqli_result($returnw,$i,"completion_status"));
 
         $Gtypecode = $this->GetGameTypeCode($game_id);
         $IsAccepted = $this->CheckGameAccepted($ConfigFile, $ID, $game_id);
@@ -366,7 +370,7 @@ class CR3DCQuery{
         $bexit = false;
         while($ti < $numt && $bexit == false){
 
-          $TGID = mysql_result($returnt, $ti, 0);
+          $TGID = $this->mysqli_result($returnt, $ti, 0);
 
           if($TGID == $game_id){
             $bexit = true;
@@ -464,8 +468,8 @@ class CR3DCQuery{
 
     //Get game where the player is black
     $queryb = "SELECT * FROM game WHERE b_player_id = ".$ID." AND completion_status IN('A','I')";
-    $returnb = mysql_query($queryb, $this->link) or die(mysql_error());
-    $numb = mysql_numrows($returnb);
+    $returnb = mysqli_query($this->link,$queryb) or die(mysqli_error($this->link));
+    $numb = mysqli_num_rows($returnb);
 
     if($numb != 0){
 
@@ -474,14 +478,14 @@ class CR3DCQuery{
 
       while($i < $numb){
 
-        $game_id = trim(mysql_result($returnb,$i,"game_id"));
-        $initiator = trim(mysql_result($returnb,$i,"initiator"));
-        $w_player_id = trim(mysql_result($returnb,$i,"w_player_id"));
-        $b_player_id = trim(mysql_result($returnb,$i,"b_player_id"));
-        $next_move = trim(mysql_result($returnb,$i,"next_move"));
+        $game_id = trim($this->mysqli_result($returnb,$i,"game_id"));
+        $initiator = trim($this->mysqli_result($returnb,$i,"initiator"));
+        $w_player_id = trim($this->mysqli_result($returnb,$i,"w_player_id"));
+        $b_player_id = trim($this->mysqli_result($returnb,$i,"b_player_id"));
+        $next_move = trim($this->mysqli_result($returnb,$i,"next_move"));
 
-        $status = trim(mysql_result($returnb,$i,"status"));
-        $completion_status = trim(mysql_result($returnb,$i,"completion_status"));
+        $status = trim($this->mysqli_result($returnb,$i,"status"));
+        $completion_status = trim($this->mysqli_result($returnb,$i,"completion_status"));
 
         $Gtypecode = $this->GetGameTypeCode($game_id);
         $IsAccepted = $this->CheckGameAccepted($ConfigFile, $ID, $game_id);
@@ -492,7 +496,7 @@ class CR3DCQuery{
         $bexit = false;
         while($ti < $numt && $bexit == false){
 
-          $TGID = mysql_result($returnt, $ti, 0);
+          $TGID = $this->mysqli_result($returnt, $ti, 0);
 
           if($TGID == $game_id){
             $bexit = true;
@@ -654,33 +658,33 @@ class CR3DCQuery{
     //WINS
 
     $query = "SELECT COUNT(*) FROM game WHERE (w_player_id=".$ID." AND completion_status='W') OR (b_player_id=".$ID." AND completion_status='B')";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-      $wins = mysql_result($return,0,0);
+      $wins = $this->mysqli_result($return,0,0);
     }
 
     /////////////////////////////////////
     //LOSS
 
     $query2 = "SELECT COUNT(*) FROM game WHERE (w_player_id=".$ID." AND completion_status='B') OR (b_player_id=".$ID." AND completion_status='W')";
-    $return2 = mysql_query($query2, $this->link) or die(mysql_error());
-    $num2 = mysql_numrows($return2);
+    $return2 = mysqli_query($this->link,$query2) or die(mysqli_error($this->link));
+    $num2 = mysqli_num_rows($return2);
 
     if($num2 != 0){
-      $loss = mysql_result($return2,0,0);
+      $loss = $this->mysqli_result($return2,0,0);
     }
 
     /////////////////////////////////////
     //DRAWS
 
     $query4 = "SELECT COUNT(*) FROM game WHERE (w_player_id=".$ID." AND completion_status='D') OR (b_player_id=".$ID." AND completion_status='D')";
-    $return4 = mysql_query($query4, $this->link) or die(mysql_error());
-    $num4 = mysql_numrows($return4);
+    $return4 = mysqli_query($this->link,$query4) or die(mysqli_error($this->link));
+    $num4 = mysqli_num_rows($return4);
 
     if($num4 != 0){
-      $draws = mysql_result($return4,0,0);
+      $draws = $this->mysqli_result($return4,0,0);
     }
 
   }
@@ -829,8 +833,8 @@ class CR3DCQuery{
     if($bTournament){
 
       $query = "SELECT * FROM game WHERE game_id = '".$GameID."' AND w_player_id != ".$player_id;
-      $return = mysql_query($query, $this->link) or die(mysql_error());
-      $num = mysql_numrows($return);
+      $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+      $num = mysqli_num_rows($return);
 
       if($num != 0){
         $bReturn = true;
@@ -839,8 +843,8 @@ class CR3DCQuery{
     }else{
 
       $query = "SELECT * FROM game WHERE game_id = '".$GameID."' AND b_player_id = ".$player_id;
-      $return = mysql_query($query, $this->link) or die(mysql_error());
-      $num = mysql_numrows($return);
+      $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+      $num = mysqli_num_rows($return);
 
       if($num != 0){
         $bReturn = true;
@@ -861,18 +865,18 @@ class CR3DCQuery{
 
     //Get game info
     $query = "SELECT * FROM game WHERE game_id = '".$ID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i = 0;
-      $game_id = trim(mysql_result($return,$i,"game_id"));
-      $initiator = trim(mysql_result($return,$i,"initiator"));
-      $w_player_id = trim(mysql_result($return,$i,"w_player_id"));
-      $b_player_id = trim(mysql_result($return,$i,"b_player_id"));
-      $next_move = trim(mysql_result($return,$i,"next_move"));
-      $start_time = trim(mysql_result($return,$i,"start_time"));
+      $game_id = trim($this->mysqli_result($return,$i,"game_id"));
+      $initiator = trim($this->mysqli_result($return,$i,"initiator"));
+      $w_player_id = trim($this->mysqli_result($return,$i,"w_player_id"));
+      $b_player_id = trim($this->mysqli_result($return,$i,"b_player_id"));
+      $next_move = trim($this->mysqli_result($return,$i,"next_move"));
+      $start_time = trim($this->mysqli_result($return,$i,"start_time"));
 
     }
 
@@ -954,11 +958,11 @@ class CR3DCQuery{
 
     // Check to see if the user has an avatar already
     $query = "SELECT * FROM c4m_avatars WHERE a_playerid = ".$pid."";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-       $strImageName = mysql_result($return, 0, "a_imgname");
+       $strImageName = $this->mysqli_result($return, 0, "a_imgname");
     }
 
     return $strImageName;
@@ -1928,20 +1932,20 @@ class CR3DCQuery{
   function GetChessBoardColors($ConfigFile, $player_id, &$clrl, &$clrd){
 
     $query = "SELECT * FROM c4m_chessboardcolors WHERE player_id = ".$player_id;
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $clrl = trim(mysql_result($return, 0, "cc_lcolor"));
-      $clrd = trim(mysql_result($return, 0, "cc_dcolor"));
+      $clrl = trim($this->mysqli_result($return, 0, "cc_lcolor"));
+      $clrd = trim($this->mysqli_result($return, 0, "cc_dcolor"));
 
     }else{
 
       if($player_id != ""){
 
         $Insert = "INSERT INTO c4m_chessboardcolors VALUES(NULL, $player_id, '#957A01', '#FFFFFF')";
-        mysql_query($Insert, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$Insert) or die(mysqli_error($this->link));
 
         $clrl = "#FFFFFF";
         $clrd = "#957A01";
@@ -1960,7 +1964,7 @@ class CR3DCQuery{
   function UpdateChessBoardColors($ConfigFile, $player_id, $clrl, $clrd){
 
     $query = "UPDATE c4m_chessboardcolors SET cc_dcolor = '".$clrd."', cc_lcolor = '".$clrl."' WHERE player_id = ".$player_id;
-    mysql_query($query, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$query) or die(mysqli_error($this->link));
 
   }
 
@@ -1975,11 +1979,11 @@ class CR3DCQuery{
 
     //Who made the first move
     $query1 = "SELECT * FROM move_history WHERE game_id = '".$GameID."' ORDER BY move_id ASC";
-    $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+    $num1 = mysqli_num_rows($return1);
 
     if($num1 != 0){
-      $move_id = trim(mysql_result($return1, 0, "move_id"));
+      $move_id = trim($this->mysqli_result($return1, 0, "move_id"));
     }
 
     return $move_id;
@@ -1997,15 +2001,15 @@ class CR3DCQuery{
 
     //Who made the first move
     $query1 = "SELECT * FROM move_history WHERE game_id = '".$GameID."' ORDER BY move_id ASC";
-    $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+    $num1 = mysqli_num_rows($return1);
 
     if($num1 != 0){
 
       $i = 0;
       $MAX = $moveidcount+1;
       while($i < $MAX){
-        $time = trim(mysql_result($return1, $moveidcount, "time"));
+        $time = trim($this->mysqli_result($return1, $moveidcount, "time"));
         $i++;
       }
 
@@ -2026,24 +2030,24 @@ class CR3DCQuery{
 
     //Who made the first move
     $query1 = "SELECT * FROM move_history WHERE game_id = '".$GameID."'";
-    $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+    $num1 = mysqli_num_rows($return1);
 
     if($num1 != 0){
 
-      $playerid = mysql_result($return1, 0, "player_id");
+      $playerid = $this->mysqli_result($return1, 0, "player_id");
       $Player = $this->GetUserIDByPlayerID($ConfigFile, $playerid);
 
     }
 
     //Get game info
     $query2 = "SELECT * FROM game WHERE game_id = '".$GameID."'";
-    $return2 = mysql_query($query2, $this->link) or die(mysql_error());
-    $num2 = mysql_numrows($return2);
+    $return2 = mysqli_query($this->link,$query2) or die(mysqli_error($this->link));
+    $num2 = mysqli_num_rows($return2);
 
     if($num2 != 0){
-      $wbplayerid = mysql_result($return2, 0, "w_player_id");
-      $bplayerid = mysql_result($return2, 0, "b_player_id");
+      $wbplayerid = $this->mysqli_result($return2, 0, "w_player_id");
+      $bplayerid = $this->mysqli_result($return2, 0, "b_player_id");
 
       if($playerid == $wbplayerid){
         $color = "w";
@@ -2466,20 +2470,20 @@ class CR3DCQuery{
 
     //Get game info
     $query = "SELECT * FROM game WHERE game_id = '".$ID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i = 0;
       while($i < $num){
 
-        $game_id = trim(mysql_result($return,$i,"game_id"));
-        $initiator = trim(mysql_result($return,$i,"initiator"));
-        $w_player_id = trim(mysql_result($return,$i,"w_player_id"));
-        $b_player_id = trim(mysql_result($return,$i,"b_player_id"));
-        $next_move = trim(mysql_result($return,$i,"next_move"));
-        $start_time = trim(mysql_result($return,$i,"start_time"));
+        $game_id = trim($this->mysqli_result($return,$i,"game_id"));
+        $initiator = trim($this->mysqli_result($return,$i,"initiator"));
+        $w_player_id = trim($this->mysqli_result($return,$i,"w_player_id"));
+        $b_player_id = trim($this->mysqli_result($return,$i,"b_player_id"));
+        $next_move = trim($this->mysqli_result($return,$i,"next_move"));
+        $start_time = trim($this->mysqli_result($return,$i,"start_time"));
 
         echo "<table width='100%' border='0' cellpadding='3' cellspacing='1' align='center' class='forumline'>";
         echo "<tr><td class='row1' colspan='1'>".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_16")." </td><td class='row2' colspan='3'>".date("m-d-Y",$start_time)."</td></tr>";
@@ -2737,8 +2741,8 @@ class CR3DCQuery{
 
       }
 
-      $return = mysql_query($query, $this->link) or die(mysql_error());
-      $num = mysql_numrows($return);
+      $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+      $num = mysqli_num_rows($return);
 
       // Place the results in the array
       if($num != 0){
@@ -2749,10 +2753,10 @@ class CR3DCQuery{
         $ia = 0;
         while($i < $num){
 
-          $player_id = trim(mysql_result($return,$i,"player_id"));
-          $userid = trim(mysql_result($return,$i,"userid"));
-          $signup_time  = trim(mysql_result($return,$i,"signup_time"));
-          $email = trim(mysql_result($return,$i,"email"));
+          $player_id = trim($this->mysqli_result($return,$i,"player_id"));
+          $userid = trim($this->mysqli_result($return,$i,"userid"));
+          $signup_time  = trim($this->mysqli_result($return,$i,"signup_time"));
+          $email = trim($this->mysqli_result($return,$i,"email"));
 
           if($this->IsPlayerDisabled($player_id) == false){
             $wins = 0;
@@ -2840,8 +2844,8 @@ class CR3DCQuery{
 
     //Get game info
     $query = "SELECT * FROM player ORDER BY userid Asc";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     echo "<table width='400' border='0' cellpadding='3' cellspacing='1' align='center' class='forumline'>";
     echo "<tr><td class='tableheadercolor' colspan='5'><font class='sitemenuheader'>".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_27")."</font></td></tr>";
@@ -2852,10 +2856,10 @@ class CR3DCQuery{
       $i = 0;
       while($i < $num){
 
-        $player_id = trim(mysql_result($return,$i,"player_id"));
-        $userid = trim(mysql_result($return,$i,"userid"));
-        $signup_time  = trim(mysql_result($return,$i,"signup_time"));
-        $email = trim(mysql_result($return,$i,"email"));
+        $player_id = trim($this->mysqli_result($return,$i,"player_id"));
+        $userid = trim($this->mysqli_result($return,$i,"userid"));
+        $signup_time  = trim($this->mysqli_result($return,$i,"signup_time"));
+        $email = trim($this->mysqli_result($return,$i,"email"));
 
         if($this->IsPlayerDisabled($player_id) == false){
 
@@ -2896,8 +2900,8 @@ class CR3DCQuery{
 
     //Get game info
     $query = "SELECT * FROM player ORDER BY userid Asc";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $aEmail = array();
 
@@ -2907,10 +2911,10 @@ class CR3DCQuery{
       $ii = 0;
       while($i < $num){
 
-        $player_id = trim(mysql_result($return,$i,"player_id"));
-        $userid = trim(mysql_result($return,$i,"userid"));
-        $signup_time  = trim(mysql_result($return,$i,"signup_time"));
-        $email = trim(mysql_result($return,$i,"email"));
+        $player_id = trim($this->mysqli_result($return,$i,"player_id"));
+        $userid = trim($this->mysqli_result($return,$i,"userid"));
+        $signup_time  = trim($this->mysqli_result($return,$i,"signup_time"));
+        $email = trim($this->mysqli_result($return,$i,"email"));
 
         if($this->IsPlayerDisabled($player_id) == false){
           $aEmail[$ii] = $email;
@@ -2937,8 +2941,8 @@ class CR3DCQuery{
     $nMaxList = 20;
 
     $query = "SELECT * FROM player ORDER BY userid Asc";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     // Check if the index is numeric
     if(!is_numeric($index)){
@@ -3020,10 +3024,10 @@ class CR3DCQuery{
       $ii = 0;
       while($i < $num && $ii < $nMaxList){
 
-        $player_id = trim(mysql_result($return,$i,"player_id"));
-        $userid = trim(mysql_result($return,$i,"userid"));
-        $signup_time  = trim(mysql_result($return,$i,"signup_time"));
-        $email = trim(mysql_result($return,$i,"email"));
+        $player_id = trim($this->mysqli_result($return,$i,"player_id"));
+        $userid = trim($this->mysqli_result($return,$i,"userid"));
+        $signup_time  = trim($this->mysqli_result($return,$i,"signup_time"));
+        $email = trim($this->mysqli_result($return,$i,"email"));
 
         if($this->IsPlayerDisabled($player_id)){
 
@@ -3083,8 +3087,8 @@ class CR3DCQuery{
 
     //Get game info
     $query = "SELECT * FROM player3 WHERE userid='".$Name."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $isTemp = false;
 
@@ -3105,8 +3109,8 @@ class CR3DCQuery{
 
     //Get game info
     $query = "SELECT * FROM player ORDER BY userid Asc";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     echo "<select name='slctUsers'>";
     echo "<option value='-'>".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_38")."</option>";
@@ -3116,10 +3120,10 @@ class CR3DCQuery{
       $i = 0;
       while($i < $num){
 
-        $player_id = trim(mysql_result($return,$i,"player_id"));
-        $userid = trim(mysql_result($return,$i,"userid"));
-        $signup_time  = trim(mysql_result($return,$i,"signup_time"));
-        $email = trim(mysql_result($return,$i,"email"));
+        $player_id = trim($this->mysqli_result($return,$i,"player_id"));
+        $userid = trim($this->mysqli_result($return,$i,"userid"));
+        $signup_time  = trim($this->mysqli_result($return,$i,"signup_time"));
+        $email = trim($this->mysqli_result($return,$i,"email"));
 
         if($this->IsPlayerDisabled($player_id) == false){
 
@@ -3152,8 +3156,8 @@ class CR3DCQuery{
 
     //Get game info
     $query = "SELECT * FROM active_sessions WHERE player_id =".$ID;
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
       $bOnline = true;
@@ -3172,8 +3176,8 @@ class CR3DCQuery{
 
     //Get game info
     $query = "SELECT * FROM c4m_msginbox WHERE player_id =".$ID." ORDER BY msg_posted DESC LIMIT 5";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
@@ -3184,9 +3188,9 @@ class CR3DCQuery{
 
       while($i < $num){
 
-        $inbox_id = trim(mysql_result($return,$i,"inbox_id"));
-        $message = trim(mysql_result($return,$i,"message"));
-        $posted = trim(mysql_result($return,$i,"msg_posted"));
+        $inbox_id = trim($this->mysqli_result($return,$i,"inbox_id"));
+        $message = trim($this->mysqli_result($return,$i,"message"));
+        $posted = trim($this->mysqli_result($return,$i,"msg_posted"));
 
         if(substr($message, 0, 2) == "C0"){
 
@@ -3252,21 +3256,21 @@ class CR3DCQuery{
 
     //Get game info
     $query = "SELECT * FROM message_queue WHERE player_id =".$ID."";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i = 0;
       while($i < $num){
 
-        $mid = trim(mysql_result($return,$i,"mid"));
-        $message = trim(mysql_result($return,$i,"message"));
-        $posted = trim(mysql_result($return,$i,"posted"));
+        $mid = trim($this->mysqli_result($return,$i,"mid"));
+        $message = trim($this->mysqli_result($return,$i,"message"));
+        $posted = trim($this->mysqli_result($return,$i,"posted"));
 
         //insert messages
         $query = "INSERT INTO c4m_msginbox VALUES(NULL, ".$ID.", '".$message."', ".$posted.")";
-        mysql_query($query, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$query) or die(mysqli_error($this->link));
 
         $i++;
 
@@ -3292,8 +3296,8 @@ class CR3DCQuery{
 
     //Get game info
     $query = "SELECT * FROM c4m_msginbox WHERE player_id =".$ID."";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
@@ -3307,9 +3311,9 @@ class CR3DCQuery{
 
       while($i < $num){
 
-        $inbox_id = trim(mysql_result($return,$i,"inbox_id"));
-        $message = trim(mysql_result($return,$i,"message"));
-        $posted = trim(mysql_result($return,$i,"msg_posted"));
+        $inbox_id = trim($this->mysqli_result($return,$i,"inbox_id"));
+        $message = trim($this->mysqli_result($return,$i,"message"));
+        $posted = trim($this->mysqli_result($return,$i,"msg_posted"));
 
         if(substr($message, 0, 2) == "C0"){
 
@@ -3336,9 +3340,9 @@ class CR3DCQuery{
 
       while($i < $num){
 
-        $inbox_id = trim(mysql_result($return,$i,"inbox_id"));
-        $message = trim(mysql_result($return,$i,"message"));
-        $posted = trim(mysql_result($return,$i,"msg_posted"));
+        $inbox_id = trim($this->mysqli_result($return,$i,"inbox_id"));
+        $message = trim($this->mysqli_result($return,$i,"message"));
+        $posted = trim($this->mysqli_result($return,$i,"msg_posted"));
 
         if(substr($message, 0, 2) == "M0"){
 
@@ -3362,9 +3366,9 @@ class CR3DCQuery{
       echo "<tr><td class='row1' colspan='2'><font class='sitemenuheader'>".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_42")."</font></td></tr>";
       while($i < $num){
 
-        $inbox_id = trim(mysql_result($return,$i,"inbox_id"));
-        $message = trim(mysql_result($return,$i,"message"));
-        $posted = trim(mysql_result($return,$i,"msg_posted"));
+        $inbox_id = trim($this->mysqli_result($return,$i,"inbox_id"));
+        $message = trim($this->mysqli_result($return,$i,"message"));
+        $posted = trim($this->mysqli_result($return,$i,"msg_posted"));
 
         if(substr($message, 0, 2) == "GC"){
 
@@ -3391,9 +3395,9 @@ class CR3DCQuery{
       echo "<tr><td class='row1' colspan='2'><font class='sitemenuheader'>".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_43")."</font></td></tr>";
       while($i < $num){
 
-        $inbox_id = trim(mysql_result($return,$i,"inbox_id"));
-        $message = trim(mysql_result($return,$i,"message"));
-        $posted = trim(mysql_result($return,$i,"msg_posted"));
+        $inbox_id = trim($this->mysqli_result($return,$i,"inbox_id"));
+        $message = trim($this->mysqli_result($return,$i,"message"));
+        $posted = trim($this->mysqli_result($return,$i,"msg_posted"));
 
         if(substr($message, 0, 2) == "T0"){
 
@@ -3443,8 +3447,8 @@ class CR3DCQuery{
 
     //Get game info
     $query = "SELECT * FROM c4m_msginbox WHERE inbox_id =".$InboxID;
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
@@ -3455,9 +3459,9 @@ class CR3DCQuery{
 
       while($i < $num){
 
-        $inbox_id = trim(mysql_result($return,$i,"inbox_id"));
-        $message = rawurldecode(trim(mysql_result($return,$i,"message")));
-        $posted = trim(mysql_result($return,$i,"msg_posted"));
+        $inbox_id = trim($this->mysqli_result($return,$i,"inbox_id"));
+        $message = rawurldecode(trim($this->mysqli_result($return,$i,"message")));
+        $posted = trim($this->mysqli_result($return,$i,"msg_posted"));
 
         if(substr($message, 0, 2) == "C0"){
 
@@ -3533,25 +3537,25 @@ class CR3DCQuery{
 
     //Get game info
     $query = "SELECT * FROM c4m_msginbox WHERE inbox_id =".$InboxID."";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i = 0;
       while($i < $num){
 
-        $player_id  = trim(mysql_result($return,$i,"player_id"));
-        $message = trim(mysql_result($return,$i,"message"));
-        $msg_posted = trim(mysql_result($return,$i,"msg_posted"));
+        $player_id  = trim($this->mysqli_result($return,$i,"player_id"));
+        $message = trim($this->mysqli_result($return,$i,"message"));
+        $msg_posted = trim($this->mysqli_result($return,$i,"msg_posted"));
 
         //insert messages
         $query = "INSERT INTO c4m_msgsaved VALUES(NULL, ".$player_id.", '".$message."', ".$msg_posted.")";
-        mysql_query($query, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$query) or die(mysqli_error($this->link));
 
         // Remove Item
         $query = "DELETE FROM c4m_msginbox WHERE inbox_id =".$InboxID."";
-        mysql_query($query, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$query) or die(mysqli_error($this->link));
 
         $i++;
 
@@ -3570,7 +3574,7 @@ class CR3DCQuery{
 
     // Remove Item
     $query = "DELETE FROM c4m_msginbox WHERE inbox_id =".$InboxID."";
-    mysql_query($query, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$query) or die(mysqli_error($this->link));
 
   }
 
@@ -3585,8 +3589,8 @@ class CR3DCQuery{
 
     //Get game info
     $query = "SELECT * FROM c4m_msgsaved WHERE player_id =".$ID."";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
@@ -3599,9 +3603,9 @@ class CR3DCQuery{
       echo "<tr><td class='row1' colspan='2'><font class='sitemenuheader'>".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_40")."</font></td></tr>";
       while($i < $num){
 
-        $saved_id = trim(mysql_result($return,$i,"saved_id"));
-        $message = trim(mysql_result($return,$i,"message"));
-        $posted = trim(mysql_result($return,$i,"msg_posted"));
+        $saved_id = trim($this->mysqli_result($return,$i,"saved_id"));
+        $message = trim($this->mysqli_result($return,$i,"message"));
+        $posted = trim($this->mysqli_result($return,$i,"msg_posted"));
 
         if(substr($message, 0, 2) == "C0"){
 
@@ -3627,9 +3631,9 @@ class CR3DCQuery{
       echo "<tr><td class='row1' colspan='2'><font class='sitemenuheader'>".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_41")."</font></td></tr>";
       while($i < $num){
 
-        $saved_id = trim(mysql_result($return,$i,"saved_id"));
-        $message = trim(mysql_result($return,$i,"message"));
-        $posted = trim(mysql_result($return,$i,"msg_posted"));
+        $saved_id = trim($this->mysqli_result($return,$i,"saved_id"));
+        $message = trim($this->mysqli_result($return,$i,"message"));
+        $posted = trim($this->mysqli_result($return,$i,"msg_posted"));
 
         if(substr($message, 0, 2) == "M0"){
 
@@ -3654,9 +3658,9 @@ class CR3DCQuery{
       echo "<tr><td class='row1' colspan='2'><font class='sitemenuheader'>".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_42")."</font></td></tr>";
       while($i < $num){
 
-        $saved_id = trim(mysql_result($return,$i,"saved_id"));
-        $message = trim(mysql_result($return,$i,"message"));
-        $posted = trim(mysql_result($return,$i,"msg_posted"));
+        $saved_id = trim($this->mysqli_result($return,$i,"saved_id"));
+        $message = trim($this->mysqli_result($return,$i,"message"));
+        $posted = trim($this->mysqli_result($return,$i,"msg_posted"));
 
         if(substr($message, 0, 2) == "GC"){
 
@@ -3683,9 +3687,9 @@ class CR3DCQuery{
       echo "<tr><td class='row1' colspan='2'><font class='sitemenuheader'>".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_43")."</font></td></tr>";
       while($i < $num){
 
-        $saved_id = trim(mysql_result($return,$i,"saved_id"));
-        $message = trim(mysql_result($return,$i,"message"));
-        $posted = trim(mysql_result($return,$i,"msg_posted"));
+        $saved_id = trim($this->mysqli_result($return,$i,"saved_id"));
+        $message = trim($this->mysqli_result($return,$i,"message"));
+        $posted = trim($this->mysqli_result($return,$i,"msg_posted"));
 
         if(substr($message, 0, 2) == "T0"){
 
@@ -3720,7 +3724,7 @@ class CR3DCQuery{
 
     // Remove Item
     $query = "DELETE FROM c4m_msgsaved WHERE saved_id =".$SavedID."";
-    mysql_query($query, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$query) or die(mysqli_error($this->link));
 
   }
 
@@ -3733,8 +3737,8 @@ class CR3DCQuery{
 
     //Get game info
     $query = "SELECT * FROM c4m_msgsaved WHERE saved_id =".$SavedID."";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
@@ -3745,9 +3749,9 @@ class CR3DCQuery{
 
       while($i < $num){
 
-        $saved_id = trim(mysql_result($return,$i,"saved_id"));
-        $message = rawurldecode(trim(mysql_result($return,$i,"message")));
-        $posted = trim(mysql_result($return,$i,"msg_posted"));
+        $saved_id = trim($this->mysqli_result($return,$i,"saved_id"));
+        $message = rawurldecode(trim($this->mysqli_result($return,$i,"message")));
+        $posted = trim($this->mysqli_result($return,$i,"msg_posted"));
 
         if(substr($message, 0, 2) == "C0"){
 
@@ -3822,13 +3826,13 @@ class CR3DCQuery{
 
     //Get game info for white player
     $query = "SELECT * FROM game WHERE w_player_id =".$Player_ID." AND completion_status IN ('W','B','D','A','I')";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     //get all the games from the c4m_tournamentgames table
     $queryt = "SELECT tg_gameid FROM c4m_tournamentgames";
-    $returnt = mysql_query($queryt, $this->link) or die(mysql_error());
-    $numt = mysql_numrows($returnt);
+    $returnt = mysqli_query($this->link,$queryt) or die(mysqli_error($this->link));
+    $numt = mysqli_num_rows($returnt);
 
     echo "<br>";
     echo "<table width='400' border='0' cellpadding='3' cellspacing='1' align='center' class='forumline'>";
@@ -3841,20 +3845,20 @@ class CR3DCQuery{
 
       while($i < $num){
 
-        $game_id = trim(mysql_result($return,$i,"game_id"));
-        $initiator = trim(mysql_result($return,$i,"initiator"));
-        $w_player_id = trim(mysql_result($return,$i,"w_player_id"));
-        $b_player_id = trim(mysql_result($return,$i,"b_player_id"));
-        $status = trim(mysql_result($return,$i,"status"));
-        $completion_status = trim(mysql_result($return,$i,"completion_status"));
-        $start_time = trim(mysql_result($return,$i,"start_time"));
+        $game_id = trim($this->mysqli_result($return,$i,"game_id"));
+        $initiator = trim($this->mysqli_result($return,$i,"initiator"));
+        $w_player_id = trim($this->mysqli_result($return,$i,"w_player_id"));
+        $b_player_id = trim($this->mysqli_result($return,$i,"b_player_id"));
+        $status = trim($this->mysqli_result($return,$i,"status"));
+        $completion_status = trim($this->mysqli_result($return,$i,"completion_status"));
+        $start_time = trim($this->mysqli_result($return,$i,"start_time"));
 
         //Check if the game is a tournament game
         $ti = 0;
         $bexit = false;
         while($ti < $numt && $bexit == false){
 
-          $TGID = mysql_result($returnt, $ti, 0);
+          $TGID = $this->mysqli_result($returnt, $ti, 0);
 
           if($TGID == $game_id){
             $bexit = true;
@@ -3882,8 +3886,8 @@ class CR3DCQuery{
 
     //Get game info for Black player
     $query1 = "SELECT * FROM game WHERE b_player_id =".$Player_ID." AND completion_status IN ('W','B','D','A','I')";
-    $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+    $num1 = mysqli_num_rows($return1);
 
     if($num1 != 0){
 
@@ -3891,20 +3895,20 @@ class CR3DCQuery{
 
       while($ii < $num1){
 
-        $game_id = trim(mysql_result($return1,$ii,"game_id"));
-        $initiator = trim(mysql_result($return1,$ii,"initiator"));
-        $w_player_id = trim(mysql_result($return1,$ii,"w_player_id"));
-        $b_player_id = trim(mysql_result($return1,$ii,"b_player_id"));
-        $status = trim(mysql_result($return1,$ii,"status"));
-        $completion_status = trim(mysql_result($return1,$ii,"completion_status"));
-        $start_time = trim(mysql_result($return1,$ii,"start_time"));
+        $game_id = trim($this->mysqli_result($return1,$ii,"game_id"));
+        $initiator = trim($this->mysqli_result($return1,$ii,"initiator"));
+        $w_player_id = trim($this->mysqli_result($return1,$ii,"w_player_id"));
+        $b_player_id = trim($this->mysqli_result($return1,$ii,"b_player_id"));
+        $status = trim($this->mysqli_result($return1,$ii,"status"));
+        $completion_status = trim($this->mysqli_result($return1,$ii,"completion_status"));
+        $start_time = trim($this->mysqli_result($return1,$ii,"start_time"));
 
         //Check if the game is a tournament game
         $ti = 0;
         $bexit = false;
         while($ti < $numt && $bexit == false){
 
-          $TGID = mysql_result($returnt, $ti, 0);
+          $TGID = $this->mysqli_result($returnt, $ti, 0);
 
           if($TGID == $game_id){
             $bexit = true;
@@ -3969,8 +3973,8 @@ class CR3DCQuery{
 
     }
 
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     // Skin table settings
     if(defined('CFG_SEARCHPLAYERS_TABLE1_WIDTH') && defined('CFG_SEARCHPLAYERS_TABLE1_BORDER') && defined('CFG_SEARCHPLAYERS_TABLE1_CELLPADDING') && defined('CFG_SEARCHPLAYERS_TABLE1_CELLSPACING') && defined('CFG_SEARCHPLAYERS_TABLE1_ALIGN')){
@@ -3987,10 +3991,10 @@ class CR3DCQuery{
       $i = 0;
       while($i < $num){
 
-        $player_id = trim(mysql_result($return,$i,"player_id"));
-        $userid = trim(mysql_result($return,$i,"userid"));
-        $signup_time  = trim(mysql_result($return,$i,"signup_time"));
-        $email = trim(mysql_result($return,$i,"email"));
+        $player_id = trim($this->mysqli_result($return,$i,"player_id"));
+        $userid = trim($this->mysqli_result($return,$i,"userid"));
+        $signup_time  = trim($this->mysqli_result($return,$i,"signup_time"));
+        $email = trim($this->mysqli_result($return,$i,"email"));
 
         if($this->IsPlayerDisabled($player_id) == false){
 
@@ -4183,12 +4187,12 @@ class CR3DCQuery{
 
     // Date Of last login
     $query = "SELECT * FROM player_last_login WHERE o_playerid = '".$ID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $date = mysql_result($return,0,"o_date");
+      $date = $this->mysqli_result($return,0,"o_date");
       $returntxt = $this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_155")." ".$date;
 
     }else{
@@ -4199,12 +4203,12 @@ class CR3DCQuery{
 
     // Date of last move
     $query = "SELECT * FROM move_history WHERE player_id = '".$ID."' ORDER BY move_id DESC";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $time1 = mysql_result($return,0,"time");
+      $time1 = $this->mysqli_result($return,0,"time");
       $date = date("Y-m-d G:i:s", $time1);
       $returntxt = $returntxt."<br>".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_156")." ".$date;
 
@@ -4226,12 +4230,12 @@ class CR3DCQuery{
   function GetMemberDateTimeInfo($ConfigFile, $ID){
 
     $query = "SELECT * FROM player WHERE player_id = ".$ID;
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $signup_time = mysql_result($return,0,"signup_time");
+      $signup_time = $this->mysqli_result($return,0,"signup_time");
 
       // Get difference between the dates.
       $firstdate = time();
@@ -4327,41 +4331,41 @@ class CR3DCQuery{
 
     //count black player//////////////////////////////////////////////////////
     $query = "SELECT count(*) FROM game WHERE b_player_id = ".$ID." AND completion_status IN('I')";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-      $PersonalGame = $PersonalGame + mysql_result($return,0,0);
+      $PersonalGame = $PersonalGame + $this->mysqli_result($return,0,0);
     }
 
     //count white player//////////////////////////////////////////////////////
     $query1 = "SELECT count(*) FROM game WHERE w_player_id = ".$ID." AND completion_status  IN('I')";
-    $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+    $num1 = mysqli_num_rows($return1);
 
     if($num1 != 0){
-      $PersonalGame = $PersonalGame + mysql_result($return1,0,0);
+      $PersonalGame = $PersonalGame + $this->mysqli_result($return1,0,0);
     }
 
     // Get All game count
     /////////////////////////////////////
 
     $query2 = "SELECT count(*) FROM game WHERE completion_status IN('I')";
-    $return2 = mysql_query($query2, $this->link) or die(mysql_error());
-    $num2 = mysql_numrows($return2);
+    $return2 = mysqli_query($this->link,$query2) or die(mysqli_error($this->link));
+    $num2 = mysqli_num_rows($return2);
 
     if($num2 != 0){
-      $AllGames = $AllGames + mysql_result($return2,0,0);
+      $AllGames = $AllGames + $this->mysqli_result($return2,0,0);
     }
 
     // Get Tournament Count
     /////////////////////////////////////
     $query3 = "SELECT count(*) FROM c4m_tournament WHERE t_status IN('S')";
-    $return3 = mysql_query($query3, $this->link) or die(mysql_error());
-    $num3 = mysql_numrows($return3);
+    $return3 = mysqli_query($this->link,$query3) or die(mysqli_error($this->link));
+    $num3 = mysqli_num_rows($return3);
 
     if($num3 != 0){
-      $TGames = $TGames + mysql_result($return3,0,0);
+      $TGames = $TGames + $this->mysqli_result($return3,0,0);
     }
 
     echo "<br>";
@@ -4398,24 +4402,24 @@ class CR3DCQuery{
     /////////////////////////////////////
 
     $query2 = "SELECT count(*) FROM game WHERE completion_status IN('I')";
-    $return2 = mysql_query($query2, $this->link) or die(mysql_error());
-    $num2 = mysql_numrows($return2);
+    $return2 = mysqli_query($this->link,$query2) or die(mysqli_error($this->link));
+    $num2 = mysqli_num_rows($return2);
 
     if($num2 != 0){
 
-      $AllGames = $AllGames + mysql_result($return2,0,0);
+      $AllGames = $AllGames + $this->mysqli_result($return2,0,0);
 
     }
 
     // Get Tournament Count
     /////////////////////////////////////
     $query3 = "SELECT count(*) FROM c4m_tournament WHERE t_status IN('S')";
-    $return3 = mysql_query($query3, $this->link) or die(mysql_error());
-    $num3 = mysql_numrows($return3);
+    $return3 = mysqli_query($this->link,$query3) or die(mysqli_error($this->link));
+    $num3 = mysqli_num_rows($return3);
 
     if($num3 != 0){
 
-      $TGames = $TGames + mysql_result($return3,0,0);
+      $TGames = $TGames + $this->mysqli_result($return3,0,0);
 
     }
 
@@ -4431,15 +4435,15 @@ class CR3DCQuery{
     $PCount = 0;
 
     $query1 = "SELECT count(*) FROM player";
-    $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+    $num1 = mysqli_num_rows($return1);
 
     $query2 = "SELECT count(*) FROM player2";
-    $return2 = mysql_query($query2, $this->link) or die(mysql_error());
-    $num2 = mysql_numrows($return2);
+    $return2 = mysqli_query($this->link,$query2) or die(mysqli_error($this->link));
+    $num2 = mysqli_num_rows($return2);
 
     if($num1 != 0 && $num2 >= 0){
-      $PCount = $PCount + (mysql_result($return1,0,0) - mysql_result($return2,0,0));
+      $PCount = $PCount + ($this->mysqli_result($return1,0,0) - $this->mysqli_result($return2,0,0));
     }
 
   }
@@ -4460,33 +4464,33 @@ class CR3DCQuery{
     /////////////////////////////////////
 
     $query1 = "SELECT count(*) FROM c4m_msginbox WHERE message LIKE 'C0%' AND player_id =".$PlayerID;
-    $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+    $num1 = mysqli_num_rows($return1);
 
     if($num1 != 0){
-      $TextMsg = mysql_result($return1,0,0);
+      $TextMsg = $this->mysqli_result($return1,0,0);
     }
 
     // Move Message count
     /////////////////////////////////////
 
     $query2 = "SELECT count(*) FROM c4m_msginbox WHERE message LIKE 'M0%' AND player_id =".$PlayerID;
-    $return2 = mysql_query($query2, $this->link) or die(mysql_error());
-    $num2 = mysql_numrows($return2);
+    $return2 = mysqli_query($this->link,$query2) or die(mysqli_error($this->link));
+    $num2 = mysqli_num_rows($return2);
 
     if($num2 != 0){
-      $MoveMsg = mysql_result($return2,0,0);
+      $MoveMsg = $this->mysqli_result($return2,0,0);
     }
 
     // Challenge Message count
     /////////////////////////////////////
 
     $query3 = "SELECT count(*) FROM c4m_msginbox WHERE message LIKE 'GC%' AND player_id =".$PlayerID;
-    $return3 = mysql_query($query3, $this->link) or die(mysql_error());
-    $num3 = mysql_numrows($return3);
+    $return3 = mysqli_query($this->link,$query3) or die(mysqli_error($this->link));
+    $num3 = mysqli_num_rows($return3);
 
     if($num3 != 0){
-      $ChallengeMsg = mysql_result($return3,0,0);
+      $ChallengeMsg = $this->mysqli_result($return3,0,0);
     }
 
     //
@@ -4533,16 +4537,16 @@ class CR3DCQuery{
       echo "<table width='95%' cellpadding='0' cellspacing='0' border='0' align='center'>";
 
       $query = "SELECT * FROM cfm_point_caching ORDER BY points DESC LIMIT 10";
-      $return = mysql_query($query, $this->link) or die(mysql_error());
-      $num = mysql_numrows($return);
+      $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+      $num = mysqli_num_rows($return);
 
       if($num != 0){
 
         $i = 0;
         while($i < $num){
 
-          $nPlayerID = mysql_result($return, $i, "player_id");
-          $nPoints = mysql_result($return, $i, "points");
+          $nPlayerID = $this->mysqli_result($return, $i, "player_id");
+          $nPoints = $this->mysqli_result($return, $i, "points");
 
           $strUserID = $this->GetUserIDByPlayerID($ConfigFile, $nPlayerID);
 
@@ -4624,7 +4628,7 @@ class CR3DCQuery{
       //Change the password
 	  $New = $this->hash_password($New);
       $update = "UPDATE player SET password = '".$New."' WHERE player_id = ".$player_id."";
-      mysql_query($update, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
       echo "<br>";
       echo "<table width='95%' cellpadding='0' cellspacing='0' border='0' align='center'>";
@@ -4686,7 +4690,7 @@ class CR3DCQuery{
       //}else{
       //  $insert11 = "INSERT INTO cfm_game_options VALUES('".$GameID."', '".$Rating."', '-', " . $timing_mode . ")";
      // }
-      mysql_query($insert11, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$insert11) or die(mysqli_error($this->link));
 
       if($move1 != "" && $time1 != "" && $move2 != "" && $time2 != ""){
 
@@ -4694,7 +4698,7 @@ class CR3DCQuery{
 
           if(is_int((int)$move1) && is_int((int)$time1) && is_int((int)$move2) && is_int((int)$time2)){
             $insert = "INSERT INTO timed_games VALUES('".$GameID."', ".$move1.", ".$time1.", ".$move2.", ".$time2.")";
-            mysql_query($insert, $this->link) or die(mysql_error());
+            mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
           }
 
         }
@@ -4707,7 +4711,7 @@ class CR3DCQuery{
 
             if(is_int((int)$move1) && is_int((int)$time1)){
               $insert = "INSERT INTO timed_games VALUES('".$GameID."', ".$move1.", ".$time1.", 0, 0)";
-              mysql_query($insert, $this->link) or die(mysql_error());
+              mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
             }
 
           }
@@ -4716,7 +4720,7 @@ class CR3DCQuery{
 
           if($brealtimeposs){
             $insert = "INSERT INTO cfm_gamesrealtime VALUES('".$GameID."', NOW())";
-            mysql_query($insert, $this->link) or die(mysql_error());
+            mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
           }
 
         }
@@ -4737,7 +4741,7 @@ class CR3DCQuery{
       //}else{
       //  $insert11 = "INSERT INTO cfm_game_options VALUES('".$GameID."', '".$Rating."', '-', " . $timing_mode . ")";
       //}
-      mysql_query($insert11, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$insert11) or die(mysqli_error($this->link));
 
       if($move1 != "" && $time1 != "" && $move2 != "" && $time2 != ""){
 
@@ -4745,7 +4749,7 @@ class CR3DCQuery{
 
           if(is_int((int)$move1) && is_int((int)$time1) && is_int((int)$move2) && is_int((int)$time2)){
             $insert = "INSERT INTO timed_games VALUES('".$GameID."', ".$move1.", ".$time1.", ".$move2.", ".$time2.")";
-            mysql_query($insert, $this->link) or die(mysql_error());
+            mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
           }
 
         }
@@ -4758,7 +4762,7 @@ class CR3DCQuery{
 
             if(is_int((int)$move1) && is_int((int)$time1)){
               $insert = "INSERT INTO timed_games VALUES('".$GameID."', ".$move1.", ".$time1.", 0, 0)";
-              mysql_query($insert, $this->link) or die(mysql_error());
+              mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
             }
 
           }
@@ -4767,7 +4771,7 @@ class CR3DCQuery{
 
           if($brealtimeposs){
             $insert = "INSERT INTO cfm_gamesrealtime VALUES('".$GameID."', NOW())";
-            mysql_query($insert, $this->link) or die(mysql_error());
+            mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
           }
 
         }
@@ -4790,33 +4794,33 @@ class CR3DCQuery{
         }
 
         $query = "SELECT * FROM cfm_creategamefen WHERE o_id =".$precreate;
-        $return = mysql_query($query, $this->link) or die(mysql_error());
-        $num = mysql_numrows($return);
+        $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+        $num = mysqli_num_rows($return);
 
         if($num != 0){
 
           $query2 = "SELECT * FROM cfm_creategamefen_moves WHERE o_cgfid =".$precreate." ORDER BY o_id ASC";
-          $return2 = mysql_query($query2, $this->link) or die(mysql_error());
-          $num2 = mysql_numrows($return2);
+          $return2 = mysqli_query($this->link,$query2) or die(mysqli_error($this->link));
+          $num2 = mysqli_num_rows($return2);
 
           if($num2 != 0){
 
             $ii = 0;
             while($ii < $num2){
 
-              $o_move = trim(mysql_result($return2,$ii,"o_move"));
+              $o_move = trim($this->mysqli_result($return2,$ii,"o_move"));
 
               if($ii == 0){
                 $insert1 = "INSERT INTO move_history VALUES(NULL, ".time().", ".$w_player_id1.", '".$o_move."','".$GameID."')";
-                mysql_query($insert1, $this->link) or die(mysql_error());
+                mysqli_query($this->link,$insert1) or die(mysqli_error($this->link));
               }else{
 
                 if($ii % 2 == 0 ){
                   $insert1 = "INSERT INTO move_history VALUES(NULL, ".time().", ".$w_player_id1.", '".$o_move."','".$GameID."')";
-                  mysql_query($insert1, $this->link) or die(mysql_error());
+                  mysqli_query($this->link,$insert1) or die(mysqli_error($this->link));
                 }else{
                   $insert1 = "INSERT INTO move_history VALUES(NULL, ".time().", ".$b_player_id1.", '".$o_move."','".$GameID."')";
-                  mysql_query($insert1, $this->link) or die(mysql_error());
+                  mysqli_query($this->link,$insert1) or die(mysqli_error($this->link));
                 }
 
               }
@@ -4845,16 +4849,16 @@ class CR3DCQuery{
   function CheckGameAccepted($ConfigFile, $player_id, $GID){
 
     $query = "SELECT * FROM game WHERE game_id ='".$GID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $returncode = "- -";
 
     if($num != 0){
 
-      $initiator = trim(mysql_result($return,0,"initiator"));
-      $status = trim(mysql_result($return,0,"status"));
-      $completion_status = trim(mysql_result($return,0,"completion_status"));
+      $initiator = trim($this->mysqli_result($return,0,"initiator"));
+      $status = trim($this->mysqli_result($return,0,"status"));
+      $completion_status = trim($this->mysqli_result($return,0,"completion_status"));
 
       // Handle Initiator
       if($initiator == $player_id){
@@ -4940,17 +4944,17 @@ class CR3DCQuery{
     $bTurn = false;
 
     $query = "SELECT * FROM game WHERE game_id ='".$GID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $initiator = trim(mysql_result($return,0,"initiator"));
-      $w_player_id = mysql_result($return,0,"w_player_id");
-      $b_player_id = mysql_result($return,0,"b_player_id");
-      $next_move = trim(mysql_result($return,0,"next_move"));
-      $status = trim(mysql_result($return,0,"status"));
-      $completion_status = trim(mysql_result($return,0,"completion_status"));
+      $initiator = trim($this->mysqli_result($return,0,"initiator"));
+      $w_player_id = $this->mysqli_result($return,0,"w_player_id");
+      $b_player_id = $this->mysqli_result($return,0,"b_player_id");
+      $next_move = trim($this->mysqli_result($return,0,"next_move"));
+      $status = trim($this->mysqli_result($return,0,"status"));
+      $completion_status = trim($this->mysqli_result($return,0,"completion_status"));
 
       //check if the game is active and incomplete
       if($status == "A" && $completion_status == "I"){
@@ -5149,8 +5153,8 @@ class CR3DCQuery{
   function GetPlayerListSelectBox($ConfigFile){
 
     $query = "SELECT * FROM player ORDER BY userid Asc";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     echo "<select NAME='lstPlayers[]' multiple size='15' style='width:170'>";
 
@@ -5159,10 +5163,10 @@ class CR3DCQuery{
       $i = 0;
       while($i < $num){
 
-        $player_id = trim(mysql_result($return,$i,"player_id"));
-        $userid = trim(mysql_result($return,$i,"userid"));
-        $signup_time  = trim(mysql_result($return,$i,"signup_time"));
-        $email = trim(mysql_result($return,$i,"email"));
+        $player_id = trim($this->mysqli_result($return,$i,"player_id"));
+        $userid = trim($this->mysqli_result($return,$i,"userid"));
+        $signup_time  = trim($this->mysqli_result($return,$i,"signup_time"));
+        $email = trim($this->mysqli_result($return,$i,"email"));
 
         if($this->IsPlayerDisabled($player_id) == false){
           echo "<option VALUE='".$player_id."'>".$userid."</option>";
@@ -5194,14 +5198,14 @@ class CR3DCQuery{
     $sDate = date("Y-m-d G:i:s", mktime($SHour, $SMin, $SSec, $SDateMonth, $SDateDay, $SDYear));
 
     $insert = "INSERT INTO c4m_tournament VALUES(NULL, '".$TournName."', '".$GameType."', ".$PlayerNumPerGroup.", '".$cDate."', '".$sDate."', '".$Comments."', 'P')";
-    mysql_query($insert, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
     $query = "SELECT LAST_INSERT_ID()";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-      $TournamentID = trim(mysql_result($return,0,0));
+      $TournamentID = trim($this->mysqli_result($return,0,0));
     }
 
     return (int)$TournamentID;
@@ -5216,14 +5220,14 @@ class CR3DCQuery{
   function AddTournamentPlayer($ConfigFile, $TID, $PID){
 
     $insert = "INSERT INTO c4m_tournamentplayers VALUES(NULL, ".$TID.", ".$PID.", 'P')";
-    mysql_query($insert, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
     // Message the player
 
     $message = "T0|".$TID."";
 
     $insert = "INSERT INTO message_queue(player_id, message, posted) VALUES(".$PID.",'".$message."',".time().")";
-    mysql_query($insert, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
   }
 
 
@@ -5234,8 +5238,8 @@ class CR3DCQuery{
   function GetTournamentInvites($ConfigFile, $PID){
 
     $query = "SELECT * FROM c4m_tournamentplayers WHERE tp_playerid=".$PID;
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     echo "<br>";
     echo "<table width='95%' cellpadding='0' cellspacing='0' border='0' align='center'>";
@@ -5244,17 +5248,17 @@ class CR3DCQuery{
 
       $i=0;
       while($i < $num){
-        $tp_id = trim(mysql_result($return,$i,"tp_id"));
-        $tp_tournamentid = trim(mysql_result($return,$i,"tp_tournamentid"));
-        $tp_playerid = trim(mysql_result($return,$i,"tp_playerid"));
-        $tp_status = trim(mysql_result($return,$i,"tp_status"));
+        $tp_id = trim($this->mysqli_result($return,$i,"tp_id"));
+        $tp_tournamentid = trim($this->mysqli_result($return,$i,"tp_tournamentid"));
+        $tp_playerid = trim($this->mysqli_result($return,$i,"tp_playerid"));
+        $tp_status = trim($this->mysqli_result($return,$i,"tp_status"));
 
         $query1 = "SELECT * FROM c4m_tournament WHERE t_id=".$tp_tournamentid." AND t_cutoffdate >= NOW() AND t_status NOT IN('S','R','C')";
-        $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-        $num1 = mysql_numrows($return1);
+        $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+        $num1 = mysqli_num_rows($return1);
 
         if($num1 != 0){
-          $t_name = trim(mysql_result($return1,0,"t_name"));
+          $t_name = trim($this->mysqli_result($return1,0,"t_name"));
 
           echo "<tr><td><font class='menubulletcolor'>";
           echo "&nbsp; &#8226; &nbsp<a href='./chess_view_tournament_proposal.php?tid=".$tp_tournamentid."'>".$t_name."</a>";
@@ -5286,19 +5290,19 @@ class CR3DCQuery{
   function GetTournamentInfo($ConfigFile, $TID, $PID){
 
     $query = "SELECT * FROM c4m_tournament WHERE t_id=".$TID;
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $t_id = trim(mysql_result($return,0,"t_id"));
-      $t_name = trim(mysql_result($return,0,"t_name"));
-      $t_type = trim(mysql_result($return,0,"t_type"));
-      $t_playernum = trim(mysql_result($return,0,"t_playernum"));
-      $t_cutoffdate = trim(mysql_result($return,0,"t_cutoffdate"));
-      $t_startdate = trim(mysql_result($return,0,"t_startdate"));
-      $t_comment = trim(mysql_result($return,0,"t_comment"));
-      $t_status = trim(mysql_result($return,0,"t_status"));
+      $t_id = trim($this->mysqli_result($return,0,"t_id"));
+      $t_name = trim($this->mysqli_result($return,0,"t_name"));
+      $t_type = trim($this->mysqli_result($return,0,"t_type"));
+      $t_playernum = trim($this->mysqli_result($return,0,"t_playernum"));
+      $t_cutoffdate = trim($this->mysqli_result($return,0,"t_cutoffdate"));
+      $t_startdate = trim($this->mysqli_result($return,0,"t_startdate"));
+      $t_comment = trim($this->mysqli_result($return,0,"t_comment"));
+      $t_status = trim($this->mysqli_result($return,0,"t_status"));
 
       echo "<table border='0' align='center' class='forumline' cellpadding='3' cellspacing='1' width='500'>";
       echo "<tr><td colspan='2' class='tableheadercolor'><b><font class='sitemenuheader'>".$t_name."</font><b></td></tr>";
@@ -5328,8 +5332,8 @@ class CR3DCQuery{
       echo "</table><br>";
 
       $query1 = "SELECT * FROM c4m_tournamentplayers WHERE tp_tournamentid=".$TID;
-      $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-      $num1 = mysql_numrows($return1);
+      $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+      $num1 = mysqli_num_rows($return1);
 
       if($num1 != 0){
 
@@ -5347,8 +5351,8 @@ class CR3DCQuery{
 
             while($nswitch < $npcount && $ncount < $num1){
 
-              $tp_playerid = trim(mysql_result($return1, $ncount, "tp_playerid"));
-              $tp_status = trim(mysql_result($return1, $ncount, "tp_status"));
+              $tp_playerid = trim($this->mysqli_result($return1, $ncount, "tp_playerid"));
+              $tp_status = trim($this->mysqli_result($return1, $ncount, "tp_status"));
 
               echo "<tr><td class='row2'>".$this->GetUserIDByPlayerID($ConfigFile, $tp_playerid)."</td>";
               echo "<td class='row2' width='300'>";
@@ -5390,8 +5394,8 @@ class CR3DCQuery{
 
           while($ncount < $num1){
 
-            $tp_playerid = trim(mysql_result($return1, $ncount, "tp_playerid"));
-            $tp_status = trim(mysql_result($return1, $ncount, "tp_status"));
+            $tp_playerid = trim($this->mysqli_result($return1, $ncount, "tp_playerid"));
+            $tp_status = trim($this->mysqli_result($return1, $ncount, "tp_status"));
 
             echo "<tr><td class='row2'>".$this->GetUserIDByPlayerID($ConfigFile, $tp_playerid)."</td>";
             echo "<td class='row2' width='300'>";
@@ -5434,13 +5438,13 @@ class CR3DCQuery{
   function AcceptTournament($ConfigFile, $TID, $PID){
 
     $query = "SELECT * FROM c4m_tournament WHERE t_id=".$TID." AND t_cutoffdate >= NOW()";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $update = "UPDATE c4m_tournamentplayers SET tp_status='A' WHERE tp_tournamentid=".$TID." AND tp_playerid=".$PID;
-      mysql_query($update, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
     }
 
@@ -5454,8 +5458,8 @@ class CR3DCQuery{
   function GetTournamentProposal($ConfigFile){
 
     $query = "SELECT * FROM c4m_tournament WHERE t_status='P'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     echo "<br>";
     echo "<table width='95%' cellpadding='0' cellspacing='0' border='0' align='center'>";
@@ -5464,14 +5468,14 @@ class CR3DCQuery{
 
       $i = 0;
       while($i < $num){
-        $t_id = trim(mysql_result($return, $i, "t_id"));
-        $t_name = trim(mysql_result($return, $i, "t_name"));
-        $t_type = trim(mysql_result($return, $i, "t_type"));
-        $t_playernum = trim(mysql_result($return, $i, "t_playernum"));
-        $t_cutoffdate = trim(mysql_result($return, $i, "t_cutoffdate"));
-        $t_startdate = trim(mysql_result($return, $i, "t_startdate"));
-        $t_comment = trim(mysql_result($return, $i, "t_comment"));
-        $t_status = trim(mysql_result($return, $i, "t_status"));
+        $t_id = trim($this->mysqli_result($return, $i, "t_id"));
+        $t_name = trim($this->mysqli_result($return, $i, "t_name"));
+        $t_type = trim($this->mysqli_result($return, $i, "t_type"));
+        $t_playernum = trim($this->mysqli_result($return, $i, "t_playernum"));
+        $t_cutoffdate = trim($this->mysqli_result($return, $i, "t_cutoffdate"));
+        $t_startdate = trim($this->mysqli_result($return, $i, "t_startdate"));
+        $t_comment = trim($this->mysqli_result($return, $i, "t_comment"));
+        $t_status = trim($this->mysqli_result($return, $i, "t_status"));
 
         echo "<tr><td><a href='./admin_view_proposal.php?tid=".$t_id."'>".$t_name."</a></td></tr>";
 
@@ -5493,19 +5497,19 @@ class CR3DCQuery{
   function ViewTournamentProposal($ConfigFile, $TID){
 
     $query = "SELECT * FROM c4m_tournament WHERE t_id=".$TID;
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $t_id = trim(mysql_result($return,0,"t_id"));
-      $t_name = trim(mysql_result($return,0,"t_name"));
-      $t_type = trim(mysql_result($return,0,"t_type"));
-      $t_playernum = trim(mysql_result($return,0,"t_playernum"));
-      $t_cutoffdate = trim(mysql_result($return,0,"t_cutoffdate"));
-      $t_startdate = trim(mysql_result($return,0,"t_startdate"));
-      $t_comment = trim(mysql_result($return,0,"t_comment"));
-      $t_status = trim(mysql_result($return,0,"t_status"));
+      $t_id = trim($this->mysqli_result($return,0,"t_id"));
+      $t_name = trim($this->mysqli_result($return,0,"t_name"));
+      $t_type = trim($this->mysqli_result($return,0,"t_type"));
+      $t_playernum = trim($this->mysqli_result($return,0,"t_playernum"));
+      $t_cutoffdate = trim($this->mysqli_result($return,0,"t_cutoffdate"));
+      $t_startdate = trim($this->mysqli_result($return,0,"t_startdate"));
+      $t_comment = trim($this->mysqli_result($return,0,"t_comment"));
+      $t_status = trim($this->mysqli_result($return,0,"t_status"));
 
       echo "<table border='0' align='center' class='forumline' cellpadding='3' cellspacing='1' width='500'>";
       echo "<tr><td colspan='2' class='tableheadercolor'><b><font class='sitemenuheader'>".$t_name."</font><b></td></tr>";
@@ -5535,8 +5539,8 @@ class CR3DCQuery{
       echo "</table><br>";
 
       $query1 = "SELECT * FROM c4m_tournamentplayers WHERE tp_tournamentid=".$TID;
-      $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-      $num1 = mysql_numrows($return1);
+      $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+      $num1 = mysqli_num_rows($return1);
 
       if($num1 != 0){
 
@@ -5552,8 +5556,8 @@ class CR3DCQuery{
             echo "<tr><td class='row1' colspan='2'>".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_96")."".$ngroupcount."</td></tr>";
 
             while($nswitch < $npcount && $ncount < $num1){
-              $tp_playerid = trim(mysql_result($return1, $ncount, "tp_playerid"));
-              $tp_status = trim(mysql_result($return1, $ncount, "tp_status"));
+              $tp_playerid = trim($this->mysqli_result($return1, $ncount, "tp_playerid"));
+              $tp_status = trim($this->mysqli_result($return1, $ncount, "tp_status"));
 
               echo "<tr><td class='row2'>".$this->GetUserIDByPlayerID($ConfigFile, $tp_playerid)."</td>";
               echo "<td class='row2' width='300'>";
@@ -5594,8 +5598,8 @@ class CR3DCQuery{
           echo "<tr><td class='row1' colspan='2'>".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_100")."</td></tr>";
 
           while($ncount < $num1){
-            $tp_playerid = trim(mysql_result($return1, $ncount, "tp_playerid"));
-            $tp_status = trim(mysql_result($return1, $ncount, "tp_status"));
+            $tp_playerid = trim($this->mysqli_result($return1, $ncount, "tp_playerid"));
+            $tp_status = trim($this->mysqli_result($return1, $ncount, "tp_status"));
 
             echo "<tr><td class='row2'>".$this->GetUserIDByPlayerID($ConfigFile, $tp_playerid)."</td>";
             echo "<td class='row2' width='300'>";
@@ -5625,35 +5629,35 @@ class CR3DCQuery{
         }
 
         $query3 = "SELECT COUNT(*) FROM c4m_tournamentmatches WHERE tm_tournamentid=".$TID;
-        $return3 = mysql_query($query3, $this->link) or die(mysql_error());
-        $num3 = mysql_numrows($return3);
+        $return3 = mysqli_query($this->link,$query3) or die(mysqli_error($this->link));
+        $num3 = mysqli_num_rows($return3);
 
         $roundNumber = 0;
 
         if($num3 != 0){
-          $roundNumber = mysql_result($return3, 0, 0);
+          $roundNumber = $this->mysqli_result($return3, 0, 0);
         }
 
         $query4 = "SELECT * FROM c4m_tournamentmatches WHERE tm_tournamentid=".$TID." ORDER BY tm_id DESC";
-        $return4= mysql_query($query4, $this->link) or die(mysql_error());
-        $num4 =  mysql_numrows($return4);
+        $return4= mysqli_query($this->link,$query4) or die(mysqli_error($this->link));
+        $num4 =  mysqli_num_rows($return4);
 
         $endtime = "";
         $starttime = "";
 
         if($num4 != 0){
-          $endtime = trim(mysql_result($return4, 0, "tm_endtime"));
-          $starttime = trim(mysql_result($return4, 0, "tm_starttime"));
+          $endtime = trim($this->mysqli_result($return4, 0, "tm_endtime"));
+          $starttime = trim($this->mysqli_result($return4, 0, "tm_starttime"));
         }
 
         $queryt = "SELECT NOW()";
-        $returnt= mysql_query($queryt, $this->link) or die(mysql_error());
-        $numt =  mysql_numrows($returnt);
+        $returnt= mysqli_query($this->link,$queryt) or die(mysqli_error($this->link));
+        $numt =  mysqli_num_rows($returnt);
 
         $ctime1 = "";
 
         if($numt != 0){
-          $ctime1 = trim(mysql_result($returnt, 0, 0));
+          $ctime1 = trim($this->mysqli_result($returnt, 0, 0));
         }
 
         if($endtime != "" && $starttime != "" && $ctime1 != ""){
@@ -5856,16 +5860,16 @@ class CR3DCQuery{
     //////////////////////////////////////////////////////
 
     $query = "SELECT * FROM c4m_tournamentplayers, player WHERE c4m_tournamentplayers.tp_playerid = player.player_id AND c4m_tournamentplayers.tp_tournamentid =".$TID.""; // AND c4m_tournamentplayers.tp_status='A'
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $query1 = "SELECT * FROM c4m_tournament WHERE t_id =".$TID."";
-    $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+    $num1 = mysqli_num_rows($return1);
 
     $PlayerPerGroup = 0;
     if($num1 != 0){
-      $PlayerPerGroup = mysql_result($return1,0,"t_playernum");
+      $PlayerPerGroup = $this->mysqli_result($return1,0,"t_playernum");
     }
 
     $ListOfTeams = array();
@@ -5877,8 +5881,8 @@ class CR3DCQuery{
     if($npp > 1 || $npp == 0  && $num != 0){
 
       $query2 = "SELECT * FROM c4m_tournamentteams WHERE tt_tournamentid =".$TID."";
-      $return2 = mysql_query($query2, $this->link) or die(mysql_error());
-      $num2 = mysql_numrows($return2);
+      $return2 = mysqli_query($this->link,$query2) or die(mysqli_error($this->link));
+      $num2 = mysqli_num_rows($return2);
 
       //echo $num2." c4m_tournamentteams <br>";
 
@@ -5891,12 +5895,12 @@ class CR3DCQuery{
         $i = 0;
         while($i < $num){
 
-          $player_id = trim(mysql_result($return,$i,"player_id"));
-          $userid = trim(mysql_result($return,$i,"userid"));
-          $signup_time  = trim(mysql_result($return,$i,"signup_time"));
-          $email = trim(mysql_result($return,$i,"email"));
+          $player_id = trim($this->mysqli_result($return,$i,"player_id"));
+          $userid = trim($this->mysqli_result($return,$i,"userid"));
+          $signup_time  = trim($this->mysqli_result($return,$i,"signup_time"));
+          $email = trim($this->mysqli_result($return,$i,"email"));
 
-          $tp_status = trim(mysql_result($return,$i,"tp_status"));
+          $tp_status = trim($this->mysqli_result($return,$i,"tp_status"));
 
           if($nGroupSwitch < $PlayerPerGroup){
 
@@ -5904,17 +5908,17 @@ class CR3DCQuery{
               //echo $nGroupNum." ".$userid."<br>";
 
               $insert = "INSERT INTO c4m_tournamentteams VALUES(NULL, $nGroupNum, $TID, $player_id)";
-              mysql_query($insert, $this->link) or die(mysql_error());
+              mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
               //create the team points record if needed
               $queryttp = "SELECT * FROM c4m_tournamentteampoints WHERE ttp_tournamentid =".$TID." AND ttp_teamid=".$nGroupNum;
-              $returnttp = mysql_query($queryttp, $this->link) or die(mysql_error());
-              $numttp = mysql_numrows($returnttp);
+              $returnttp = mysqli_query($this->link,$queryttp) or die(mysqli_error($this->link));
+              $numttp = mysqli_num_rows($returnttp);
 
               if($numttp == 0){
 
                 $insertttp = "INSERT INTO c4m_tournamentteampoints VALUES(NULL, $nGroupNum, $TID, 0, 0)";
-                mysql_query($insertttp, $this->link) or die(mysql_error());
+                mysqli_query($this->link,$insertttp) or die(mysqli_error($this->link));
 
               }
 
@@ -5929,7 +5933,7 @@ class CR3DCQuery{
               //echo $nGroupNum." ".$userid."<br>";
 
               $insert = "INSERT INTO c4m_tournamentteams VALUES(NULL, $nGroupNum, $TID, $player_id)";
-              mysql_query($insert, $this->link) or die(mysql_error());
+              mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
             }
           }
 
@@ -5942,49 +5946,49 @@ class CR3DCQuery{
 
       //create the new match (if needed)
       $query3 = "SELECT * FROM c4m_tournamentmatches WHERE tm_tournamentid =".$TID." AND tm_status='A'";
-      $return3 = mysql_query($query3, $this->link) or die(mysql_error());
-      $num3 = mysql_numrows($return3);
+      $return3 = mysqli_query($this->link,$query3) or die(mysqli_error($this->link));
+      $num3 = mysqli_num_rows($return3);
 
       $tgtmid = 0;
 
       if($num3 == 0){
 
         $insertmatch = "INSERT INTO c4m_tournamentmatches VALUES(NULL, $TID, 'A', '".$mtime."', DATE_ADD('".$mtime."', INTERVAL 5 MINUTE))";
-        mysql_query($insertmatch, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$insertmatch) or die(mysqli_error($this->link));
 
         $queryid = "SELECT last_insert_id()";
-        $returnid = mysql_query($queryid, $this->link) or die(mysql_error());
-        $numid = mysql_numrows($returnid);
+        $returnid = mysqli_query($this->link,$queryid) or die(mysqli_error($this->link));
+        $numid = mysqli_num_rows($returnid);
 
         if($numid != 0){
-          $tgtmid = mysql_result($returnid,0,0);
+          $tgtmid = $this->mysqli_result($returnid,0,0);
 
           //reset the team points
           $insertmatch = "UPDATE c4m_tournamentteampoints SET ttp_wins=0, ttp_loss=0 WHERE ttp_tournamentid=".$TID;
-          mysql_query($insertmatch, $this->link) or die(mysql_error());
+          mysqli_query($this->link,$insertmatch) or die(mysqli_error($this->link));
         }
 
       }else{
-        $tgtmid = mysql_result($return3,0,0);
+        $tgtmid = $this->mysqli_result($return3,0,0);
 
         //echo "match created: ".$tgtmid;
 
         //Update the match times
         $insertmatch = "UPDATE c4m_tournamentmatches SET tm_starttime = DATE_ADD('".$mtime."', INTERVAL 1 MINUTE), tm_endtime = DATE_ADD('".$mtime."', INTERVAL 6 MINUTE) WHERE tm_id=".$tgtmid;
-        mysql_query($insertmatch, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$insertmatch) or die(mysqli_error($this->link));
 
       }
 
       //Create the games
       //Get all the prvious games
       $query4 = "SELECT * FROM c4m_tournamentgames WHERE tg_tmid =".$tgtmid." AND tg_status='C'";
-      $return4 = mysql_query($query4, $this->link) or die(mysql_error());
-      $num4 = mysql_numrows($return4);
+      $return4 = mysqli_query($this->link,$query4) or die(mysqli_error($this->link));
+      $num4 = mysqli_num_rows($return4);
 
       // Get group Count
       $query5 = "SELECT DISTINCT tt_teamid FROM c4m_tournamentteams WHERE tt_tournamentid =".$TID;
-      $return5 = mysql_query($query5, $this->link) or die(mysql_error());
-      $num5 = mysql_numrows($return5);
+      $return5 = mysqli_query($this->link,$query5) or die(mysqli_error($this->link));
+      $num5 = mysqli_num_rows($return5);
 
       //Create the team list array
       $TeamsList = array();
@@ -5996,24 +6000,24 @@ class CR3DCQuery{
         $nTtmpCount = 0;
         while($nTtmpCount < $num5){
 
-          $TeamID =  mysql_result($return5, $nTtmpCount,"tt_teamid");
+          $TeamID =  $this->mysqli_result($return5, $nTtmpCount,"tt_teamid");
 
           // We need to check if the team is still allowed to play
           $querypid = "SELECT * FROM c4m_tournamentteams WHERE tt_tournamentid =".$TID." AND tt_teamid=".$TeamID." LIMIT 1";
-          $returnpid = mysql_query($querypid, $this->link) or die(mysql_error());
-          $numpid = mysql_numrows($returnpid);
+          $returnpid = mysqli_query($this->link,$querypid) or die(mysqli_error($this->link));
+          $numpid = mysqli_num_rows($returnpid);
 
-          $tt_playerid = mysql_result($returnpid, 0,"tt_playerid");
+          $tt_playerid = $this->mysqli_result($returnpid, 0,"tt_playerid");
 
           //echo $tt_playerid." ::: ";
 
           $query7 = "SELECT * FROM c4m_tournamentplayers WHERE tp_tournamentid=".$TID." AND tp_playerid=".$tt_playerid."";
-          $return7 = mysql_query($query7, $this->link) or die(mysql_error());
-          $num7 = mysql_numrows($return7);
+          $return7 = mysqli_query($this->link,$query7) or die(mysqli_error($this->link));
+          $num7 = mysqli_num_rows($return7);
 
           if($num7 != 0){
 
-            $tp_status = mysql_result($return7, 0,"tp_status");
+            $tp_status = $this->mysqli_result($return7, 0,"tp_status");
 
             //echo "".$tp_status."<br>";
 
@@ -6047,18 +6051,18 @@ class CR3DCQuery{
 
         //Check if in game
         $query6 = "SELECT * FROM c4m_tournamentteamvsteam WHERE ttvt_tmid=".$tgtmid." AND ttvt_teamid=".$TeamsList[$nCount]." AND ttvt_status='A'";
-        $return6 = mysql_query($query6, $this->link) or die(mysql_error());
-        $num6 = mysql_numrows($return6);
+        $return6 = mysqli_query($this->link,$query6) or die(mysqli_error($this->link));
+        $num6 = mysqli_num_rows($return6);
 
         $query66 = "SELECT * FROM c4m_tournamentteamvsteam WHERE ttvt_tmid=".$tgtmid." AND ttvt_otherteamid=".$TeamsList[$nCount]." AND ttvt_status='A'";
-        $return66 = mysql_query($query66, $this->link) or die(mysql_error());
-        $num66 = mysql_numrows($return66);
+        $return66 = mysqli_query($this->link,$query66) or die(mysqli_error($this->link));
+        $num66 = mysqli_num_rows($return66);
 
         if($num6 == 0 && $num66 == 0){
 
           $query8 = "SELECT * FROM c4m_tournamentteamvsteam WHERE ttvt_tmid=".$tgtmid." AND ttvt_teamid=".$TeamsList[$nCount]." AND ttvt_status='C'";
-          $return8 = mysql_query($query8, $this->link) or die(mysql_error());
-          $num8 = mysql_numrows($return8);
+          $return8 = mysqli_query($this->link,$query8) or die(mysqli_error($this->link));
+          $num8 = mysqli_num_rows($return8);
 
           $playedTeams = $TeamsList[$nCount];
 
@@ -6071,7 +6075,7 @@ class CR3DCQuery{
               if($playedTeams == ""){
 
               }else{
-                $playedTeams = $playedTeams.",".mysql_result($return8, $countplayed,"ttvt_otherteamid");
+                $playedTeams = $playedTeams.",".$this->mysqli_result($return8, $countplayed,"ttvt_otherteamid");
               }
 
               $countplayed++;
@@ -6089,39 +6093,39 @@ class CR3DCQuery{
 
               //check if the team is alreadey in a new game
               $query9 = "SELECT * FROM c4m_tournamentteamvsteam WHERE ttvt_tmid=".$tgtmid." AND ttvt_teamid=".$TeamsList[$TeamsListcounter]." AND ttvt_status='A'";
-              $return9 = mysql_query($query9, $this->link) or die(mysql_error());
-              $num9 = mysql_numrows($return9);
+              $return9 = mysqli_query($this->link,$query9) or die(mysqli_error($this->link));
+              $num9 = mysqli_num_rows($return9);
 
               $query99 = "SELECT * FROM c4m_tournamentteamvsteam WHERE ttvt_tmid=".$tgtmid." AND ttvt_otherteamid=".$TeamsList[$TeamsListcounter]." AND ttvt_status='A'";
-              $return99 = mysql_query($query99, $this->link) or die(mysql_error());
-              $num99 = mysql_numrows($return99);
+              $return99 = mysqli_query($this->link,$query99) or die(mysqli_error($this->link));
+              $num99 = mysqli_num_rows($return99);
 
               if($num9 == 0 && $num99 == 0){
                 //Check if we already played the team in current match
 
                 $query10 = "SELECT * FROM c4m_tournamentteamvsteam WHERE ttvt_tmid=".$tgtmid." AND ttvt_teamid=".$TeamsList[$nCount]." AND ttvt_otherteamid =".$TeamsList[$TeamsListcounter]." AND ttvt_status='C'";
-                $return10 = mysql_query($query10, $this->link) or die(mysql_error());
-                $num10 = mysql_numrows($return10);
+                $return10 = mysqli_query($this->link,$query10) or die(mysqli_error($this->link));
+                $num10 = mysqli_num_rows($return10);
 
                 $query11 = "SELECT * FROM c4m_tournamentteamvsteam WHERE ttvt_tmid=".$tgtmid." AND ttvt_teamid=".$TeamsList[$TeamsListcounter]." AND ttvt_otherteamid =".$TeamsList[$nCount]." AND ttvt_status='C'";
-                $return11 = mysql_query($query11, $this->link) or die(mysql_error());
-                $num11 = mysql_numrows($return11);
+                $return11 = mysqli_query($this->link,$query11) or die(mysqli_error($this->link));
+                $num11 = mysqli_num_rows($return11);
 
                 if($num10 == 0 && $num11 == 0){
 
                   //echo "<br>".$TeamsList[$nCount]." VS ".$TeamsList[$TeamsListcounter]."<br>";
 
                   $insert1 = "INSERT INTO c4m_tournamentteamvsteam VALUES(NULL, $tgtmid, $TeamsList[$nCount], $TeamsList[$TeamsListcounter], 'A')";
-                  mysql_query($insert1, $this->link) or die(mysql_error());
+                  mysqli_query($this->link,$insert1) or die(mysqli_error($this->link));
 
                   //create the games for each team member
                   $query11 = "SELECT * FROM c4m_tournamentteams WHERE tt_teamid=".$TeamsList[$nCount]." AND tt_tournamentid=".$TID;
-                  $return11 = mysql_query($query11, $this->link) or die(mysql_error());
-                  $num11 = mysql_numrows($return11);
+                  $return11 = mysqli_query($this->link,$query11) or die(mysqli_error($this->link));
+                  $num11 = mysqli_num_rows($return11);
 
                   $query12 = "SELECT * FROM c4m_tournamentteams WHERE tt_teamid=".$TeamsList[$TeamsListcounter]." AND tt_tournamentid=".$TID;
-                  $return12 = mysql_query($query12, $this->link) or die(mysql_error());
-                  $num12 = mysql_numrows($return12);
+                  $return12 = mysqli_query($this->link,$query12) or die(mysqli_error($this->link));
+                  $num12 = mysqli_num_rows($return12);
 
                   if($num11 != 0 && $num12 != 0){
 
@@ -6132,9 +6136,9 @@ class CR3DCQuery{
                      $nGroup1Count = 0;
                      while($nGroup1Count < $num11){
 
-                       $tt_teamid = mysql_result($return11, $nGroup1Count,"tt_teamid");
-                       $tt_tournamentid = mysql_result($return11, $nGroup1Count,"tt_tournamentid");
-                       $tt_playerid = mysql_result($return11, $nGroup1Count,"tt_playerid");
+                       $tt_teamid = $this->mysqli_result($return11, $nGroup1Count,"tt_teamid");
+                       $tt_tournamentid = $this->mysqli_result($return11, $nGroup1Count,"tt_tournamentid");
+                       $tt_playerid = $this->mysqli_result($return11, $nGroup1Count,"tt_playerid");
 
                        $wins = 0;
                        $loss = 0;
@@ -6160,9 +6164,9 @@ class CR3DCQuery{
                      $nGroup2Count = 0;
                      while($nGroup2Count < $num12){
 
-                       $tt_teamid = mysql_result($return12, $nGroup2Count,"tt_teamid");
-                       $tt_tournamentid = mysql_result($return12, $nGroup2Count,"tt_tournamentid");
-                       $tt_playerid = mysql_result($return12, $nGroup2Count,"tt_playerid");
+                       $tt_teamid = $this->mysqli_result($return12, $nGroup2Count,"tt_teamid");
+                       $tt_tournamentid = $this->mysqli_result($return12, $nGroup2Count,"tt_tournamentid");
+                       $tt_playerid = $this->mysqli_result($return12, $nGroup2Count,"tt_playerid");
 
                        $wins = 0;
                        $loss = 0;
@@ -6199,10 +6203,10 @@ class CR3DCQuery{
                        $otherid = $PlayerPoints2[$nLoopCount]['PlayerID'];
 
                        $insertgame = "INSERT INTO game VALUES('".$gameid."', $initiatorid, $initiatorid, $otherid, 'A', 'I', ".$time.", NULL, 1, 1, 1, 1)";
-                       mysql_query($insertgame, $this->link) or die(mysql_error());
+                       mysqli_query($this->link,$insertgame) or die(mysqli_error($this->link));
 
                        $insertgamematch = "INSERT INTO c4m_tournamentgames VALUES(NULL, ".$tgtmid.", '".$gameid."', ".$initiatorid.", ".$otherid.", 'N', 'N', 'I' )";
-                       mysql_query($insertgamematch, $this->link) or die(mysql_error());
+                       mysqli_query($this->link,$insertgamematch) or die(mysqli_error($this->link));
 
                        //echo $PlayerPoints1[$nLoopCount]['PlayerID']." VS ".$PlayerPoints2[$nLoopCount]['PlayerID']." -- ".$gameid."<br>";
 
@@ -6263,26 +6267,26 @@ class CR3DCQuery{
       }
 
       $update = "UPDATE c4m_tournament SET t_status='S' WHERE t_id=".$TID;
-      mysql_query($update, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
     }else{
 
       //echo "Team #".$ListOfTeams[0]." Is the winner!!!!<br>";
 
       $update = "UPDATE c4m_tournament SET t_status='C' WHERE t_id=".$TID;
-      mysql_query($update, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
       //email the team players that won the tournament
       $query13 = "SELECT * FROM c4m_tournamentteams WHERE tt_teamid=".$ListOfTeams[0]." AND tt_tournamentid=".$TID;
-      $return13 = mysql_query($query13, $this->link) or die(mysql_error());
-      $num13 = mysql_numrows($return13);
+      $return13 = mysqli_query($this->link,$query13) or die(mysqli_error($this->link));
+      $num13 = mysqli_num_rows($return13);
 
       if($num13 != 0){
 
         $i = 0;
         while($i < $num13){
 
-          $pid = mysql_result($return13, $i, "tt_playerid");
+          $pid = $this->mysqli_result($return13, $i, "tt_playerid");
 
           ////////////////////////////////////////////////////////////////
           // Send email to users that he/she is in a game
@@ -6323,8 +6327,8 @@ class CR3DCQuery{
 
     // Get group Count
     $query5 = "SELECT DISTINCT tt_teamid FROM c4m_tournamentteams WHERE tt_tournamentid =".$TID;
-    $return5 = mysql_query($query5, $this->link) or die(mysql_error());
-    $num5 = mysql_numrows($return5);
+    $return5 = mysqli_query($this->link,$query5) or die(mysqli_error($this->link));
+    $num5 = mysqli_num_rows($return5);
 
     //Create the team list array
     $TeamsList = array();
@@ -6336,22 +6340,22 @@ class CR3DCQuery{
 
       while($nTtmpCount < $num5){
 
-        $TeamID =  mysql_result($return5, $nTtmpCount,"tt_teamid");
+        $TeamID =  $this->mysqli_result($return5, $nTtmpCount,"tt_teamid");
 
         //We need to check if the team is still allowed to play
         $querypid = "SELECT * FROM c4m_tournamentteams WHERE tt_tournamentid =".$TID." AND tt_teamid=".$TeamID." LIMIT 1";
-        $returnpid = mysql_query($querypid, $this->link) or die(mysql_error());
-        $numpid = mysql_numrows($returnpid);
+        $returnpid = mysqli_query($this->link,$querypid) or die(mysqli_error($this->link));
+        $numpid = mysqli_num_rows($returnpid);
 
-        $tt_playerid = mysql_result($returnpid, 0,"tt_playerid");
+        $tt_playerid = $this->mysqli_result($returnpid, 0,"tt_playerid");
 
         $query7 = "SELECT * FROM c4m_tournamentplayers WHERE tp_tournamentid=".$TID." AND tp_playerid=".$tt_playerid."";
-        $return7 = mysql_query($query7, $this->link) or die(mysql_error());
-        $num7 = mysql_numrows($return7);
+        $return7 = mysqli_query($this->link,$query7) or die(mysqli_error($this->link));
+        $num7 = mysqli_num_rows($return7);
 
         if($num7 != 0){
 
-          $tp_status = mysql_result($return7, 0,"tp_status");
+          $tp_status = $this->mysqli_result($return7, 0,"tp_status");
 
           if($tp_status != "L"){
 
@@ -6380,36 +6384,36 @@ class CR3DCQuery{
   function UpdatePreviousTournamentgameTVT($ConfigFile, $TID){
 
     $query = "SELECT * FROM c4m_tournamentmatches WHERE tm_tournamentid =".$TID." ORDER BY tm_id DESC";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       //Get the first item from the list (This is the last match)
-      $tm_id = trim(mysql_result($return,0,"tm_id"));
-      $tm_tournamentid = trim(mysql_result($return,0,"tm_tournamentid"));
-      $tm_status = trim(mysql_result($return,0,"tm_status"));
-      $tm_starttime = trim(mysql_result($return,0,"tm_starttime"));
-      $tm_endtime = trim(mysql_result($return,0,"tm_endtime"));
+      $tm_id = trim($this->mysqli_result($return,0,"tm_id"));
+      $tm_tournamentid = trim($this->mysqli_result($return,0,"tm_tournamentid"));
+      $tm_status = trim($this->mysqli_result($return,0,"tm_status"));
+      $tm_starttime = trim($this->mysqli_result($return,0,"tm_starttime"));
+      $tm_endtime = trim($this->mysqli_result($return,0,"tm_endtime"));
 
       //Update the player and game status
       $query1 = "SELECT * FROM c4m_tournamentgames WHERE tg_tmid=".$tm_id." AND tg_status = 'I'";
-      $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-      $num1 = mysql_numrows($return1);
+      $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+      $num1 = mysqli_num_rows($return1);
 
       if($num1 != 0){
 
         $i=0;
         while($i < $num1){
 
-          $tg_id = trim(mysql_result($return1,$i,"tg_id"));
-          $tg_tmid = trim(mysql_result($return1,$i,"tg_tmid"));
-          $tg_gameid = trim(mysql_result($return1,$i,"tg_gameid"));
-          $tg_playerid = trim(mysql_result($return1,$i,"tg_playerid"));
-          $tg_otherplayerid = trim(mysql_result($return1,$i,"tg_otherplayerid"));
-          $tg_playerloggedin = trim(mysql_result($return1,$i,"tg_playerloggedin"));
-          $tg_otherplayerloggedin = trim(mysql_result($return1,$i,"tg_otherplayerloggedin"));
-          $tg_status = trim(mysql_result($return1,$i,"tg_status"));
+          $tg_id = trim($this->mysqli_result($return1,$i,"tg_id"));
+          $tg_tmid = trim($this->mysqli_result($return1,$i,"tg_tmid"));
+          $tg_gameid = trim($this->mysqli_result($return1,$i,"tg_gameid"));
+          $tg_playerid = trim($this->mysqli_result($return1,$i,"tg_playerid"));
+          $tg_otherplayerid = trim($this->mysqli_result($return1,$i,"tg_otherplayerid"));
+          $tg_playerloggedin = trim($this->mysqli_result($return1,$i,"tg_playerloggedin"));
+          $tg_otherplayerloggedin = trim($this->mysqli_result($return1,$i,"tg_otherplayerloggedin"));
+          $tg_status = trim($this->mysqli_result($return1,$i,"tg_status"));
 
           //Check if the players logged in for the game
           $initiator = "";
@@ -6618,12 +6622,12 @@ class CR3DCQuery{
               //check if the white player/ black player has moved
 
               $query2 = "SELECT * FROM move_history WHERE player_id=".$w_player_id." AND game_id ='".$GID."'";
-              $return2 = mysql_query($query2, $this->link) or die(mysql_error());
-              $num2 = mysql_numrows($return2);
+              $return2 = mysqli_query($this->link,$query2) or die(mysqli_error($this->link));
+              $num2 = mysqli_num_rows($return2);
 
               $query3 = "SELECT * FROM move_history WHERE player_id=".$b_player_id." AND game_id ='".$GID."'";
-              $return3 = mysql_query($query3, $this->link) or die(mysql_error());
-              $num3 = mysql_numrows($return3);
+              $return3 = mysqli_query($this->link,$query3) or die(mysqli_error($this->link));
+              $num3 = mysqli_num_rows($return3);
 
               if($num2 == 0 && $num3 != 0){
                 $this->UpdateTeamPoints($ConfigFile, $tm_tournamentid, $w_player_id, 1, 0);
@@ -6732,19 +6736,19 @@ class CR3DCQuery{
 
         //update tournamentgames status to complete
         $update1 = "UPDATE c4m_tournamentgames SET tg_status='C' WHERE tg_tmid=".$tm_id;
-        mysql_query($update1, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$update1) or die(mysqli_error($this->link));
 
         //update c4m_tournamentteamvsteam status to complete
         $update2 = "UPDATE c4m_tournamentteamvsteam SET ttvt_status='C' WHERE ttvt_tmid=".$tm_id;
-        mysql_query($update2, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$update2) or die(mysqli_error($this->link));
 
       }
 
       //Check to see if we need to create a new match and remove a team
       // Get group Count
       $query11 = "SELECT DISTINCT tt_teamid FROM c4m_tournamentteams WHERE tt_tournamentid =".$TID;
-      $return11 = mysql_query($query11, $this->link) or die(mysql_error());
-      $num11 = mysql_numrows($return11);
+      $return11 = mysqli_query($this->link,$query11) or die(mysqli_error($this->link));
+      $num11 = mysqli_num_rows($return11);
 
       //Create the team list array
       $TeamsList = array();
@@ -6756,24 +6760,24 @@ class CR3DCQuery{
         $nTtmpCount = 0;
         while($nTtmpCount < $num11){
 
-          $TeamID =  mysql_result($return11, $nTtmpCount,"tt_teamid");
+          $TeamID =  $this->mysqli_result($return11, $nTtmpCount,"tt_teamid");
 
           //We need to check if the team is still allowed to play
           $querypid = "SELECT * FROM c4m_tournamentteams WHERE tt_tournamentid =".$TID." AND tt_teamid=".$TeamID." LIMIT 1";
-          $returnpid = mysql_query($querypid, $this->link) or die(mysql_error());
-          $numpid = mysql_numrows($returnpid);
+          $returnpid = mysqli_query($this->link,$querypid) or die(mysqli_error($this->link));
+          $numpid = mysqli_num_rows($returnpid);
 
-          $tt_playerid = mysql_result($returnpid, 0,"tt_playerid");
+          $tt_playerid = $this->mysqli_result($returnpid, 0,"tt_playerid");
 
           //echo $tt_playerid." ::: ";
 
           $query22 = "SELECT * FROM c4m_tournamentplayers WHERE tp_tournamentid=".$TID." AND tp_playerid=".$tt_playerid."";
-          $return22 = mysql_query($query22, $this->link) or die(mysql_error());
-          $num22 = mysql_numrows($return22);
+          $return22 = mysqli_query($this->link,$query22) or die(mysqli_error($this->link));
+          $num22 = mysqli_num_rows($return22);
 
           if($num22 != 0){
 
-            $tp_status = mysql_result($return22, 0,"tp_status");
+            $tp_status = $this->mysqli_result($return22, 0,"tp_status");
 
             //echo "".$tp_status."<br>";
 
@@ -6807,18 +6811,18 @@ class CR3DCQuery{
 
         //Check if in game
         $query33 = "SELECT * FROM c4m_tournamentteamvsteam WHERE ttvt_tmid=".$tm_id." AND ttvt_teamid=".$TeamsList[$nCount]." AND ttvt_status='A'";
-        $return33 = mysql_query($query33, $this->link) or die(mysql_error());
-        $num33 = mysql_numrows($return33);
+        $return33 = mysqli_query($this->link,$this->link,$query33) or die(mysqli_error($this->link));
+        $num33 = mysqli_num_rows($return33);
 
         $query44 = "SELECT * FROM c4m_tournamentteamvsteam WHERE ttvt_tmid=".$tm_id." AND ttvt_otherteamid=".$TeamsList[$nCount]." AND ttvt_status='A'";
-        $return44 = mysql_query($query44, $this->link) or die(mysql_error());
-        $num44 = mysql_numrows($return44);
+        $return44 = mysqli_query($this->link,$query44) or die(mysqli_error($this->link));
+        $num44 = mysqli_num_rows($return44);
 
         if($num33 == 0 && $num44 == 0){
 
           $query55 = "SELECT * FROM c4m_tournamentteamvsteam WHERE ttvt_tmid=".$tm_id." AND ttvt_teamid=".$TeamsList[$nCount]." AND ttvt_status='C'";
-          $return55 = mysql_query($query55, $this->link) or die(mysql_error());
-          $num55 = mysql_numrows($return55);
+          $return55 = mysqli_query($this->link,$this->link,$query55) or die(mysqli_error($this->link));
+          $num55 = mysqli_num_rows($return55);
 
           $playedTeams = $TeamsList[$nCount];
 
@@ -6831,7 +6835,7 @@ class CR3DCQuery{
               if($playedTeams == ""){
 
               }else{
-                $playedTeams = $playedTeams.",".mysql_result($return55, $countplayed,"ttvt_otherteamid");
+                $playedTeams = $playedTeams.",".$this->mysqli_result($return55, $countplayed,"ttvt_otherteamid");
               }
 
               $countplayed++;
@@ -6848,23 +6852,23 @@ class CR3DCQuery{
               //check if the team is already in a new game
               //echo $TeamsList[$TeamsListcounter]."<br>";
               $query66 = "SELECT * FROM c4m_tournamentteamvsteam WHERE ttvt_tmid=".$tm_id." AND ttvt_teamid=".$TeamsList[$TeamsListcounter]." AND ttvt_status='A'";
-              $return66 = mysql_query($query66, $this->link) or die(mysql_error(). "15465");
-              $num66 = mysql_numrows($return66);
+              $return66 = mysqli_query($this->link,$query66) or die(mysqli_error($this->link). "15465");
+              $num66 = mysqli_num_rows($return66);
 
               $query77 = "SELECT * FROM c4m_tournamentteamvsteam WHERE ttvt_tmid=".$tm_id." AND ttvt_otherteamid=".$TeamsList[$TeamsListcounter]." AND ttvt_status='A'";
-              $return77 = mysql_query($query77, $this->link) or die(mysql_error());
-              $num77 = mysql_numrows($return77);
+              $return77 = mysqli_query($this->link,$query77) or die(mysqli_error($this->link));
+              $num77 = mysqli_num_rows($return77);
 
               if($num66 == 0 && $num77 == 0){
                 //Check if we already played the team in current match
 
                 $query88 = "SELECT * FROM c4m_tournamentteamvsteam WHERE ttvt_tmid=".$tm_id." AND ttvt_teamid=".$TeamsList[$nCount]." AND ttvt_otherteamid =".$TeamsList[$TeamsListcounter]." AND ttvt_status='C'";
-                $return88 = mysql_query($query88, $this->link) or die(mysql_error());
-                $num88 = mysql_numrows($return88);
+                $return88 = mysqli_query($this->link,$query88) or die(mysqli_error($this->link));
+                $num88 = mysqli_num_rows($return88);
 
                 $query99 = "SELECT * FROM c4m_tournamentteamvsteam WHERE ttvt_tmid=".$tm_id." AND ttvt_teamid=".$TeamsList[$TeamsListcounter]." AND ttvt_otherteamid =".$TeamsList[$nCount]." AND ttvt_status='C'";
-                $return99 = mysql_query($query99, $this->link) or die(mysql_error());
-                $num99 = mysql_numrows($return99);
+                $return99 = mysqli_query($this->link,$query99) or die(mysqli_error($this->link));
+                $num99 = mysqli_num_rows($return99);
 
                 if($num88 == 0 && $num99 == 0){
 
@@ -6894,7 +6898,7 @@ class CR3DCQuery{
 
          //set game match to complete
          $update2= "UPDATE c4m_tournamentmatches SET tm_status='C' WHERE tm_id=".$tm_id;
-         $return = mysql_query($update2, $this->link) or die(mysql_error());
+         $return = mysqli_query($this->link,$update2) or die(mysqli_error($this->link));
 
          // remove a team
          $nTCount = count($TeamsList);
@@ -6906,14 +6910,14 @@ class CR3DCQuery{
          While($nTmpCount < $nTCount){
 
           $query100 = "SELECT * FROM c4m_tournamentteampoints WHERE ttp_teamid=".$TeamsList[$nTmpCount]." AND ttp_tournamentid=".$TID;
-          $return100 = mysql_query($query100, $this->link) or die(mysql_error());
-          $num100 = mysql_numrows($return100);
+          $return100 = mysqli_query($this->link,$query100) or die(mysqli_error($this->link));
+          $num100 = mysqli_num_rows($return100);
 
           if($num100 != 0){
 
-            $ttp_id = mysql_result($return100, 0, "ttp_id");
-            $ttp_wins = mysql_result($return100, 0, "ttp_wins");
-            $ttp_loss = mysql_result($return100, 0, "ttp_loss");
+            $ttp_id = $this->mysqli_result($return100, 0, "ttp_id");
+            $ttp_wins = $this->mysqli_result($return100, 0, "ttp_wins");
+            $ttp_loss = $this->mysqli_result($return100, 0, "ttp_loss");
 
             $points = $this->GetPointValue($ttp_wins, $ttp_loss, 0);
             $this->GetPointRanking($points, $ttp_wins);
@@ -6950,18 +6954,18 @@ class CR3DCQuery{
          if($nCanDelete != 0){
 
            $query101 = "SELECT * FROM c4m_tournamentteams WHERE tt_teamid=".$TeamPoints[($nTCount-1)]['TeamID']." AND tt_tournamentid=".$TID;
-           $return101 = mysql_query($query101, $this->link) or die(mysql_error());
-           $num101 = mysql_numrows($return101);
+           $return101 = mysqli_query($this->link,$query101) or die(mysqli_error($this->link));
+           $num101 = mysqli_num_rows($return101);
 
            if($num101 != 0){
 
              $nteamplayercnt= 0;
              while($nteamplayercnt < $num101){
 
-               $tt_playerid = mysql_result($return101, $nteamplayercnt,"tt_playerid");
+               $tt_playerid = $this->mysqli_result($return101, $nteamplayercnt,"tt_playerid");
 
                $update = "UPDATE c4m_tournamentplayers SET tp_status='L' WHERE tp_tournamentid=".$TID." AND tp_playerid=".$tt_playerid;
-               mysql_query($update, $this->link) or die(mysql_error());
+               mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
                $nteamplayercnt++;
 
@@ -6986,33 +6990,33 @@ class CR3DCQuery{
 
     //get the team that the player is a member of
     $query = "SELECT * FROM c4m_tournamentteams WHERE tt_tournamentid=".$TID." AND tt_playerid=".$PID;
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-      $tt_id = trim(mysql_result($return, 0,"tt_id"));
-      $tt_teamid = trim(mysql_result($return, 0,"tt_teamid"));
-      $tt_tournamentid = trim(mysql_result($return, 0,"tt_tournamentid"));
-      $tt_playerid = trim(mysql_result($return, 0,"tt_playerid"));
+      $tt_id = trim($this->mysqli_result($return, 0,"tt_id"));
+      $tt_teamid = trim($this->mysqli_result($return, 0,"tt_teamid"));
+      $tt_tournamentid = trim($this->mysqli_result($return, 0,"tt_tournamentid"));
+      $tt_playerid = trim($this->mysqli_result($return, 0,"tt_playerid"));
 
       //Update the team points:
 
       //get the team that the player is a member of
       $query1 = "SELECT * FROM c4m_tournamentteampoints WHERE ttp_tournamentid=".$TID." AND ttp_teamid=".$tt_teamid;
-      $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-      $num1 = mysql_numrows($return1);
+      $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+      $num1 = mysqli_num_rows($return1);
 
       if($num1 != 0){
 
-        $ttp_id = trim(mysql_result($return1, 0,"ttp_id"));
-        $ttp_wins = trim(mysql_result($return1, 0,"ttp_wins"));
-        $ttp_loss = trim(mysql_result($return1, 0,"ttp_loss"));
+        $ttp_id = trim($this->mysqli_result($return1, 0,"ttp_id"));
+        $ttp_wins = trim($this->mysqli_result($return1, 0,"ttp_wins"));
+        $ttp_loss = trim($this->mysqli_result($return1, 0,"ttp_loss"));
 
         $wins = (int) $ttp_wins + $Win;
         $losses = (int) $ttp_loss + $Loss;
 
         $update  = "UPDATE c4m_tournamentteampoints SET ttp_wins=".$wins.", ttp_loss=".$losses." WHERE ttp_id=".$ttp_id;
-        mysql_query($update, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
       }
 
@@ -7038,8 +7042,8 @@ class CR3DCQuery{
     //////////////////////////////////////////////////////
 
     $query = "SELECT * FROM c4m_tournamentplayers, player WHERE c4m_tournamentplayers.tp_playerid = player.player_id AND c4m_tournamentplayers.tp_tournamentid =".$TID." AND c4m_tournamentplayers.tp_status='A'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num > 1 && $num != 0){
 
@@ -7056,10 +7060,10 @@ class CR3DCQuery{
       $i = 0;
       while($i < $num){
 
-        $player_id = trim(mysql_result($return,$i,"player_id"));
-        $userid = trim(mysql_result($return,$i,"userid"));
-        $signup_time  = trim(mysql_result($return,$i,"signup_time"));
-        $email = trim(mysql_result($return,$i,"email"));
+        $player_id = trim($this->mysqli_result($return,$i,"player_id"));
+        $userid = trim($this->mysqli_result($return,$i,"userid"));
+        $signup_time  = trim($this->mysqli_result($return,$i,"signup_time"));
+        $email = trim($this->mysqli_result($return,$i,"email"));
 
         if($i != $randrow){
 
@@ -7108,15 +7112,15 @@ class CR3DCQuery{
 
       //create the new match
       $insertmatch = "INSERT INTO c4m_tournamentmatches VALUES(NULL, $TID, 'A', '".$mtime."', DATE_ADD('".$mtime."', INTERVAL 5 MINUTE))";
-      mysql_query($insertmatch, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$insertmatch) or die(mysqli_error($this->link));
 
       $queryid = "SELECT last_insert_id()";
-      $returnid = mysql_query($queryid, $this->link) or die(mysql_error());
-      $numid = mysql_numrows($returnid);
+      $returnid = mysqli_query($this->link,$queryid) or die(mysqli_error($this->link));
+      $numid = mysqli_num_rows($returnid);
 
       $tgtid = 0;
       if($numid != 0){
-        $tgtid = mysql_result($returnid,0,0);
+        $tgtid = $this->mysqli_result($returnid,0,0);
       }
 
       ////////////////////////////////////////////////////////////////
@@ -7137,10 +7141,10 @@ class CR3DCQuery{
         //echo "<br>";
 
         $insertgame = "INSERT INTO game VALUES('".$gameid."', $initiatorid, $initiatorid, $otherid, 'A', 'I', ".$time.", NULL, 1, 1, 1, 1)";
-        mysql_query($insertgame, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$insertgame) or die(mysqli_error($this->link));
 
         $insertgamematch = "INSERT INTO c4m_tournamentgames VALUES(NULL, ".$tgtid.", '".$gameid."', ".$initiatorid.", ".$otherid.", 'N', 'N', 'I' )";
-        mysql_query($insertgamematch, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$insertgamematch) or die(mysqli_error($this->link));
 
         ////////////////////////////////////////////////////////////////
         // Send email to users that he/she is in a game
@@ -7176,16 +7180,16 @@ class CR3DCQuery{
       }
 
       $update = "UPDATE c4m_tournament SET t_status='S' WHERE t_id=".$TID;
-      mysql_query($update, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
     }else{
 
       // Select the winner
       if($num == 1){
-        $player_id = trim(mysql_result($return,0,"player_id"));
-        $userid = trim(mysql_result($return,0,"userid"));
-        $signup_time  = trim(mysql_result($return,0,"signup_time"));
-        $email = trim(mysql_result($return,0,"email"));
+        $player_id = trim($this->mysqli_result($return,0,"player_id"));
+        $userid = trim($this->mysqli_result($return,0,"userid"));
+        $signup_time  = trim($this->mysqli_result($return,0,"signup_time"));
+        $email = trim($this->mysqli_result($return,0,"email"));
 
         //echo $userid." Is the winner";
 
@@ -7206,7 +7210,7 @@ class CR3DCQuery{
         //////////////////////////////////////////////////////////////////////////
 
         $update = "UPDATE c4m_tournament SET t_status='C' WHERE t_id=".$TID;
-        mysql_query($update, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
       }
 
@@ -7222,14 +7226,14 @@ class CR3DCQuery{
   function GetEmailByPlayerID($ConfigFile, $ID){
 
     $query = "SELECT * FROM player WHERE player_id = ".$ID;
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $email = $this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_111");
 
     if($num != 0){
 
-       $email  = trim(mysql_result($return,0,"email"));
+       $email  = trim($this->mysqli_result($return,0,"email"));
 
     }
 
@@ -7247,12 +7251,12 @@ class CR3DCQuery{
 
     // Advanced email configuration
     $query1 = "SELECT * FROM server_email_settings WHERE o_id='1'";
-    $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+    $num1 = mysqli_num_rows($return1);
 
     $query2 = "SELECT * FROM smtp_settings WHERE o_id='1'";
-    $return2 = mysql_query($query2, $this->link) or die(mysql_error());
-    $num2 = mysql_numrows($return2);
+    $return2 = mysqli_query($this->link,$query2) or die(mysqli_error($this->link));
+    $num2 = mysqli_num_rows($return2);
 
     $bOld = true;
 
@@ -7263,17 +7267,17 @@ class CR3DCQuery{
     $xdomain= "";
 
     if($num1 != 0){
-      $smtp = trim(mysql_result($return1,0,"o_smtp"));
-      $port = trim(mysql_result($return1,0,"o_smtp_port"));
+      $smtp = trim($this->mysqli_result($return1,0,"o_smtp"));
+      $port = trim($this->mysqli_result($return1,0,"o_smtp_port"));
 
       $user = "";
       $pass = "";
       $domain = "";
 
       if($num2 != 0){
-        $user = trim(mysql_result($return2,0,"o_user"));
-        $pass = trim(mysql_result($return2,0,"o_pass"));
-        $domain = trim(mysql_result($return2,0,"o_domain"));
+        $user = trim($this->mysqli_result($return2,0,"o_user"));
+        $pass = trim($this->mysqli_result($return2,0,"o_pass"));
+        $domain = trim($this->mysqli_result($return2,0,"o_domain"));
       }
 
       if($smtp != "" && $port != "" && $user == "" && $pass == ""){
@@ -7338,7 +7342,7 @@ class CR3DCQuery{
       if(!$mail->Send()){
 
         $insert = "INSERT INTO email_log VALUES(NULL, '".$to."', '".$fromemail."', '".$fromname."', '".addslashes($subject)."', '".addslashes($body)."', '".addslashes($mail->ErrorInfo)."', NOW())";
-        mysql_query($insert, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
       }
 
@@ -7398,8 +7402,8 @@ class CR3DCQuery{
     //////////////////////////////////////////////////////
 
     $query = "SELECT * FROM c4m_tournamentplayers, player WHERE c4m_tournamentplayers.tp_playerid = player.player_id AND c4m_tournamentplayers.tp_tournamentid =".$TID." AND c4m_tournamentplayers.tp_status='A'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num > 1 && $num != 0){
 
@@ -7410,10 +7414,10 @@ class CR3DCQuery{
       $i = 0;
       while($i < $num){
 
-        $player_id = trim(mysql_result($return,$i,"player_id"));
-        $userid = trim(mysql_result($return,$i,"userid"));
-        $signup_time  = trim(mysql_result($return,$i,"signup_time"));
-        $email = trim(mysql_result($return,$i,"email"));
+        $player_id = trim($this->mysqli_result($return,$i,"player_id"));
+        $userid = trim($this->mysqli_result($return,$i,"userid"));
+        $signup_time  = trim($this->mysqli_result($return,$i,"signup_time"));
+        $email = trim($this->mysqli_result($return,$i,"email"));
 
         $PlayerList[$i] = $player_id;
 
@@ -7425,41 +7429,41 @@ class CR3DCQuery{
 
       //create the new match (if needed)
       $query2 = "SELECT * FROM c4m_tournamentmatches WHERE tm_tournamentid =".$TID." AND tm_status='A'";
-      $return2 = mysql_query($query2, $this->link) or die(mysql_error());
-      $num2 = mysql_numrows($return2);
+      $return2 = mysqli_query($this->link,$query2) or die(mysqli_error($this->link));
+      $num2 = mysqli_num_rows($return2);
 
       $tgtmid = 0;
 
       if($num2 == 0){
 
         $insertmatch = "INSERT INTO c4m_tournamentmatches VALUES(NULL, $TID, 'A', '".$mtime."', DATE_ADD('".$mtime."', INTERVAL 5 MINUTE))";
-        mysql_query($insertmatch, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$insertmatch) or die(mysqli_error($this->link));
 
         $queryid = "SELECT last_insert_id()";
-        $returnid = mysql_query($queryid, $this->link) or die(mysql_error());
-        $numid = mysql_numrows($returnid);
+        $returnid = mysqli_query($this->link,$queryid) or die(mysqli_error($this->link));
+        $numid = mysqli_num_rows($returnid);
 
         if($numid != 0){
-           $tgtmid = mysql_result($returnid,0,0);
+           $tgtmid = $this->mysqli_result($returnid,0,0);
         }
 
         //echo "match Created: ".$tgtmid;
 
       }else{
-        $tgtmid = mysql_result($return2,0,0);
+        $tgtmid = $this->mysqli_result($return2,0,0);
 
         //echo "match Already created: ".$tgtmid;
 
         //Update the match times
         $insertmatch = "UPDATE c4m_tournamentmatches SET tm_starttime = DATE_ADD('".$mtime."', INTERVAL 1 MINUTE), tm_endtime = DATE_ADD('".$mtime."', INTERVAL 6 MINUTE) WHERE tm_id=".$tgtmid;
-        mysql_query($insertmatch, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$insertmatch) or die(mysqli_error($this->link));
 
       }
 
       //Create the players match points record
       $query3 = "SELECT * FROM c4m_tournamentplayerpoints WHERE tpp_tournamentid=".$TID;
-      $return3 = mysql_query($query3, $this->link) or die(mysql_error());
-      $num3 = mysql_numrows($return3);
+      $return3 = mysqli_query($this->link,$query3) or die(mysqli_error($this->link));
+      $num3 = mysqli_num_rows($return3);
 
       if($num3 == 0){
 
@@ -7468,7 +7472,7 @@ class CR3DCQuery{
         while($ii < $nplrcount){
 
           $insert = "INSERT INTO c4m_tournamentplayerpoints VALUES(NULL, ".$PlayerList[$ii].", ".$TID.", 0, 0 )";
-          mysql_query($insert, $this->link) or die(mysql_error());
+          mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
           $ii++;
 
@@ -7483,12 +7487,12 @@ class CR3DCQuery{
 
         //Check if in game
         $query4 = "SELECT * FROM c4m_tournamentplayervsplayer WHERE tpvp_tmid=".$tgtmid." AND tpvp_playerid=".$PlayerList[$iii]." AND tpvp_status='A'";
-        $return4 = mysql_query($query4, $this->link) or die(mysql_error());
-        $num4 = mysql_numrows($return4);
+        $return4 = mysqli_query($this->link,$query4) or die(mysqli_error($this->link));
+        $num4 = mysqli_num_rows($return4);
 
         $query5 = "SELECT * FROM c4m_tournamentplayervsplayer WHERE tpvp_tmid=".$tgtmid." AND tpvp_otherplayerid=".$PlayerList[$iii]." AND tpvp_status='A'";
-        $return5 = mysql_query($query5, $this->link) or die(mysql_error());
-        $num5 = mysql_numrows($return5);
+        $return5 = mysqli_query($this->link,$query5) or die(mysqli_error($this->link));
+        $num5 = mysqli_num_rows($return5);
 
         if($num4 == 0 && $num5 == 0){
 
@@ -7500,28 +7504,28 @@ class CR3DCQuery{
 
               //check if the player is already in a new game
               $query6 = "SELECT * FROM c4m_tournamentplayervsplayer WHERE tpvp_tmid=".$tgtmid." AND tpvp_playerid=".$PlayerList[$playerListcounter]." AND tpvp_status='A'";
-              $return6 = mysql_query($query6, $this->link) or die(mysql_error());
-              $num6 = mysql_numrows($return6);
+              $return6 = mysqli_query($this->link,$query6) or die(mysqli_error($this->link));
+              $num6 = mysqli_num_rows($return6);
 
               $query7 = "SELECT * FROM c4m_tournamentplayervsplayer WHERE tpvp_tmid=".$tgtmid." AND tpvp_otherplayerid=".$PlayerList[$playerListcounter]." AND tpvp_status='A'";
-              $return7 = mysql_query($query7, $this->link) or die(mysql_error());
-              $num7 = mysql_numrows($return7);
+              $return7 = mysqli_query($this->link,$query7) or die(mysqli_error($this->link));
+              $num7 = mysqli_num_rows($return7);
 
               if($num6 == 0 && $num7 == 0){
 
                 //Check if we already played the player in current match
                 $query8 = "SELECT * FROM c4m_tournamentplayervsplayer WHERE tpvp_tmid=".$tgtmid." AND tpvp_playerid=".$PlayerList[$iii]." AND tpvp_otherplayerid =".$PlayerList[$playerListcounter]." AND tpvp_status='C'";
-                $return8 = mysql_query($query8, $this->link) or die(mysql_error());
-                $num8 = mysql_numrows($return8);
+                $return8 = mysqli_query($this->link,$query8) or die(mysqli_error($this->link));
+                $num8 = mysqli_num_rows($return8);
 
                 $query9 = "SELECT * FROM c4m_tournamentplayervsplayer WHERE tpvp_tmid=".$tgtmid." AND tpvp_playerid=".$PlayerList[$playerListcounter]." AND tpvp_otherplayerid =".$PlayerList[$iii]." AND tpvp_status='C'";
-                $return9 = mysql_query($query9, $this->link) or die(mysql_error());
-                $num9 = mysql_numrows($return9);
+                $return9 = mysqli_query($this->link,$query9) or die(mysqli_error($this->link));
+                $num9 = mysqli_num_rows($return9);
 
                 if($num8 == 0 && $num9 == 0){
 
                   $insert1 = "INSERT INTO c4m_tournamentplayervsplayer VALUES(NULL, $tgtmid, $PlayerList[$iii], $PlayerList[$playerListcounter], 'A')";
-                  mysql_query($insert1, $this->link) or die(mysql_error());
+                  mysqli_query($this->link,$insert1) or die(mysqli_error($this->link));
 
                   //Create the tournament game
                   $gameid = $this->gen_unique();
@@ -7530,10 +7534,10 @@ class CR3DCQuery{
                   $otherid = $PlayerList[$playerListcounter];
 
                   $insertgame = "INSERT INTO game VALUES('".$gameid."', $initiatorid, $initiatorid, $otherid, 'A', 'I', ".$time.", NULL, 1, 1, 1, 1)";
-                  mysql_query($insertgame, $this->link) or die(mysql_error());
+                  mysqli_query($this->link,$insertgame) or die(mysqli_error($this->link));
 
                   $insertgamematch = "INSERT INTO c4m_tournamentgames VALUES(NULL, ".$tgtmid.", '".$gameid."', ".$initiatorid.", ".$otherid.", 'N', 'N', 'I' )";
-                  mysql_query($insertgamematch, $this->link) or die(mysql_error());
+                  mysqli_query($this->link,$insertgamematch) or die(mysqli_error($this->link));
 
                   //echo "<br>".$PlayerList[$iii]." VS ".$PlayerList[$playerListcounter]." -- ".$gameid."<br>";
 
@@ -7582,22 +7586,22 @@ class CR3DCQuery{
       }
 
       $update = "UPDATE c4m_tournament SET t_status='S' WHERE t_id=".$TID;
-      mysql_query($update, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
     }else{
 
       //Tournament Completed
       // Select the winner
       if($num == 1){
-        $player_id = trim(mysql_result($return,0,"player_id"));
-        $userid = trim(mysql_result($return,0,"userid"));
-        $signup_time  = trim(mysql_result($return,0,"signup_time"));
-        $email = trim(mysql_result($return,0,"email"));
+        $player_id = trim($this->mysqli_result($return,0,"player_id"));
+        $userid = trim($this->mysqli_result($return,0,"userid"));
+        $signup_time  = trim($this->mysqli_result($return,0,"signup_time"));
+        $email = trim($this->mysqli_result($return,0,"email"));
 
         //echo $userid." Is the winner";
 
         $update = "UPDATE c4m_tournament SET t_status='C' WHERE t_id=".$TID;
-        mysql_query($update, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
       }
 
@@ -7613,38 +7617,38 @@ class CR3DCQuery{
   function UpdatePreviousTournamentgameLA($ConfigFile, $TID){
 
     $query = "SELECT * FROM c4m_tournamentmatches WHERE tm_tournamentid =".$TID." ORDER BY tm_id DESC";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $TMID = 0;
 
     if($num != 0){
 
       //Get the first item from the list (This is the last match)
-      $tm_id = trim(mysql_result($return,0,"tm_id"));
-      $tm_tournamentid = trim(mysql_result($return,0,"tm_tournamentid"));
-      $tm_status = trim(mysql_result($return,0,"tm_status"));
-      $tm_starttime = trim(mysql_result($return,0,"tm_starttime"));
-      $tm_endtime = trim(mysql_result($return,0,"tm_endtime"));
+      $tm_id = trim($this->mysqli_result($return,0,"tm_id"));
+      $tm_tournamentid = trim($this->mysqli_result($return,0,"tm_tournamentid"));
+      $tm_status = trim($this->mysqli_result($return,0,"tm_status"));
+      $tm_starttime = trim($this->mysqli_result($return,0,"tm_starttime"));
+      $tm_endtime = trim($this->mysqli_result($return,0,"tm_endtime"));
 
       //Update the player and game status
       $query1 = "SELECT * FROM c4m_tournamentgames WHERE tg_tmid=".$tm_id." AND tg_status = 'I'";
-      $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-      $num1 = mysql_numrows($return1);
+      $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+      $num1 = mysqli_num_rows($return1);
 
       if($num1 != 0){
 
         $i=0;
         while($i < $num1){
 
-          $tg_id = trim(mysql_result($return1,$i,"tg_id"));
-          $tg_tmid = trim(mysql_result($return1,$i,"tg_tmid"));
-          $tg_gameid = trim(mysql_result($return1,$i,"tg_gameid"));
-          $tg_playerid = trim(mysql_result($return1,$i,"tg_playerid"));
-          $tg_otherplayerid = trim(mysql_result($return1,$i,"tg_otherplayerid"));
-          $tg_playerloggedin = trim(mysql_result($return1,$i,"tg_playerloggedin"));
-          $tg_otherplayerloggedin = trim(mysql_result($return1,$i,"tg_otherplayerloggedin"));
-          $tg_status = trim(mysql_result($return1,$i,"tg_status"));
+          $tg_id = trim($this->mysqli_result($return1,$i,"tg_id"));
+          $tg_tmid = trim($this->mysqli_result($return1,$i,"tg_tmid"));
+          $tg_gameid = trim($this->mysqli_result($return1,$i,"tg_gameid"));
+          $tg_playerid = trim($this->mysqli_result($return1,$i,"tg_playerid"));
+          $tg_otherplayerid = trim($this->mysqli_result($return1,$i,"tg_otherplayerid"));
+          $tg_playerloggedin = trim($this->mysqli_result($return1,$i,"tg_playerloggedin"));
+          $tg_otherplayerloggedin = trim($this->mysqli_result($return1,$i,"tg_otherplayerloggedin"));
+          $tg_status = trim($this->mysqli_result($return1,$i,"tg_status"));
 
           $TMID = $tg_tmid;
 
@@ -7846,12 +7850,12 @@ class CR3DCQuery{
               //check if the white player/ black player has moved
 
               $query2 = "SELECT * FROM move_history WHERE player_id=".$w_player_id." AND game_id ='".$GID."'";
-              $return2 = mysql_query($query2, $this->link) or die(mysql_error());
-              $num2 = mysql_numrows($return2);
+              $return2 = mysqli_query($this->link,$query2) or die(mysqli_error($this->link));
+              $num2 = mysqli_num_rows($return2);
 
               $query3 = "SELECT * FROM move_history WHERE player_id=".$b_player_id." AND game_id ='".$GID."'";
-              $return3 = mysql_query($query3, $this->link) or die(mysql_error());
-              $num3 = mysql_numrows($return3);
+              $return3 = mysqli_query($this->link,$query3) or die(mysqli_error($this->link));
+              $num3 = mysqli_num_rows($return3);
 
               if($num2 == 0 && $num3 != 0){
                ///////////////////////////////////////////////////////////////////////
@@ -7962,11 +7966,11 @@ class CR3DCQuery{
 
         //update tournamentgames status to complete
         $update1 = "UPDATE c4m_tournamentgames SET tg_status='C' WHERE tg_tmid=".$tm_id;
-        mysql_query($update1, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$update1) or die(mysqli_error($this->link));
 
         //update c4m_tournamentplayervsplayer status to complete
         $update2 = "UPDATE c4m_tournamentplayervsplayer SET tpvp_status='C' WHERE tpvp_tmid=".$tm_id;
-        mysql_query($update2, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$update2) or die(mysqli_error($this->link));
 
       }
 
@@ -7976,8 +7980,8 @@ class CR3DCQuery{
       //Check to see if we need to create a new match and remove a player
 
       $query11 = "SELECT * FROM c4m_tournamentplayers, player WHERE c4m_tournamentplayers.tp_playerid = player.player_id AND c4m_tournamentplayers.tp_tournamentid =".$TID." AND c4m_tournamentplayers.tp_status='A'";
-      $return11 = mysql_query($query11, $this->link) or die(mysql_error());
-      $num11 = mysql_numrows($return11);
+      $return11 = mysqli_query($this->link,$query11) or die(mysqli_error($this->link));
+      $num11 = mysqli_num_rows($return11);
 
       //Create the arrays
       $PlayerList = array();
@@ -7988,10 +7992,10 @@ class CR3DCQuery{
         $i = 0;
         while($i < $num11){
 
-          $player_id = trim(mysql_result($return11,$i,"player_id"));
-          $userid = trim(mysql_result($return11,$i,"userid"));
-          $signup_time  = trim(mysql_result($return11,$i,"signup_time"));
-          $email = trim(mysql_result($return11,$i,"email"));
+          $player_id = trim($this->mysqli_result($return11,$i,"player_id"));
+          $userid = trim($this->mysqli_result($return11,$i,"userid"));
+          $signup_time  = trim($this->mysqli_result($return11,$i,"signup_time"));
+          $email = trim($this->mysqli_result($return11,$i,"email"));
 
           $PlayerList[$i] = $player_id;
 
@@ -8015,12 +8019,12 @@ class CR3DCQuery{
 
         //Check if in game
         $query12 = "SELECT * FROM c4m_tournamentplayervsplayer WHERE tpvp_tmid=".$tgtmid." AND tpvp_playerid=".$PlayerList[$iii]." AND tpvp_status='A'";
-        $return12 = mysql_query($query12, $this->link) or die(mysql_error());
-        $num12 = mysql_numrows($return12);
+        $return12 = mysqli_query($this->link,$query12) or die(mysqli_error($this->link));
+        $num12 = mysqli_num_rows($return12);
 
         $query13 = "SELECT * FROM c4m_tournamentplayervsplayer WHERE tpvp_tmid=".$tgtmid." AND tpvp_otherplayerid=".$PlayerList[$iii]." AND tpvp_status='A'";
-        $return13 = mysql_query($query13, $this->link) or die(mysql_error());
-        $num13 = mysql_numrows($return13);
+        $return13 = mysqli_query($this->link,$query13) or die(mysqli_error($this->link));
+        $num13 = mysqli_num_rows($return13);
 
         if($num12 == 0 && $num13 == 0){
 
@@ -8032,23 +8036,23 @@ class CR3DCQuery{
 
               //check if the player is already in a new game
               $query14 = "SELECT * FROM c4m_tournamentplayervsplayer WHERE tpvp_tmid=".$tgtmid." AND tpvp_playerid=".$PlayerList[$playerListcounter]." AND tpvp_status='A'";
-              $return14 = mysql_query($query14, $this->link) or die(mysql_error());
-              $num14 = mysql_numrows($return14);
+              $return14 = mysqli_query($this->link,$query14) or die(mysqli_error($this->link));
+              $num14 = mysqli_num_rows($return14);
 
               $query15 = "SELECT * FROM c4m_tournamentplayervsplayer WHERE tpvp_tmid=".$tgtmid." AND tpvp_otherplayerid=".$PlayerList[$playerListcounter]." AND tpvp_status='A'";
-              $return15 = mysql_query($query15, $this->link) or die(mysql_error());
-              $num15 = mysql_numrows($return15);
+              $return15 = mysqli_query($this->link,$query15) or die(mysqli_error($this->link));
+              $num15 = mysqli_num_rows($return15);
 
               if($num14 == 0 && $num15 == 0){
 
                 //Check if we already played the player in current match
                 $query16 = "SELECT * FROM c4m_tournamentplayervsplayer WHERE tpvp_tmid=".$tgtmid." AND tpvp_playerid=".$PlayerList[$iii]." AND tpvp_otherplayerid =".$PlayerList[$playerListcounter]." AND tpvp_status='C'";
-                $return16 = mysql_query($query16, $this->link) or die(mysql_error());
-                $num16 = mysql_numrows($return16);
+                $return16 = mysqli_query($this->link,$query16) or die(mysqli_error($this->link));
+                $num16 = mysqli_num_rows($return16);
 
                 $query17 = "SELECT * FROM c4m_tournamentplayervsplayer WHERE tpvp_tmid=".$tgtmid." AND tpvp_playerid=".$PlayerList[$playerListcounter]." AND tpvp_otherplayerid =".$PlayerList[$iii]." AND tpvp_status='C'";
-                $return17 = mysql_query($query17, $this->link) or die(mysql_error());
-                $num17 = mysql_numrows($return17);
+                $return17 = mysqli_query($this->link,$query17) or die(mysqli_error($this->link));
+                $num17 = mysqli_num_rows($return17);
 
                 if($num16 == 0 && $num17 == 0){
                   $GamesToBePlayed++;
@@ -8076,7 +8080,7 @@ class CR3DCQuery{
 
          //set game match to complete
          $update2= "UPDATE c4m_tournamentmatches SET tm_status='C' WHERE tm_id=".$tm_id;
-         $return = mysql_query($update2, $this->link) or die(mysql_error());
+         $return = mysqli_query($this->link,$update2) or die(mysqli_error($this->link));
 
          //Remove a player
          $nPCount = count($PlayerList);
@@ -8088,14 +8092,14 @@ class CR3DCQuery{
          While($nTmpCount < $nPCount){
 
            $query18 = "SELECT * FROM c4m_tournamentplayerpoints WHERE tpp_playerid=".$PlayerList[$nTmpCount]." AND tpp_tournamentid=".$TID;
-           $return18 = mysql_query($query18, $this->link) or die(mysql_error());
-           $num18 = mysql_numrows($return18);
+           $return18 = mysqli_query($this->link,$query18) or die(mysqli_error($this->link));
+           $num18 = mysqli_num_rows($return18);
 
            if($num18 != 0){
 
-             $tpp_id = mysql_result($return18, 0, "tpp_id");
-             $tpp_wins = mysql_result($return18, 0, "tpp_wins");
-             $tpp_loss = mysql_result($return18, 0, "tpp_loss");
+             $tpp_id = $this->mysqli_result($return18, 0, "tpp_id");
+             $tpp_wins = $this->mysqli_result($return18, 0, "tpp_wins");
+             $tpp_loss = $this->mysqli_result($return18, 0, "tpp_loss");
 
              $points = $this->GetPointValue($tpp_wins, $tpp_loss, 0);
              $this->GetPointRanking($points, $tpp_wins);
@@ -8133,7 +8137,7 @@ class CR3DCQuery{
            //echo "Deleted ".$PlayerPoints[($nPCount-1)]['PlayerID']."<br>";
 
            $update3 = "UPDATE c4m_tournamentplayers SET tp_status='L' WHERE tp_playerid=".$PlayerPoints[($nPCount-1)]['PlayerID']." AND tp_tournamentid=".$TID;
-           mysql_query($update3, $this->link) or die(mysql_error());
+           mysqli_query($this->link,$update3) or die(mysqli_error($this->link));
 
          }
 
@@ -8151,7 +8155,7 @@ class CR3DCQuery{
   function UpdatePlayerPoints($ConfigFile, $TID, $PID, $Loss, $Win){
 
     $update = "UPDATE c4m_tournamentplayerpoints SET tpp_wins=".$Win.", tpp_loss=".$Loss." WHERE tpp_playerid=".$PID." AND tpp_tournamentid=".$TID;
-    mysql_query($update, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
   }
 
@@ -8173,16 +8177,16 @@ class CR3DCQuery{
     //////////////////////////////////////////////////////
 
     $query = "SELECT * FROM c4m_tournamentplayers, player WHERE c4m_tournamentplayers.tp_playerid = player.player_id AND c4m_tournamentplayers.tp_tournamentid =".$TID.""; // AND c4m_tournamentplayers.tp_status='A'
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $query1 = "SELECT * FROM c4m_tournament WHERE t_id =".$TID."";
-    $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+    $num1 = mysqli_num_rows($return1);
 
     $PlayerPerGroup = 0;
     if($num1 != 0){
-      $PlayerPerGroup = mysql_result($return1,0,"t_playernum");
+      $PlayerPerGroup = $this->mysqli_result($return1,0,"t_playernum");
     }
 
     $aTeams = array();
@@ -8194,8 +8198,8 @@ class CR3DCQuery{
     if($nCTeams > 1 || $nCTeams == 0 && $num != 0){
 
       $query2 = "SELECT * FROM c4m_tournamentteams WHERE tt_tournamentid =".$TID."";
-      $return2 = mysql_query($query2, $this->link) or die(mysql_error());
-      $num2 = mysql_numrows($return2);
+      $return2 = mysqli_query($this->link,$query2) or die(mysqli_error($this->link));
+      $num2 = mysqli_num_rows($return2);
 
       if($num2 == 0){
         //create the teams
@@ -8205,12 +8209,12 @@ class CR3DCQuery{
         $i = 0;
         while($i < $num){
 
-          $player_id = trim(mysql_result($return,$i,"player_id"));
-          $userid = trim(mysql_result($return,$i,"userid"));
-          $signup_time  = trim(mysql_result($return,$i,"signup_time"));
-          $email = trim(mysql_result($return,$i,"email"));
+          $player_id = trim($this->mysqli_result($return,$i,"player_id"));
+          $userid = trim($this->mysqli_result($return,$i,"userid"));
+          $signup_time  = trim($this->mysqli_result($return,$i,"signup_time"));
+          $email = trim($this->mysqli_result($return,$i,"email"));
 
-          $tp_status = trim(mysql_result($return,$i,"tp_status"));
+          $tp_status = trim($this->mysqli_result($return,$i,"tp_status"));
 
           if($nGroupSwitch < $PlayerPerGroup){
 
@@ -8218,16 +8222,16 @@ class CR3DCQuery{
               //echo $nGroupNum." ".$userid."<br>";
 
               $insert = "INSERT INTO c4m_tournamentteams VALUES(NULL, $nGroupNum, $TID, $player_id)";
-              mysql_query($insert, $this->link) or die(mysql_error());
+              mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
               //create the player points record if needed
               $queryttp = "SELECT * FROM c4m_tournamentplayerpoints WHERE tpp_tournamentid=".$TID." AND tpp_playerid=".$player_id;
-              $returnttp = mysql_query($queryttp, $this->link) or die(mysql_error());
-              $numttp = mysql_numrows($returnttp);
+              $returnttp = mysqli_query($this->link,$queryttp) or die(mysqli_error($this->link));
+              $numttp = mysqli_num_rows($returnttp);
 
               if($numttp == 0){
                 $insert = "INSERT INTO c4m_tournamentplayerpoints VALUES(NULL, ".$player_id.", ".$TID.", 0, 0 )";
-                mysql_query($insert, $this->link) or die(mysql_error());
+                mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
               }
 
             }
@@ -8241,16 +8245,16 @@ class CR3DCQuery{
               //echo $nGroupNum." ".$userid."<br>";
 
               $insert = "INSERT INTO c4m_tournamentteams VALUES(NULL, $nGroupNum, $TID, $player_id)";
-              mysql_query($insert, $this->link) or die(mysql_error());
+              mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
               //create the player points record if needed
               $queryttp = "SELECT * FROM c4m_tournamentplayerpoints WHERE tpp_tournamentid=".$TID." AND tpp_playerid=".$player_id;
-              $returnttp = mysql_query($queryttp, $this->link) or die(mysql_error());
-              $numttp = mysql_numrows($returnttp);
+              $returnttp = mysqli_query($this->link,$queryttp) or die(mysqli_error($this->link));
+              $numttp = mysqli_num_rows($returnttp);
 
               if($numttp == 0){
                 $insert = "INSERT INTO c4m_tournamentplayerpoints VALUES(NULL, ".$player_id.", ".$TID.", 0, 0 )";
-                mysql_query($insert, $this->link) or die(mysql_error());
+                mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
               }
 
             }
@@ -8266,41 +8270,41 @@ class CR3DCQuery{
 
       //create the new match (if needed)
       $query3 = "SELECT * FROM c4m_tournamentmatches WHERE tm_tournamentid =".$TID." AND tm_status='A'";
-      $return3 = mysql_query($query3, $this->link) or die(mysql_error());
-      $num3 = mysql_numrows($return3);
+      $return3 = mysqli_query($this->link,$query3) or die(mysqli_error($this->link));
+      $num3 = mysqli_num_rows($return3);
 
       $tgtmid = 0;
 
       if($num3 == 0){
 
         $insertmatch = "INSERT INTO c4m_tournamentmatches VALUES(NULL, $TID, 'A', '".$mtime."', DATE_ADD('".$mtime."', INTERVAL 5 MINUTE))";
-        mysql_query($insertmatch, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$insertmatch) or die(mysqli_error($this->link));
 
         $queryid = "SELECT last_insert_id()";
-        $returnid = mysql_query($queryid, $this->link) or die(mysql_error());
-        $numid = mysql_numrows($returnid);
+        $returnid = mysqli_query($this->link,$queryid) or die(mysqli_error($this->link));
+        $numid = mysqli_num_rows($returnid);
 
         if($numid != 0){
-           $tgtmid = mysql_result($returnid,0,0);
+           $tgtmid = $this->mysqli_result($returnid,0,0);
         }
 
         //echo " match created: ".$tgtmid;
 
       }else{
-        $tgtmid = mysql_result($return3,0,0);
+        $tgtmid = $this->mysqli_result($return3,0,0);
 
         //echo " match already created: ".$tgtmid;
 
         //Update the match times
         $insertmatch = "UPDATE c4m_tournamentmatches SET tm_starttime = DATE_ADD('".$mtime."', INTERVAL 1 MINUTE), tm_endtime = DATE_ADD('".$mtime."', INTERVAL 6 MINUTE) WHERE tm_id=".$tgtmid;
-        mysql_query($insertmatch, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$insertmatch) or die(mysqli_error($this->link));
 
       }
 
       // Get group Count
       $query5 = "SELECT DISTINCT tt_teamid FROM c4m_tournamentteams WHERE tt_tournamentid =".$TID;
-      $return5 = mysql_query($query5, $this->link) or die(mysql_error());
-      $num5 = mysql_numrows($return5);
+      $return5 = mysqli_query($this->link,$query5) or die(mysqli_error($this->link));
+      $num5 = mysqli_num_rows($return5);
 
       //Create the team list array
       $TeamsList = array();
@@ -8312,7 +8316,7 @@ class CR3DCQuery{
         $nTtmpCount = 0;
         while($nTtmpCount < $num5){
 
-          $TeamID =  mysql_result($return5, $nTtmpCount,"tt_teamid");
+          $TeamID =  $this->mysqli_result($return5, $nTtmpCount,"tt_teamid");
 
           $TeamsList[$nTeamCount] = $TeamID;
           $nTeamCount++;
@@ -8334,18 +8338,18 @@ class CR3DCQuery{
 
         //Check if in game
         $query6 = "SELECT * FROM c4m_tournamentteamvsteam WHERE ttvt_tmid=".$tgtmid." AND ttvt_teamid=".$TeamsList[$nCount]." AND ttvt_status='A'";
-        $return6 = mysql_query($query6, $this->link) or die(mysql_error());
-        $num6 = mysql_numrows($return6);
+        $return6 = mysqli_query($this->link,$query6) or die(mysqli_error($this->link));
+        $num6 = mysqli_num_rows($return6);
 
         $query66 = "SELECT * FROM c4m_tournamentteamvsteam WHERE ttvt_tmid=".$tgtmid." AND ttvt_otherteamid=".$TeamsList[$nCount]." AND ttvt_status='A'";
-        $return66 = mysql_query($query66, $this->link) or die(mysql_error());
-        $num66 = mysql_numrows($return66);
+        $return66 = mysqli_query($this->link,$query66) or die(mysqli_error($this->link));
+        $num66 = mysqli_num_rows($return66);
 
         if($num6 == 0 && $num66 == 0){
 
           $query8 = "SELECT * FROM c4m_tournamentteamvsteam WHERE ttvt_tmid=".$tgtmid." AND ttvt_teamid=".$TeamsList[$nCount]." AND ttvt_status='C'";
-          $return8 = mysql_query($query8, $this->link) or die(mysql_error());
-          $num8 = mysql_numrows($return8);
+          $return8 = mysqli_query($this->link,$query8) or die(mysqli_error($this->link));
+          $num8 = mysqli_num_rows($return8);
 
           $playedTeams = $TeamsList[$nCount];
 
@@ -8358,7 +8362,7 @@ class CR3DCQuery{
               if($playedTeams == ""){
 
               }else{
-                $playedTeams = $playedTeams.",".mysql_result($return8, $countplayed,"ttvt_otherteamid");
+                $playedTeams = $playedTeams.",".$this->mysqli_result($return8, $countplayed,"ttvt_otherteamid");
               }
 
               $countplayed++;
@@ -8375,39 +8379,39 @@ class CR3DCQuery{
 
               //check if the team is alreadey in a new game
               $query9 = "SELECT * FROM c4m_tournamentteamvsteam WHERE ttvt_tmid=".$tgtmid." AND ttvt_teamid=".$TeamsList[$TeamsListcounter]." AND ttvt_status='A'";
-              $return9 = mysql_query($query9, $this->link) or die(mysql_error());
-              $num9 = mysql_numrows($return9);
+              $return9 = mysqli_query($this->link,$query9) or die(mysqli_error($this->link));
+              $num9 = mysqli_num_rows($return9);
 
               $query99 = "SELECT * FROM c4m_tournamentteamvsteam WHERE ttvt_tmid=".$tgtmid." AND ttvt_otherteamid=".$TeamsList[$TeamsListcounter]." AND ttvt_status='A'";
-              $return99 = mysql_query($query99, $this->link) or die(mysql_error());
-              $num99 = mysql_numrows($return99);
+              $return99 = mysqli_query($this->link,$query99) or die(mysqli_error($this->link));
+              $num99 = mysqli_num_rows($return99);
 
               if($num9 == 0 && $num99 == 0){
 
                 //Check if we already played the team in current match
                 $query10 = "SELECT * FROM c4m_tournamentteamvsteam WHERE ttvt_tmid=".$tgtmid." AND ttvt_teamid=".$TeamsList[$nCount]." AND ttvt_otherteamid =".$TeamsList[$TeamsListcounter]." AND ttvt_status='C'";
-                $return10 = mysql_query($query10, $this->link) or die(mysql_error());
-                $num10 = mysql_numrows($return10);
+                $return10 = mysqli_query($this->link,$query10) or die(mysqli_error($this->link));
+                $num10 = mysqli_num_rows($return10);
 
                 $query11 = "SELECT * FROM c4m_tournamentteamvsteam WHERE ttvt_tmid=".$tgtmid." AND ttvt_teamid=".$TeamsList[$TeamsListcounter]." AND ttvt_otherteamid =".$TeamsList[$nCount]." AND ttvt_status='C'";
-                $return11 = mysql_query($query11, $this->link) or die(mysql_error());
-                $num11 = mysql_numrows($return11);
+                $return11 = mysqli_query($this->link,$query11) or die(mysqli_error($this->link));
+                $num11 = mysqli_num_rows($return11);
 
                 if($num10 == 0 && $num11 == 0){
 
                   //echo "<br>".$TeamsList[$nCount]." VS ".$TeamsList[$TeamsListcounter]."<br>";
 
                   $insert1 = "INSERT INTO c4m_tournamentteamvsteam VALUES(NULL, $tgtmid, $TeamsList[$nCount], $TeamsList[$TeamsListcounter], 'A')";
-                  mysql_query($insert1, $this->link) or die(mysql_error());
+                  mysqli_query($this->link,$insert1) or die(mysqli_error($this->link));
 
                   //create the games for each team member
                   $query11 = "SELECT * FROM c4m_tournamentteams WHERE tt_teamid=".$TeamsList[$nCount]." AND tt_tournamentid=".$TID;
-                  $return11 = mysql_query($query11, $this->link) or die(mysql_error());
-                  $num11 = mysql_numrows($return11);
+                  $return11 = mysqli_query($this->link,$query11) or die(mysqli_error($this->link));
+                  $num11 = mysqli_num_rows($return11);
 
                   $query12 = "SELECT * FROM c4m_tournamentteams WHERE tt_teamid=".$TeamsList[$TeamsListcounter]." AND tt_tournamentid=".$TID;
-                  $return12 = mysql_query($query12, $this->link) or die(mysql_error());
-                  $num12 = mysql_numrows($return12);
+                  $return12 = mysqli_query($this->link,$query12) or die(mysqli_error($this->link));
+                  $num12 = mysqli_num_rows($return12);
 
                   if($num11 != 0 && $num12 != 0){
 
@@ -8418,9 +8422,9 @@ class CR3DCQuery{
                      $nGroup1Count = 0;
                      while($nGroup1Count < $num11){
 
-                       $tt_teamid = mysql_result($return11, $nGroup1Count,"tt_teamid");
-                       $tt_tournamentid = mysql_result($return11, $nGroup1Count,"tt_tournamentid");
-                       $tt_playerid = mysql_result($return11, $nGroup1Count,"tt_playerid");
+                       $tt_teamid = $this->mysqli_result($return11, $nGroup1Count,"tt_teamid");
+                       $tt_tournamentid = $this->mysqli_result($return11, $nGroup1Count,"tt_tournamentid");
+                       $tt_playerid = $this->mysqli_result($return11, $nGroup1Count,"tt_playerid");
 
                        $wins = 0;
                        $loss = 0;
@@ -8446,9 +8450,9 @@ class CR3DCQuery{
                      $nGroup2Count = 0;
                      while($nGroup2Count < $num12){
 
-                       $tt_teamid = mysql_result($return12, $nGroup2Count,"tt_teamid");
-                       $tt_tournamentid = mysql_result($return12, $nGroup2Count,"tt_tournamentid");
-                       $tt_playerid = mysql_result($return12, $nGroup2Count,"tt_playerid");
+                       $tt_teamid = $this->mysqli_result($return12, $nGroup2Count,"tt_teamid");
+                       $tt_tournamentid = $this->mysqli_result($return12, $nGroup2Count,"tt_tournamentid");
+                       $tt_playerid = $this->mysqli_result($return12, $nGroup2Count,"tt_playerid");
 
                        $wins = 0;
                        $loss = 0;
@@ -8484,10 +8488,10 @@ class CR3DCQuery{
 
 
                        $insertgame = "INSERT INTO game VALUES('".$gameid."', $initiatorid, $initiatorid, $otherid, 'A', 'I', ".$time.", NULL, 1, 1, 1, 1)";
-                       mysql_query($insertgame, $this->link) or die(mysql_error());
+                       mysqli_query($this->link,$insertgame) or die(mysqli_error($this->link));
 
                        $insertgamematch = "INSERT INTO c4m_tournamentgames VALUES(NULL, ".$tgtmid.", '".$gameid."', ".$initiatorid.", ".$otherid.", 'N', 'N', 'I' )";
-                       mysql_query($insertgamematch, $this->link) or die(mysql_error());
+                       mysqli_query($this->link,$insertgamematch) or die(mysqli_error($this->link));
 
                        //echo $PlayerPoints1[$nLoopCount]['PlayerID']." VS ".$PlayerPoints2[$nLoopCount]['PlayerID']." -- ".$gameid."<br>";
 
@@ -8543,7 +8547,7 @@ class CR3DCQuery{
       }
 
       $update = "UPDATE c4m_tournament SET t_status='S' WHERE t_id=".$TID;
-      mysql_query($update, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
     }else{
 
@@ -8551,7 +8555,7 @@ class CR3DCQuery{
 
 
       $update = "UPDATE c4m_tournament SET t_status='C' WHERE t_id=".$TID;
-      mysql_query($update, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$update) or die(mysqli_error($this->link));
     }
 
   }
@@ -8564,21 +8568,21 @@ class CR3DCQuery{
   function GetLeagueBTeams($ConfigFile, $TID){
 
     $query = "SELECT * FROM c4m_tournamentplayers, player WHERE c4m_tournamentplayers.tp_playerid = player.player_id AND c4m_tournamentplayers.tp_tournamentid =".$TID.""; // AND c4m_tournamentplayers.tp_status='A'
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $query1 = "SELECT * FROM c4m_tournament WHERE t_id =".$TID."";
-    $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+    $num1 = mysqli_num_rows($return1);
 
     $PlayerPerGroup = 0;
     if($num1 != 0){
-      $PlayerPerGroup = mysql_result($return1,0,"t_playernum");
+      $PlayerPerGroup = $this->mysqli_result($return1,0,"t_playernum");
     }
 
     $query2 = "SELECT * FROM c4m_tournamentteams_temp WHERE tt_tournamentid =".$TID."";
-    $return2 = mysql_query($query2, $this->link) or die(mysql_error());
-    $num2 = mysql_numrows($return2);
+    $return2 = mysqli_query($this->link,$query2) or die(mysqli_error($this->link));
+    $num2 = mysqli_num_rows($return2);
 
     if($num2 == 0){
 
@@ -8589,12 +8593,12 @@ class CR3DCQuery{
       $i = 0;
       while($i < $num){
 
-        $player_id = trim(mysql_result($return,$i,"player_id"));
-        $userid = trim(mysql_result($return,$i,"userid"));
-        $signup_time  = trim(mysql_result($return,$i,"signup_time"));
-        $email = trim(mysql_result($return,$i,"email"));
+        $player_id = trim($this->mysqli_result($return,$i,"player_id"));
+        $userid = trim($this->mysqli_result($return,$i,"userid"));
+        $signup_time  = trim($this->mysqli_result($return,$i,"signup_time"));
+        $email = trim($this->mysqli_result($return,$i,"email"));
 
-        $tp_status = trim(mysql_result($return,$i,"tp_status"));
+        $tp_status = trim($this->mysqli_result($return,$i,"tp_status"));
 
         if($nGroupSwitch < $PlayerPerGroup){
 
@@ -8602,7 +8606,7 @@ class CR3DCQuery{
             //echo $nGroupNum." ".$userid."<br>";
 
             $insert = "INSERT INTO c4m_tournamentteams_temp VALUES(NULL, $nGroupNum, $TID, $player_id)";
-            mysql_query($insert, $this->link) or die(mysql_error());
+            mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
           }
 
@@ -8614,7 +8618,7 @@ class CR3DCQuery{
             //echo $nGroupNum." ".$userid."<br>";
 
             $insert = "INSERT INTO c4m_tournamentteams_temp VALUES(NULL, $nGroupNum, $TID, $player_id)";
-            mysql_query($insert, $this->link) or die(mysql_error());
+            mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
           }
 
@@ -8629,8 +8633,8 @@ class CR3DCQuery{
 
     // Get group Count
     $query5 = "SELECT DISTINCT tt_teamid FROM c4m_tournamentteams_temp WHERE tt_tournamentid =".$TID;
-    $return5 = mysql_query($query5, $this->link) or die(mysql_error());
-    $num5 = mysql_numrows($return5);
+    $return5 = mysqli_query($this->link,$query5) or die(mysqli_error($this->link));
+    $num5 = mysqli_num_rows($return5);
 
     //Create the team list array
     $TeamsList = array();
@@ -8642,7 +8646,7 @@ class CR3DCQuery{
 
       while($nTtmpCount < $num5){
 
-        $TeamID =  mysql_result($return5, $nTtmpCount,"tt_teamid");
+        $TeamID =  $this->mysqli_result($return5, $nTtmpCount,"tt_teamid");
         $TeamsList[$nTeamCount] = $TeamID;
         $nTeamCount++;
         $nTtmpCount++;
@@ -8652,7 +8656,7 @@ class CR3DCQuery{
     }
 
     $delete = "DELETE FROM c4m_tournamentteams_temp WHERE tt_tournamentid =".$TID;
-    mysql_query($delete, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$delete) or die(mysqli_error($this->link));
 
     return $TeamsList;
 
@@ -8666,38 +8670,38 @@ class CR3DCQuery{
   function UpdatePreviousTournamentgameLB($ConfigFile, $TID){
 
     $query = "SELECT * FROM c4m_tournamentmatches WHERE tm_tournamentid =".$TID." ORDER BY tm_id DESC";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $TMID = 0;
 
     if($num != 0){
 
       //Get the first item from the list (This is the last match)
-      $tm_id = trim(mysql_result($return,0,"tm_id"));
-      $tm_tournamentid = trim(mysql_result($return,0,"tm_tournamentid"));
-      $tm_status = trim(mysql_result($return,0,"tm_status"));
-      $tm_starttime = trim(mysql_result($return,0,"tm_starttime"));
-      $tm_endtime = trim(mysql_result($return,0,"tm_endtime"));
+      $tm_id = trim($this->mysqli_result($return,0,"tm_id"));
+      $tm_tournamentid = trim($this->mysqli_result($return,0,"tm_tournamentid"));
+      $tm_status = trim($this->mysqli_result($return,0,"tm_status"));
+      $tm_starttime = trim($this->mysqli_result($return,0,"tm_starttime"));
+      $tm_endtime = trim($this->mysqli_result($return,0,"tm_endtime"));
 
       //Update the player and game status
       $query1 = "SELECT * FROM c4m_tournamentgames WHERE tg_tmid=".$tm_id." AND tg_status = 'I'";
-      $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-      $num1 = mysql_numrows($return1);
+      $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+      $num1 = mysqli_num_rows($return1);
 
       if($num1 != 0){
 
         $i=0;
         while($i < $num1){
 
-          $tg_id = trim(mysql_result($return1,$i,"tg_id"));
-          $tg_tmid = trim(mysql_result($return1,$i,"tg_tmid"));
-          $tg_gameid = trim(mysql_result($return1,$i,"tg_gameid"));
-          $tg_playerid = trim(mysql_result($return1,$i,"tg_playerid"));
-          $tg_otherplayerid = trim(mysql_result($return1,$i,"tg_otherplayerid"));
-          $tg_playerloggedin = trim(mysql_result($return1,$i,"tg_playerloggedin"));
-          $tg_otherplayerloggedin = trim(mysql_result($return1,$i,"tg_otherplayerloggedin"));
-          $tg_status = trim(mysql_result($return1,$i,"tg_status"));
+          $tg_id = trim($this->mysqli_result($return1,$i,"tg_id"));
+          $tg_tmid = trim($this->mysqli_result($return1,$i,"tg_tmid"));
+          $tg_gameid = trim($this->mysqli_result($return1,$i,"tg_gameid"));
+          $tg_playerid = trim($this->mysqli_result($return1,$i,"tg_playerid"));
+          $tg_otherplayerid = trim($this->mysqli_result($return1,$i,"tg_otherplayerid"));
+          $tg_playerloggedin = trim($this->mysqli_result($return1,$i,"tg_playerloggedin"));
+          $tg_otherplayerloggedin = trim($this->mysqli_result($return1,$i,"tg_otherplayerloggedin"));
+          $tg_status = trim($this->mysqli_result($return1,$i,"tg_status"));
 
           $TMID = $tg_tmid;
 
@@ -8899,12 +8903,12 @@ class CR3DCQuery{
               //check if the white player/ black player has moved
 
               $query2 = "SELECT * FROM move_history WHERE player_id=".$w_player_id." AND game_id ='".$GID."'";
-              $return2 = mysql_query($query2, $this->link) or die(mysql_error());
-              $num2 = mysql_numrows($return2);
+              $return2 = mysqli_query($this->link,$query2) or die(mysqli_error($this->link));
+              $num2 = mysqli_num_rows($return2);
 
               $query3 = "SELECT * FROM move_history WHERE player_id=".$b_player_id." AND game_id ='".$GID."'";
-              $return3 = mysql_query($query3, $this->link) or die(mysql_error());
-              $num3 = mysql_numrows($return3);
+              $return3 = mysqli_query($this->link,$query3) or die(mysqli_error($this->link));
+              $num3 = mysqli_num_rows($return3);
 
               if($num2 == 0 && $num3 != 0){
                 $this->UpdatePlayerPoints($ConfigFile, $tm_tournamentid, $w_player_id, 1, 0);
@@ -9015,11 +9019,11 @@ class CR3DCQuery{
 
         //update tournamentgames status to complete
         $update1 = "UPDATE c4m_tournamentgames SET tg_status='C' WHERE tg_tmid=".$tm_id;
-        mysql_query($update1, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$update1) or die(mysqli_error($this->link));
 
         //update c4m_tournamentteamvsteam status to complete
         $update2 = "UPDATE c4m_tournamentteamvsteam SET ttvt_status='C' WHERE ttvt_tmid=".$tm_id;
-        mysql_query($update2, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$update2) or die(mysqli_error($this->link));
 
       }
 
@@ -9027,8 +9031,8 @@ class CR3DCQuery{
 
       // Get group Count
       $query5 = "SELECT DISTINCT tt_teamid FROM c4m_tournamentteams WHERE tt_tournamentid =".$TID;
-      $return5 = mysql_query($query5, $this->link) or die(mysql_error());
-      $num5 = mysql_numrows($return5);
+      $return5 = mysqli_query($this->link,$query5) or die(mysqli_error($this->link));
+      $num5 = mysqli_num_rows($return5);
 
       //Create the team list array
       $TeamsList = array();
@@ -9040,7 +9044,7 @@ class CR3DCQuery{
         $nTtmpCount = 0;
         while($nTtmpCount < $num5){
 
-          $TeamID =  mysql_result($return5, $nTtmpCount,"tt_teamid");
+          $TeamID =  $this->mysqli_result($return5, $nTtmpCount,"tt_teamid");
 
           $TeamsList[$nTeamCount] = $TeamID;
           $nTeamCount++;
@@ -9063,18 +9067,18 @@ class CR3DCQuery{
 
         //Check if in game
         $query33 = "SELECT * FROM c4m_tournamentteamvsteam WHERE ttvt_tmid=".$tm_id." AND ttvt_teamid=".$TeamsList[$nCount]." AND ttvt_status='A'";
-        $return33 = mysql_query($query33, $this->link) or die(mysql_error());
-        $num33 = mysql_numrows($return33);
+        $return33 = mysqli_query($this->link,$this->link,$query33) or die(mysqli_error($this->link));
+        $num33 = mysqli_num_rows($return33);
 
         $query44 = "SELECT * FROM c4m_tournamentteamvsteam WHERE ttvt_tmid=".$tm_id." AND ttvt_otherteamid=".$TeamsList[$nCount]." AND ttvt_status='A'";
-        $return44 = mysql_query($query44, $this->link) or die(mysql_error());
-        $num44 = mysql_numrows($return44);
+        $return44 = mysqli_query($this->link,$query44) or die(mysqli_error($this->link));
+        $num44 = mysqli_num_rows($return44);
 
         if($num33 == 0 && $num44 == 0){
 
           $query55 = "SELECT * FROM c4m_tournamentteamvsteam WHERE ttvt_tmid=".$tm_id." AND ttvt_teamid=".$TeamsList[$nCount]." AND ttvt_status='C'";
-          $return55 = mysql_query($query55, $this->link) or die(mysql_error());
-          $num55 = mysql_numrows($return55);
+          $return55 = mysqli_query($this->link,$this->link,$query55) or die(mysqli_error($this->link));
+          $num55 = mysqli_num_rows($return55);
 
           $playedTeams = $TeamsList[$nCount];
 
@@ -9087,7 +9091,7 @@ class CR3DCQuery{
               if($playedTeams == ""){
 
               }else{
-                $playedTeams = $playedTeams.",".mysql_result($return55, $countplayed,"ttvt_otherteamid");
+                $playedTeams = $playedTeams.",".$this->mysqli_result($return55, $countplayed,"ttvt_otherteamid");
               }
 
               $countplayed++;
@@ -9105,23 +9109,23 @@ class CR3DCQuery{
               //check if the team is already in a new game
               //echo $TeamsList[$TeamsListcounter]."<br>";
               $query66 = "SELECT * FROM c4m_tournamentteamvsteam WHERE ttvt_tmid=".$tm_id." AND ttvt_teamid=".$TeamsList[$TeamsListcounter]." AND ttvt_status='A'";
-              $return66 = mysql_query($query66, $this->link) or die(mysql_error(). "15465");
-              $num66 = mysql_numrows($return66);
+              $return66 = mysqli_query($this->link,$query66) or die(mysqli_error($this->link). "15465");
+              $num66 = mysqli_num_rows($return66);
 
               $query77 = "SELECT * FROM c4m_tournamentteamvsteam WHERE ttvt_tmid=".$tm_id." AND ttvt_otherteamid=".$TeamsList[$TeamsListcounter]." AND ttvt_status='A'";
-              $return77 = mysql_query($query77, $this->link) or die(mysql_error());
-              $num77 = mysql_numrows($return77);
+              $return77 = mysqli_query($this->link,$query77) or die(mysqli_error($this->link));
+              $num77 = mysqli_num_rows($return77);
 
               if($num66 == 0 && $num77 == 0){
 
                 //Check if we already played the team in current match
                 $query88 = "SELECT * FROM c4m_tournamentteamvsteam WHERE ttvt_tmid=".$tm_id." AND ttvt_teamid=".$TeamsList[$nCount]." AND ttvt_otherteamid =".$TeamsList[$TeamsListcounter]." AND ttvt_status='C'";
-                $return88 = mysql_query($query88, $this->link) or die(mysql_error());
-                $num88 = mysql_numrows($return88);
+                $return88 = mysqli_query($this->link,$query88) or die(mysqli_error($this->link));
+                $num88 = mysqli_num_rows($return88);
 
                 $query99 = "SELECT * FROM c4m_tournamentteamvsteam WHERE ttvt_tmid=".$tm_id." AND ttvt_teamid=".$TeamsList[$TeamsListcounter]." AND ttvt_otherteamid =".$TeamsList[$nCount]." AND ttvt_status='C'";
-                $return99 = mysql_query($query99, $this->link) or die(mysql_error());
-                $num99 = mysql_numrows($return99);
+                $return99 = mysqli_query($this->link,$query99) or die(mysqli_error($this->link));
+                $num99 = mysqli_num_rows($return99);
 
                 if($num88 == 0 && $num99 == 0){
 
@@ -9151,7 +9155,7 @@ class CR3DCQuery{
 
          //set game match to complete
          $update2= "UPDATE c4m_tournamentmatches SET tm_status='C' WHERE tm_id=".$tm_id;
-         $return = mysql_query($update2, $this->link) or die(mysql_error());
+         $return = mysqli_query($this->link,$update2) or die(mysqli_error($this->link));
 
          // remove players
          $nActiveTeams = count($TeamsList);
@@ -9161,8 +9165,8 @@ class CR3DCQuery{
 
            //Get team players
            $query = "SELECT * FROM c4m_tournamentteams WHERE tt_tournamentid=".$TID." AND tt_teamid=".$TeamsList[$nCounter]."";
-           $return = mysql_query($query, $this->link) or die(mysql_error());
-           $num = mysql_numrows($return);
+           $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+           $num = mysqli_num_rows($return);
 
            if($num != 0){
 
@@ -9171,17 +9175,17 @@ class CR3DCQuery{
              $i=0;
              while($i < $num){
 
-               $tt_playerid = mysql_result($return, $i, "tt_playerid");
+               $tt_playerid = $this->mysqli_result($return, $i, "tt_playerid");
 
                $query2 = "SELECT * FROM c4m_tournamentplayerpoints WHERE tpp_playerid=".$tt_playerid." AND tpp_tournamentid=".$TID;
-               $return2 = mysql_query($query2, $this->link) or die(mysql_error());
-               $num2 = mysql_numrows($return2);
+               $return2 = mysqli_query($this->link,$query2) or die(mysqli_error($this->link));
+               $num2 = mysqli_num_rows($return2);
 
                if($num2 != 0){
 
-                 $tpp_id = mysql_result($return2, 0, "tpp_id");
-                 $tpp_wins = mysql_result($return2, 0, "tpp_wins");
-                 $tpp_loss = mysql_result($return2, 0, "tpp_loss");
+                 $tpp_id = $this->mysqli_result($return2, 0, "tpp_id");
+                 $tpp_wins = $this->mysqli_result($return2, 0, "tpp_wins");
+                 $tpp_loss = $this->mysqli_result($return2, 0, "tpp_loss");
 
                  $points = $this->GetPointValue($tpp_wins, $tpp_loss, 0);
                  $this->GetPointRanking($points, $tpp_wins);
@@ -9211,7 +9215,7 @@ class CR3DCQuery{
                }else{
 
                  $update = "UPDATE c4m_tournamentplayers SET tp_status='L' WHERE tp_tournamentid=".$TID." AND tp_playerid=".$TeamPlayerPoints[$i-1]['PID'];
-                 mysql_query($update, $this->link) or die(mysql_error());
+                 mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
                }
 
@@ -9225,11 +9229,11 @@ class CR3DCQuery{
 
          //Remove players from team list
          $update = "DELETE FROM c4m_tournamentteams WHERE tt_tournamentid=".$TID;
-         mysql_query($update, $this->link) or die(mysql_error());
+         mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
          //remove points
          $update = "DELETE FROM c4m_tournamentplayerpoints WHERE tpp_tournamentid=".$TID;
-         mysql_query($update, $this->link) or die(mysql_error());
+         mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
       }
 
@@ -9245,17 +9249,17 @@ class CR3DCQuery{
   function StartTournamentGameRound($ConfigFile, $TID, $TIME){
 
     $query = "SELECT * FROM c4m_tournament WHERE t_id=".$TID;
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $t_type = trim(mysql_result($return,0,"t_type"));
+      $t_type = trim($this->mysqli_result($return,0,"t_type"));
 
       //Update previous game rounds/remove loosing players
       $query1 = "SELECT * FROM c4m_tournamentmatches WHERE tm_tournamentid=".$TID;
-      $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-      $num1 = mysql_numrows($return1);
+      $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+      $num1 = mysqli_num_rows($return1);
 
       if($num1 != 0){
 
@@ -9320,36 +9324,36 @@ class CR3DCQuery{
   function UpdatePreviousTournamentgameRR($ConfigFile, $TID){
 
     $query = "SELECT * FROM c4m_tournamentmatches WHERE tm_tournamentid =".$TID." ORDER BY tm_id DESC";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       //Get the first item from the list (This is the last match)
-      $tm_id = trim(mysql_result($return,0,"tm_id"));
-      $tm_tournamentid = trim(mysql_result($return,0,"tm_tournamentid"));
-      $tm_status = trim(mysql_result($return,0,"tm_status"));
-      $tm_starttime = trim(mysql_result($return,0,"tm_starttime"));
-      $tm_endtime = trim(mysql_result($return,0,"tm_endtime"));
+      $tm_id = trim($this->mysqli_result($return,0,"tm_id"));
+      $tm_tournamentid = trim($this->mysqli_result($return,0,"tm_tournamentid"));
+      $tm_status = trim($this->mysqli_result($return,0,"tm_status"));
+      $tm_starttime = trim($this->mysqli_result($return,0,"tm_starttime"));
+      $tm_endtime = trim($this->mysqli_result($return,0,"tm_endtime"));
 
       //Update the player and game status
       $query1 = "SELECT * FROM c4m_tournamentgames WHERE tg_tmid=".$tm_id;
-      $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-      $num1 = mysql_numrows($return1);
+      $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+      $num1 = mysqli_num_rows($return1);
 
       if($num1 != 0){
 
         $i=0;
         while($i < $num1){
 
-          $tg_id = trim(mysql_result($return1,$i,"tg_id"));
-          $tg_tmid = trim(mysql_result($return1,$i,"tg_tmid"));
-          $tg_gameid = trim(mysql_result($return1,$i,"tg_gameid"));
-          $tg_playerid = trim(mysql_result($return1,$i,"tg_playerid"));
-          $tg_otherplayerid = trim(mysql_result($return1,$i,"tg_otherplayerid"));
-          $tg_playerloggedin = trim(mysql_result($return1,$i,"tg_playerloggedin"));
-          $tg_otherplayerloggedin = trim(mysql_result($return1,$i,"tg_otherplayerloggedin"));
-          $tg_status = trim(mysql_result($return1,$i,"tg_status"));
+          $tg_id = trim($this->mysqli_result($return1,$i,"tg_id"));
+          $tg_tmid = trim($this->mysqli_result($return1,$i,"tg_tmid"));
+          $tg_gameid = trim($this->mysqli_result($return1,$i,"tg_gameid"));
+          $tg_playerid = trim($this->mysqli_result($return1,$i,"tg_playerid"));
+          $tg_otherplayerid = trim($this->mysqli_result($return1,$i,"tg_otherplayerid"));
+          $tg_playerloggedin = trim($this->mysqli_result($return1,$i,"tg_playerloggedin"));
+          $tg_otherplayerloggedin = trim($this->mysqli_result($return1,$i,"tg_otherplayerloggedin"));
+          $tg_status = trim($this->mysqli_result($return1,$i,"tg_status"));
 
           //Check if the players logged in for the game
           $initiator = "";
@@ -9542,12 +9546,12 @@ class CR3DCQuery{
               //check if the white player/ black player has moved
 
               $query2 = "SELECT * FROM move_history WHERE player_id=".$w_player_id." AND game_id ='".$GID."'";
-              $return2 = mysql_query($query2, $this->link) or die(mysql_error());
-              $num2 = mysql_numrows($return2);
+              $return2 = mysqli_query($this->link,$query2) or die(mysqli_error($this->link));
+              $num2 = mysqli_num_rows($return2);
 
               $query3 = "SELECT * FROM move_history WHERE player_id=".$b_player_id." AND game_id ='".$GID."'";
-              $return3 = mysql_query($query3, $this->link) or die(mysql_error());
-              $num3 = mysql_numrows($return3);
+              $return3 = mysqli_query($this->link,$query3) or die(mysqli_error($this->link));
+              $num3 = mysqli_num_rows($return3);
 
               if($num2 == 0 && $num3 != 0){
                 $this->UpdateTournamentPlayerStatus($ConfigFile, $tm_tournamentid, $w_player_id, "L");
@@ -9652,12 +9656,12 @@ class CR3DCQuery{
 
         //update tournamentgames status to complete
         $update1 = "UPDATE c4m_tournamentgames SET tg_status='C' WHERE tg_tmid=".$tm_id;
-        mysql_query($update1, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$update1) or die(mysqli_error($this->link));
 
       }
 
       $update2= "UPDATE c4m_tournamentmatches SET tm_status='C' WHERE tm_id=".$tm_id;
-      $return = mysql_query($update2, $this->link) or die(mysql_error());
+      $return = mysqli_query($this->link,$update2) or die(mysqli_error($this->link));
 
     }
 
@@ -9671,7 +9675,7 @@ class CR3DCQuery{
   function UpdateTournamentPlayerStatus($ConfigFile, $TID, $PID, $status){
 
     $update = "UPDATE c4m_tournamentplayers SET tp_status='".$status."' WHERE tp_tournamentid=".$TID." AND tp_playerid=".$PID;
-    mysql_query($update, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
   }
 
@@ -9683,7 +9687,7 @@ class CR3DCQuery{
   function UpdateGameStatus($ConfigFile, $GID, $status, $completion_status){
 
     $update = "UPDATE game SET status='".$status."', completion_status='".$completion_status."' WHERE game_id='".$GID."'";
-    mysql_query($update, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
   }
 
@@ -9695,19 +9699,19 @@ class CR3DCQuery{
   function GetGameInfoByRef($ConfigFile, $GID, &$initiator, &$w_player_id, &$b_player_id, &$status, &$completion_status, &$start_time, &$next_move){
 
     $query = "SELECT * FROM game WHERE game_id='".$GID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $game_id = trim(mysql_result($return,0,"game_id"));
-      $initiator = trim(mysql_result($return,0,"initiator"));
-      $w_player_id = trim(mysql_result($return,0,"w_player_id"));
-      $b_player_id = trim(mysql_result($return,0,"b_player_id"));
-      $status = trim(mysql_result($return,0,"status"));
-      $completion_status = trim(mysql_result($return,0,"completion_status"));
-      $start_time = trim(mysql_result($return,0,"start_time"));
-      $next_move = trim(mysql_result($return,0,"next_move"));
+      $game_id = trim($this->mysqli_result($return,0,"game_id"));
+      $initiator = trim($this->mysqli_result($return,0,"initiator"));
+      $w_player_id = trim($this->mysqli_result($return,0,"w_player_id"));
+      $b_player_id = trim($this->mysqli_result($return,0,"b_player_id"));
+      $status = trim($this->mysqli_result($return,0,"status"));
+      $completion_status = trim($this->mysqli_result($return,0,"completion_status"));
+      $start_time = trim($this->mysqli_result($return,0,"start_time"));
+      $next_move = trim($this->mysqli_result($return,0,"next_move"));
 
     }
 
@@ -9717,9 +9721,9 @@ class CR3DCQuery{
   function GetGameInfo($gameid)
   {
 	$query = "SELECT * FROM `game` WHERE `game_id` = '$gameid'";
-	$result = mysql_query($query, $this->link) or die(mysql_error());
-	if(mysql_numrows($result) != 0)
-		return mysql_fetch_assoc($result);
+	$result = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+	if(mysqli_num_rows($result) != 0)
+		return mysqli_fetch_assoc($result);
 	return FALSE;
   }
 
@@ -9731,7 +9735,7 @@ class CR3DCQuery{
   function AcceptTournamentproposal($ConfigFile, $TID){
 
     $update = "UPDATE c4m_tournament SET t_status='A' WHERE t_id=".$TID;
-    mysql_query($update, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
   }
 
@@ -9743,7 +9747,7 @@ class CR3DCQuery{
   function RevokeTournamentproposal($ConfigFile, $TID){
 
     $update = "UPDATE c4m_tournament SET t_status='R' WHERE t_id=".$TID;
-    mysql_query($update, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
   }
 
@@ -9755,8 +9759,8 @@ class CR3DCQuery{
   function GetAcceptedTournamentProposal($ConfigFile){
 
     $query = "SELECT * FROM c4m_tournament WHERE t_status='A'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     echo "<br>";
     echo "<table width='95%' cellpadding='0' cellspacing='0' border='0' align='center'>";
@@ -9765,14 +9769,14 @@ class CR3DCQuery{
 
       $i = 0;
       while($i < $num){
-        $t_id = trim(mysql_result($return, $i, "t_id"));
-        $t_name = trim(mysql_result($return, $i, "t_name"));
-        $t_type = trim(mysql_result($return, $i, "t_type"));
-        $t_playernum = trim(mysql_result($return, $i, "t_playernum"));
-        $t_cutoffdate = trim(mysql_result($return, $i, "t_cutoffdate"));
-        $t_startdate = trim(mysql_result($return, $i, "t_startdate"));
-        $t_comment = trim(mysql_result($return, $i, "t_comment"));
-        $t_status = trim(mysql_result($return, $i, "t_status"));
+        $t_id = trim($this->mysqli_result($return, $i, "t_id"));
+        $t_name = trim($this->mysqli_result($return, $i, "t_name"));
+        $t_type = trim($this->mysqli_result($return, $i, "t_type"));
+        $t_playernum = trim($this->mysqli_result($return, $i, "t_playernum"));
+        $t_cutoffdate = trim($this->mysqli_result($return, $i, "t_cutoffdate"));
+        $t_startdate = trim($this->mysqli_result($return, $i, "t_startdate"));
+        $t_comment = trim($this->mysqli_result($return, $i, "t_comment"));
+        $t_status = trim($this->mysqli_result($return, $i, "t_status"));
 
         echo "<tr><td><a href='./admin_view_proposal.php?tid=".$t_id."'>".$t_name."</a></td></tr>";
 
@@ -9794,8 +9798,8 @@ class CR3DCQuery{
   function GetStartedTournamentProposal($ConfigFile){
 
     $query = "SELECT * FROM c4m_tournament WHERE t_status='S'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     echo "<br>";
     echo "<table width='95%' cellpadding='0' cellspacing='0' border='0' align='center'>";
@@ -9804,14 +9808,14 @@ class CR3DCQuery{
 
       $i = 0;
       while($i < $num){
-        $t_id = trim(mysql_result($return, $i, "t_id"));
-        $t_name = trim(mysql_result($return, $i, "t_name"));
-        $t_type = trim(mysql_result($return, $i, "t_type"));
-        $t_playernum = trim(mysql_result($return, $i, "t_playernum"));
-        $t_cutoffdate = trim(mysql_result($return, $i, "t_cutoffdate"));
-        $t_startdate = trim(mysql_result($return, $i, "t_startdate"));
-        $t_comment = trim(mysql_result($return, $i, "t_comment"));
-        $t_status = trim(mysql_result($return, $i, "t_status"));
+        $t_id = trim($this->mysqli_result($return, $i, "t_id"));
+        $t_name = trim($this->mysqli_result($return, $i, "t_name"));
+        $t_type = trim($this->mysqli_result($return, $i, "t_type"));
+        $t_playernum = trim($this->mysqli_result($return, $i, "t_playernum"));
+        $t_cutoffdate = trim($this->mysqli_result($return, $i, "t_cutoffdate"));
+        $t_startdate = trim($this->mysqli_result($return, $i, "t_startdate"));
+        $t_comment = trim($this->mysqli_result($return, $i, "t_comment"));
+        $t_status = trim($this->mysqli_result($return, $i, "t_status"));
 
         echo "<tr><td><a href='./admin_view_proposal.php?tid=".$t_id."'>".$t_name."</a></td></tr>";
 
@@ -9847,8 +9851,8 @@ class CR3DCQuery{
         break;
     }
 
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     // Skin table settings
     if(defined('CFG_GETCLIENTTOURNAMENTLIST_TABLE1_WIDTH') && defined('CFG_GETCLIENTTOURNAMENTLIST_TABLE1_BORDER') && defined('CFG_GETCLIENTTOURNAMENTLIST_TABLE1_CELLPADDING') && defined('CFG_GETCLIENTTOURNAMENTLIST_TABLE1_CELLSPACING') && defined('CFG_GETCLIENTTOURNAMENTLIST_TABLE1_ALIGN')){
@@ -9865,14 +9869,14 @@ class CR3DCQuery{
       $i=0;
       while($i < $num){
 
-        $t_id = trim(mysql_result($return,$i,"t_id"));
-        $t_name = trim(mysql_result($return,$i,"t_name"));
-        $t_type = trim(mysql_result($return,$i,"t_type"));
-        $t_playernum = trim(mysql_result($return,$i,"t_playernum"));
-        $t_cutoffdate = trim(mysql_result($return,$i,"t_cutoffdate"));
-        $t_startdate = trim(mysql_result($return,$i,"t_startdate"));
-        $t_comment = trim(mysql_result($return,$i,"t_comment"));
-        $t_status = trim(mysql_result($return,$i,"t_status"));
+        $t_id = trim($this->mysqli_result($return,$i,"t_id"));
+        $t_name = trim($this->mysqli_result($return,$i,"t_name"));
+        $t_type = trim($this->mysqli_result($return,$i,"t_type"));
+        $t_playernum = trim($this->mysqli_result($return,$i,"t_playernum"));
+        $t_cutoffdate = trim($this->mysqli_result($return,$i,"t_cutoffdate"));
+        $t_startdate = trim($this->mysqli_result($return,$i,"t_startdate"));
+        $t_comment = trim($this->mysqli_result($return,$i,"t_comment"));
+        $t_status = trim($this->mysqli_result($return,$i,"t_status"));
 
         echo "<tr><td class='row2'><a href='./chess_tournament_status.php?tid=".$t_id."'>".$t_name."</a></td>";
         echo "<td class='row2'>";
@@ -9927,19 +9931,19 @@ class CR3DCQuery{
   function ViewTournamentGameStatus($ConfigFile, $TID, $PID){
 
     $query = "SELECT * FROM c4m_tournament WHERE t_id=".$TID;
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $t_id = trim(mysql_result($return,0,"t_id"));
-      $t_name = trim(mysql_result($return,0,"t_name"));
-      $t_type = trim(mysql_result($return,0,"t_type"));
-      $t_playernum = trim(mysql_result($return,0,"t_playernum"));
-      $t_cutoffdate = trim(mysql_result($return,0,"t_cutoffdate"));
-      $t_startdate = trim(mysql_result($return,0,"t_startdate"));
-      $t_comment = trim(mysql_result($return,0,"t_comment"));
-      $t_status = trim(mysql_result($return,0,"t_status"));
+      $t_id = trim($this->mysqli_result($return,0,"t_id"));
+      $t_name = trim($this->mysqli_result($return,0,"t_name"));
+      $t_type = trim($this->mysqli_result($return,0,"t_type"));
+      $t_playernum = trim($this->mysqli_result($return,0,"t_playernum"));
+      $t_cutoffdate = trim($this->mysqli_result($return,0,"t_cutoffdate"));
+      $t_startdate = trim($this->mysqli_result($return,0,"t_startdate"));
+      $t_comment = trim($this->mysqli_result($return,0,"t_comment"));
+      $t_status = trim($this->mysqli_result($return,0,"t_status"));
 
       echo "<table border='0' align='center' class='forumline' cellpadding='3' cellspacing='1' width='500'>";
       echo "<tr><td colspan='2' class='tableheadercolor'><b><font class='sitemenuheader'>".$t_name."</font><b></td></tr>";
@@ -9970,8 +9974,8 @@ class CR3DCQuery{
       echo "</table><br>";
 
       $query1 = "SELECT * FROM c4m_tournamentmatches WHERE tm_tournamentid=".$TID." ORDER BY tm_id ASC";
-      $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-      $num1 = mysql_numrows($return1);
+      $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+      $num1 = mysqli_num_rows($return1);
 
       if($num1 !=0){
 
@@ -9982,11 +9986,11 @@ class CR3DCQuery{
         $i=0;
         while($i < $num1){
 
-          $tm_id = trim(mysql_result($return1,$i,"tm_id"));
-          $tm_tournamentid = trim(mysql_result($return1,$i,"tm_tournamentid"));
-          $tm_status = trim(mysql_result($return1,$i,"tm_status"));
-          $tm_starttime = trim(mysql_result($return1,$i,"tm_starttime"));
-          $tm_endtime = trim(mysql_result($return1,$i,"tm_endtime"));
+          $tm_id = trim($this->mysqli_result($return1,$i,"tm_id"));
+          $tm_tournamentid = trim($this->mysqli_result($return1,$i,"tm_tournamentid"));
+          $tm_status = trim($this->mysqli_result($return1,$i,"tm_status"));
+          $tm_starttime = trim($this->mysqli_result($return1,$i,"tm_starttime"));
+          $tm_endtime = trim($this->mysqli_result($return1,$i,"tm_endtime"));
 
           echo "<table border='0' align='center' class='forumline' cellpadding='3' cellspacing='1' width='97%'>";
           echo "<tr><tdclass='tableheadercolor'><b><font class='sitemenuheader'>".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_123")."".($i+1)."</font><b></td></tr>";
@@ -10011,8 +10015,8 @@ class CR3DCQuery{
 
           //Get the games
           $query2 = "SELECT * FROM c4m_tournamentgames WHERE tg_tmid=".$tm_id." ORDER BY tg_id ASC";
-          $return2 = mysql_query($query2, $this->link) or die(mysql_error());
-          $num2 = mysql_numrows($return2);
+          $return2 = mysqli_query($this->link,$query2) or die(mysqli_error($this->link));
+          $num2 = mysqli_num_rows($return2);
 
           if($num2 !=0){
             echo "<table border='0' align='center' cellpadding='3' cellspacing='1' width='100%'>";
@@ -10021,14 +10025,14 @@ class CR3DCQuery{
             $ii=0;
             while($ii < $num2){
 
-              $tg_id = trim(mysql_result($return2,$ii,"tg_id"));
-              $tg_tmid = trim(mysql_result($return2,$ii,"tg_tmid"));
-              $tg_gameid = trim(mysql_result($return2,$ii,"tg_gameid"));
-              $tg_playerid = trim(mysql_result($return2,$ii,"tg_playerid"));
-              $tg_otherplayerid = trim(mysql_result($return2,$ii,"tg_otherplayerid"));
-              $tg_playerloggedin = trim(mysql_result($return2,$ii,"tg_playerloggedin"));
-              $tg_otherplayerloggedin = trim(mysql_result($return2,$ii,"tg_otherplayerloggedin"));
-              $tg_status = trim(mysql_result($return2,$ii,"tg_status"));
+              $tg_id = trim($this->mysqli_result($return2,$ii,"tg_id"));
+              $tg_tmid = trim($this->mysqli_result($return2,$ii,"tg_tmid"));
+              $tg_gameid = trim($this->mysqli_result($return2,$ii,"tg_gameid"));
+              $tg_playerid = trim($this->mysqli_result($return2,$ii,"tg_playerid"));
+              $tg_otherplayerid = trim($this->mysqli_result($return2,$ii,"tg_otherplayerid"));
+              $tg_playerloggedin = trim($this->mysqli_result($return2,$ii,"tg_playerloggedin"));
+              $tg_otherplayerloggedin = trim($this->mysqli_result($return2,$ii,"tg_otherplayerloggedin"));
+              $tg_status = trim($this->mysqli_result($return2,$ii,"tg_status"));
 
               echo "<tr><td class='row1'>";
 
@@ -10070,8 +10074,8 @@ class CR3DCQuery{
 
         //Get the winner list
         $query3 = "SELECT * FROM c4m_tournamentmatches WHERE tm_tournamentid=".$TID." AND tm_status='C' ORDER BY tm_id ASC";
-        $return3 = mysql_query($query3, $this->link) or die(mysql_error());
-        $num3 = mysql_numrows($return3);
+        $return3 = mysqli_query($this->link,$query3) or die(mysqli_error($this->link));
+        $num3 = mysqli_num_rows($return3);
 
         if($num1 == $num3){
 
@@ -10080,14 +10084,14 @@ class CR3DCQuery{
           echo "<tr><td class='row2'>";
 
           $query4 = "SELECT * FROM c4m_tournamentplayers WHERE tp_tournamentid=".$TID." AND tp_status='A'";
-          $return4 = mysql_query($query4, $this->link) or die(mysql_error());
-          $num4 = mysql_numrows($return4);
+          $return4 = mysqli_query($this->link,$query4) or die(mysqli_error($this->link));
+          $num4 = mysqli_num_rows($return4);
 
           if($num4 !=0){
 
             $iii=0;
             while($iii < $num4){
-              $tp_playerid = mysql_result($return4,$iii,"tp_playerid");
+              $tp_playerid = $this->mysqli_result($return4,$iii,"tp_playerid");
 
               echo "<img src='./skins/".$this->SkinsLocation."/images/winner.gif' align='middle'> ".$this->GetUserIDByPlayerID($ConfigFile, $tp_playerid)."<br>";
 
@@ -10123,23 +10127,23 @@ class CR3DCQuery{
   function ViewTournamentGamePlayers($ConfigFile, $TID){
 
     $query = "SELECT * FROM c4m_tournament WHERE t_id=".$TID;
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $t_id = trim(mysql_result($return,0,"t_id"));
-      $t_name = trim(mysql_result($return,0,"t_name"));
-      $t_type = trim(mysql_result($return,0,"t_type"));
-      $t_playernum = trim(mysql_result($return,0,"t_playernum"));
-      $t_cutoffdate = trim(mysql_result($return,0,"t_cutoffdate"));
-      $t_startdate = trim(mysql_result($return,0,"t_startdate"));
-      $t_comment = trim(mysql_result($return,0,"t_comment"));
-      $t_status = trim(mysql_result($return,0,"t_status"));
+      $t_id = trim($this->mysqli_result($return,0,"t_id"));
+      $t_name = trim($this->mysqli_result($return,0,"t_name"));
+      $t_type = trim($this->mysqli_result($return,0,"t_type"));
+      $t_playernum = trim($this->mysqli_result($return,0,"t_playernum"));
+      $t_cutoffdate = trim($this->mysqli_result($return,0,"t_cutoffdate"));
+      $t_startdate = trim($this->mysqli_result($return,0,"t_startdate"));
+      $t_comment = trim($this->mysqli_result($return,0,"t_comment"));
+      $t_status = trim($this->mysqli_result($return,0,"t_status"));
 
       $query1 = "SELECT * FROM c4m_tournamentplayers WHERE tp_tournamentid=".$TID;
-      $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-      $num1 = mysql_numrows($return1);
+      $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+      $num1 = mysqli_num_rows($return1);
 
       if($num1 != 0){
 
@@ -10155,8 +10159,8 @@ class CR3DCQuery{
             echo "<tr><td class='row1' colspan='3'>".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_96")."".$ngroupcount."</td></tr>";
 
             while($nswitch < $npcount && $ncount < $num1){
-              $tp_playerid = trim(mysql_result($return1, $ncount, "tp_playerid"));
-              $tp_status = trim(mysql_result($return1, $ncount, "tp_status"));
+              $tp_playerid = trim($this->mysqli_result($return1, $ncount, "tp_playerid"));
+              $tp_status = trim($this->mysqli_result($return1, $ncount, "tp_status"));
 
               echo "<tr><td class='row2'>".$this->GetUserIDByPlayerID($ConfigFile, $tp_playerid)."</td>";
               echo "<td class='row2' >";
@@ -10207,8 +10211,8 @@ class CR3DCQuery{
           echo "<tr><td class='row1' colspan='3'>".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_100")."</td></tr>";
 
           while($ncount < $num1){
-            $tp_playerid = trim(mysql_result($return1, $ncount, "tp_playerid"));
-            $tp_status = trim(mysql_result($return1, $ncount, "tp_status"));
+            $tp_playerid = trim($this->mysqli_result($return1, $ncount, "tp_playerid"));
+            $tp_status = trim($this->mysqli_result($return1, $ncount, "tp_status"));
 
             echo "<tr><td class='row2'>".$this->GetUserIDByPlayerID($ConfigFile, $tp_playerid)."</td>";
             echo "<td class='row2' width='300'>";
@@ -10295,7 +10299,7 @@ class CR3DCQuery{
 
     $message = rawurlencode($message);
     $insert = "INSERT INTO c4m_tournamentgamechat VALUES(NULL, '".$GameID."', '".$message."', NOW())";
-    mysql_query($insert, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
   }
 
@@ -10307,15 +10311,15 @@ class CR3DCQuery{
   function GetTChat($ConfigFile, $GameID){
 
     $query = "SELECT * FROM c4m_tournamentgamechat WHERE tgc_gameid='".$GameID."' ORDER BY tgc_date DESC";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i=0;
       while($i < $num){
 
-        $Message = $this->FilterChatText(mysql_result($return, $i, "tgc_message"));
+        $Message = $this->FilterChatText($this->mysqli_result($return, $i, "tgc_message"));
 	$Message = rawurldecode($Message);
         echo $Message."\n\n";
 
@@ -10334,8 +10338,8 @@ class CR3DCQuery{
   function GetTGCanPlay($ConfigFile, $GameID, $playerID){
 
     $query = "SELECT * FROM game WHERE game_id='".$GameID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $bCanPlay = 0;
 
@@ -10343,16 +10347,16 @@ class CR3DCQuery{
 
       //Check if the user can play
       $query1 = "SELECT * FROM game WHERE game_id='".$GameID."' AND w_player_id=".$playerID;
-      $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-      $num1 = mysql_numrows($return1);
+      $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+      $num1 = mysqli_num_rows($return1);
 
       if($num1 != 0){
         $bCanPlay = 1;
       }
 
       $query2 = "SELECT * FROM game WHERE game_id='".$GameID."' AND b_player_id=".$playerID;
-      $return2 = mysql_query($query2, $this->link) or die(mysql_error());
-      $num2 = mysql_numrows($return2);
+      $return2 = mysqli_query($this->link,$query2) or die(mysqli_error($this->link));
+      $num2 = mysqli_num_rows($return2);
 
       if($num2 != 0){
         $bCanPlay = 1;
@@ -10372,22 +10376,22 @@ class CR3DCQuery{
   function PlayerLoginForTGame($ConfigFile, $GameID, $playerID){
 
     $query = "SELECT * FROM c4m_tournamentgames WHERE tg_gameid='".$GameID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $tg_playerid = mysql_result($return, 0, "tg_playerid");
-      $tg_otherplayerid = mysql_result($return, 0, "tg_otherplayerid");
+      $tg_playerid = $this->mysqli_result($return, 0, "tg_playerid");
+      $tg_otherplayerid = $this->mysqli_result($return, 0, "tg_otherplayerid");
 
       if($playerID == $tg_playerid){
         $update = "UPDATE c4m_tournamentgames SET tg_playerloggedin='Y' WHERE tg_gameid='".$GameID."'";
-        mysql_query($update, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$update) or die(mysqli_error($this->link));
       }
 
       if($playerID == $tg_otherplayerid){
         $update = "UPDATE c4m_tournamentgames SET tg_otherplayerloggedin='Y' WHERE tg_gameid='".$GameID."'";
-        mysql_query($update, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$update) or die(mysqli_error($this->link));
       }
 
     }
@@ -10402,18 +10406,18 @@ class CR3DCQuery{
   function TimeForTGame($ConfigFile, $GameID){
 
     $query = "SELECT * FROM c4m_tournamentgames WHERE tg_gameid='".$GameID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $bTimeToPlay = false;
 
     if($num != 0){
 
-      $tg_tmid = mysql_result($return, 0, "tg_tmid");
+      $tg_tmid = $this->mysqli_result($return, 0, "tg_tmid");
 
       $query1 = "SELECT * FROM c4m_tournamentmatches WHERE tm_id=".$tg_tmid." AND tm_starttime <= NOW() AND tm_endtime >= NOW()";
-      $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-      $num1 = mysql_numrows($return1);
+      $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+      $num1 = mysqli_num_rows($return1);
 
       if($num1 != 0){
 
@@ -10435,15 +10439,15 @@ class CR3DCQuery{
   function RetrievedLostPass($ConfigFile, $UName, $Email){
 
     $query = "SELECT * FROM player WHERE userid='".$UName."' AND email='".$Email."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
     $conf = $this->conf;
 
-      $email = mysql_result($return, 0, email);
-      $password = mysql_result($return, 0, password);
+      $email = $this->mysqli_result($return, 0, email);
+      $password = $this->mysqli_result($return, 0, password);
 
       $aTags1 = array("['UName']", "['password']", "['siteurl']", "['sitename']");
       $aReplaceTags = array($UName, $password, $this->TrimRSlash($conf['site_url']), $conf['site_name']);
@@ -10464,19 +10468,19 @@ class CR3DCQuery{
   function ResetPassword($ConfigFile, $UName, $Email){
 
     $query = "SELECT * FROM player WHERE userid='".$UName."' AND email='".$Email."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
     $conf = $this->conf;
 
-      $email = mysql_result($return, 0, email);
+      $email = $this->mysqli_result($return, 0, email);
       $password = $this->gen_unique();
 	  $hash = $this->hash_password($password);
 	  $query = "UPDATE player SET password='$hash' WHERE userid='$UName'";
 	  //echo $query;
-	  if(!mysql_query($query))
+	  if(!mysqli_query($this->link,$query))
 		die("Unable to reset password. DB Error.");
 
       $aTags1 = array("['UName']", "['password']", "['siteurl']", "['sitename']");
@@ -10527,23 +10531,23 @@ class CR3DCQuery{
   function SavePersonalInformation($ConfigFile, $RealName, $Location, $Age, $SelfRating, $Comment, $ChessPlayer, $EmailAddress, $PID){
 
     $query = "SELECT * FROM c4m_personalinfo WHERE p_playerid=".$PID."";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $UPDATE = "UPDATE c4m_personalinfo SET p_fullname='".$RealName."', p_location='".$Location."', p_age='".$Age."', p_selfrating='".$SelfRating."', p_commentmotto='".$Comment."', p_favouritechessplayer='".$ChessPlayer."' WHERE p_playerid=".$PID."";
-      mysql_query($UPDATE, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
       if($EmailAddress != ""){
         $update = "UPDATE player SET email='".$EmailAddress."' WHERE player_id='".$PID."'";
-        mysql_query($update, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$update) or die(mysqli_error($this->link));
       }
 
     }else{
 
       $INSERT = "INSERT INTO c4m_personalinfo VALUES(".$PID.", '".$RealName."', '".$Location."', '".$Age."', '".$SelfRating."', '".$Comment."', '".$ChessPlayer."')";
-      mysql_query($INSERT, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
     }
 
@@ -10557,17 +10561,17 @@ class CR3DCQuery{
   function GetPersonalInformation($ConfigFile, &$RealName, &$Location, &$Age, &$SelfRating, &$Comment, &$ChessPlayer, $PID){
 
     $query = "SELECT * FROM c4m_personalinfo WHERE p_playerid=".$PID."";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $RealName = mysql_result($return, 0, "p_fullname");
-      $Location = mysql_result($return, 0, "p_location");
-      $Age = mysql_result($return, 0, "p_age");
-      $SelfRating = mysql_result($return, 0, "p_selfrating");
-      $Comment = mysql_result($return, 0, "p_commentmotto");
-      $ChessPlayer = mysql_result($return, 0, "p_favouritechessplayer");
+      $RealName = $this->mysqli_result($return, 0, "p_fullname");
+      $Location = $this->mysqli_result($return, 0, "p_location");
+      $Age = $this->mysqli_result($return, 0, "p_age");
+      $SelfRating = $this->mysqli_result($return, 0, "p_selfrating");
+      $Comment = $this->mysqli_result($return, 0, "p_commentmotto");
+      $ChessPlayer = $this->mysqli_result($return, 0, "p_favouritechessplayer");
 
     }
 
@@ -10581,18 +10585,18 @@ class CR3DCQuery{
   function SaveNotification($ConfigFile, $move, $challange, $PID){
 
     $query = "SELECT * FROM c4m_notification WHERE p_playerid=".$PID."";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $UPDATE = "UPDATE c4m_notification SET p_move='".$move."', p_challange='".$challange."' WHERE p_playerid=".$PID."";
-      mysql_query($UPDATE, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
     }else{
 
       $INSERT = "INSERT INTO c4m_notification VALUES(".$PID.", '".$move."', '".$challange."')";
-      mysql_query($INSERT, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
     }
 
@@ -10606,13 +10610,13 @@ class CR3DCQuery{
   function GetNotification($ConfigFile, &$move, &$challange, $PID){
 
     $query = "SELECT * FROM c4m_notification WHERE p_playerid=".$PID."";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $move = mysql_result($return, 0, "p_move");
-      $challange = mysql_result($return, 0, "p_challange");
+      $move = $this->mysqli_result($return, 0, "p_move");
+      $challange = $this->mysqli_result($return, 0, "p_challange");
 
     }else{
 
@@ -10631,10 +10635,10 @@ class CR3DCQuery{
   function RevokeDrawGame($ConfigFile, $gid, $PID){
 
 	$query = "UPDATE `game` SET `draw_requests` = NULL WHERE `game_id` = '$gid'";
-	mysql_query($query, $this->link) or die(mysql_error());
+	mysqli_query($this->link,$query) or die(mysqli_error($this->link));
   
     //$delete = "DELETE FROM c4m_gamedraws WHERE tm_gameid='".$gid."'";
-    //mysql_query($delete, $this->link) or die(mysql_error());
+    //mysqli_query($this->link,$delete) or die(mysqli_error($this->link));
 
     $conf = $this->conf;
 
@@ -10697,13 +10701,13 @@ class CR3DCQuery{
 	
     // // Check if game draw record exists in db
     // $query = "SELECT * FROM c4m_gamedraws WHERE tm_gameid='".$gid."'";
-    // $return = mysql_query($query, $this->link) or die(mysql_error());
-    // $num = mysql_numrows($return);
+    // $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    // $num = mysqli_num_rows($return);
 
     // if($num == 0){
 
       // $insert = "INSERT INTO c4m_gamedraws VALUES('".$gid."', 0, 0)";
-      // mysql_query($insert, $this->link) or die(mysql_error());
+      // mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
     // }
 
@@ -10757,17 +10761,17 @@ class CR3DCQuery{
 		}
     }
 
-    mysql_query($update, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
     // Set the game to draw if both parties consent
     // $query = "SELECT * FROM c4m_gamedraws WHERE tm_gameid='".$gid."'";
-    // $return = mysql_query($query, $this->link) or die(mysql_error());
-    // $num = mysql_numrows($return);
+    // $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    // $num = mysqli_num_rows($return);
 
     //if($num != 0){
 
-      // $black = mysql_result($return,0,"tm_b");
-      // $white = mysql_result($return,0,"tm_w");
+      // $black = $this->mysqli_result($return,0,"tm_b");
+      // $white = $this->mysqli_result($return,0,"tm_w");
 
       // if($black == 1 && $white == 1){
 	  if($draw_requests == 'both')
@@ -10793,7 +10797,7 @@ class CR3DCQuery{
 
         //$this->UpdateGameStatus($ConfigFile, $gid, "C", "D");
 		$update = "UPDATE `game` SET `status` = 'C', `completion_status` = 'D' WHERE `game_id` = '$gid'";
-		mysql_query($update, $this->link) or die(mysql_error());
+		mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 		
         $this->CachePlayerPointsByPlayerID($b_player_id);
         $this->CachePlayerPointsByPlayerID($w_player_id);
@@ -10815,12 +10819,12 @@ class CR3DCQuery{
 
     //$query = "SELECT * FROM c4m_gamedraws WHERE tm_gameid='".$gid."'";
 	$query = "SELECT `draw_requests` FROM `game` WHERE `game_id` = '$gid'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-		$val = mysql_result($return, 0, 'draw_requests');
+		$val = $this->mysqli_result($return, 0, 'draw_requests');
 		if($val == 'both')
 			$strStatus = "IDS_DRAW";
 		elseif(($val == 'white' && $isblack) || ($val == 'black' && !$isblack)) 
@@ -10828,8 +10832,8 @@ class CR3DCQuery{
 		elseif(($val == 'white' && !$isblack) || ($val == 'black' && $isblack)) 
 			$strStatus = "IDS_USER_REQUESTED_DRAW";
 	
-      // $black = mysql_result($return,0,"tm_b");
-      // $white = mysql_result($return,0,"tm_w");
+      // $black = $this->mysqli_result($return,0,"tm_b");
+      // $white = $this->mysqli_result($return,0,"tm_w");
 
       // if($black == 1 && $white == 1){
 
@@ -10867,13 +10871,13 @@ class CR3DCQuery{
 
     // Check if game realtime request record exists in db
     $query = "SELECT * FROM c4m_gamerealtime WHERE gr_gameid='".$gid."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num == 0){
 
       $insert = "INSERT INTO c4m_gamerealtime VALUES('".$gid."', 0, 0)";
-      mysql_query($insert, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
     }
 
@@ -10884,7 +10888,7 @@ class CR3DCQuery{
       $update = "UPDATE c4m_gamerealtime SET gr_w=1 WHERE gr_gameid='".$gid."'";
     }
 
-    mysql_query($update, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
   }
 
@@ -10898,13 +10902,13 @@ class CR3DCQuery{
     $strStatus = "IDS_NO_REAL_TIME";
 
     $query = "SELECT * FROM c4m_gamerealtime WHERE gr_gameid='".$gid."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $black = mysql_result($return,0,"gr_b");
-      $white = mysql_result($return,0,"gr_w");
+      $black = $this->mysqli_result($return,0,"gr_b");
+      $white = $this->mysqli_result($return,0,"gr_w");
 
       if($black == 1 && $white == 1){
         $strStatus = "IDS_REAL_TIME";
@@ -10932,13 +10936,13 @@ class CR3DCQuery{
   function ExitRealTimeGame($ConfigFile, $gid){
 
     $query = "SELECT * FROM c4m_gamerealtime WHERE gr_gameid='".$gid."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $update = "UPDATE c4m_gamerealtime SET gr_b=0, gr_w=0 WHERE gr_gameid='".$gid."'";
-      mysql_query($update, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
     }
 
@@ -10952,13 +10956,13 @@ class CR3DCQuery{
   function ManageRealTimeGame($ConfigFile, $gid){
 
     $query = "SELECT * FROM c4m_gamerealtime WHERE gr_gameid='".$gid."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $black = mysql_result($return,0,"gr_b");
-      $white = mysql_result($return,0,"gr_w");
+      $black = $this->mysqli_result($return,0,"gr_b");
+      $white = $this->mysqli_result($return,0,"gr_w");
 
       $initiator = "";
       $w_player_id = "";
@@ -10970,7 +10974,7 @@ class CR3DCQuery{
 
       if($this->IsPlayerOnline($ConfigFile, $w_player_id) == false || $this->IsPlayerOnline($ConfigFile, $b_player_id) == false){
         $update = "UPDATE c4m_gamerealtime SET gr_b=0, gr_w=0 WHERE gr_gameid='".$gid."'";
-        mysql_query($update, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$update) or die(mysqli_error($this->link));
       }
 
     }
@@ -10988,17 +10992,17 @@ class CR3DCQuery{
     $this->PurgeOldGameChallangesFromInbox($this->ChessCFGFileLocation, $player_id, $gid);
 
     $query = "SELECT * FROM game WHERE game_id ='".$gid."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $black = mysql_result($return,0,"b_player_id");
-      $white = mysql_result($return,0,"w_player_id");
+      $black = $this->mysqli_result($return,0,"b_player_id");
+      $white = $this->mysqli_result($return,0,"w_player_id");
 
       if($black == $player_id || $white == $player_id){
         $delete = "DELETE FROM game WHERE game_id ='".$gid."'";
-        mysql_query($delete, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$delete) or die(mysqli_error($this->link));
 
       }
 
@@ -11014,13 +11018,13 @@ class CR3DCQuery{
   function RevokeGame2($gid, $player_id){
 
     $query = "SELECT * FROM game WHERE game_id ='".$gid."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $black = mysql_result($return,0,"b_player_id");
-      $white = mysql_result($return,0,"w_player_id");
+      $black = $this->mysqli_result($return,0,"b_player_id");
+      $white = $this->mysqli_result($return,0,"w_player_id");
 
       // Remove game challange from inbox
       if($black != $player_id){
@@ -11031,7 +11035,7 @@ class CR3DCQuery{
 
       if($black == $player_id || $white == $player_id){
         $delete = "DELETE FROM game WHERE game_id ='".$gid."'";
-        mysql_query($delete, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$delete) or die(mysqli_error($this->link));
 
       }
 
@@ -11049,12 +11053,12 @@ class CR3DCQuery{
     $bCanNotify = true;
 
     $query = "SELECT * FROM c4m_notification WHERE p_playerid =".$player_id."";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      if(mysql_result($return, 0, "p_move") == "n"){
+      if($this->mysqli_result($return, 0, "p_move") == "n"){
         $bCanNotify = false;
       }
 
@@ -11074,12 +11078,12 @@ class CR3DCQuery{
    $bCanNotify = true;
 
     $query = "SELECT * FROM c4m_notification WHERE p_playerid =".$player_id."";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      if(mysql_result($return, 0, "p_challange") == "n"){
+      if($this->mysqli_result($return, 0, "p_challange") == "n"){
         $bCanNotify = false;
       }
 
@@ -11097,15 +11101,15 @@ class CR3DCQuery{
   function TGameStatus($gid){
 
     $query = "SELECT * FROM game WHERE game_id ='".$gid."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $bReturn = true;
 
     if($num != 0){
 
-      $status = mysql_result($return,0,"status");
-      $completion_status = mysql_result($return,0,"completion_status");
+      $status = $this->mysqli_result($return,0,"status");
+      $completion_status = $this->mysqli_result($return,0,"completion_status");
 
       if($status == "A" && $completion_status == "I"){
         $bReturn = true;
@@ -11131,15 +11135,15 @@ class CR3DCQuery{
   function GetTournamentName($ConfigFile, $TID){
 
     $query = "SELECT * FROM c4m_tournament WHERE t_id=".$TID;
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
 
     $t_name = "";
 
     if($num != 0){
 
-      $t_name = trim(mysql_result($return,0,"t_name"));
+      $t_name = trim($this->mysqli_result($return,0,"t_name"));
 
     }
 
@@ -11156,16 +11160,16 @@ class CR3DCQuery{
 
     //Get Inbox info
     $query = "SELECT * FROM c4m_msginbox WHERE player_id =".$PID."";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $i = 0;
 
     while($i < $num){
 
-      $inbox_id = trim(mysql_result($return,$i,"inbox_id"));
-      $message = trim(mysql_result($return,$i,"message"));
-      $posted = trim(mysql_result($return,$i,"msg_posted"));
+      $inbox_id = trim($this->mysqli_result($return,$i,"inbox_id"));
+      $message = trim($this->mysqli_result($return,$i,"message"));
+      $posted = trim($this->mysqli_result($return,$i,"msg_posted"));
 
       if(substr($message, 0, 2) == "M0"){
 
@@ -11194,16 +11198,16 @@ class CR3DCQuery{
 
     //Get Inbox info
     $query = "SELECT * FROM c4m_msginbox WHERE player_id =".$PID."";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $i = 0;
 
     while($i < $num){
 
-      $inbox_id = trim(mysql_result($return,$i,"inbox_id"));
-      $message = trim(mysql_result($return,$i,"message"));
-      $posted = trim(mysql_result($return,$i,"msg_posted"));
+      $inbox_id = trim($this->mysqli_result($return,$i,"inbox_id"));
+      $message = trim($this->mysqli_result($return,$i,"message"));
+      $posted = trim($this->mysqli_result($return,$i,"msg_posted"));
 
       if(substr($message, 0, 2) == "GC"){
 
@@ -11253,11 +11257,11 @@ class CR3DCQuery{
     }
 
     // Query the database
-    $returnw = mysql_query($queryw, $this->link) or die(mysql_error());
-    $numw = mysql_numrows($returnw);
+    $returnw = mysqli_query($this->link,$queryw) or die(mysqli_error($this->link));
+    $numw = mysqli_num_rows($returnw);
 
-    $returnb = mysql_query($queryb, $this->link) or die(mysql_error());
-    $numb = mysql_numrows($returnb);
+    $returnb = mysqli_query($this->link,$queryb) or die(mysqli_error($this->link));
+    $numb = mysqli_num_rows($returnb);
 
     echo "<br>";
 
@@ -11274,13 +11278,13 @@ class CR3DCQuery{
     $i = 0;
     while($i < $numw){
 
-      $game_id = trim(mysql_result($returnw,$i,"game_id"));
-      $initiator = trim(mysql_result($returnw,$i,"initiator"));
-      $w_player_id = trim(mysql_result($returnw,$i,"w_player_id"));
-      $b_player_id = trim(mysql_result($returnw,$i,"b_player_id"));
-      $start_time = trim(mysql_result($returnw,$i,"start_time"));
-      $status = trim(mysql_result($returnw,$i,"status"));
-      $completion_status = trim(mysql_result($returnw,$i,"completion_status"));
+      $game_id = trim($this->mysqli_result($returnw,$i,"game_id"));
+      $initiator = trim($this->mysqli_result($returnw,$i,"initiator"));
+      $w_player_id = trim($this->mysqli_result($returnw,$i,"w_player_id"));
+      $b_player_id = trim($this->mysqli_result($returnw,$i,"b_player_id"));
+      $start_time = trim($this->mysqli_result($returnw,$i,"start_time"));
+      $status = trim($this->mysqli_result($returnw,$i,"status"));
+      $completion_status = trim($this->mysqli_result($returnw,$i,"completion_status"));
 
       echo "<tr>";
       echo "<td class='row2'><a href='./chess_game.php?gameid=".$game_id."'>".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_142")."</a></td>";
@@ -11297,13 +11301,13 @@ class CR3DCQuery{
     $i = 0;
     while($i < $numb){
 
-      $game_id = trim(mysql_result($returnb,$i,"game_id"));
-      $initiator = trim(mysql_result($returnb,$i,"initiator"));
-      $w_player_id = trim(mysql_result($returnb,$i,"w_player_id"));
-      $b_player_id = trim(mysql_result($returnb,$i,"b_player_id"));
-      $status = trim(mysql_result($returnb,$i,"status"));
-      $completion_status = trim(mysql_result($returnb,$i,"completion_status"));
-      $start_time = trim(mysql_result($returnb,$i,"start_time"));
+      $game_id = trim($this->mysqli_result($returnb,$i,"game_id"));
+      $initiator = trim($this->mysqli_result($returnb,$i,"initiator"));
+      $w_player_id = trim($this->mysqli_result($returnb,$i,"w_player_id"));
+      $b_player_id = trim($this->mysqli_result($returnb,$i,"b_player_id"));
+      $status = trim($this->mysqli_result($returnb,$i,"status"));
+      $completion_status = trim($this->mysqli_result($returnb,$i,"completion_status"));
+      $start_time = trim($this->mysqli_result($returnb,$i,"start_time"));
 
       echo "<tr>";
       echo "<td class='row2'><a href='./chess_game.php?gameid=".$game_id."'>".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_142")."</a></td>";
@@ -11331,8 +11335,8 @@ class CR3DCQuery{
     $queryw = "SELECT * FROM game WHERE (w_player_id = '0' OR b_player_id = '0') AND status = 'W'";
 
     // Query the database
-    $returnw = mysql_query($queryw, $this->link) or die(mysql_error());
-    $numw = mysql_numrows($returnw);
+    $returnw = mysqli_query($this->link,$queryw) or die(mysqli_error($this->link));
+    $numw = mysqli_num_rows($returnw);
 
     echo "<br>";
 
@@ -11349,13 +11353,13 @@ class CR3DCQuery{
     $i = 0;
     while($i < $numw){
 
-      $game_id = trim(mysql_result($returnw,$i,"game_id"));
-      $initiator = trim(mysql_result($returnw,$i,"initiator"));
-      $w_player_id = trim(mysql_result($returnw,$i,"w_player_id"));
-      $b_player_id = trim(mysql_result($returnw,$i,"b_player_id"));
-      $start_time = trim(mysql_result($returnw,$i,"start_time"));
-      $status = trim(mysql_result($returnw,$i,"status"));
-      $completion_status = trim(mysql_result($returnw,$i,"completion_status"));
+      $game_id = trim($this->mysqli_result($returnw,$i,"game_id"));
+      $initiator = trim($this->mysqli_result($returnw,$i,"initiator"));
+      $w_player_id = trim($this->mysqli_result($returnw,$i,"w_player_id"));
+      $b_player_id = trim($this->mysqli_result($returnw,$i,"b_player_id"));
+      $start_time = trim($this->mysqli_result($returnw,$i,"start_time"));
+      $status = trim($this->mysqli_result($returnw,$i,"status"));
+      $completion_status = trim($this->mysqli_result($returnw,$i,"completion_status"));
 
       echo "<tr>";
 	if($w_player_id==$PID || $b_player_id==$PID){
@@ -11388,13 +11392,13 @@ class CR3DCQuery{
   function GetLastGameMoveDate($ConfigFile, $GameID){
 
     $query = "SELECT * FROM move_history WHERE game_id='".$GameID."' ORDER BY move_id DESC";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $LastMove = "";
 
     if($num != 0){
-      $LastMove = trim(mysql_result($return,0,"time"));
+      $LastMove = trim($this->mysqli_result($return,0,"time"));
     }
 
     return $LastMove;
@@ -11409,7 +11413,7 @@ class CR3DCQuery{
 
     $message = rawurlencode($message); 
     $insert = "INSERT INTO c4m_gamechat VALUES(NULL, '".$GameID."', '".$message."', NOW())";
-    mysql_query($insert, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
   }
 
@@ -11421,15 +11425,15 @@ class CR3DCQuery{
   function GetGChat($ConfigFile, $GameID){
 
     $query = "SELECT * FROM c4m_gamechat WHERE tgc_gameid='".$GameID."' ORDER BY tgc_date DESC";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i=0;
       while($i < $num){
 
-        $Message = $this->FilterChatText(mysql_result($return, $i, "tgc_message"));
+        $Message = $this->FilterChatText($this->mysqli_result($return, $i, "tgc_message"));
 	$Message = rawurldecode($Message);
         echo $Message."\n\n";
         $i++;
@@ -11483,8 +11487,8 @@ class CR3DCQuery{
   function IsPlayerDisabled($PID){
 
     $query = "SELECT * FROM player2 WHERE player_id = ".$PID;
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $bDisabled = false;
 
@@ -11504,8 +11508,8 @@ class CR3DCQuery{
   function IsPlayerDisabled2($UID){
 
     $query = "SELECT * FROM player2 WHERE userid = '".$UID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $bDisabled = false;
 
@@ -11525,8 +11529,8 @@ class CR3DCQuery{
   function NewUserRequiresApproval(){
 
     $query = "SELECT * FROM c4m_userregistration WHERE a_requiresreg = '0' LIMIT 1";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $bReturn = true;
 
@@ -11546,20 +11550,20 @@ class CR3DCQuery{
   function UpdateUserRequiresApproval($Approve){
 
     $query = "SELECT * FROM c4m_userregistration LIMIT 1";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $a_id = mysql_result($return,0,"a_id");
+      $a_id = $this->mysqli_result($return,0,"a_id");
 
       $update = "UPDATE c4m_userregistration SET a_requiresreg = '".$Approve."' WHERE a_id=".$a_id;
-      mysql_query($update, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
     }else{
 
       $insert = "INSERT INTO c4m_userregistration Values(NULL, '".$Approve."')";
-      mysql_query($insert, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
     }
 
@@ -11573,8 +11577,8 @@ class CR3DCQuery{
   function NewTournamentRequiresApproval(){
 
     $query = "SELECT * FROM c4m_autoaccepttournament WHERE a_requiresreg = '0' LIMIT 1";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $bReturn = true;
 
@@ -11594,19 +11598,19 @@ class CR3DCQuery{
   function UpdateTournamentRequiresApproval($Approve){
 
     $query = "SELECT * FROM c4m_autoaccepttournament LIMIT 1";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $a_id = mysql_result($return,0,"a_id");
+      $a_id = $this->mysqli_result($return,0,"a_id");
 
       $update = "UPDATE c4m_autoaccepttournament SET a_requiresreg = '".$Approve."' WHERE a_id=".$a_id;
-      mysql_query($update, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
     }else{
       $insert = "INSERT INTO c4m_autoaccepttournament Values(NULL, '".$Approve."')";
-      mysql_query($insert, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
     }
 
   }
@@ -11619,15 +11623,15 @@ class CR3DCQuery{
   function GetMainLink(){
 
     $query = "SELECT * FROM c4m_mainlink LIMIT 1";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $link = "n/a";
 
     if($num != 0){
 
-      $a_name = mysql_result($return,0,"a_name");
-      $a_url = mysql_result($return,0,"a_url");
+      $a_name = $this->mysqli_result($return,0,"a_name");
+      $a_url = $this->mysqli_result($return,0,"a_url");
 
       $link = "&nbsp;<a href='".$a_url."'>".$a_name."</a>&nbsp; &#8226;&nbsp;";
     }
@@ -11644,13 +11648,13 @@ class CR3DCQuery{
   function GetMainLinkByRef(&$name, &$url){
 
     $query = "SELECT * FROM c4m_mainlink LIMIT 1";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $name = mysql_result($return,0,"a_name");
-      $url = mysql_result($return,0,"a_url");
+      $name = $this->mysqli_result($return,0,"a_name");
+      $url = $this->mysqli_result($return,0,"a_url");
 
     }
 
@@ -11664,20 +11668,20 @@ class CR3DCQuery{
   function UpdateMainLink($name, $url){
 
     $query = "SELECT * FROM c4m_mainlink LIMIT 1";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $a_id = mysql_result($return,0,"a_id");
+      $a_id = $this->mysqli_result($return,0,"a_id");
 
       $update = "UPDATE c4m_mainlink SET a_name = '".$name."', a_url = '".$url."' WHERE a_id=".$a_id;
-      mysql_query($update, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
     }else{
 
       $insert = "INSERT INTO c4m_mainlink Values(NULL, '".$name."', '".$url."')";
-      mysql_query($insert, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
     }
 
@@ -11691,8 +11695,8 @@ class CR3DCQuery{
   function LoginBilling($UserID, $Pass){
 
     $query = "SELECT * FROM player WHERE userid='".$UserID."' AND password='".$Pass."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $bLoggedIn = false;
 
@@ -11712,8 +11716,8 @@ class CR3DCQuery{
   function PaypalIsEnabled(){
 
     $query = "SELECT * FROM c4m_paypal WHERE a_requirespayment = '0' LIMIT 1";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $bReturn = true;
 
@@ -11733,20 +11737,20 @@ class CR3DCQuery{
   function UpdatePaypalIsEnabled($Approve){
 
     $query = "SELECT * FROM c4m_paypal LIMIT 1";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $a_id = mysql_result($return,0,"a_id");
+      $a_id = $this->mysqli_result($return,0,"a_id");
 
       $update = "UPDATE c4m_paypal SET a_requirespayment = '".$Approve."' WHERE a_id=".$a_id;
-      mysql_query($update, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
     }else{
 
       $insert = "INSERT INTO c4m_paypal Values(NULL, '".$Approve."')";
-      mysql_query($insert, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
     }
 
@@ -11761,14 +11765,14 @@ class CR3DCQuery{
   function GetCommandConfig(&$userlimit, &$enabletournament, &$enableplayerimport){
 
     $query = "SELECT * FROM c4m_commandconfig";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $userlimit =  mysql_result($return,0,"o_userlimit");
-      $enabletournament =  mysql_result($return,0,"o_enabletournament");
-      $enableplayerimport =  mysql_result($return,0,"o_enableplayerimport");
+      $userlimit =  $this->mysqli_result($return,0,"o_userlimit");
+      $enabletournament =  $this->mysqli_result($return,0,"o_enabletournament");
+      $enableplayerimport =  $this->mysqli_result($return,0,"o_enableplayerimport");
     }
 
   }
@@ -11782,15 +11786,15 @@ class CR3DCQuery{
 
     // Get current user count
     $query = "SELECT * FROM player";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $nUserCount = 0;
 
     $i=0;
     while($i < $num){
 
-      $id = mysql_result($return,$i,"player_id");
+      $id = $this->mysqli_result($return,$i,"player_id");
 
       if($this->IsPlayerDisabled($id) == false){
         $nUserCount++;
@@ -11811,13 +11815,13 @@ class CR3DCQuery{
   function UserLimit(){
 
     $query = "SELECT * FROM c4m_commandconfig";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $nUserCountMAX = 0;
 
     if($num != 0){
-      $nUserCountMAX = mysql_result($return,0,"o_userlimit");
+      $nUserCountMAX = $this->mysqli_result($return,0,"o_userlimit");
     }
 
     return $nUserCountMAX;
@@ -11869,11 +11873,11 @@ class CR3DCQuery{
   function GetEmailSettings(&$strTermOver){
 
     $query = "SELECT * FROM c4m_emailmessageconfig";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-      $strTermOver = mysql_result($return,0,"o_regover");
+      $strTermOver = $this->mysqli_result($return,0,"o_regover");
     }
 
   }
@@ -11886,23 +11890,23 @@ class CR3DCQuery{
   function SetEmailSettings($strTermOver){
 
     $query = "SELECT * FROM c4m_emailmessageconfig";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     // remove quotes
     $strTermOver = str_replace("\"", "", $strTermOver);
     $strTermOver = str_replace("'", "", $strTermOver);
 
     if($num != 0){
-      $o_id = mysql_result($return,0,"o_id");
+      $o_id = $this->mysqli_result($return,0,"o_id");
 
       $update = "UPDATE c4m_emailmessageconfig SET o_regover='".$strTermOver."' WHERE o_id=".$o_id;
-      mysql_query($update, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
     }else{
 
       $insert = "INSERT INTO c4m_emailmessageconfig VALUES(NULL, '".$strTermOver."')";
-      mysql_query($insert, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
     }
 
@@ -11916,7 +11920,7 @@ class CR3DCQuery{
   function AddMultiUserRedemptionCode($code){
 
     $insert = "INSERT INTO c4m_multiuserredemptioncode VALUES(NULL, '".$code."', NOW())";
-    mysql_query($insert, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
   }
 
@@ -11927,8 +11931,8 @@ class CR3DCQuery{
   function GetMultiUserRedemptionCodes(){
 
     $query = "SELECT * FROM c4m_multiuserredemptioncode";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $i=0;
 
@@ -11941,9 +11945,9 @@ class CR3DCQuery{
 
     while($i < $num){
 
-      $o_id = mysql_result($return,$i,"o_id");
-      $o_redemptioncode = mysql_result($return,$i,"o_redemptioncode");
-      $o_date = mysql_result($return,$i,"o_date");
+      $o_id = $this->mysqli_result($return,$i,"o_id");
+      $o_redemptioncode = $this->mysqli_result($return,$i,"o_redemptioncode");
+      $o_date = $this->mysqli_result($return,$i,"o_date");
 
       echo "<tr>";
       echo "<td class='row2'><input type='radio' name='rdoID' value='".$o_id."'></td>";
@@ -11966,7 +11970,7 @@ class CR3DCQuery{
   function DeleteMultiUserRedemptionCode($ID){
 
     $delete = "DELETE FROM c4m_multiuserredemptioncode WHERE o_id=".$ID;
-    mysql_query($delete, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$delete) or die(mysqli_error($this->link));
 
   }
 
@@ -11978,15 +11982,15 @@ class CR3DCQuery{
   function GetPlayerInfoByID2($player_id, &$userid, &$password, &$email){
 
     $query = "SELECT * FROM player WHERE player_id = ".$player_id;
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-       $player_id = trim(mysql_result($return,0,"player_id"));
-       $userid = trim(mysql_result($return,0,"userid"));
-       $password = trim(mysql_result($return,0,"password"));
-       $email = trim(mysql_result($return,0,"email"));
+       $player_id = trim($this->mysqli_result($return,0,"player_id"));
+       $userid = trim($this->mysqli_result($return,0,"userid"));
+       $password = trim($this->mysqli_result($return,0,"password"));
+       $email = trim($this->mysqli_result($return,0,"email"));
 
     }
 
@@ -12000,18 +12004,18 @@ class CR3DCQuery{
   function InsertTournamentPlayer($userid, $password, $email){
 
     $insert = "INSERT INTO player VALUES(NULL, '".$userid."', '".$password."', ".time().", 'F', '".$email."')";
-    mysql_query($insert, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
     $query = "SELECT LAST_INSERT_ID()";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-       $player_id = trim(mysql_result($return,0,0));
+       $player_id = trim($this->mysqli_result($return,0,0));
 
        $insert = "INSERT INTO player3 VALUES(".$player_id.", '".$userid."')";
-       mysql_query($insert, $this->link) or die(mysql_error());
+       mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
     }
 
@@ -12084,8 +12088,8 @@ class CR3DCQuery{
     echo "<tr><td class='row1'>".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_28")."</td><td class='row1'>".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_29")."</td><td class='row1'>".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_30")."</td><td class='row1'>".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_31")."</td><td class='row1'>".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_32")."</td><td class='row1'>".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_33")."</td></tr>";
 
     $query = "SELECT * FROM player ORDER BY userid ASC";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
       // Place the results in the array
       if($num != 0){
@@ -12095,10 +12099,10 @@ class CR3DCQuery{
         $i = 0;
         while($i < $num){
 
-          $player_id = trim(mysql_result($return,$i,"player_id"));
-          $userid = trim(mysql_result($return,$i,"userid"));
-          $signup_time  = trim(mysql_result($return,$i,"signup_time"));
-          $email = trim(mysql_result($return,$i,"email"));
+          $player_id = trim($this->mysqli_result($return,$i,"player_id"));
+          $userid = trim($this->mysqli_result($return,$i,"userid"));
+          $signup_time  = trim($this->mysqli_result($return,$i,"signup_time"));
+          $email = trim($this->mysqli_result($return,$i,"email"));
 
           if($this->IsPlayerDisabled($player_id) == false){
             $wins = 0;
@@ -12268,38 +12272,38 @@ class CR3DCQuery{
           echo $ncdate."<br>";
 
           $query1 = "SELECT * FROM c4m_tournamentmatches WHERE tm_tournamentid=".$TID." AND tm_starttime like '".date("Y-m-d", mktime(0,0,0, $month, $ncdate, $year))."%' ORDER BY tm_id ASC";
-          $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-          $num1 = mysql_numrows($return1);
+          $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+          $num1 = mysqli_num_rows($return1);
 
           if($num1 !=0){
 
             $i=0;
             while($i < $num1){
 
-              $tm_id = trim(mysql_result($return1,$i,"tm_id"));
-              $tm_tournamentid = trim(mysql_result($return1,$i,"tm_tournamentid"));
-              $tm_status = trim(mysql_result($return1,$i,"tm_status"));
-              $tm_starttime = trim(mysql_result($return1,$i,"tm_starttime"));
-              $tm_endtime = trim(mysql_result($return1,$i,"tm_endtime"));
+              $tm_id = trim($this->mysqli_result($return1,$i,"tm_id"));
+              $tm_tournamentid = trim($this->mysqli_result($return1,$i,"tm_tournamentid"));
+              $tm_status = trim($this->mysqli_result($return1,$i,"tm_status"));
+              $tm_starttime = trim($this->mysqli_result($return1,$i,"tm_starttime"));
+              $tm_endtime = trim($this->mysqli_result($return1,$i,"tm_endtime"));
 
               //Get the games
               $query2 = "SELECT * FROM c4m_tournamentgames WHERE tg_tmid=".$tm_id." ORDER BY tg_id ASC";
-              $return2 = mysql_query($query2, $this->link) or die(mysql_error());
-              $num2 = mysql_numrows($return2);
+              $return2 = mysqli_query($this->link,$query2) or die(mysqli_error($this->link));
+              $num2 = mysqli_num_rows($return2);
 
               if($num2 !=0){
 
                 $ii=0;
                 while($ii < $num2){
 
-                  $tg_id = trim(mysql_result($return2,$ii,"tg_id"));
-                  $tg_tmid = trim(mysql_result($return2,$ii,"tg_tmid"));
-                  $tg_gameid = trim(mysql_result($return2,$ii,"tg_gameid"));
-                  $tg_playerid = trim(mysql_result($return2,$ii,"tg_playerid"));
-                  $tg_otherplayerid = trim(mysql_result($return2,$ii,"tg_otherplayerid"));
-                  $tg_playerloggedin = trim(mysql_result($return2,$ii,"tg_playerloggedin"));
-                  $tg_otherplayerloggedin = trim(mysql_result($return2,$ii,"tg_otherplayerloggedin"));
-                  $tg_status = trim(mysql_result($return2,$ii,"tg_status"));
+                  $tg_id = trim($this->mysqli_result($return2,$ii,"tg_id"));
+                  $tg_tmid = trim($this->mysqli_result($return2,$ii,"tg_tmid"));
+                  $tg_gameid = trim($this->mysqli_result($return2,$ii,"tg_gameid"));
+                  $tg_playerid = trim($this->mysqli_result($return2,$ii,"tg_playerid"));
+                  $tg_otherplayerid = trim($this->mysqli_result($return2,$ii,"tg_otherplayerid"));
+                  $tg_playerloggedin = trim($this->mysqli_result($return2,$ii,"tg_playerloggedin"));
+                  $tg_otherplayerloggedin = trim($this->mysqli_result($return2,$ii,"tg_otherplayerloggedin"));
+                  $tg_status = trim($this->mysqli_result($return2,$ii,"tg_status"));
 
                   if($tg_status == "A" || $tg_status == "I"){
                     echo "<a href=\"javascript:PopupWindow('./t_index.php?gid=".$tg_gameid."')\">".$this->GetUserIDByPlayerID($ConfigFile, $tg_playerid)." VS ".$this->GetUserIDByPlayerID($ConfigFile, $tg_otherplayerid)."</a><br>";
@@ -12328,38 +12332,38 @@ class CR3DCQuery{
           echo $ncdate."<br>";
 
           $query1 = "SELECT * FROM c4m_tournamentmatches WHERE tm_tournamentid=".$TID." AND tm_starttime like '".date("Y-m-d", mktime(0,0,0, $month, $ncdate, $year))."%' ORDER BY tm_id ASC";
-          $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-          $num1 = mysql_numrows($return1);
+          $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+          $num1 = mysqli_num_rows($return1);
 
           if($num1 !=0){
 
             $i=0;
             while($i < $num1){
 
-              $tm_id = trim(mysql_result($return1,$i,"tm_id"));
-              $tm_tournamentid = trim(mysql_result($return1,$i,"tm_tournamentid"));
-              $tm_status = trim(mysql_result($return1,$i,"tm_status"));
-              $tm_starttime = trim(mysql_result($return1,$i,"tm_starttime"));
-              $tm_endtime = trim(mysql_result($return1,$i,"tm_endtime"));
+              $tm_id = trim($this->mysqli_result($return1,$i,"tm_id"));
+              $tm_tournamentid = trim($this->mysqli_result($return1,$i,"tm_tournamentid"));
+              $tm_status = trim($this->mysqli_result($return1,$i,"tm_status"));
+              $tm_starttime = trim($this->mysqli_result($return1,$i,"tm_starttime"));
+              $tm_endtime = trim($this->mysqli_result($return1,$i,"tm_endtime"));
 
               //Get the games
               $query2 = "SELECT * FROM c4m_tournamentgames WHERE tg_tmid=".$tm_id." ORDER BY tg_id ASC";
-              $return2 = mysql_query($query2, $this->link) or die(mysql_error());
-              $num2 = mysql_numrows($return2);
+              $return2 = mysqli_query($this->link,$query2) or die(mysqli_error($this->link));
+              $num2 = mysqli_num_rows($return2);
 
               if($num2 !=0){
 
                 $ii=0;
                 while($ii < $num2){
 
-                  $tg_id = trim(mysql_result($return2,$ii,"tg_id"));
-                  $tg_tmid = trim(mysql_result($return2,$ii,"tg_tmid"));
-                  $tg_gameid = trim(mysql_result($return2,$ii,"tg_gameid"));
-                  $tg_playerid = trim(mysql_result($return2,$ii,"tg_playerid"));
-                  $tg_otherplayerid = trim(mysql_result($return2,$ii,"tg_otherplayerid"));
-                  $tg_playerloggedin = trim(mysql_result($return2,$ii,"tg_playerloggedin"));
-                  $tg_otherplayerloggedin = trim(mysql_result($return2,$ii,"tg_otherplayerloggedin"));
-                  $tg_status = trim(mysql_result($return2,$ii,"tg_status"));
+                  $tg_id = trim($this->mysqli_result($return2,$ii,"tg_id"));
+                  $tg_tmid = trim($this->mysqli_result($return2,$ii,"tg_tmid"));
+                  $tg_gameid = trim($this->mysqli_result($return2,$ii,"tg_gameid"));
+                  $tg_playerid = trim($this->mysqli_result($return2,$ii,"tg_playerid"));
+                  $tg_otherplayerid = trim($this->mysqli_result($return2,$ii,"tg_otherplayerid"));
+                  $tg_playerloggedin = trim($this->mysqli_result($return2,$ii,"tg_playerloggedin"));
+                  $tg_otherplayerloggedin = trim($this->mysqli_result($return2,$ii,"tg_otherplayerloggedin"));
+                  $tg_status = trim($this->mysqli_result($return2,$ii,"tg_status"));
 
                   if($tg_status == "A" || $tg_status == "I"){
                     echo "<a href=\"javascript:PopupWindow('./t_index.php?gid=".$tg_gameid."')\">".$this->GetUserIDByPlayerID($ConfigFile, $tg_playerid)." VS ".$this->GetUserIDByPlayerID($ConfigFile, $tg_otherplayerid)."</a><br>";
@@ -12422,20 +12426,20 @@ class CR3DCQuery{
 
     //count black player//////////////////////////////////////////////////////
     $query = "SELECT count(*) FROM game WHERE b_player_id = ".$PlayerID." AND completion_status IN('C')";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-      $PersonalGame = $PersonalGame + mysql_result($return,0,0);
+      $PersonalGame = $PersonalGame + $this->mysqli_result($return,0,0);
     }
 
     //count white player//////////////////////////////////////////////////////
     $query1 = "SELECT count(*) FROM game WHERE w_player_id = ".$PlayerID." AND completion_status  IN('C')";
-    $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+    $num1 = mysqli_num_rows($return1);
 
     if($num1 != 0){
-      $PersonalGame = $PersonalGame + mysql_result($return1,0,0);
+      $PersonalGame = $PersonalGame + $this->mysqli_result($return1,0,0);
     }
 
     return $PersonalGame;
@@ -12495,7 +12499,7 @@ class CR3DCQuery{
     $oldrating = $this->ELOGetRating($playerid);
 
     $update = "UPDATE elo_points SET cpoints=".$newrating.", opoints=".$oldrating." WHERE player_id=".$playerid;
-    mysql_query($update, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
   }
 
@@ -12509,12 +12513,12 @@ class CR3DCQuery{
     $Rating = 0;
 
     $query1 = "SELECT * FROM elo_points WHERE player_id=".$playerid;
-    $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+    $num1 = mysqli_num_rows($return1);
 
     if($num1 != 0){
 
-      $Rating = mysql_result($return1,0,"cpoints");
+      $Rating = $this->mysqli_result($return1,0,"cpoints");
 
     }
 
@@ -12532,8 +12536,8 @@ class CR3DCQuery{
     $active = false;
 
     $query1 = "SELECT * FROM elo_points";
-    $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+    $num1 = mysqli_num_rows($return1);
 
     if($num1 != 0){
       $active = true;
@@ -12552,20 +12556,20 @@ class CR3DCQuery{
 
     //Select all the players in the game
     $query = "SELECT * FROM player";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i=0;
       while($i < $num){
 
-        $playerid = mysql_result($return,$i,"player_id");
+        $playerid = $this->mysqli_result($return,$i,"player_id");
 
         //create an ELO rating record if the player does not exist yet
         $query1 = "SELECT * FROM elo_points WHERE player_id = ".$playerid;
-        $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-        $num1 = mysql_numrows($return1);
+        $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+        $num1 = mysqli_num_rows($return1);
 
         if($num1 != 0){
 
@@ -12574,7 +12578,7 @@ class CR3DCQuery{
           $playerrating = $this->GetPointValue($wins, $loss, $draws);
 
           $insert = "INSERT INTO elo_points VALUES(".$playerid.", ".$playerrating.", ".$playerrating.")";
-          mysql_query($insert, $this->link);
+          mysqli_query($this->link,$insert);
         }
 
         $i++;
@@ -12593,7 +12597,7 @@ class CR3DCQuery{
 
     //Removes all players from the ELO rating system
     $delete = "DELETE FROM elo_points";
-    mysql_query($delete, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$delete) or die(mysqli_error($this->link));
 
   }
 
@@ -12604,7 +12608,7 @@ class CR3DCQuery{
   function SetDBPointValue($pointvalue){
 
     $update = "UPDATE chess_point_value SET o_points='".$pointvalue."' WHERE o_id=1";
-    mysql_query($update, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
   }
 
@@ -12616,11 +12620,11 @@ class CR3DCQuery{
   function GetDBPointValue(){
 
     $query = "SELECT * FROM chess_point_value WHERE o_id=1";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-      $points = mysql_result($return,0,"o_points");
+      $points = $this->mysqli_result($return,0,"o_points");
     }
 
     return $points;
@@ -12784,8 +12788,8 @@ class CR3DCQuery{
     
     // Get move history for game.
     $query = "SELECT * FROM move_history WHERE game_id='".$GameID."' ORDER BY time ASC";
-    $return = mysql_query($query) or die(mysql_error());
-    $moveCnt = mysql_numrows($return);   
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $moveCnt = mysqli_num_rows($return);   
     
     // Need to find out if it is now white's or black's turn.
     // to find out from which move to start from.
@@ -12803,7 +12807,7 @@ class CR3DCQuery{
     // Loop through moves.
     while($i < $moveCnt){
 
-      $move = mysql_result($return, $i, "move");
+      $move = $this->mysqli_result($return, $i, "move");
 
       $start_col = substr($move,0,1);
       $start_row = substr($move,1,1);
@@ -13083,11 +13087,11 @@ class CR3DCQuery{
     $style = 1;
 
     $query1 = "SELECT * FROM chess_boardstyle WHERE id=".$playerid;
-    $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+    $num1 = mysqli_num_rows($return1);
 
     if($num1 != 0){
-      $style = mysql_result($return1,0,"style");
+      $style = $this->mysqli_result($return1,0,"style");
     }
 
     return $style;
@@ -13102,15 +13106,15 @@ class CR3DCQuery{
   function SetBoardStyleByUserID($playerid, $Style){
 
     $query1 = "SELECT * FROM chess_boardstyle WHERE id=".$playerid;
-    $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+    $num1 = mysqli_num_rows($return1);
 
     if($num1 != 0){
       $update = "UPDATE chess_boardstyle SET style=".$Style." WHERE id=".$playerid;
-      mysql_query($update, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$update) or die(mysqli_error($this->link));
     }else{
       $Insert = "INSERT INTO chess_boardstyle VALUES(".$playerid.", ".$Style.")";
-      mysql_query($Insert, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$Insert) or die(mysqli_error($this->link));
     }
 
   }
@@ -13143,8 +13147,8 @@ class CR3DCQuery{
     echo "<tr><td class='row1'>".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_28")."</td><td class='row1'>".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_29")."</td><td class='row1'>".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_30")."</td><td class='row1'>".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_32")."</td><td class='row1'>".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_33")."</td></tr>";
 
     $query = "SELECT * FROM player ORDER BY userid ASC";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
       // Place the results in the array
       if($num != 0){
@@ -13154,10 +13158,10 @@ class CR3DCQuery{
         $i = 0;
         while($i < $num){
 
-          $player_id = trim(mysql_result($return,$i,"player_id"));
-          $userid = trim(mysql_result($return,$i,"userid"));
-          $signup_time  = trim(mysql_result($return,$i,"signup_time"));
-          $email = trim(mysql_result($return,$i,"email"));
+          $player_id = trim($this->mysqli_result($return,$i,"player_id"));
+          $userid = trim($this->mysqli_result($return,$i,"userid"));
+          $signup_time  = trim($this->mysqli_result($return,$i,"signup_time"));
+          $email = trim($this->mysqli_result($return,$i,"email"));
 
           if($this->IsPlayerDisabled($player_id) == false){
             $wins = 0;
@@ -13239,8 +13243,8 @@ class CR3DCQuery{
     $benabled = false;
 
     $query1 = "SELECT * FROM timed_games WHERE id='".$gid."'";
-    $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+    $num1 = mysqli_num_rows($return1);
 
     if($num1 != 0){
       $benabled = true;
@@ -13258,15 +13262,15 @@ class CR3DCQuery{
   function TimedGameStats($gid){
 
     $query1 = "SELECT * FROM timed_games WHERE id='".$gid."'";
-    $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+    $num1 = mysqli_num_rows($return1);
 
     if($num1 != 0){
 
-      $moves1 = mysql_result($return1,0,"moves1");
-      $time1 = mysql_result($return1,0,"time1");
-      $moves2 = mysql_result($return1,0,"moves2");
-      $time2 = mysql_result($return1,0,"time2");
+      $moves1 = $this->mysqli_result($return1,0,"moves1");
+      $time1 = $this->mysqli_result($return1,0,"time1");
+      $moves2 = $this->mysqli_result($return1,0,"moves2");
+      $time2 = $this->mysqli_result($return1,0,"time2");
 
       echo "<table width='210' border='0'>";
       echo "<tr>";
@@ -13304,16 +13308,16 @@ class CR3DCQuery{
   function UpdatePlayerTime($gid, $isblack, $Xseconds){
 
     $query1 = "SELECT * FROM timed_game_stats WHERE id='".$gid."'";
-    $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+    $num1 = mysqli_num_rows($return1);
 
     if($num1 != 0){
 
       //update user minutes
       if($isblack){
-        $xtime = mysql_result($return1,0,"blacktime");
+        $xtime = $this->mysqli_result($return1,0,"blacktime");
       }else{
-        $xtime = mysql_result($return1,0,"whitetime");
+        $xtime = $this->mysqli_result($return1,0,"whitetime");
       }
 
       list($hours1, $mins1, $seconds1) = explode(":", $xtime, 3);
@@ -13341,18 +13345,18 @@ class CR3DCQuery{
         $update = "UPDATE timed_game_stats SET whitetime='".$xtime."' WHERE id='".$gid."'";
       }
 
-      mysql_query($update, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
     }else{
 
       //Get Game Stats
       $query2 = "SELECT * FROM timed_games WHERE id='".$gid."'";
-      $return2 = mysql_query($query2, $this->link) or die(mysql_error());
-      $num2 = mysql_numrows($return2);
+      $return2 = mysqli_query($this->link,$query2) or die(mysqli_error($this->link));
+      $num2 = mysqli_num_rows($return2);
 
       if($num2 != 0){
 
-        $time1 = mysql_result($return2,0,"time1");
+        $time1 = $this->mysqli_result($return2,0,"time1");
 
         $sec1 = 0;
         $min1 = (int)$time1;
@@ -13371,7 +13375,7 @@ class CR3DCQuery{
         $Blacktt = "".trim($hour1)." : ".trim($min1)." : ".trim($sec1)."";
 
         $insert = "INSERT INTO timed_game_stats VALUES('".$gid."', '".$whitett."', '".$Blacktt."', '00: 00 : 00', '00: 00 : 00', ".time().", ".strtotime("+".$time1." minute", time()).", 0, 0)";
-        mysql_query($insert, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
       }
 
     }
@@ -13390,15 +13394,15 @@ class CR3DCQuery{
     $seconds1 = 0;
 
     $query1 = "SELECT * FROM timed_game_stats WHERE id='".$gid."'";
-    $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+    $num1 = mysqli_num_rows($return1);
 
     if($num1 != 0){
 
       if($color == "white"){
-        $time = mysql_result($return1,0,"whitetime");
+        $time = $this->mysqli_result($return1,0,"whitetime");
       }else{
-        $time = mysql_result($return1,0,"blacktime");
+        $time = $this->mysqli_result($return1,0,"blacktime");
       }
 
       list($hours1, $mins1, $seconds1) = explode(":", $time, 3);
@@ -13419,11 +13423,11 @@ class CR3DCQuery{
     $count = 0;
 
     $query1 = "SELECT COUNT(*) FROM move_history WHERE game_id='".$gid."' AND player_id='".$pid."'";
-    $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+    $num1 = mysqli_num_rows($return1);
 
     if($num1 != 0){
-      $count = mysql_result($return1,0,0);
+      $count = $this->mysqli_result($return1,0,0);
     }
 
     return $count;
@@ -13439,24 +13443,24 @@ class CR3DCQuery{
 
     // Get real time information
     $query1 = "SELECT * FROM timed_game_stats WHERE id='".$gid."'";
-    $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+    $num1 = mysqli_num_rows($return1);
 
     $query2 = "SELECT * FROM timed_games WHERE id='".$gid."'";
-    $return2 = mysql_query($query2, $this->link) or die(mysql_error());
-    $num2 = mysql_numrows($return2);
+    $return2 = mysqli_query($this->link,$query2) or die(mysqli_error($this->link));
+    $num2 = mysqli_num_rows($return2);
 
     // Check if there are records for both queries
     if($num1 != 0 && $num2 !=0){
 
-      $endtimew = mysql_result($return1,0,"endtimew");
-      $endtimeb = mysql_result($return1,0,"endtimeb");
-      $whitetime = mysql_result($return1,0,"whitetime");
-      $blacktime = mysql_result($return1,0,"blacktime");
-      $starttime = mysql_result($return1,0,"starttime");
-      $endtime = mysql_result($return1,0,"endtime");
-      $wtimectrl = mysql_result($return1,0,"wtimectrl");
-      $btimectrl = mysql_result($return1,0,"btimectrl");
+      $endtimew = $this->mysqli_result($return1,0,"endtimew");
+      $endtimeb = $this->mysqli_result($return1,0,"endtimeb");
+      $whitetime = $this->mysqli_result($return1,0,"whitetime");
+      $blacktime = $this->mysqli_result($return1,0,"blacktime");
+      $starttime = $this->mysqli_result($return1,0,"starttime");
+      $endtime = $this->mysqli_result($return1,0,"endtime");
+      $wtimectrl = $this->mysqli_result($return1,0,"wtimectrl");
+      $btimectrl = $this->mysqli_result($return1,0,"btimectrl");
 
       // Get time info and convert it to seconds
       list($hours1, $mins1, $seconds1) = explode(":", $whitetime, 3);
@@ -13474,10 +13478,10 @@ class CR3DCQuery{
       $bmovecnt = $this->GetPlayerMoveCount($gid, $b_player_id);
 
       //Get the time control information
-      $moves1 = mysql_result($return2,0,"moves1");
-      $time1 = mysql_result($return2,0,"time1");
-      $moves2 = mysql_result($return2,0,"moves2");
-      $time2 = mysql_result($return2,0,"time2");
+      $moves1 = $this->mysqli_result($return2,0,"moves1");
+      $time1 = $this->mysqli_result($return2,0,"time1");
+      $moves2 = $this->mysqli_result($return2,0,"moves2");
+      $time2 = $this->mysqli_result($return2,0,"time2");
 
       // update time control2 if values are specified and player meets the requirement
       if($moves2 != 0 && $time2 != 0){
@@ -13514,7 +13518,7 @@ class CR3DCQuery{
 
             $xtime = "".trim($xhours)." : ".trim($xmins)." : ".trim($xsecs)."";
             $update = "UPDATE timed_game_stats SET endtimew='".$xtime."', wtimectrl='1' WHERE id='".$gid."'";
-            mysql_query($update, $this->link) or die(mysql_error());
+            mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
           }
 
@@ -13551,7 +13555,7 @@ class CR3DCQuery{
 
             $xtime = "".trim($xhours)." : ".trim($xmins)." : ".trim($xsecs)."";
             $update = "UPDATE timed_game_stats SET endtimeb='".$xtime."', btimectrl='1' WHERE id='".$gid."'";
-            mysql_query($update, $this->link) or die(mysql_error());
+            mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
           }
 
@@ -13635,8 +13639,8 @@ class CR3DCQuery{
   function CreatePlayerTimeIfNotEXists($gid, $isblack){
 
     $query1 = "SELECT * FROM timed_game_stats WHERE id='".$gid."'";
-    $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+    $num1 = mysqli_num_rows($return1);
 
     if($num1 != 0){
 
@@ -13644,12 +13648,12 @@ class CR3DCQuery{
 
       //Get Game Stats
       $query2 = "SELECT * FROM timed_games WHERE id='".$gid."'";
-      $return2 = mysql_query($query2, $this->link) or die(mysql_error());
-      $num2 = mysql_numrows($return2);
+      $return2 = mysqli_query($this->link,$query2) or die(mysqli_error($this->link));
+      $num2 = mysqli_num_rows($return2);
 
       if($num2 != 0){
 
-        $time1 = mysql_result($return2,0,"time1");
+        $time1 = $this->mysqli_result($return2,0,"time1");
 
         $sec1 = 0;
         $min1 = (int)$time1;
@@ -13668,7 +13672,7 @@ class CR3DCQuery{
         $Blacktt = "".trim($hour1)." : ".trim($min1)." : ".trim($sec1)."";
 
         $insert = "INSERT INTO timed_game_stats VALUES('".$gid."', '".$whitett."', '".$Blacktt."', '00: 00 : 00', '00: 00 : 00', ".time().", ".strtotime("+".$time1." minute", time()).", 0, 0)";
-        mysql_query($insert, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
       }
 
@@ -13687,8 +13691,8 @@ class CR3DCQuery{
 
     //Check if it's a realtime game
     $query1 = "SELECT * FROM cfm_gamesrealtime WHERE id='".$gid."'";
-    $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+    $num1 = mysqli_num_rows($return1);
 
     if($num1 != 0){
       $gamecode = 2;
@@ -13696,8 +13700,8 @@ class CR3DCQuery{
 
     //Check if it's a timed game
     $query2 = "SELECT * FROM timed_games WHERE id='".$gid."'";
-    $return2 = mysql_query($query2, $this->link) or die(mysql_error());
-    $num2 = mysql_numrows($return2);
+    $return2 = mysqli_query($this->link,$query2) or die(mysqli_error($this->link));
+    $num2 = mysqli_num_rows($return2);
 
     if($num2 != 0){
       $gamecode = 3;
@@ -13871,13 +13875,13 @@ class CR3DCQuery{
   function GetInitialGameFEN($ConfigFile, $GameID){
 
     $query1 = "SELECT * FROM c4m_newgameotherfen WHERE gameid='".$GameID."'";
-    $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+    $num1 = mysqli_num_rows($return1);
 
     $FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
     if($num1 != 0){
-      $FEN = mysql_result($return1,0,"fen");
+      $FEN = $this->mysqli_result($return1,0,"fen");
 
       $returncode = $FEN;
 
@@ -13923,34 +13927,34 @@ class CR3DCQuery{
   function SetServerEmailSettings($smtp, $port, $user, $pass, $domain){
 
     $query1 = "SELECT * FROM server_email_settings WHERE o_id='1'";
-    $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+    $num1 = mysqli_num_rows($return1);
 
     if($num1 != 0){
 
       $update1 = "UPDATE server_email_settings SET o_smtp='".$smtp."', o_smtp_port='".$port."' WHERE o_id='1'";
-      mysql_query($update1, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$update1) or die(mysqli_error($this->link));
 
     }else{
 
       $insert1 = "INSERT INTO server_email_settings VALUES('1', '".$smtp."', '".$port."')";
-      mysql_query($insert1, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$insert1) or die(mysqli_error($this->link));
 
     }
 
     $query1 = "SELECT * FROM smtp_settings WHERE o_id='1'";
-    $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+    $num1 = mysqli_num_rows($return1);
 
     if($num1 != 0){
 
       $update1 = "UPDATE smtp_settings SET o_user='".$user."', o_pass='".$pass."', o_domain='".$domain."' WHERE o_id='1'";
-      mysql_query($update1, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$update1) or die(mysqli_error($this->link));
 
     }else{
 
       $insert1 = "INSERT INTO smtp_settings VALUES('1', '".$user."', '".$pass."', '".$domain."')";
-      mysql_query($insert1, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$insert1) or die(mysqli_error($this->link));
 
     }
 
@@ -13968,12 +13972,12 @@ class CR3DCQuery{
     $port = "";
 
     $query1 = "SELECT * FROM server_email_settings WHERE o_id='1'";
-    $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+    $num1 = mysqli_num_rows($return1);
 
     if($num1 != 0){
-      $smtp = mysql_result($return1,0,"o_smtp");
-      $port = mysql_result($return1,0,"o_smtp_port");
+      $smtp = $this->mysqli_result($return1,0,"o_smtp");
+      $port = $this->mysqli_result($return1,0,"o_smtp_port");
     }
 
     $user = "";
@@ -13981,13 +13985,13 @@ class CR3DCQuery{
     $domain = "";
 
     $query1 = "SELECT * FROM smtp_settings WHERE o_id='1'";
-    $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+    $num1 = mysqli_num_rows($return1);
 
     if($num1 != 0){
-      $user = mysql_result($return1,0,"o_user");
-      $pass = mysql_result($return1,0,"o_pass");
-      $domain = mysql_result($return1,0,"o_domain");
+      $user = $this->mysqli_result($return1,0,"o_user");
+      $pass = $this->mysqli_result($return1,0,"o_pass");
+      $domain = $this->mysqli_result($return1,0,"o_domain");
     }
 
   }
@@ -14002,14 +14006,14 @@ class CR3DCQuery{
     $version = "0.0.0";
 
     $query1 = "SELECT * FROM server_version WHERE o_id='1'";
-    $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+    $num1 = mysqli_num_rows($return1);
 
     if($num1 != 0){
 
-      $major = mysql_result($return1,0,"o_major");
-      $minor = mysql_result($return1,0,"o_minor");
-      $build = mysql_result($return1,0,"o_build");
+      $major = $this->mysqli_result($return1,0,"o_major");
+      $minor = $this->mysqli_result($return1,0,"o_minor");
+      $build = $this->mysqli_result($return1,0,"o_build");
 
       $version = $major.".".$minor.".".$build;
 
@@ -14027,8 +14031,8 @@ class CR3DCQuery{
   function GetPreCreatedGameSelectBox(){
 
     $query = "SELECT * FROM cfm_creategamefen";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     echo "<select name='slc_precreate'>";
     echo "<option VALUE='0'>".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_144")."</option>";
@@ -14038,8 +14042,8 @@ class CR3DCQuery{
       $i = 0;
       while($i < $num){
 
-        $o_id = trim(mysql_result($return,$i,"o_id"));
-        $o_fen = trim(mysql_result($return,$i,"o_fen"));
+        $o_id = trim($this->mysqli_result($return,$i,"o_id"));
+        $o_fen = trim($this->mysqli_result($return,$i,"o_fen"));
 
         echo "<option VALUE='".$o_id."'>".$o_fen."</option>";
 
@@ -14061,14 +14065,14 @@ class CR3DCQuery{
   function GetOnlinePlayerList(){
 
     $query = "SELECT * FROM active_sessions";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i = 0;
       while($i < $num){
-        $player_id = trim(mysql_result($return,$i,"player_id"));
+        $player_id = trim($this->mysqli_result($return,$i,"player_id"));
 
         $this->GetPlayerInfoByID2($player_id, $userid, $password, $email);
         echo "<a href='./chess_statistics.php?playerid=".$player_id."&name=".$userid."'>".$userid."</a>";
@@ -14103,8 +14107,8 @@ LEFT JOIN cfm_game_options ON game.game_id = cfm_game_options.o_gameid
 LEFT JOIN timed_games ON game.game_id = timed_games.id
 WHERE game.status = 'A' AND completion_status = 'I'
 qq;
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num == 0) return;
 
@@ -14117,15 +14121,15 @@ qq;
 	while($i < $num)
 	{
 
-        $game_id = trim(mysql_result($return,$i,"game_id"));
-        $o_rating = trim(mysql_result($return,$i,"o_rating"));
-        $o_timetype = trim(mysql_result($return,$i,"o_timetype"));
-        $time_mode = trim(mysql_result($return,$i,"time_mode"));
+        $game_id = trim($this->mysqli_result($return,$i,"game_id"));
+        $o_rating = trim($this->mysqli_result($return,$i,"o_rating"));
+        $o_timetype = trim($this->mysqli_result($return,$i,"o_timetype"));
+        $time_mode = trim($this->mysqli_result($return,$i,"time_mode"));
 
-		$m1 = (int)@mysql_result($return, $i, 'moves1');
-		$m2 = (int)@mysql_result($return, $i, 'moves2');
-		$t1 = (int)@mysql_result($return, $i, 'times1');
-		$t2 = (int)@mysql_result($return, $i, 'times2');
+		$m1 = (int)@$this->mysqli_result($return, $i, 'moves1');
+		$m2 = (int)@$this->mysqli_result($return, $i, 'moves2');
+		$t1 = (int)@$this->mysqli_result($return, $i, 'times1');
+		$t2 = (int)@$this->mysqli_result($return, $i, 'times2');
 
 		$nTimeCheck = 0;
         switch($o_timetype){
@@ -14154,22 +14158,22 @@ qq;
 		$nTimeCheck = $nTimeCheck * 86400;	// Convert the day values into seconds.
 
 
-          $start_time = trim(mysql_result($return, $i, "start_time"));
-          $w_player_id = trim(mysql_result($return, $i, "w_player_id"));
-          $b_player_id = trim(mysql_result($return, $i, "b_player_id"));
-          $next_move = trim(mysql_result($return, $i, "next_move"));
+          $start_time = trim($this->mysqli_result($return, $i, "start_time"));
+          $w_player_id = trim($this->mysqli_result($return, $i, "w_player_id"));
+          $b_player_id = trim($this->mysqli_result($return, $i, "b_player_id"));
+          $next_move = trim($this->mysqli_result($return, $i, "next_move"));
 
           // // Check if there is a move that we can reference our time to.
           // $query2 = "SELECT * FROM move_history WHERE game_id = '".$game_id."' ORDER BY move_id DESC";
-          // $return2 = mysql_query($query2, $this->link) or die(mysql_error());
-          // $num2 = mysql_numrows($return2);
+          // $return2 = mysqli_query($this->link,$query2) or die(mysqli_error($this->link));
+          // $num2 = mysqli_num_rows($return2);
 
           // // defaut the time to the games start time
           // $move_time = $start_time;
 
           // // set the time to the last move if there is one
           // if($num2 != 0){
-            // $move_time = mysql_result($return2,0,"time");
+            // $move_time = $this->mysqli_result($return2,0,"time");
           // }
 
           // // check if the game has timed out
@@ -14186,10 +14190,10 @@ qq;
 			// Then work out if the used time + the elapsed time since the last move is
 			// greater than the allowed time. If that is the case, the game has timed out.
 			$query = "SELECT time FROM move_history WHERE game_id = '$game_id' ORDER BY time DESC LIMIT 1";
-			$return2 = mysql_query($query) or die(mysql_error());
-			$cnt = mysql_numrows($return2);
-			$last_move_time = ($cnt > 0 ? (int)mysql_result($return2, 0, 'time') : (int)$start_time);
-			$player_time_recorded = ($next_move == 'w' ? (int)mysql_result($return, $i, 'w_time_used') : (int)mysql_result($return, $i, 'b_time_used'));
+			$return2 = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+			$cnt = mysqli_num_rows($return2);
+			$last_move_time = ($cnt > 0 ? (int)$this->mysqli_result($return2, 0, 'time') : (int)$start_time);
+			$player_time_recorded = ($next_move == 'w' ? (int)$this->mysqli_result($return, $i, 'w_time_used') : (int)$this->mysqli_result($return, $i, 'b_time_used'));
 			$player_time_elapsed = $now - $last_move_time + $player_time_recorded;
 			//echo "$now - $last_move_time = $player_time_elapsed for ".($nTimeCheck * 86400)."<br/>";
 			if($player_time_elapsed > $nTimeCheck)
@@ -14271,7 +14275,7 @@ qq;
 
             // // Update game option list
             // $update = "UPDATE cfm_game_options SET o_timetype = '-' WHERE o_gameid='".$game_id."'";
-            // mysql_query($update, $this->link) or die(mysql_error());
+            // mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
             //////////////////////////////////////////////////////////////////////////
             // Send email
@@ -14316,8 +14320,8 @@ qq;
 
     // Select all games that are not timed out
     $query = "SELECT * FROM cfm_game_options WHERE o_timetype != '-'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
@@ -14326,9 +14330,9 @@ qq;
       while($i < $num)
 	  {
 
-        $o_gameid = trim(mysql_result($return,$i,"o_gameid"));
-        $o_rating = trim(mysql_result($return,$i,"o_rating"));
-        $o_timetype = trim(mysql_result($return,$i,"o_timetype"));
+        $o_gameid = trim($this->mysqli_result($return,$i,"o_gameid"));
+        $o_rating = trim($this->mysqli_result($return,$i,"o_rating"));
+        $o_timetype = trim($this->mysqli_result($return,$i,"o_timetype"));
 
         // Get the timout settings for the game type (in days)
         $nTimeCheck = 0;
@@ -14361,27 +14365,27 @@ qq;
 
         // get the game information
         $query1 = "SELECT * FROM game WHERE game_id='".$o_gameid."' AND status='A' AND completion_status='I'";
-        $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-        $num1 = mysql_numrows($return1);
+        $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+        $num1 = mysqli_num_rows($return1);
 
         if($num1 != 0){
 
-          $start_time = trim(mysql_result($return1,0,"start_time"));
-          $w_player_id = trim(mysql_result($return1,0,"w_player_id"));
-          $b_player_id = trim(mysql_result($return1,0,"b_player_id"));
-          $next_move = trim(mysql_result($return1,0,"next_move"));
+          $start_time = trim($this->mysqli_result($return1,0,"start_time"));
+          $w_player_id = trim($this->mysqli_result($return1,0,"w_player_id"));
+          $b_player_id = trim($this->mysqli_result($return1,0,"b_player_id"));
+          $next_move = trim($this->mysqli_result($return1,0,"next_move"));
 
           // // Check if there is a move that we can reference our time to.
           // $query2 = "SELECT * FROM move_history WHERE game_id = '".$o_gameid."' ORDER BY move_id DESC";
-          // $return2 = mysql_query($query2, $this->link) or die(mysql_error());
-          // $num2 = mysql_numrows($return2);
+          // $return2 = mysqli_query($this->link,$query2) or die(mysqli_error($this->link));
+          // $num2 = mysqli_num_rows($return2);
 
           // // defaut the time to the games start time
           // $move_time = $start_time;
 
           // // set the time to the last move if there is one
           // if($num2 != 0){
-            // $move_time = mysql_result($return2,0,"time");
+            // $move_time = $this->mysqli_result($return2,0,"time");
           // }
 
           // // check if the game has timed out
@@ -14458,7 +14462,7 @@ qq;
 
             // Update game option list
             $update = "UPDATE cfm_game_options SET o_timetype = '-' WHERE o_gameid='".$o_gameid."'";
-            mysql_query($update, $this->link) or die(mysql_error());
+            mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
             //////////////////////////////////////////////////////////////////////////
             // Send email
@@ -14506,12 +14510,12 @@ qq;
     $bRated = true;
 
     $query = "SELECT * FROM cfm_game_options WHERE o_gameid = '".$GameID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $o_rating = trim(mysql_result($return,0,"o_rating"));
+      $o_rating = trim($this->mysqli_result($return,0,"o_rating"));
 
       if($o_rating == "gunrated"){
         $bRated = false;
@@ -14531,16 +14535,16 @@ qq;
   function GetServerGameOptions(&$CSnail, &$CSlow, &$CNormal, &$CShort, &$CBlitz, &$timing_mode){
 
     $query = "SELECT * FROM admin_game_options WHERE o_id = 1";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-      $CSnail = trim(mysql_result($return,0,"o_snail"));
-      $CSlow = trim(mysql_result($return,0,"o_slow"));
-      $CNormal = trim(mysql_result($return,0,"o_normal"));
-      $CShort = trim(mysql_result($return,0,"o_short"));
-      $CBlitz = trim(mysql_result($return,0,"o_blitz"));
-	  $timing_mode = (int)trim(mysql_result($return, 0, 'timing_mode'));
+      $CSnail = trim($this->mysqli_result($return,0,"o_snail"));
+      $CSlow = trim($this->mysqli_result($return,0,"o_slow"));
+      $CNormal = trim($this->mysqli_result($return,0,"o_normal"));
+      $CShort = trim($this->mysqli_result($return,0,"o_short"));
+      $CBlitz = trim($this->mysqli_result($return,0,"o_blitz"));
+	  $timing_mode = (int)trim($this->mysqli_result($return, 0, 'timing_mode'));
     }
 
   }
@@ -14553,7 +14557,7 @@ qq;
   function SetServerGameOptions($CSnail, $CSlow, $CNormal, $CShort, $CBlitz, $timing_mode){
 
     $update = "UPDATE admin_game_options SET o_snail = ".$CSnail.", o_slow = ".$CSlow.", o_normal = ".$CNormal.", o_short = ".$CShort.", o_blitz = ".$CBlitz.", timing_mode = $timing_mode WHERE o_id = 1";
-    mysql_query($update, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
   }
 
@@ -14586,15 +14590,15 @@ qq;
     echo "</table>";
 
     $query = "SELECT * FROM cfm_game_options WHERE o_gameid = '".$GameID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $bRated = true;
 
     if($num != 0){
 
-      $o_rating = trim(mysql_result($return,0,"o_rating"));
-      $o_timetype = trim(mysql_result($return,0,"o_timetype"));
+      $o_rating = trim($this->mysqli_result($return,0,"o_rating"));
+      $o_timetype = trim($this->mysqli_result($return,0,"o_timetype"));
 
       if($o_rating == "gunrated"){
         $bRated = false;
@@ -14665,8 +14669,8 @@ qq;
   function CheckChessClubExists($ClubName){
 
     $query = "SELECT * FROM chess_club WHERE o_clubname = '".$ClubName."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $bExists = false;
 
@@ -14687,23 +14691,23 @@ qq;
 
     // Create the club
     $insert = "INSERT INTO chess_club VALUES(NULL, '".$ClubName."', NOW())";
-    mysql_query($insert, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
     $query = "SELECT LAST_INSERT_ID()";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-       $clubid = trim(mysql_result($return,0,0));
+       $clubid = trim($this->mysqli_result($return,0,0));
 
        // Add the creater to the members list and set him/her as the owner
        $insert = "INSERT INTO chess_club_members VALUES(NULL, '".$clubid."', '".$PlayerID."', 'y', 'y')";
-       mysql_query($insert, $this->link) or die(mysql_error());
+       mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
        // Create the chess club page record
        $insert = "INSERT INTO chess_club_page VALUES(NULL, '".$clubid."', '')";
-       mysql_query($insert, $this->link) or die(mysql_error());
+       mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
     }
 
@@ -14717,8 +14721,8 @@ qq;
   function IsUserInClub($PlayerID){
 
     $query = "SELECT * FROM chess_club_members WHERE o_playerid = '".$PlayerID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $bInClub = false;
 
@@ -14738,8 +14742,8 @@ qq;
   function GetChessClubSelectBox(){
 
     $query = "SELECT * FROM chess_club ORDER By o_clubname ASC";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     echo "<select NAME='lstclublist' size='15' style='width:540'>";
 
@@ -14748,8 +14752,8 @@ qq;
       $i = 0;
       While($i < $num){
 
-        $o_id = trim(mysql_result($return,$i,"o_id"));
-        $o_clubname = trim(mysql_result($return,$i,"o_clubname"));
+        $o_id = trim($this->mysqli_result($return,$i,"o_id"));
+        $o_clubname = trim($this->mysqli_result($return,$i,"o_clubname"));
 
         echo "<option VALUE='".$o_id."'>[".($i+1)."] ".$o_clubname."</option>";
 
@@ -14771,7 +14775,7 @@ qq;
 
     // Add the player to the members list
     $insert = "INSERT INTO chess_club_members VALUES(NULL, '".$ClubID."', '".$PlayerID."', 'n', 'n')";
-    mysql_query($insert, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
   }
 
@@ -14783,14 +14787,14 @@ qq;
   function IsUserApplicationPending($PlayerID){
 
     $query = "SELECT * FROM chess_club_members WHERE o_playerid = '".$PlayerID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $bAppPending = true;
 
     if($num != 0){
 
-      $o_active = mysql_result($return,0,"o_active");
+      $o_active = $this->mysqli_result($return,0,"o_active");
 
       if($o_active == 'y'){
         $bAppPending = false;
@@ -14810,7 +14814,7 @@ qq;
   function LeaveClub($PlayerID){
 
     $delete = "DELETE FROM chess_club_members WHERE o_playerid = '".$PlayerID."'";
-    mysql_query($delete, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$delete) or die(mysqli_error($this->link));
 
   }
 
@@ -14822,14 +14826,14 @@ qq;
   function IsUserClubLeader($PlayerID){
 
     $query = "SELECT * FROM chess_club_members WHERE o_playerid = '".$PlayerID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $bOwner = false;
 
     if($num != 0){
 
-      $o_owner = mysql_result($return,0,"o_owner");
+      $o_owner = $this->mysqli_result($return,0,"o_owner");
 
       if($o_owner == 'y'){
         $bOwner = true;
@@ -14849,16 +14853,16 @@ qq;
   function GetClubMemberlistAdmin($ClubLeaderID){
 
     $query = "SELECT * FROM chess_club_members WHERE o_playerid = '".$ClubLeaderID."' AND o_owner='y'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $o_chessclubid = mysql_result($return,0,"o_chessclubid");
+      $o_chessclubid = $this->mysqli_result($return,0,"o_chessclubid");
 
       $query1 = "SELECT * FROM chess_club_members WHERE o_chessclubid = '".$o_chessclubid."'";
-      $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-      $num1 = mysql_numrows($return1);
+      $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+      $num1 = mysqli_num_rows($return1);
 
       if($num1 != 0){
 
@@ -14875,9 +14879,9 @@ qq;
         $i=0;
         while($i < $num1){
 
-          $o_playerid = mysql_result($return1,$i,"o_playerid");
-          $o_owner = mysql_result($return1,$i,"o_owner");
-          $o_active = mysql_result($return1,$i,"o_active");
+          $o_playerid = $this->mysqli_result($return1,$i,"o_playerid");
+          $o_owner = $this->mysqli_result($return1,$i,"o_owner");
+          $o_active = $this->mysqli_result($return1,$i,"o_active");
 
           if($o_owner != 'y'){
 
@@ -14921,7 +14925,7 @@ qq;
   function ActivateClubMember($PlayerID){
 
     $update = "UPDATE chess_club_members SET o_active='y' WHERE o_playerid = '".$PlayerID."'";
-    mysql_query($update, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
   }
 
@@ -14933,26 +14937,26 @@ qq;
   function DisbandClub($PlayerID){
 
     $query = "SELECT * FROM chess_club_members WHERE o_playerid = '".$PlayerID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $o_chessclubid = mysql_result($return,0,"o_chessclubid");
+      $o_chessclubid = $this->mysqli_result($return,0,"o_chessclubid");
 
       if($this->IsUserClubLeader($PlayerID)){
 
         // Delete all the current members
         $delete = "DELETE FROM chess_club_members WHERE o_chessclubid = '".$o_chessclubid."'";
-        mysql_query($delete, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$delete) or die(mysqli_error($this->link));
 
         // Delete club page
         $delete = "DELETE FROM chess_club_page WHERE o_chessclubid = '".$o_chessclubid."'";
-        mysql_query($delete, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$delete) or die(mysqli_error($this->link));
 
         //Delete the club
         $delete = "DELETE FROM chess_club WHERE o_id = '".$o_chessclubid."'";
-        mysql_query($delete, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$delete) or die(mysqli_error($this->link));
 
       }
 
@@ -14968,23 +14972,23 @@ qq;
   function GetClubPageHTML($PlayerID){
 
     $query = "SELECT * FROM chess_club_members WHERE o_playerid = '".$PlayerID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $txtpagehtml = "";
 
     if($num != 0){
 
-      $o_chessclubid = mysql_result($return,0,"o_chessclubid");
+      $o_chessclubid = $this->mysqli_result($return,0,"o_chessclubid");
 
       if($this->IsUserClubLeader($PlayerID)){
 
         $query1 = "SELECT * FROM chess_club_page WHERE o_chessclubid = '".$o_chessclubid."'";
-        $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-        $num1 = mysql_numrows($return1);
+        $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+        $num1 = mysqli_num_rows($return1);
 
         if($num1 != 0){
-          $txtpagehtml = mysql_result($return1,0,"o_pagehtml");
+          $txtpagehtml = $this->mysqli_result($return1,0,"o_pagehtml");
         }
 
       }
@@ -15003,17 +15007,17 @@ qq;
   function UpdateClubPageHTML($PlayerID, $HTML){
 
     $query = "SELECT * FROM chess_club_members WHERE o_playerid = '".$PlayerID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $o_chessclubid = mysql_result($return,0,"o_chessclubid");
+      $o_chessclubid = $this->mysqli_result($return,0,"o_chessclubid");
 
       if($this->IsUserClubLeader($PlayerID)){
 
         $update = "UPDATE chess_club_page SET o_pagehtml='".addslashes($HTML)."' WHERE o_chessclubid = '".$o_chessclubid."'";
-        mysql_query($update, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
       }
 
@@ -15029,13 +15033,13 @@ qq;
   function GetClubPageHTMLPlayer($ClubID){
 
     $query1 = "SELECT * FROM chess_club_page WHERE o_chessclubid = '".$ClubID."'";
-    $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+    $num1 = mysqli_num_rows($return1);
 
     $txtpagehtml = "";
 
     if($num1 != 0){
-      $txtpagehtml = mysql_result($return1,0,"o_pagehtml");
+      $txtpagehtml = $this->mysqli_result($return1,0,"o_pagehtml");
     }
 
     return stripslashes($txtpagehtml);
@@ -15050,13 +15054,13 @@ qq;
   function GetClubNameById($ClubID){
 
     $query = "SELECT * FROM chess_club WHERE o_id = '".$ClubID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $clubname = "";
 
     if($num != 0){
-      $clubname = mysql_result($return,0,"o_clubname");
+      $clubname = $this->mysqli_result($return,0,"o_clubname");
     }
 
     return $clubname;
@@ -15071,12 +15075,12 @@ qq;
   function ChessClubPageMenu($PlayerID){
 
     $query = "SELECT * FROM chess_club_members WHERE o_playerid = '".$PlayerID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $o_chessclubid = mysql_result($return,0,"o_chessclubid");
+      $o_chessclubid = $this->mysqli_result($return,0,"o_chessclubid");
       $clubname = $this->GetClubNameById($o_chessclubid);
 
       echo "<center>";
@@ -15098,35 +15102,35 @@ qq;
 
     //Get game where the player is white
     $queryw = "SELECT * FROM game WHERE w_player_id = ".$ID." AND completion_status IN('A','I')";
-    $returnw = mysql_query($queryw, $this->link) or die(mysql_error());
-    $numw = mysql_numrows($returnw);
+    $returnw = mysqli_query($this->link,$queryw) or die(mysqli_error($this->link));
+    $numw = mysqli_num_rows($returnw);
 
     // //get all the games from the c4m_tournamentgames table
     // $queryt = "SELECT tg_gameid FROM c4m_tournamentgames";
-    // $returnt = mysql_query($queryt, $this->link) or die(mysql_error());
-    // $numt = mysql_numrows($returnt);
+    // $returnt = mysqli_query($this->link,$queryt) or die(mysqli_error($this->link));
+    // $numt = mysqli_num_rows($returnt);
 
     if($numw != 0){
 
       $i = 0;
       while($i < $numw){
 
-        $game_id = trim(mysql_result($returnw,$i,"game_id"));
-        $initiator = trim(mysql_result($returnw,$i,"initiator"));
-        $w_player_id = trim(mysql_result($returnw,$i,"w_player_id"));
-        $b_player_id = trim(mysql_result($returnw,$i,"b_player_id"));
-        $next_move = trim(mysql_result($returnw,$i,"next_move"));
-        $status = trim(mysql_result($returnw,$i,"status"));
-        $completion_status = trim(mysql_result($returnw,$i,"completion_status"));
+        $game_id = trim($this->mysqli_result($returnw,$i,"game_id"));
+        $initiator = trim($this->mysqli_result($returnw,$i,"initiator"));
+        $w_player_id = trim($this->mysqli_result($returnw,$i,"w_player_id"));
+        $b_player_id = trim($this->mysqli_result($returnw,$i,"b_player_id"));
+        $next_move = trim($this->mysqli_result($returnw,$i,"next_move"));
+        $status = trim($this->mysqli_result($returnw,$i,"status"));
+        $completion_status = trim($this->mysqli_result($returnw,$i,"completion_status"));
 
-        $start_time = trim(mysql_result($returnw,$i,"start_time"));
+        $start_time = trim($this->mysqli_result($returnw,$i,"start_time"));
 
         //Check if the game is a tournament game
         // $ti = 0;
         // $bexit = false;
         // while($ti < $numt && $bexit == false){
 
-          // $TGID = mysql_result($returnt, $ti, 0);
+          // $TGID = $this->mysqli_result($returnt, $ti, 0);
 
           // if($TGID == $game_id){
             // $bexit = true;
@@ -15233,29 +15237,29 @@ qq;
 
     //Get game where the player is black
     $queryb = "SELECT * FROM game WHERE b_player_id = ".$ID." AND completion_status IN('A','I')";
-    $returnb = mysql_query($queryb, $this->link) or die(mysql_error());
-    $numb = mysql_numrows($returnb);
+    $returnb = mysqli_query($this->link,$queryb) or die(mysqli_error($this->link));
+    $numb = mysqli_num_rows($returnb);
 
     if($numb != 0){
 
       $i = 0;
       while($i < $numb){
 
-        $game_id = trim(mysql_result($returnb,$i,"game_id"));
-        $initiator = trim(mysql_result($returnb,$i,"initiator"));
-        $w_player_id = trim(mysql_result($returnb,$i,"w_player_id"));
-        $b_player_id = trim(mysql_result($returnb,$i,"b_player_id"));
-        $next_move = trim(mysql_result($returnb,$i,"next_move"));
-        $start_time = trim(mysql_result($returnb,$i,"start_time"));
-        $status = trim(mysql_result($returnb,$i,"status"));
-        $completion_status = trim(mysql_result($returnb,$i,"completion_status"));
+        $game_id = trim($this->mysqli_result($returnb,$i,"game_id"));
+        $initiator = trim($this->mysqli_result($returnb,$i,"initiator"));
+        $w_player_id = trim($this->mysqli_result($returnb,$i,"w_player_id"));
+        $b_player_id = trim($this->mysqli_result($returnb,$i,"b_player_id"));
+        $next_move = trim($this->mysqli_result($returnb,$i,"next_move"));
+        $start_time = trim($this->mysqli_result($returnb,$i,"start_time"));
+        $status = trim($this->mysqli_result($returnb,$i,"status"));
+        $completion_status = trim($this->mysqli_result($returnb,$i,"completion_status"));
 
         //Check if the game is a tournament game
         // $ti = 0;
         // $bexit = false;
         // while($ti < $numt && $bexit == false){
 
-          // $TGID = mysql_result($returnt, $ti, 0);
+          // $TGID = $this->mysqli_result($returnt, $ti, 0);
 
           // if($TGID == $game_id){
             // $bexit = true;
@@ -15379,20 +15383,20 @@ WHERE
 	(`completion_status` = 'A' OR `completion_status` = 'I') AND
 	(`status` = 'A' OR (`status` = 'W' AND initiator = $ID))
 qq;
-    $result = mysql_query($query, $this->link) or die(mysql_error());
-    $result_cnt = mysql_numrows($result);
+    $result = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $result_cnt = mysqli_num_rows($result);
 	
 	$i = 0;
 	while($i < $result_cnt)
 	{
-		$game_id = trim(mysql_result($result,$i,"game_id"));
-        $initiator = trim(mysql_result($result,$i,"initiator"));
-        $w_player_id = trim(mysql_result($result,$i,"w_player_id"));
-        $b_player_id = trim(mysql_result($result,$i,"b_player_id"));
-        $next_move = trim(mysql_result($result,$i,"next_move"));
-        $status = trim(mysql_result($result,$i,"status"));
-        $completion_status = trim(mysql_result($result,$i,"completion_status"));
-        $start_time = trim(mysql_result($result,$i,"start_time"));
+		$game_id = trim($this->mysqli_result($result,$i,"game_id"));
+        $initiator = trim($this->mysqli_result($result,$i,"initiator"));
+        $w_player_id = trim($this->mysqli_result($result,$i,"w_player_id"));
+        $b_player_id = trim($this->mysqli_result($result,$i,"b_player_id"));
+        $next_move = trim($this->mysqli_result($result,$i,"next_move"));
+        $status = trim($this->mysqli_result($result,$i,"status"));
+        $completion_status = trim($this->mysqli_result($result,$i,"completion_status"));
+        $start_time = trim($this->mysqli_result($result,$i,"start_time"));
 		
 		$playing_white = ($ID == $w_player_id ? TRUE : FALSE);
 		
@@ -15486,35 +15490,35 @@ qq;
 
     //Get game where the player is white
     $queryw = "SELECT * FROM game WHERE w_player_id = '0' AND completion_status = 'I'";
-    $returnw = mysql_query($queryw, $this->link) or die(mysql_error());
-    $numw = mysql_numrows($returnw);
+    $returnw = mysqli_query($this->link,$queryw) or die(mysqli_error($this->link));
+    $numw = mysqli_num_rows($returnw);
 
     //get all the games from the c4m_tournamentgames table
     $queryt = "SELECT tg_gameid FROM c4m_tournamentgames";
-    $returnt = mysql_query($queryt, $this->link) or die(mysql_error());
-    $numt = mysql_numrows($returnt);
+    $returnt = mysqli_query($this->link,$queryt) or die(mysqli_error($this->link));
+    $numt = mysqli_num_rows($returnt);
 
     if($numw != 0){
 
       $i = 0;
       while($i < $numw){
 
-        $game_id = trim(mysql_result($returnw,$i,"game_id"));
-        $initiator = trim(mysql_result($returnw,$i,"initiator"));
-        $w_player_id = trim(mysql_result($returnw,$i,"w_player_id"));
-        $b_player_id = trim(mysql_result($returnw,$i,"b_player_id"));
-        $next_move = trim(mysql_result($returnw,$i,"next_move"));
-        $status = trim(mysql_result($returnw,$i,"status"));
-        $completion_status = trim(mysql_result($returnw,$i,"completion_status"));
+        $game_id = trim($this->mysqli_result($returnw,$i,"game_id"));
+        $initiator = trim($this->mysqli_result($returnw,$i,"initiator"));
+        $w_player_id = trim($this->mysqli_result($returnw,$i,"w_player_id"));
+        $b_player_id = trim($this->mysqli_result($returnw,$i,"b_player_id"));
+        $next_move = trim($this->mysqli_result($returnw,$i,"next_move"));
+        $status = trim($this->mysqli_result($returnw,$i,"status"));
+        $completion_status = trim($this->mysqli_result($returnw,$i,"completion_status"));
 
-        $start_time = trim(mysql_result($returnw,$i,"start_time"));
+        $start_time = trim($this->mysqli_result($returnw,$i,"start_time"));
 
         //Check if the game is a tournament game
         $ti = 0;
         $bexit = false;
         while($ti < $numt && $bexit == false){
 
-          $TGID = mysql_result($returnt, $ti, 0);
+          $TGID = $this->mysqli_result($returnt, $ti, 0);
 
           if($TGID == $game_id){
             $bexit = true;
@@ -15621,29 +15625,29 @@ qq;
 
     //Get game where the player is black
     $queryb = "SELECT * FROM game WHERE b_player_id = '0' AND completion_status = 'I' ";
-    $returnb = mysql_query($queryb, $this->link) or die(mysql_error());
-    $numb = mysql_numrows($returnb);
+    $returnb = mysqli_query($this->link,$queryb) or die(mysqli_error($this->link));
+    $numb = mysqli_num_rows($returnb);
 
     if($numb != 0){
 
       $i = 0;
       while($i < $numb){
 
-        $game_id = trim(mysql_result($returnb,$i,"game_id"));
-        $initiator = trim(mysql_result($returnb,$i,"initiator"));
-        $w_player_id = trim(mysql_result($returnb,$i,"w_player_id"));
-        $b_player_id = trim(mysql_result($returnb,$i,"b_player_id"));
-        $next_move = trim(mysql_result($returnb,$i,"next_move"));
-        $start_time = trim(mysql_result($returnb,$i,"start_time"));
-        $status = trim(mysql_result($returnb,$i,"status"));
-        $completion_status = trim(mysql_result($returnb,$i,"completion_status"));
+        $game_id = trim($this->mysqli_result($returnb,$i,"game_id"));
+        $initiator = trim($this->mysqli_result($returnb,$i,"initiator"));
+        $w_player_id = trim($this->mysqli_result($returnb,$i,"w_player_id"));
+        $b_player_id = trim($this->mysqli_result($returnb,$i,"b_player_id"));
+        $next_move = trim($this->mysqli_result($returnb,$i,"next_move"));
+        $start_time = trim($this->mysqli_result($returnb,$i,"start_time"));
+        $status = trim($this->mysqli_result($returnb,$i,"status"));
+        $completion_status = trim($this->mysqli_result($returnb,$i,"completion_status"));
 
         //Check if the game is a tournament game
         $ti = 0;
         $bexit = false;
         while($ti < $numt && $bexit == false){
 
-          $TGID = mysql_result($returnt, $ti, 0);
+          $TGID = $this->mysqli_result($returnt, $ti, 0);
 
           if($TGID == $game_id){
             $bexit = true;
@@ -15767,20 +15771,20 @@ WHERE
 	(`w_player_id` = $ID OR `b_player_id` = $ID OR `w_player_id` = 0 OR `b_player_id` = 0) AND
 	`initiator` <> $ID
 qq;
-    $result = mysql_query($query, $this->link) or die(mysql_error());
-    $result_cnt = mysql_numrows($result);
+    $result = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $result_cnt = mysqli_num_rows($result);
 	
 	$i = 0;
 	while($i < $result_cnt)
 	{
-		$game_id = trim(mysql_result($result,$i,"game_id"));
-        $initiator = trim(mysql_result($result,$i,"initiator"));
-        $w_player_id = trim(mysql_result($result,$i,"w_player_id"));
-        $b_player_id = trim(mysql_result($result,$i,"b_player_id"));
-        $next_move = trim(mysql_result($result,$i,"next_move"));
-        $status = trim(mysql_result($result,$i,"status"));
-        $completion_status = trim(mysql_result($result,$i,"completion_status"));
-        $start_time = trim(mysql_result($result,$i,"start_time"));
+		$game_id = trim($this->mysqli_result($result,$i,"game_id"));
+        $initiator = trim($this->mysqli_result($result,$i,"initiator"));
+        $w_player_id = trim($this->mysqli_result($result,$i,"w_player_id"));
+        $b_player_id = trim($this->mysqli_result($result,$i,"b_player_id"));
+        $next_move = trim($this->mysqli_result($result,$i,"next_move"));
+        $status = trim($this->mysqli_result($result,$i,"status"));
+        $completion_status = trim($this->mysqli_result($result,$i,"completion_status"));
+        $start_time = trim($this->mysqli_result($result,$i,"start_time"));
 		
 		$playing_white = ($ID == $w_player_id ? TRUE : FALSE);
 		
@@ -15862,7 +15866,7 @@ qq;
   function AddWordsToFilter($strWord){
 
     $insert = "INSERT INTO language_filter VALUES(NULL, '".$strWord."')";
-    mysql_query($insert, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
   }
 
@@ -15874,8 +15878,8 @@ qq;
   function GetFilteredWordSelectBox(){
 
     $query = "SELECT * FROM language_filter";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     echo "<select NAME='lstwordlist' size='15' style='width:540'>";
 
@@ -15884,8 +15888,8 @@ qq;
       $i=0;
       while($i < $num){
 
-        $o_id = mysql_result($return,$i,"o_id");
-        $o_word = mysql_result($return,$i,"o_word");
+        $o_id = $this->mysqli_result($return,$i,"o_id");
+        $o_word = $this->mysqli_result($return,$i,"o_word");
 
         echo "<option value='".$o_id."'>".$o_word."</option>";
 
@@ -15907,7 +15911,7 @@ qq;
   function RemoveFilteredWords($ID){
 
     $delete = "DELETE FROM language_filter WHERE o_id='".$ID."'";
-    mysql_query($delete, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$delete) or die(mysqli_error($this->link));
 
   }
 
@@ -15919,16 +15923,16 @@ qq;
   function GetFilteredWordArray(&$aArray){
 
     $query = "SELECT * FROM language_filter";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i=0;
       while($i < $num){
 
-        $o_id = mysql_result($return,$i,"o_id");
-        $o_word = mysql_result($return,$i,"o_word");
+        $o_id = $this->mysqli_result($return,$i,"o_id");
+        $o_word = $this->mysqli_result($return,$i,"o_word");
 
         array_push($aArray, $o_word);
 
@@ -15948,8 +15952,8 @@ qq;
   function GetEmailLogHTML(){
 
     $query = "SELECT * FROM email_log";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     // Skin table settings
     if(defined('CFG_GETEMAILLOGHTML_TABLE1_WIDTH') && defined('CFG_GETEMAILLOGHTML_TABLE1_BORDER') && defined('CFG_GETEMAILLOGHTML_TABLE1_CELLPADDING') && defined('CFG_GETEMAILLOGHTML_TABLE1_CELLSPACING') && defined('CFG_GETEMAILLOGHTML_TABLE1_ALIGN')){
@@ -15967,14 +15971,14 @@ qq;
       $i=0;
       while($i < $num){
 
-        $o_id = mysql_result($return,$i,"o_id");
-        $o_to = mysql_result($return,$i,"o_to");
-        $o_fromemail = mysql_result($return,$i,"o_fromemail");
-        $o_fromname = mysql_result($return,$i,"o_fromname");
-        $o_subject = mysql_result($return,$i,"o_subject");
-        $o_body = mysql_result($return,$i,"o_body");
-        $o_errormsg = mysql_result($return,$i,"o_errormsg");
-        $o_date = mysql_result($return,$i,"o_date");
+        $o_id = $this->mysqli_result($return,$i,"o_id");
+        $o_to = $this->mysqli_result($return,$i,"o_to");
+        $o_fromemail = $this->mysqli_result($return,$i,"o_fromemail");
+        $o_fromname = $this->mysqli_result($return,$i,"o_fromname");
+        $o_subject = $this->mysqli_result($return,$i,"o_subject");
+        $o_body = $this->mysqli_result($return,$i,"o_body");
+        $o_errormsg = $this->mysqli_result($return,$i,"o_errormsg");
+        $o_date = $this->mysqli_result($return,$i,"o_date");
 
         $text = "TO: $o_to<br>FROM: $o_fromemail<br>SUBLECT: $o_subject<br>ERROR: $o_errormsg<br>DATE: $o_date";
 
@@ -15998,7 +16002,7 @@ qq;
   function DeleteEmailLog($id){
 
     $delete = "DELETE FROM email_log WHERE o_id='".$id."'";
-    mysql_query($delete, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$delete) or die(mysqli_error($this->link));
 
   }
 
@@ -16010,25 +16014,25 @@ qq;
   function SendEmailLog($id){
 
     $query = "SELECT * FROM email_log WHERE o_id='".$id."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i = 0;
-      $o_id = mysql_result($return,$i,"o_id");
-      $o_to = mysql_result($return,$i,"o_to");
-      $o_fromemail = mysql_result($return,$i,"o_fromemail");
-      $o_fromname = mysql_result($return,$i,"o_fromname");
-      $o_subject = mysql_result($return,$i,"o_subject");
-      $o_body = mysql_result($return,$i,"o_body");
-      $o_errormsg = mysql_result($return,$i,"o_errormsg");
-      $o_date = mysql_result($return,$i,"o_date");
+      $o_id = $this->mysqli_result($return,$i,"o_id");
+      $o_to = $this->mysqli_result($return,$i,"o_to");
+      $o_fromemail = $this->mysqli_result($return,$i,"o_fromemail");
+      $o_fromname = $this->mysqli_result($return,$i,"o_fromname");
+      $o_subject = $this->mysqli_result($return,$i,"o_subject");
+      $o_body = $this->mysqli_result($return,$i,"o_body");
+      $o_errormsg = $this->mysqli_result($return,$i,"o_errormsg");
+      $o_date = $this->mysqli_result($return,$i,"o_date");
 
       $this->SendEmail($o_to, $o_fromemail, $o_fromname, $o_subject, $o_body);
 
       $delete = "DELETE FROM email_log WHERE o_id='".$id."'";
-      mysql_query($delete, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$delete) or die(mysqli_error($this->link));
     }
 
   }
@@ -16041,13 +16045,13 @@ qq;
   function LoginTemp($UserID, $Password){
 
     $query = "SELECT * FROM player WHERE userid = '".$UserID."' AND password = '".$Password."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $player_id = "";
 
     if($num != 0){
-       $player_id  = trim(mysql_result($return,0,"player_id"));
+       $player_id  = trim($this->mysqli_result($return,0,"player_id"));
     }
 
     return $player_id;
@@ -16069,29 +16073,29 @@ qq;
 
     // Count proposed tournaments
     $query = "SELECT COUNT(*) FROM c4m_tournament WHERE t_status='P'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-      $nProposedTcount = mysql_result($return,0,0);
+      $nProposedTcount = $this->mysqli_result($return,0,0);
     }
 
     // Get pending player count
     $query = "SELECT COUNT(*) FROM pendingplayer";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-      $nNewPlayerscount = mysql_result($return,0,0);
+      $nNewPlayerscount = $this->mysqli_result($return,0,0);
     }
 
     // Get fail email count
     $query = "SELECT COUNT(*) FROM email_log";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-      $nFaildEmailcount = mysql_result($return,0,0);
+      $nFaildEmailcount = $this->mysqli_result($return,0,0);
     }
 
     //$nProposedTcount
@@ -16232,16 +16236,16 @@ qq;
   function GetPreCreatedGamesListHTML(){
 
     $query = "SELECT * FROM cfm_creategamefen";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i=0;
       while($i < $num){
 
-        $o_id  = trim(mysql_result($return,$i,"o_id"));
-        $o_fen  = trim(mysql_result($return,$i,"o_fen"));
+        $o_id  = trim($this->mysqli_result($return,$i,"o_id"));
+        $o_fen  = trim($this->mysqli_result($return,$i,"o_fen"));
 
         echo "<tr>";
         echo "<td class='row1'>";
@@ -16273,11 +16277,11 @@ qq;
     $queryb = "SELECT * FROM game WHERE b_player_id =".$PID." AND completion_status='I' AND status='A'";
 
     // Query the database
-    $returnw = mysql_query($queryw, $this->link) or die(mysql_error());
-    $numw = mysql_numrows($returnw);
+    $returnw = mysqli_query($this->link,$queryw) or die(mysqli_error($this->link));
+    $numw = mysqli_num_rows($returnw);
 
-    $returnb = mysql_query($queryb, $this->link) or die(mysql_error());
-    $numb = mysql_numrows($returnb);
+    $returnb = mysqli_query($this->link,$queryb) or die(mysqli_error($this->link));
+    $numb = mysqli_num_rows($returnb);
 
     echo "<br>";
 
@@ -16294,13 +16298,13 @@ qq;
     $i = 0;
     while($i < $numw){
 
-      $game_id = trim(mysql_result($returnw,$i,"game_id"));
-      $initiator = trim(mysql_result($returnw,$i,"initiator"));
-      $w_player_id = trim(mysql_result($returnw,$i,"w_player_id"));
-      $b_player_id = trim(mysql_result($returnw,$i,"b_player_id"));
-      $status = trim(mysql_result($returnw,$i,"status"));
-      $completion_status = trim(mysql_result($returnw,$i,"completion_status"));
-      $start_time = trim(mysql_result($returnw,$i,"start_time"));
+      $game_id = trim($this->mysqli_result($returnw,$i,"game_id"));
+      $initiator = trim($this->mysqli_result($returnw,$i,"initiator"));
+      $w_player_id = trim($this->mysqli_result($returnw,$i,"w_player_id"));
+      $b_player_id = trim($this->mysqli_result($returnw,$i,"b_player_id"));
+      $status = trim($this->mysqli_result($returnw,$i,"status"));
+      $completion_status = trim($this->mysqli_result($returnw,$i,"completion_status"));
+      $start_time = trim($this->mysqli_result($returnw,$i,"start_time"));
 
       echo "<tr>";
       echo "<td class='row2'><a href='./chess_game.php?gameid=".$game_id."'>".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_142")."</a></td>";
@@ -16317,13 +16321,13 @@ qq;
     $i = 0;
     while($i < $numb){
 
-      $game_id = trim(mysql_result($returnb,$i,"game_id"));
-      $initiator = trim(mysql_result($returnb,$i,"initiator"));
-      $w_player_id = trim(mysql_result($returnb,$i,"w_player_id"));
-      $b_player_id = trim(mysql_result($returnb,$i,"b_player_id"));
-      $status = trim(mysql_result($returnb,$i,"status"));
-      $completion_status = trim(mysql_result($returnb,$i,"completion_status"));
-      $start_time = trim(mysql_result($returnb,$i,"start_time"));
+      $game_id = trim($this->mysqli_result($returnb,$i,"game_id"));
+      $initiator = trim($this->mysqli_result($returnb,$i,"initiator"));
+      $w_player_id = trim($this->mysqli_result($returnb,$i,"w_player_id"));
+      $b_player_id = trim($this->mysqli_result($returnb,$i,"b_player_id"));
+      $status = trim($this->mysqli_result($returnb,$i,"status"));
+      $completion_status = trim($this->mysqli_result($returnb,$i,"completion_status"));
+      $start_time = trim($this->mysqli_result($returnb,$i,"start_time"));
 
       echo "<tr>";
       echo "<td class='row2'><a href='./chess_game.php?gameid=".$game_id."'>".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_142")."</a></td>";
@@ -16350,13 +16354,13 @@ qq;
   function GetDefaultAdminChessboardColors(&$clrl, &$clrd){
 
     $query = "SELECT * FROM admin_chessboard_colors";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $clrd = trim(mysql_result($return,0,"o_dcolor"));
-      $clrl = trim(mysql_result($return,0,"o_lcolor"));
+      $clrd = trim($this->mysqli_result($return,0,"o_dcolor"));
+      $clrl = trim($this->mysqli_result($return,0,"o_lcolor"));
 
     }
 
@@ -16370,7 +16374,7 @@ qq;
   function UpdateDefaultAdminChessboardColors($clrl, $clrd){
 
     $update = "UPDATE admin_chessboard_colors SET o_dcolor='".$clrd."', o_lcolor='".$clrl."' WHERE o_id=1";
-    $return = mysql_query($update, $this->link) or die(mysql_error());
+    $return = mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
   }
 
@@ -16422,7 +16426,7 @@ qq;
   function AddOnlinePlayerToGraphData($player){
 
     $insert = "INSERT INTO whos_online_graph VALUES(NULL, NOW(), '".$player."')";
-    mysql_query($insert, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
   }
 
@@ -16438,8 +16442,8 @@ qq;
     $ThirdDate = 0;
 
     $query = "SELECT DISTINCT o_date FROM whos_online_graph WHERE o_date <= NOW() ORDER BY o_date DESC;";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
@@ -16447,15 +16451,15 @@ qq;
       $switch = 1;
       while($i < $num){
 
-        $date = trim(mysql_result($return,$i,"o_date"));
+        $date = trim($this->mysqli_result($return,$i,"o_date"));
 
         $query1 = "SELECT COUNT(*) FROM whos_online_graph WHERE o_date = '".$date."';";
-        $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-        $num1 = mysql_numrows($return1);
+        $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+        $num1 = mysqli_num_rows($return1);
 
         if($num1 != 0){
 
-          $count = mysql_result($return1,0,0);
+          $count = $this->mysqli_result($return1,0,0);
 
           if($switch == 1){
             $FirstDate = $count;
@@ -16487,8 +16491,8 @@ qq;
     $Date3 = "*";
 
     $query = "SELECT DISTINCT o_date FROM whos_online_graph WHERE o_date <= NOW() ORDER BY o_date DESC;";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
@@ -16496,7 +16500,7 @@ qq;
       $switch = 1;
       while($i < $num){
 
-        $date = trim(mysql_result($return,$i,"o_date"));
+        $date = trim($this->mysqli_result($return,$i,"o_date"));
 
         if($switch == 1){
           $Date1 = $date;
@@ -16522,15 +16526,15 @@ qq;
   function UpdateLastLoginInfo($playerid){
 
     $query = "SELECT * FROM player_last_login WHERE o_playerid = '".$playerid."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
       $update = "UPDATE player_last_login SET o_date = NOW() WHERE o_playerid = '".$playerid."'";
-      mysql_query($update, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$update) or die(mysqli_error($this->link));
     }else{
       $insert = "INSERT INTO player_last_login VALUES(NULL, '".$playerid."', NOW())";
-      mysql_query($insert, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
     }
 
   }
@@ -16543,8 +16547,8 @@ qq;
   function GetClubListHTML(){
 
     $query = "SELECT * FROM chess_club ORDER BY o_clubname ASC";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     // Skin table settings
     if(defined('CFG_GETCLUBLISTHTML_TABLE1_WIDTH') && defined('CFG_GETCLUBLISTHTML_TABLE1_BORDER') && defined('CFG_GETCLUBLISTHTML_TABLE1_CELLPADDING') && defined('CFG_GETCLUBLISTHTML_TABLE1_CELLSPACING') && defined('CFG_GETCLUBLISTHTML_TABLE1_ALIGN') && defined('CFG_GETCLUBLISTHTML_ROW1_WIDTH')){
@@ -16574,9 +16578,9 @@ qq;
       $i=0;
       while($i < $num){
 
-        $id = mysql_result($return,$i,"o_id");
-        $clubname = mysql_result($return,$i,"o_clubname");
-        $date = mysql_result($return,$i,"o_date");
+        $id = $this->mysqli_result($return,$i,"o_id");
+        $clubname = $this->mysqli_result($return,$i,"o_clubname");
+        $date = $this->mysqli_result($return,$i,"o_date");
 
         echo "<tr>";
         echo "<td class='row1'><a href='./chess_club_page.php?clubid=".$id."'>".$clubname."</a></td>";
@@ -16660,14 +16664,14 @@ qq;
     if($GameTypeCode == 1 || $GameTypeCode == 2){
 
       $query = "SELECT * FROM cfm_game_options WHERE o_gameid='".$GameID."'";
-      $return = mysql_query($query, $this->link) or die(mysql_error());
-      $num = mysql_numrows($return);
+      $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+      $num = mysqli_num_rows($return);
 
       if($num != 0){
 
-        $o_gameid = trim(mysql_result($return,0,"o_gameid"));
-        $o_rating = trim(mysql_result($return,0,"o_rating"));
-        $o_timetype = trim(mysql_result($return,0,"o_timetype"));
+        $o_gameid = trim($this->mysqli_result($return,0,"o_gameid"));
+        $o_rating = trim($this->mysqli_result($return,0,"o_rating"));
+        $o_timetype = trim($this->mysqli_result($return,0,"o_timetype"));
 
         $nTimeCheck = 0;
         $this->GetServerGameOptions($CSnail, $CSlow, $CNormal, $CShort, $CBlitz, $timing_mode);
@@ -16697,26 +16701,26 @@ qq;
         }
 
         $query1 = "SELECT * FROM move_history WHERE game_id='".$o_gameid."' ORDER BY move_id DESC";
-        $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-        $num1 = mysql_numrows($return1);
+        $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+        $num1 = mysqli_num_rows($return1);
 
         $days = 0;
 
         if($num1 != 0){
 
-          $move_time = trim(mysql_result($return1,0,"time"));
+          $move_time = trim($this->mysqli_result($return1,0,"time"));
           $nTimeDiff = strtotime("+".$nTimeCheck." day", $move_time) - time();
           $days = $this->timeLeft($nTimeDiff);
 
         }else{
 
           $query2 = "SELECT * FROM game WHERE game_id = '".$o_gameid."'";
-          $return2 = mysql_query($query2, $this->link) or die(mysql_error());
-          $num2 = mysql_numrows($return2);
+          $return2 = mysqli_query($this->link,$query2) or die(mysqli_error($this->link));
+          $num2 = mysqli_num_rows($return2);
 
           if($num2){
 
-            $move_time = trim(mysql_result($return2,0,"start_time"));
+            $move_time = trim($this->mysqli_result($return2,0,"start_time"));
             $nTimeDiff = strtotime("+".$nTimeCheck." day", $move_time) - time();
             $days = $this->timeLeft($nTimeDiff);
 
@@ -16749,11 +16753,11 @@ qq;
 
     //Who made the first move
     $query1 = "SELECT * FROM move_history WHERE game_id = '".$GameID."' ORDER BY move_id DESC";
-    $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+    $num1 = mysqli_num_rows($return1);
 
     if($num1 != 0){
-      $move = trim(mysql_result($return1, 0, "move"));
+      $move = trim($this->mysqli_result($return1, 0, "move"));
 
       switch($move){
 
@@ -16819,15 +16823,15 @@ qq;
   function SetPlayerCreditsAdmin($Credits){
 
     $query = "SELECT * FROM admin_player_credits WHERE o_id=1";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
       $update = "UPDATE admin_player_credits SET o_credits='".$Credits."' WHERE o_id=1";
-      mysql_query($update, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$update) or die(mysqli_error($this->link));
     }else{
       $insert = "INSERT INTO admin_player_credits VALUES(1, '".$Credits."')";
-      mysql_query($insert, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
     }
 
   }
@@ -16840,8 +16844,8 @@ qq;
   function SetPlayerCreditsInit($PlayerID){
 
     $query = "SELECT * FROM player_credits WHERE o_playerid='".$PlayerID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
@@ -16850,15 +16854,15 @@ qq;
     }else{
 
       $query1 = "SELECT * FROM admin_player_credits WHERE o_id=1";
-      $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-      $num1 = mysql_numrows($return1);
+      $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+      $num1 = mysqli_num_rows($return1);
 
       if($num1 != 0){
 
-        $credits = mysql_result($return1,0,"o_credits");
+        $credits = $this->mysqli_result($return1,0,"o_credits");
 
         $insert = "INSERT INTO player_credits VALUES('".$PlayerID."', '".$credits."')";
-        mysql_query($insert, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
       }
 
@@ -16874,16 +16878,16 @@ qq;
   function AddPlayerCredits($PlayerID, $Credits){
 
     $query = "SELECT * FROM player_credits WHERE o_playerid='".$PlayerID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $xcredits = mysql_result($return,0,"o_credits");
+      $xcredits = $this->mysqli_result($return,0,"o_credits");
       $xcredits = $xcredits + $Credits;
 
       $update = "UPDATE player_credits SET o_credits='".$xcredits."' WHERE o_playerid='".$PlayerID."'";
-      mysql_query($update, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
     }
 
@@ -16897,16 +16901,16 @@ qq;
   function RemovePlayerCredits($PlayerID, $Credits){
 
     $query = "SELECT * FROM player_credits WHERE o_playerid='".$PlayerID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $xcredits = mysql_result($return,0,"o_credits");
+      $xcredits = $this->mysqli_result($return,0,"o_credits");
       $xcredits = $xcredits - $Credits;
 
       $update = "UPDATE player_credits SET o_credits='".$xcredits."' WHERE o_playerid='".$PlayerID."'";
-      mysql_query($update, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
     }
 
@@ -16922,11 +16926,11 @@ qq;
     $credits = 0;
 
     $query = "SELECT * FROM player_credits WHERE o_playerid='".$PlayerID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-      $credits = mysql_result($return,0,"o_credits");
+      $credits = $this->mysqli_result($return,0,"o_credits");
     }
 
     return $credits;
@@ -16944,11 +16948,11 @@ qq;
 
     // pzl = puzzle
     $query = "SELECT COUNT(*) FROM activities WHERE o_type='pzl' AND o_enabled='y'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-      $pcount = mysql_result($return,0,0);
+      $pcount = $this->mysqli_result($return,0,0);
     }
 
     return $pcount;
@@ -16966,11 +16970,11 @@ qq;
 
     // lsn = lesson
     $query = "SELECT COUNT(*) FROM activities WHERE o_type='lsn' AND o_enabled='y'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-      $lcount = mysql_result($return,0,0);
+      $lcount = $this->mysqli_result($return,0,0);
     }
 
     return $lcount;
@@ -16988,11 +16992,11 @@ qq;
 
     // Other count
     $query = "SELECT COUNT(*) FROM activities WHERE o_type !='lsn' AND o_type !='pzl' AND o_enabled='y'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-      $ocount = mysql_result($return,0,0);
+      $ocount = $this->mysqli_result($return,0,0);
     }
 
     return $ocount;
@@ -17010,11 +17014,11 @@ qq;
 
     // pzl = puzzle
     $query = "SELECT COUNT(*) FROM activities, player_purchased_activities WHERE activities.o_id = player_purchased_activities.o_activitiesid AND activities.o_type='pzl' AND o_playerid = '".$PlayerID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-      $pcount = mysql_result($return,0,0);
+      $pcount = $this->mysqli_result($return,0,0);
     }
 
     return $pcount;
@@ -17032,11 +17036,11 @@ qq;
 
     // lsn = lesson
     $query = "SELECT COUNT(*) FROM activities, player_purchased_activities WHERE activities.o_id = player_purchased_activities.o_activitiesid AND activities.o_type='lsn' AND o_playerid = '".$PlayerID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-      $lcount = mysql_result($return,0,0);
+      $lcount = $this->mysqli_result($return,0,0);
     }
 
     return $lcount;
@@ -17054,11 +17058,11 @@ qq;
 
     // get other activities
     $query = "SELECT COUNT(*) FROM activities, player_purchased_activities WHERE activities.o_id = player_purchased_activities.o_activitiesid AND activities.o_type !='lsn' AND activities.o_type !='pzl' AND o_playerid = '".$PlayerID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-      $ocount = mysql_result($return,0,0);
+      $ocount = $this->mysqli_result($return,0,0);
     }
 
     return $ocount;
@@ -17076,11 +17080,11 @@ qq;
 
     // pzl = puzzle
     $query = "SELECT COUNT(*) FROM activities, player_purchased_activities WHERE activities.o_id = player_purchased_activities.o_activitiesid AND activities.o_type='pzl' AND player_purchased_activities.o_complete ='y' AND o_playerid = '".$PlayerID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-      $pcount = mysql_result($return,0,0);
+      $pcount = $this->mysqli_result($return,0,0);
     }
 
     return $pcount;
@@ -17098,11 +17102,11 @@ qq;
 
     // lsn = lesson
     $query = "SELECT COUNT(*) FROM activities, player_purchased_activities WHERE activities.o_id = player_purchased_activities.o_activitiesid AND activities.o_type='lsn' AND player_purchased_activities.o_complete ='y' AND o_playerid = '".$PlayerID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-      $lcount = mysql_result($return,0,0);
+      $lcount = $this->mysqli_result($return,0,0);
     }
 
     return $lcount;
@@ -17120,11 +17124,11 @@ qq;
 
     // get other activities
     $query = "SELECT COUNT(*) FROM activities, player_purchased_activities WHERE activities.o_id = player_purchased_activities.o_activitiesid AND activities.o_type !='lsn' AND activities.o_type !='pzl' AND player_purchased_activities.o_complete ='y' AND o_playerid = '".$PlayerID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-      $ocount = mysql_result($return,0,0);
+      $ocount = $this->mysqli_result($return,0,0);
     }
 
     return $ocount;
@@ -17244,8 +17248,8 @@ qq;
       $title = $this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_176");
     }
 
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     // Skin table settings
     if(defined('CFG_GETPERSONALACTIVITYLISTHTML_TABLE1_WIDTH') && defined('CFG_GETPERSONALACTIVITYLISTHTML_TABLE1_BORDER') && defined('CFG_GETPERSONALACTIVITYLISTHTML_TABLE1_CELLPADDING') && defined('CFG_GETPERSONALACTIVITYLISTHTML_TABLE1_CELLSPACING') && defined('CFG_GETPERSONALACTIVITYLISTHTML_TABLE1_ALIGN')){
@@ -17261,20 +17265,20 @@ qq;
       $i = 0;
       while($i < $num){
 
-        $o_id = mysql_result($return,$i,0);
-        $o_name = mysql_result($return,$i,1);
-        $o_description = mysql_result($return,$i,2);
-        $o_createdby = mysql_result($return,$i,3);
-        $o_type = mysql_result($return,$i,4);
-        $o_credit = mysql_result($return,$i,5);
-        $o_enabled = mysql_result($return,$i,6);
-        $o_date = mysql_result($return,$i,7);
-        $o_id_1 = mysql_result($return,$i,8);
-        $o_playerid = mysql_result($return,$i,9);
-        $o_activitiesid = mysql_result($return,$i,10);
-        $o_credit_1 = mysql_result($return,$i,11);
-        $o_complete = mysql_result($return,$i,12);
-        $o_date_1 = mysql_result($return,$i,13);
+        $o_id = $this->mysqli_result($return,$i,0);
+        $o_name = $this->mysqli_result($return,$i,1);
+        $o_description = $this->mysqli_result($return,$i,2);
+        $o_createdby = $this->mysqli_result($return,$i,3);
+        $o_type = $this->mysqli_result($return,$i,4);
+        $o_credit = $this->mysqli_result($return,$i,5);
+        $o_enabled = $this->mysqli_result($return,$i,6);
+        $o_date = $this->mysqli_result($return,$i,7);
+        $o_id_1 = $this->mysqli_result($return,$i,8);
+        $o_playerid = $this->mysqli_result($return,$i,9);
+        $o_activitiesid = $this->mysqli_result($return,$i,10);
+        $o_credit_1 = $this->mysqli_result($return,$i,11);
+        $o_complete = $this->mysqli_result($return,$i,12);
+        $o_date_1 = $this->mysqli_result($return,$i,13);
 
         $strComplete = "";
 
@@ -17307,8 +17311,8 @@ qq;
 
     // get other activities
     $query = "SELECT * FROM player_purchased_activities WHERE o_activitiesid = '".$ActivityID."' AND o_playerid = '".$PlayerID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
       $AllowedToView = true;
@@ -17329,11 +17333,11 @@ qq;
 
     // Get record count
     $query = "SELECT COUNT(*) FROM activity_pages WHERE o_activitiesid='".$ActivityID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-      $pagecount = mysql_result($return,0,0);
+      $pagecount = $this->mysqli_result($return,0,0);
     }
 
     return $pagecount;
@@ -17348,15 +17352,15 @@ qq;
   function GetActivityPageResource($ActivityID, $PageIndex, $loc = "./"){
 
     $query = "SELECT * FROM activity_pages WHERE o_activitiesid='".$ActivityID."' ORDER BY o_id ASC";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       if($PageIndex < $num){
 
         // Get resource text
-        $resourcetxt = mysql_result($return, $PageIndex, "o_content1");
+        $resourcetxt = $this->mysqli_result($return, $PageIndex, "o_content1");
 
         // Parse the resources and place them in an array
         $aResource = array();
@@ -17377,17 +17381,17 @@ qq;
 
             // Get resource info
             $query1 = "SELECT * FROM activity_resources WHERE o_id='".$re1."'";
-            $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-            $num1 = mysql_numrows($return1);
+            $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+            $num1 = mysqli_num_rows($return1);
 
             if($num1 != 0){
 
-              $o_id = mysql_result($return1,0,"o_id");
-              $o_activitiesid = mysql_result($return1,0,"o_activitiesid");
-              $o_name = mysql_result($return1,0,"o_name");
-              $o_data = mysql_result($return1,0,"o_data");
-              $o_type = mysql_result($return1,0,"o_type");
-              $o_date = mysql_result($return1,0,"o_date");
+              $o_id = $this->mysqli_result($return1,0,"o_id");
+              $o_activitiesid = $this->mysqli_result($return1,0,"o_activitiesid");
+              $o_name = $this->mysqli_result($return1,0,"o_name");
+              $o_data = $this->mysqli_result($return1,0,"o_data");
+              $o_type = $this->mysqli_result($return1,0,"o_type");
+              $o_date = $this->mysqli_result($return1,0,"o_date");
 
               /////////////////////////////////////////////////////////////////////////////
               // Handle the pgn viewer resource
@@ -17963,14 +17967,14 @@ qq;
   function GetActivityPageText($ActivityID, $PageIndex){
 
     $query = "SELECT * FROM activity_pages WHERE o_activitiesid='".$ActivityID."' ORDER BY o_id ASC";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       if($PageIndex < $num){
 
-        $o_content2 = mysql_result($return,$PageIndex,"o_content2");
+        $o_content2 = $this->mysqli_result($return,$PageIndex,"o_content2");
 
         echo "<br>";
         echo stripslashes($o_content2);
@@ -17993,11 +17997,11 @@ qq;
 
     // Other count
     $query = "SELECT * FROM activities WHERE o_id='".$ActivityID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-      $strName = mysql_result($return,0,"o_name");
+      $strName = $this->mysqli_result($return,0,"o_name");
     }
 
     return $strName;
@@ -18012,15 +18016,15 @@ qq;
   function GetActivityPageType($ActivityID, $PageIndex){
 
     $query = "SELECT * FROM activity_pages WHERE o_activitiesid='".$ActivityID."' ORDER BY o_id ASC";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $type = "";
 
     if($num != 0){
 
       if($PageIndex < $num){
-        $type = mysql_result($return,$PageIndex,"o_type");
+        $type = $this->mysqli_result($return,$PageIndex,"o_type");
       }
 
     }
@@ -18037,32 +18041,32 @@ qq;
   function HandleActivityPageControlType($ActivityID, $PageIndex, $PID){
 
     $query = "SELECT * FROM activity_pages WHERE o_activitiesid='".$ActivityID."' ORDER BY o_id ASC";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       if($PageIndex < $num){
 
-        $o_id = mysql_result($return,$PageIndex,"o_id");
-        $o_solution = mysql_result($return,$PageIndex,"o_solution");
-        $o_type = mysql_result($return,$PageIndex,"o_type");
+        $o_id = $this->mysqli_result($return,$PageIndex,"o_id");
+        $o_solution = $this->mysqli_result($return,$PageIndex,"o_solution");
+        $o_type = $this->mysqli_result($return,$PageIndex,"o_type");
 
         $query1 = "SELECT * FROM player_purchased_activities WHERE o_activitiesid='".$ActivityID."' AND o_playerid='".$PID."'";
-        $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-        $num1 = mysql_numrows($return1);
+        $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+        $num1 = mysqli_num_rows($return1);
 
         if($num1 != 0){
 
-          $o_id1 = mysql_result($return1,0,"o_id");
+          $o_id1 = $this->mysqli_result($return1,0,"o_id");
 
           $query2 = "SELECT * FROM player_purchased_activity_pages WHERE o_playerpurchasedactivitiesid='".$o_id1."' AND o_activitypagesid='".$o_id."'";
-          $return2 = mysql_query($query2, $this->link) or die(mysql_error());
-          $num2 = mysql_numrows($return2);
+          $return2 = mysqli_query($this->link,$query2) or die(mysqli_error($this->link));
+          $num2 = mysqli_num_rows($return2);
 
           if($num2 != 0){
 
-              $o_answertype = mysql_result($return2,0,"o_answertype");
+              $o_answertype = $this->mysqli_result($return2,0,"o_answertype");
 
               if($o_answertype == "sln"){
                 echo "".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_229")." ".$o_solution."<br><br>";
@@ -18103,8 +18107,8 @@ qq;
   function HandleActivityAnswer($ActivityID, $PageIndex, $Answer, $PID){
 
     $query = "SELECT * FROM activity_pages WHERE o_activitiesid='".$ActivityID."' ORDER BY o_id ASC";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $txtreturn = "";
 
@@ -18112,27 +18116,27 @@ qq;
 
       if($PageIndex < $num){
 
-        $o_id = mysql_result($return,$PageIndex,"o_id");
-        $o_solution = mysql_result($return,$PageIndex,"o_solution");
+        $o_id = $this->mysqli_result($return,$PageIndex,"o_id");
+        $o_solution = $this->mysqli_result($return,$PageIndex,"o_solution");
 
         $query1 = "SELECT * FROM player_purchased_activities WHERE o_activitiesid='".$ActivityID."' AND o_playerid='".$PID."'";
-        $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-        $num1 = mysql_numrows($return1);
+        $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+        $num1 = mysqli_num_rows($return1);
 
         if($num1 != 0){
 
-          $o_id1 = mysql_result($return1,0,"o_id");
+          $o_id1 = $this->mysqli_result($return1,0,"o_id");
 
           $query2 = "SELECT * FROM player_purchased_activity_pages WHERE o_playerpurchasedactivitiesid='".$o_id1."' AND o_activitypagesid='".$o_id."'";
-          $return2 = mysql_query($query2, $this->link) or die(mysql_error());
-          $num2 = mysql_numrows($return2);
+          $return2 = mysqli_query($this->link,$query2) or die(mysqli_error($this->link));
+          $num2 = mysqli_num_rows($return2);
 
           if($num2 == 0){
 
             if(strcasecmp(trim($o_solution), trim($Answer)) == 0){
 
               $insert = "INSERT INTO player_purchased_activity_pages VALUES(NULL, '".$o_id1."', '".$o_id."', 'r', NOW())";
-              mysql_query($insert, $this->link) or die(mysql_error());
+              mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
             }else{
 
@@ -18160,32 +18164,32 @@ qq;
   function HandleActivitySolution($ActivityID, $PageIndex, $PID){
 
     $query = "SELECT * FROM activity_pages WHERE o_activitiesid='".$ActivityID."' ORDER BY o_id ASC";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       if($PageIndex < $num){
 
-        $o_id = mysql_result($return,$PageIndex,"o_id");
-        $o_solution = mysql_result($return,$PageIndex,"o_solution");
+        $o_id = $this->mysqli_result($return,$PageIndex,"o_id");
+        $o_solution = $this->mysqli_result($return,$PageIndex,"o_solution");
 
         $query1 = "SELECT * FROM player_purchased_activities WHERE o_activitiesid='".$ActivityID."' AND o_playerid='".$PID."'";
-        $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-        $num1 = mysql_numrows($return1);
+        $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+        $num1 = mysqli_num_rows($return1);
 
         if($num1 != 0){
 
-          $o_id1 = mysql_result($return1,0,"o_id");
+          $o_id1 = $this->mysqli_result($return1,0,"o_id");
 
           $query2 = "SELECT * FROM player_purchased_activity_pages WHERE o_playerpurchasedactivitiesid='".$o_id1."' AND o_activitypagesid='".$o_id."'";
-          $return2 = mysql_query($query2, $this->link) or die(mysql_error());
-          $num2 = mysql_numrows($return2);
+          $return2 = mysqli_query($this->link,$query2) or die(mysqli_error($this->link));
+          $num2 = mysqli_num_rows($return2);
 
           if($num2 == 0){
 
             $insert = "INSERT INTO player_purchased_activity_pages VALUES(NULL, '".$o_id1."', '".$o_id."', 'sln', NOW())";
-            mysql_query($insert, $this->link) or die(mysql_error());
+            mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
           }
 
@@ -18205,40 +18209,40 @@ qq;
   function HandleActivitySolutionViewed($ActivityID, $PageIndex, $PID){
 
     $query = "SELECT * FROM activity_pages WHERE o_activitiesid='".$ActivityID."' ORDER BY o_id ASC";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       if($PageIndex < $num){
 
-        $o_id = mysql_result($return,$PageIndex,"o_id");
-        $o_solution = mysql_result($return,$PageIndex,"o_solution");
-        $o_type = mysql_result($return,$PageIndex,"o_type");
+        $o_id = $this->mysqli_result($return,$PageIndex,"o_id");
+        $o_solution = $this->mysqli_result($return,$PageIndex,"o_solution");
+        $o_type = $this->mysqli_result($return,$PageIndex,"o_type");
 
         $query1 = "SELECT * FROM player_purchased_activities WHERE o_activitiesid='".$ActivityID."' AND o_playerid='".$PID."'";
-        $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-        $num1 = mysql_numrows($return1);
+        $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+        $num1 = mysqli_num_rows($return1);
 
         if($num1 != 0){
 
-          $o_id1 = mysql_result($return1,0,"o_id");
+          $o_id1 = $this->mysqli_result($return1,0,"o_id");
 
           $query2 = "SELECT * FROM player_purchased_activity_pages WHERE o_playerpurchasedactivitiesid='".$o_id1."' AND o_activitypagesid='".$o_id."'";
-          $return2 = mysql_query($query2, $this->link) or die(mysql_error());
-          $num2 = mysql_numrows($return2);
+          $return2 = mysqli_query($this->link,$query2) or die(mysqli_error($this->link));
+          $num2 = mysqli_num_rows($return2);
 
           if($num2 == 0 && $o_type == "lsn"){
 
             $insert = "INSERT INTO player_purchased_activity_pages VALUES(NULL, '".$o_id1."', '".$o_id."', 'v', NOW())";
-            mysql_query($insert, $this->link) or die(mysql_error());
+            mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
           }
 
           if($this->IsPlayerActivityComplete($ActivityID, $PageIndex, $PID)){
 
             $update = "UPDATE player_purchased_activities SET o_complete='y' WHERE o_playerid='".$PID."' AND o_activitiesid='".$ActivityID."' AND o_id='".$o_id1."'";
-            mysql_query($update, $this->link) or die(mysql_error());
+            mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
           }
 
@@ -18260,17 +18264,17 @@ qq;
     $complete = false;
 
     $query = "SELECT COUNT(*) FROM activity_pages WHERE o_activitiesid='".$ActivityID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $query1 = "SELECT COUNT(*) FROM player_purchased_activities, player_purchased_activity_pages WHERE player_purchased_activities.o_id = player_purchased_activity_pages.o_playerpurchasedactivitiesid AND player_purchased_activities.o_playerid='".$PID."' AND player_purchased_activities.o_activitiesid='".$ActivityID."'";
-    $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+    $num1 = mysqli_num_rows($return1);
 
     if($num != 0 && $num1 != 0){
 
-      $ncount1 = mysql_result($return,0,0);
-      $ncount2 = mysql_result($return1,0,0);
+      $ncount1 = $this->mysqli_result($return,0,0);
+      $ncount2 = $this->mysqli_result($return1,0,0);
 
       if($ncount1 == $ncount2){
 
@@ -18298,25 +18302,25 @@ qq;
       }
 
       $query = "SELECT * FROM activities, player_purchased_activities WHERE activities.o_id = player_purchased_activities.o_activitiesid AND player_purchased_activities.o_activitiesid='".$ActivityID."' AND o_playerid = '".$PID."'";
-      $return = mysql_query($query, $this->link) or die(mysql_error());
-      $num = mysql_numrows($return);
+      $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+      $num = mysqli_num_rows($return);
 
       if($num != 0){
 
-        $o_id = mysql_result($return,$i,0);
-        $o_name = mysql_result($return,$i,1);
-        $o_description = mysql_result($return,$i,2);
-        $o_createdby = mysql_result($return,$i,3);
-        $o_type = mysql_result($return,$i,4);
-        $o_credit = mysql_result($return,$i,5);
-        $o_enabled = mysql_result($return,$i,6);
-        $o_date = mysql_result($return,$i,7);
-        $o_id_1 = mysql_result($return,$i,8);
-        $o_playerid = mysql_result($return,$i,9);
-        $o_activitiesid = mysql_result($return,$i,10);
-        $o_credit_1 = mysql_result($return,$i,11);
-        $o_complete = mysql_result($return,$i,12);
-        $o_date_1 = mysql_result($return,$i,13);
+        $o_id = $this->mysqli_result($return,$i,0);
+        $o_name = $this->mysqli_result($return,$i,1);
+        $o_description = $this->mysqli_result($return,$i,2);
+        $o_createdby = $this->mysqli_result($return,$i,3);
+        $o_type = $this->mysqli_result($return,$i,4);
+        $o_credit = $this->mysqli_result($return,$i,5);
+        $o_enabled = $this->mysqli_result($return,$i,6);
+        $o_date = $this->mysqli_result($return,$i,7);
+        $o_id_1 = $this->mysqli_result($return,$i,8);
+        $o_playerid = $this->mysqli_result($return,$i,9);
+        $o_activitiesid = $this->mysqli_result($return,$i,10);
+        $o_credit_1 = $this->mysqli_result($return,$i,11);
+        $o_complete = $this->mysqli_result($return,$i,12);
+        $o_date_1 = $this->mysqli_result($return,$i,13);
 
         echo "<table width='95%' cellpadding='0' cellspacing='0' border='0' align='center'>";
 
@@ -18326,15 +18330,15 @@ qq;
 
         // Get pages
         $query1 = "SELECT * FROM activity_pages WHERE o_activitiesid = '".$o_activitiesid."' Order By o_id ASC";
-        $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-        $num1 = mysql_numrows($return1);
+        $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+        $num1 = mysqli_num_rows($return1);
 
         if($num1 != 0){
 
           $i=0;
           while($i < $num1){
 
-            $o_id2 = mysql_result($return1,$i,"o_id");
+            $o_id2 = $this->mysqli_result($return1,$i,"o_id");
 
             echo "<tr>";
             echo "<td>";
@@ -18372,8 +18376,8 @@ qq;
     $complete = false;
 
     $query = "SELECT * FROM player_purchased_activity_pages WHERE o_playerpurchasedactivitiesid='".$PlayerPurchasedActivitiesID."' AND o_activitypagesid='".$ActivityPagesID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
       $complete = true;
@@ -18392,8 +18396,8 @@ qq;
 
     // Get Puzzle list
     $query = "SELECT * FROM activities WHERE o_type='pzl'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     // Skin table settings
     if(defined('CFG_GETADMINACTIVITYLISTHTML_TABLE1_WIDTH') && defined('CFG_GETADMINACTIVITYLISTHTML_TABLE1_BORDER') && defined('CFG_GETADMINACTIVITYLISTHTML_TABLE1_CELLPADDING') && defined('CFG_GETADMINACTIVITYLISTHTML_TABLE1_CELLSPACING') && defined('CFG_GETADMINACTIVITYLISTHTML_TABLE1_ALIGN')){
@@ -18416,14 +18420,14 @@ qq;
       $i = 0;
       while($i < $num){
 
-        $o_id = mysql_result($return, $i, "o_id");
-        $o_name = mysql_result($return, $i, "o_name");
-        $o_description = mysql_result($return, $i, "o_description");
-        $o_createdby = mysql_result($return, $i, "o_createdby");
-        $o_type = mysql_result($return, $i, "o_type");
-        $o_credit = mysql_result($return, $i, "o_credit");
-        $o_enabled = mysql_result($return, $i, "o_enabled");
-        $o_date = mysql_result($return, $i, "o_date");
+        $o_id = $this->mysqli_result($return, $i, "o_id");
+        $o_name = $this->mysqli_result($return, $i, "o_name");
+        $o_description = $this->mysqli_result($return, $i, "o_description");
+        $o_createdby = $this->mysqli_result($return, $i, "o_createdby");
+        $o_type = $this->mysqli_result($return, $i, "o_type");
+        $o_credit = $this->mysqli_result($return, $i, "o_credit");
+        $o_enabled = $this->mysqli_result($return, $i, "o_enabled");
+        $o_date = $this->mysqli_result($return, $i, "o_date");
 
         echo "<tr>";
         echo "<td class='row2'><a href='./edit_activity.php?aid=".$o_id."'>".$o_name."</a></td><td class='row2'>".$o_description."</td><td class='row2'>".$o_enabled."</td>";
@@ -18439,8 +18443,8 @@ qq;
 
     // Get lessons list
     $query = "SELECT * FROM activities WHERE o_type='lsn'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     // Skin table settings
     if(defined('CFG_GETADMINACTIVITYLISTHTML_TABLE2_WIDTH') && defined('CFG_GETADMINACTIVITYLISTHTML_TABLE2_BORDER') && defined('CFG_GETADMINACTIVITYLISTHTML_TABLE2_CELLPADDING') && defined('CFG_GETADMINACTIVITYLISTHTML_TABLE2_CELLSPACING') && defined('CFG_GETADMINACTIVITYLISTHTML_TABLE2_ALIGN')){
@@ -18463,14 +18467,14 @@ qq;
       $i = 0;
       while($i < $num){
 
-        $o_id = mysql_result($return, $i, "o_id");
-        $o_name = mysql_result($return, $i, "o_name");
-        $o_description = mysql_result($return, $i, "o_description");
-        $o_createdby = mysql_result($return, $i, "o_createdby");
-        $o_type = mysql_result($return, $i, "o_type");
-        $o_credit = mysql_result($return, $i, "o_credit");
-        $o_enabled = mysql_result($return, $i, "o_enabled");
-        $o_date = mysql_result($return, $i, "o_date");
+        $o_id = $this->mysqli_result($return, $i, "o_id");
+        $o_name = $this->mysqli_result($return, $i, "o_name");
+        $o_description = $this->mysqli_result($return, $i, "o_description");
+        $o_createdby = $this->mysqli_result($return, $i, "o_createdby");
+        $o_type = $this->mysqli_result($return, $i, "o_type");
+        $o_credit = $this->mysqli_result($return, $i, "o_credit");
+        $o_enabled = $this->mysqli_result($return, $i, "o_enabled");
+        $o_date = $this->mysqli_result($return, $i, "o_date");
 
         echo "<tr>";
         echo "<td class='row2'><a href='./edit_activity.php?aid=".$o_id."'>".$o_name."</a></td><td class='row2'>".$o_description."</td><td class='row2'>".$o_enabled."</td>";
@@ -18486,8 +18490,8 @@ qq;
 
     // Get other list
     $query = "SELECT * FROM activities WHERE o_type !='lsn' && o_type !='pzl'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     // Skin table settings
     if(defined('CFG_GETADMINACTIVITYLISTHTML_TABLE3_WIDTH') && defined('CFG_GETADMINACTIVITYLISTHTML_TABLE3_BORDER') && defined('CFG_GETADMINACTIVITYLISTHTML_TABLE3_CELLPADDING') && defined('CFG_GETADMINACTIVITYLISTHTML_TABLE3_CELLSPACING') && defined('CFG_GETADMINACTIVITYLISTHTML_TABLE3_ALIGN')){
@@ -18510,14 +18514,14 @@ qq;
       $i = 0;
       while($i < $num){
 
-        $o_id = mysql_result($return, $i, "o_id");
-        $o_name = mysql_result($return, $i, "o_name");
-        $o_description = mysql_result($return, $i, "o_description");
-        $o_createdby = mysql_result($return, $i, "o_createdby");
-        $o_type = mysql_result($return, $i, "o_type");
-        $o_credit = mysql_result($return, $i, "o_credit");
-        $o_enabled = mysql_result($return, $i, "o_enabled");
-        $o_date = mysql_result($return, $i, "o_date");
+        $o_id = $this->mysqli_result($return, $i, "o_id");
+        $o_name = $this->mysqli_result($return, $i, "o_name");
+        $o_description = $this->mysqli_result($return, $i, "o_description");
+        $o_createdby = $this->mysqli_result($return, $i, "o_createdby");
+        $o_type = $this->mysqli_result($return, $i, "o_type");
+        $o_credit = $this->mysqli_result($return, $i, "o_credit");
+        $o_enabled = $this->mysqli_result($return, $i, "o_enabled");
+        $o_date = $this->mysqli_result($return, $i, "o_date");
 
         echo "<tr>";
         echo "<td class='row2'><a href='./edit_activity.php?aid=".$o_id."'>".$o_name."</a></td><td class='row2'>".$o_description."</td><td class='row2'>".$o_enabled."</td>";
@@ -18547,14 +18551,14 @@ qq;
     }
 
     $insert = "INSERT INTO activities VALUES(NULL, '".$Name."', '".$Description."', '".$CreatedBy."', '".$Type."', '".$Credit."', 'n', NOW())";
-    mysql_query($insert, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
     $query = "SELECT LAST_INSERT_ID()";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-      $nActivityID = trim(mysql_result($return,0,0));
+      $nActivityID = trim($this->mysqli_result($return,0,0));
     }
 
     return $nActivityID;
@@ -18569,8 +18573,8 @@ qq;
   function GetActivityInfoByIDHTML($AID){
 
     $query = "SELECT * FROM activities WHERE o_id='".$AID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     // Skin table settings
     if(defined('CFG_GETACTIVITYINFOBYIDHTML_TABLE1_WIDTH') && defined('CFG_GETACTIVITYINFOBYIDHTML_TABLE1_BORDER') && defined('CFG_GETACTIVITYINFOBYIDHTML_TABLE1_CELLPADDING') && defined('CFG_GETACTIVITYINFOBYIDHTML_TABLE1_CELLSPACING') && defined('CFG_GETACTIVITYINFOBYIDHTML_TABLE1_ALIGN')){
@@ -18590,14 +18594,14 @@ qq;
       $i = 0;
       while($i < $num){
 
-        $o_id = mysql_result($return, $i, "o_id");
-        $o_name = mysql_result($return, $i, "o_name");
-        $o_description = mysql_result($return, $i, "o_description");
-        $o_createdby = mysql_result($return, $i, "o_createdby");
-        $o_type = mysql_result($return, $i, "o_type");
-        $o_credit = mysql_result($return, $i, "o_credit");
-        $o_enabled = mysql_result($return, $i, "o_enabled");
-        $o_date = mysql_result($return, $i, "o_date");
+        $o_id = $this->mysqli_result($return, $i, "o_id");
+        $o_name = $this->mysqli_result($return, $i, "o_name");
+        $o_description = $this->mysqli_result($return, $i, "o_description");
+        $o_createdby = $this->mysqli_result($return, $i, "o_createdby");
+        $o_type = $this->mysqli_result($return, $i, "o_type");
+        $o_credit = $this->mysqli_result($return, $i, "o_credit");
+        $o_enabled = $this->mysqli_result($return, $i, "o_enabled");
+        $o_date = $this->mysqli_result($return, $i, "o_date");
 
         echo "<tr>";
         echo "<td class='row1' width='".$Rowx1."'>".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_220")."</td><td class='row2'>".$o_name."</td>";
@@ -18643,7 +18647,7 @@ qq;
     }
 
     $insert = "INSERT INTO activity_resources VALUES(NULL, '".$AID."', '".$Name."', '".$data."', '".$optType."', NOW())";
-    mysql_query($insert, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
   }
 
@@ -18655,8 +18659,8 @@ qq;
   function CreateResourceHTMLList($AID){
 
     $query = "SELECT * FROM activity_resources WHERE o_activitiesid='".$AID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     echo "<select name='slctResource'>";
     echo "<option value='-1' selected>".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_215")."</option>";
@@ -18666,9 +18670,9 @@ qq;
       $i = 0;
       while($i < $num){
 
-        $o_id = mysql_result($return, $i, "o_id");
-        $o_name = mysql_result($return, $i, "o_name");
-        $o_type = mysql_result($return, $i, "o_type");
+        $o_id = $this->mysqli_result($return, $i, "o_id");
+        $o_name = $this->mysqli_result($return, $i, "o_name");
+        $o_type = $this->mysqli_result($return, $i, "o_type");
 
         echo "<option value='".$o_id."'>[".$o_type."] ".$o_name."</option>";
 
@@ -18696,7 +18700,7 @@ qq;
     }
 
     $insert = "INSERT INTO activity_pages VALUES(NULL, '".$AID."', '".$txtResource."', '".addslashes($content2)."', '".$txtsolution."', '".$slctType."', NOW());";
-    mysql_query($insert, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
   }
 
@@ -18710,7 +18714,7 @@ qq;
     if($this->GetActivityPageCount($AID) > 0){
 
       $update = "UPDATE activities SET o_enabled='y' WHERE o_id='".$AID."'";
-      mysql_query($update, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
     }
 
@@ -18724,7 +18728,7 @@ qq;
   function DisableActivity($AID){
 
     $update = "UPDATE activities SET o_enabled='n' WHERE o_id='".$AID."'";
-    mysql_query($update, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
   }
 
@@ -18738,12 +18742,12 @@ qq;
     $enabled = false;
 
     $query = "SELECT * FROM activities WHERE o_id='".$AID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $o_enabled = mysql_result($return, 0, "o_enabled");
+      $o_enabled = $this->mysqli_result($return, 0, "o_enabled");
 
       if($o_enabled == 'y'){
         $enabled = true;
@@ -18763,16 +18767,16 @@ qq;
   function HandleActivityPageControlTypeAdmin($ActivityID, $PageIndex){
 
     $query = "SELECT * FROM activity_pages WHERE o_activitiesid='".$ActivityID."' ORDER BY o_id ASC";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       if($PageIndex < $num){
 
-        $o_id = mysql_result($return,$PageIndex,"o_id");
-        $o_solution = mysql_result($return,$PageIndex,"o_solution");
-        $o_type = mysql_result($return,$PageIndex,"o_type");
+        $o_id = $this->mysqli_result($return,$PageIndex,"o_id");
+        $o_solution = $this->mysqli_result($return,$PageIndex,"o_solution");
+        $o_type = $this->mysqli_result($return,$PageIndex,"o_type");
 
         // Create the controls
         if($o_type == "tnf"){
@@ -18809,11 +18813,11 @@ qq;
     $credit = 0;
 
     $query = "SELECT * FROM activity_config WHERE o_id=1";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-      $credit = mysql_result($return, 0, "o_credit");
+      $credit = $this->mysqli_result($return, 0, "o_credit");
     }
 
     return $credit;
@@ -18830,8 +18834,8 @@ qq;
     $free = false;
 
     $query = "SELECT * FROM activity_config WHERE o_id=1 AND o_free='y'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
       $free = true;
@@ -18868,8 +18872,8 @@ qq;
     }
 
     $query = "SELECT * FROM activities WHERE o_enabled='y' AND ".$strSQLp1." ORDER BY o_name ASC";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     // Skin table settings
     if(defined('CFG_GETACTIVITYLISTFORPURCHASEHTML_TABLE1_WIDTH') && defined('CFG_GETACTIVITYLISTFORPURCHASEHTML_TABLE1_BORDER') && defined('CFG_GETACTIVITYLISTFORPURCHASEHTML_TABLE1_CELLPADDING') && defined('CFG_GETACTIVITYLISTFORPURCHASEHTML_TABLE1_CELLSPACING') && defined('CFG_GETACTIVITYLISTFORPURCHASEHTML_TABLE1_ALIGN')){
@@ -18892,18 +18896,18 @@ qq;
       $i=0;
       while($i < $num){
 
-        $o_id = mysql_result($return, $i, "o_id");
-        $o_name = mysql_result($return, $i, "o_name");
-        $o_description = mysql_result($return, $i, "o_description");
-        $o_createdby = mysql_result($return, $i, "o_createdby");
-        $o_type = mysql_result($return, $i, "o_type");
-        $o_credit = mysql_result($return, $i, "o_credit");
-        $o_enabled = mysql_result($return, $i, "o_enabled");
-        $o_date = mysql_result($return, $i, "o_date");
+        $o_id = $this->mysqli_result($return, $i, "o_id");
+        $o_name = $this->mysqli_result($return, $i, "o_name");
+        $o_description = $this->mysqli_result($return, $i, "o_description");
+        $o_createdby = $this->mysqli_result($return, $i, "o_createdby");
+        $o_type = $this->mysqli_result($return, $i, "o_type");
+        $o_credit = $this->mysqli_result($return, $i, "o_credit");
+        $o_enabled = $this->mysqli_result($return, $i, "o_enabled");
+        $o_date = $this->mysqli_result($return, $i, "o_date");
 
         $query1 = "SELECT * FROM player_purchased_activities WHERE o_playerid='".$PID."' AND o_activitiesid='".$o_id."'";
-        $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-        $num1 = mysql_numrows($return1);
+        $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+        $num1 = mysqli_num_rows($return1);
 
         if($this->IsActivitysCreditFree()){
           $o_credit = "Free";
@@ -18938,8 +18942,8 @@ qq;
     $purchased = false;
 
     $query = "SELECT * FROM player_purchased_activities WHERE o_playerid='".$PID."' AND o_activitiesid='".$AID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
       $purchased = true;
@@ -18957,12 +18961,12 @@ qq;
   function PlayerPurchaseActivity($PID, $AID){
 
     $query = "SELECT * FROM activities WHERE o_id='".$AID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $o_credit = mysql_result($return, 0, "o_credit");
+      $o_credit = $this->mysqli_result($return, 0, "o_credit");
 
       if(!$this->IsActivityPurchased($AID, $PID) && ($this->GetPlayerCredits($PID) >= $o_credit)){
 
@@ -18973,7 +18977,7 @@ qq;
         }
 
         $insert = "INSERT INTO player_purchased_activities VALUES(NULL, '".$PID."', '".$AID."', '".$o_credit."', 'n', NOW())";
-        mysql_query($insert, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
       }
 
@@ -18989,17 +18993,17 @@ qq;
   function DeleteActivityPage($ActivityID, $PageIndex){
 
     $query = "SELECT * FROM activity_pages WHERE o_activitiesid='".$ActivityID."' ORDER BY o_id ASC";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       if($PageIndex < $num){
 
-        $o_id = mysql_result($return,$PageIndex,"o_id");
+        $o_id = $this->mysqli_result($return,$PageIndex,"o_id");
 
         $delete = "DELETE FROM activity_pages WHERE o_id='".$o_id."'";
-        mysql_query($delete, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$delete) or die(mysqli_error($this->link));
 
       }
 
@@ -19017,20 +19021,20 @@ qq;
     $strreturnmsg = "nm";
 
     $query = "SELECT * FROM activity_pages WHERE o_activitiesid='".$ActivityID."' ORDER BY o_id ASC";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       if($PageIndex < $num){
 
-        $o_id = mysql_result($return,$PageIndex,"o_id");
-        $o_activitiesid = mysql_result($return,$PageIndex,"o_activitiesid");
-        $o_content1 = mysql_result($return,$PageIndex,"o_content1");
-        $o_content2 = mysql_result($return,$PageIndex,"o_content2");
-        $o_solution = mysql_result($return,$PageIndex,"o_solution");
-        $o_type = mysql_result($return,$PageIndex,"o_type");
-        $o_date = mysql_result($return,$PageIndex,"o_date");
+        $o_id = $this->mysqli_result($return,$PageIndex,"o_id");
+        $o_activitiesid = $this->mysqli_result($return,$PageIndex,"o_activitiesid");
+        $o_content1 = $this->mysqli_result($return,$PageIndex,"o_content1");
+        $o_content2 = $this->mysqli_result($return,$PageIndex,"o_content2");
+        $o_solution = $this->mysqli_result($return,$PageIndex,"o_solution");
+        $o_type = $this->mysqli_result($return,$PageIndex,"o_type");
+        $o_date = $this->mysqli_result($return,$PageIndex,"o_date");
 
         /////////////////////////////////////////////////
         //Move directon left
@@ -19038,8 +19042,8 @@ qq;
 
           // Get previous record
           $query1 = "SELECT * FROM activity_pages WHERE o_activitiesid='".$ActivityID."' ORDER BY o_id ASC";
-          $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-          $num1 = mysql_numrows($return1);
+          $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+          $num1 = mysqli_num_rows($return1);
 
           if($num1 != 0){
 
@@ -19047,29 +19051,29 @@ qq;
 
             if($nPreviousActivityID < $num  && $nPreviousActivityID >= 0){
 
-              $o_id1 = mysql_result($return,$nPreviousActivityID,"o_id");
-              $o_activitiesid1 = mysql_result($return,$nPreviousActivityID,"o_activitiesid");
-              $o_content11 = mysql_result($return,$nPreviousActivityID,"o_content1");
-              $o_content21 = mysql_result($return,$nPreviousActivityID,"o_content2");
-              $o_solution1 = mysql_result($return,$nPreviousActivityID,"o_solution");
-              $o_type1 = mysql_result($return,$nPreviousActivityID,"o_type");
-              $o_date1 = mysql_result($return,$nPreviousActivityID,"o_date");
+              $o_id1 = $this->mysqli_result($return,$nPreviousActivityID,"o_id");
+              $o_activitiesid1 = $this->mysqli_result($return,$nPreviousActivityID,"o_activitiesid");
+              $o_content11 = $this->mysqli_result($return,$nPreviousActivityID,"o_content1");
+              $o_content21 = $this->mysqli_result($return,$nPreviousActivityID,"o_content2");
+              $o_solution1 = $this->mysqli_result($return,$nPreviousActivityID,"o_solution");
+              $o_type1 = $this->mysqli_result($return,$nPreviousActivityID,"o_type");
+              $o_date1 = $this->mysqli_result($return,$nPreviousActivityID,"o_date");
 
               // Delete Record to move
               $delete1 = "DELETE FROM activity_pages WHERE o_id='".$o_id."'";
-              mysql_query($delete1, $this->link) or die(mysql_error());
+              mysqli_query($this->link,$delete1) or die(mysqli_error($this->link));
 
               // Delete Record left of record to move
               $delete2 = "DELETE FROM activity_pages WHERE o_id='".$o_id1."'";
-              mysql_query($delete2, $this->link) or die(mysql_error());
+              mysqli_query($this->link,$delete2) or die(mysqli_error($this->link));
 
               // Create the new records
               $insert1 = "INSERT INTO activity_pages VALUES('".$o_id1."', '".$o_activitiesid."', '".$o_content1."', '".$o_content2."', '".$o_solution."', '".$o_type."', '".$o_date."')";
-              mysql_query($insert1, $this->link) or die(mysql_error());
+              mysqli_query($this->link,$insert1) or die(mysqli_error($this->link));
 
               // Create the new records
               $insert2 = "INSERT INTO activity_pages VALUES('".$o_id."', '".$o_activitiesid1."', '".$o_content11."', '".$o_content21."', '".$o_solution1."', '".$o_type1."', '".$o_date1."')";
-              mysql_query($insert2, $this->link) or die(mysql_error());
+              mysqli_query($this->link,$insert2) or die(mysqli_error($this->link));
 
               $strreturnmsg = "ml";
 
@@ -19083,8 +19087,8 @@ qq;
 
           // Get previous record
           $query1 = "SELECT * FROM activity_pages WHERE o_activitiesid='".$ActivityID."' ORDER BY o_id ASC";
-          $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-          $num1 = mysql_numrows($return1);
+          $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+          $num1 = mysqli_num_rows($return1);
 
           if($num1 != 0){
 
@@ -19092,29 +19096,29 @@ qq;
 
             if($nNextActivityID < $num && $nNextActivityID >= 0){
 
-              $o_id1 = mysql_result($return,$nNextActivityID,"o_id");
-              $o_activitiesid1 = mysql_result($return,$nNextActivityID,"o_activitiesid");
-              $o_content11 = mysql_result($return,$nNextActivityID,"o_content1");
-              $o_content21 = mysql_result($return,$nNextActivityID,"o_content2");
-              $o_solution1 = mysql_result($return,$nNextActivityID,"o_solution");
-              $o_type1 = mysql_result($return,$nNextActivityID,"o_type");
-              $o_date1 = mysql_result($return,$nNextActivityID,"o_date");
+              $o_id1 = $this->mysqli_result($return,$nNextActivityID,"o_id");
+              $o_activitiesid1 = $this->mysqli_result($return,$nNextActivityID,"o_activitiesid");
+              $o_content11 = $this->mysqli_result($return,$nNextActivityID,"o_content1");
+              $o_content21 = $this->mysqli_result($return,$nNextActivityID,"o_content2");
+              $o_solution1 = $this->mysqli_result($return,$nNextActivityID,"o_solution");
+              $o_type1 = $this->mysqli_result($return,$nNextActivityID,"o_type");
+              $o_date1 = $this->mysqli_result($return,$nNextActivityID,"o_date");
 
               // Delete Record to move
               $delete1 = "DELETE FROM activity_pages WHERE o_id='".$o_id."'";
-              mysql_query($delete1, $this->link) or die(mysql_error());
+              mysqli_query($this->link,$delete1) or die(mysqli_error($this->link));
 
               // Delete Record right of record to move
               $delete2 = "DELETE FROM activity_pages WHERE o_id='".$o_id1."'";
-              mysql_query($delete2, $this->link) or die(mysql_error());
+              mysqli_query($this->link,$delete2) or die(mysqli_error($this->link));
 
               // Create the new records
               $insert1 = "INSERT INTO activity_pages VALUES('".$o_id1."', '".$o_activitiesid."', '".$o_content1."', '".$o_content2."', '".$o_solution."', '".$o_type."', '".$o_date."')";
-              mysql_query($insert1, $this->link) or die(mysql_error());
+              mysqli_query($this->link,$insert1) or die(mysqli_error($this->link));
 
               // Create the new records
               $insert2 = "INSERT INTO activity_pages VALUES('".$o_id."', '".$o_activitiesid1."', '".$o_content11."', '".$o_content21."', '".$o_solution1."', '".$o_type1."', '".$o_date1."')";
-              mysql_query($insert2, $this->link) or die(mysql_error());
+              mysqli_query($this->link,$insert2) or die(mysqli_error($this->link));
 
               $strreturnmsg = "mr";
 
@@ -19151,12 +19155,12 @@ qq;
     echo "<tr><td colspan='2' class='row2'>";
 
     $query2 = "SELECT * FROM player WHERE player_id='".$PID."'";
-    $return2 = mysql_query($query2, $this->link) or die(mysql_error());
-    $num2 = mysql_numrows($return2);
+    $return2 = mysqli_query($this->link,$query2) or die(mysqli_error($this->link));
+    $num2 = mysqli_num_rows($return2);
 
     if($num2 != 0){
-      $userid = mysql_result($return2, 0, "userid");
-      $email = mysql_result($return2, 0, "email");
+      $userid = $this->mysqli_result($return2, 0, "userid");
+      $email = $this->mysqli_result($return2, 0, "email");
 
       echo "".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_197")." ".$PID."<input type='hidden' name='txtPID' value='".$PID."'><br>";
       echo "".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_196")." ".$userid."<input type='hidden' name='txtUID' value='".$userid."'><br>";
@@ -19168,8 +19172,8 @@ qq;
     echo "<tr><td colspan='2' class='row1'><b>".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_194")."</b></td></tr>";
 
     $query = "SELECT * FROM admin_player_credits WHERE o_id=1";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $txtExchangeRate = "";
 
@@ -19178,17 +19182,17 @@ qq;
       $paypalcurrency = "";
 
       $query1 = "SELECT * FROM c4m_paypalaccount WHERE p_id=1";
-      $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-      $num1 = mysql_numrows($return1);
+      $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+      $num1 = mysqli_num_rows($return1);
 
       if($num1 != 0){
 
-        $paypalcurrency = mysql_result($return1, 0, "p_currency");
+        $paypalcurrency = $this->mysqli_result($return1, 0, "p_currency");
         echo "<input type='hidden' name='txtppcurrency' value='".$paypalcurrency."'>";
 
       }
 
-      $o_exchangerate = mysql_result($return,0,"o_exchangerate");
+      $o_exchangerate = $this->mysqli_result($return,0,"o_exchangerate");
       $txtExchangeRate = "1 ".$this->GetStringFromStringTable("IDS_CR3DCQUERY_TXT_193")." = ".number_format($o_exchangerate, 2, '.', '')." ".$paypalcurrency;
       echo "<input type='hidden' name='txtexchangerate' value='".$o_exchangerate."'>";
     }
@@ -19217,14 +19221,14 @@ qq;
     $nCRID = 0;
 
     $insert = "INSERT INTO admin_player_credits_request VALUES(NULL, '".$PID."', '".$UID."', '".$Email."', '".$Credits."', '".$ExchangeRate."', '".$TotalAmount."', 'n', NOW())";
-    mysql_query($insert, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
     $query = "SELECT LAST_INSERT_ID()";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-      $nCRID = trim(mysql_result($return,0,0));
+      $nCRID = trim($this->mysqli_result($return,0,0));
     }
 
     return $nCRID;
@@ -19239,8 +19243,8 @@ qq;
   function GetCreditRequestsAdminHTML(){
 
     $query = "SELECT * FROM admin_player_credits_request WHERE o_status='n'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     // Skin table settings
     if(defined('CFG_GETCREDITREQUESTSADMINHTML_TABLE1_WIDTH') && defined('CFG_GETCREDITREQUESTSADMINHTML_TABLE1_BORDER') && defined('CFG_GETCREDITREQUESTSADMINHTML_TABLE1_CELLPADDING') && defined('CFG_GETCREDITREQUESTSADMINHTML_TABLE1_CELLSPACING') && defined('CFG_GETCREDITREQUESTSADMINHTML_TABLE1_ALIGN')){
@@ -19261,15 +19265,15 @@ qq;
       $i=0;
       while($i < $num){
 
-        $o_id = trim(mysql_result($return,$i,"o_id"));
-        $o_playerid = trim(mysql_result($return,$i,"o_playerid"));
-        $o_userid = trim(mysql_result($return,$i,"o_userid"));
-        $o_email = trim(mysql_result($return,$i,"o_email"));
-        $o_credits = trim(mysql_result($return,$i,"o_credits"));
-        $o_exchangerate = trim(mysql_result($return,$i,"o_exchangerate"));
-        $o_totalamount = trim(mysql_result($return,$i,"o_totalamount"));
-        $o_status = trim(mysql_result($return,$i,"o_status"));
-        $o_date = trim(mysql_result($return,$i,"o_date"));
+        $o_id = trim($this->mysqli_result($return,$i,"o_id"));
+        $o_playerid = trim($this->mysqli_result($return,$i,"o_playerid"));
+        $o_userid = trim($this->mysqli_result($return,$i,"o_userid"));
+        $o_email = trim($this->mysqli_result($return,$i,"o_email"));
+        $o_credits = trim($this->mysqli_result($return,$i,"o_credits"));
+        $o_exchangerate = trim($this->mysqli_result($return,$i,"o_exchangerate"));
+        $o_totalamount = trim($this->mysqli_result($return,$i,"o_totalamount"));
+        $o_status = trim($this->mysqli_result($return,$i,"o_status"));
+        $o_date = trim($this->mysqli_result($return,$i,"o_date"));
 
         echo "<br>";
 
@@ -19318,18 +19322,18 @@ qq;
   function AcceptCreditRequest($RID){
 
     $query = "SELECT * FROM admin_player_credits_request WHERE o_id='".$RID."' AND o_status='n'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $o_id = trim(mysql_result($return,0,"o_id"));
-      $o_playerid = trim(mysql_result($return,0,"o_playerid"));
-      $o_email = trim(mysql_result($return,0,"o_email"));
-      $o_credits = trim(mysql_result($return,0,"o_credits"));
+      $o_id = trim($this->mysqli_result($return,0,"o_id"));
+      $o_playerid = trim($this->mysqli_result($return,0,"o_playerid"));
+      $o_email = trim($this->mysqli_result($return,0,"o_email"));
+      $o_credits = trim($this->mysqli_result($return,0,"o_credits"));
 
       $update = "UPDATE admin_player_credits_request SET o_status='y' WHERE o_id='".$RID."'";
-      mysql_query($update, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
       // Update player credits
       $this->AddPlayerCredits($o_playerid, $o_credits);
@@ -19346,18 +19350,18 @@ qq;
   function DeclineCreditRequest($RID){
 
     $query = "SELECT * FROM admin_player_credits_request WHERE o_id='".$RID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $o_id = trim(mysql_result($return,0,"o_id"));
-      $o_playerid = trim(mysql_result($return,0,"o_playerid"));
-      $o_email = trim(mysql_result($return,0,"o_email"));
-      $o_credits = trim(mysql_result($return,0,"o_credits"));
+      $o_id = trim($this->mysqli_result($return,0,"o_id"));
+      $o_playerid = trim($this->mysqli_result($return,0,"o_playerid"));
+      $o_email = trim($this->mysqli_result($return,0,"o_email"));
+      $o_credits = trim($this->mysqli_result($return,0,"o_credits"));
 
       $update = "UPDATE admin_player_credits_request SET o_status='d' WHERE o_id='".$RID."'";
-      mysql_query($update, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
     }
 
@@ -19373,8 +19377,8 @@ qq;
     $enabled = false;
 
     $query = "SELECT * FROM admin_player_credits WHERE o_id=1";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
       $enabled = true;
@@ -19392,13 +19396,13 @@ qq;
   function GetActivityConfigInfo(&$Free, &$Credit){
 
     $query = "SELECT * FROM activity_config WHERE o_id=1";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $Free = trim(mysql_result($return,0,"o_free"));
-      $Credit = trim(mysql_result($return,0,"o_credit"));
+      $Free = trim($this->mysqli_result($return,0,"o_free"));
+      $Credit = trim($this->mysqli_result($return,0,"o_credit"));
 
     }
 
@@ -19412,7 +19416,7 @@ qq;
   function UpdateActivityConfigInfo($Free, $Credit){
 
     $update = "UPDATE activity_config SET o_free='".$Free."', o_credit='".$Credit."' WHERE o_id=1";
-    mysql_query($update, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
   }
 
@@ -19424,13 +19428,13 @@ qq;
   function GetPlayerCreditConfigInfo(&$Credits, &$ExchangeRate){
 
     $query = "SELECT * FROM admin_player_credits WHERE o_id=1";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $Credits = trim(mysql_result($return,0,"o_credits"));
-      $ExchangeRate = trim(mysql_result($return,0,"o_exchangerate"));
+      $Credits = trim($this->mysqli_result($return,0,"o_credits"));
+      $ExchangeRate = trim($this->mysqli_result($return,0,"o_exchangerate"));
 
     }
 
@@ -19444,18 +19448,18 @@ qq;
   function UpdatePlayerCreditConfigInfo($Credits, $ExchangeRate){
 
     $query = "SELECT * FROM admin_player_credits WHERE o_id=1";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $update = "UPDATE admin_player_credits SET o_credits='".$Credits."', o_exchangerate='".$ExchangeRate."' WHERE o_id=1";
-      mysql_query($update, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
     }else{
 
       $insert = "INSERT INTO admin_player_credits VALUES(1, '".$Credits."', '".$ExchangeRate."')";
-      mysql_query($insert, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
     }
 
@@ -19471,8 +19475,8 @@ qq;
     $bDragDrop = false;
 
     $query = "SELECT * FROM chess_board_type WHERE o_playerid=".$PlayerID." AND o_isdragdrop=1";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
       $bDragDrop = true;
@@ -19490,15 +19494,15 @@ qq;
   function SetBoardCustomerSetting($PlayerID, $setting){
 
     $query = "SELECT * FROM chess_board_type WHERE o_playerid=".$PlayerID."";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
       $update = "UPDATE chess_board_type SET o_isdragdrop=".$setting." WHERE o_playerid=".$PlayerID."";
-      mysql_query($update, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$update) or die(mysqli_error($this->link));
     }else{
       $insert = "INSERT INTO chess_board_type VALUES(".$PlayerID.", ".$setting.")";
-      mysql_query($insert, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
     }
 
   }
@@ -19511,19 +19515,19 @@ qq;
   function GetOnlinePlayersForMobile(){
 
     $query = "SELECT active_sessions.player_id, active_sessions.session_time, c4m_avatars.a_imgname, player.userid FROM active_sessions LEFT JOIN c4m_avatars ON active_sessions.player_id = c4m_avatars.a_playerid LEFT JOIN player ON active_sessions.player_id = player.player_id ORDER BY player.userid ASC";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i=0;
       while($i < $num){
 
-        $playerid = trim(mysql_result($return,$i,"player_id"));
-        $sessiontime = trim(mysql_result($return,$i,"session_time"));
-		$avatar_url = trim(mysql_result($return, $i, "a_imgname"));
+        $playerid = trim($this->mysqli_result($return,$i,"player_id"));
+        $sessiontime = trim($this->mysqli_result($return,$i,"session_time"));
+		$avatar_url = trim($this->mysqli_result($return, $i, "a_imgname"));
 		$avatar_url = $avatar_url == "" ? "avatars/noimage.jpg" : "avatars/$avatar_url";
-		$userid = trim(mysql_result($return, $i, "userid"));
+		$userid = trim($this->mysqli_result($return, $i, "userid"));
         //$userid = $this->GetUserIDByPlayerID($this->ChessCFGFileLocation, $playerid);
 
         echo "<PLAYERS>\n";
@@ -19583,12 +19587,12 @@ qq;
     $datex = "";
 
     $query = "SELECT * FROM player WHERE player_id = ".$ID;
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $signup_time = mysql_result($return,0,"signup_time");
+      $signup_time = $this->mysqli_result($return,0,"signup_time");
 
       // Get difference between the dates.
       $firstdate = time();
@@ -19611,22 +19615,22 @@ qq;
     $lastlogindate = "";
 
     $query = "SELECT * FROM player_last_login WHERE o_playerid = '".$ID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-      $lastlogindate = mysql_result($return,0,"o_date");
+      $lastlogindate = $this->mysqli_result($return,0,"o_date");
     }
 
     // Date of last move
     $lastmovedate = "";
 
     $query = "SELECT * FROM move_history WHERE player_id = '".$ID."' ORDER BY move_id DESC";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-      $time1 = mysql_result($return,0,"time");
+      $time1 = $this->mysqli_result($return,0,"time");
       $lastmovedate = date("Y-m-d G:i:s", $time1);
     }
 
@@ -19644,16 +19648,16 @@ qq;
     $clubid = 0;
 
     $querycb = "SELECT * FROM chess_club_members WHERE o_playerid ='".$ID."' AND o_active='y'";
-    $returncb = mysql_query($querycb, $this->link) or die(mysql_error());
-    $numcb = mysql_numrows($returncb);
+    $returncb = mysqli_query($this->link,$querycb) or die(mysqli_error($this->link));
+    $numcb = mysqli_num_rows($returncb);
 
     if($numcb != 0){
 
-      $clubid = mysql_result($returncb,$i,"o_chessclubid");
+      $clubid = $this->mysqli_result($returncb,$i,"o_chessclubid");
 
       $querycb1 = "SELECT * FROM chess_club_members WHERE o_chessclubid='".$clubid."' AND o_playerid ='".$ID."'";
-      $returncb1 = mysql_query($querycb1, $this->link) or die(mysql_error());
-      $numcb1 = mysql_numrows($returncb1);
+      $returncb1 = mysqli_query($this->link,$querycb1) or die(mysqli_error($this->link));
+      $numcb1 = mysqli_num_rows($returncb1);
 
       if($numcb1 != 0){
         $Club = "true";
@@ -19739,8 +19743,8 @@ qq;
 
     //Get game info
     $query = "SELECT * FROM c4m_msginbox WHERE player_id =".$ID."";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
@@ -19749,9 +19753,9 @@ qq;
       $i = 0;
       while($i < $num){
 
-        $inbox_id = trim(mysql_result($return,$i,"inbox_id"));
-        $message = trim(mysql_result($return,$i,"message"));
-        $posted = trim(mysql_result($return,$i,"msg_posted"));
+        $inbox_id = trim($this->mysqli_result($return,$i,"inbox_id"));
+        $message = trim($this->mysqli_result($return,$i,"message"));
+        $posted = trim($this->mysqli_result($return,$i,"msg_posted"));
 
         if(substr($message, 0, 2) == "C0"){
 
@@ -19807,9 +19811,9 @@ qq;
       $i = 0;
       while($i < $num){
 
-        $inbox_id = trim(mysql_result($return,$i,"inbox_id"));
-        $message = trim(mysql_result($return,$i,"message"));
-        $posted = trim(mysql_result($return,$i,"msg_posted"));
+        $inbox_id = trim($this->mysqli_result($return,$i,"inbox_id"));
+        $message = trim($this->mysqli_result($return,$i,"message"));
+        $posted = trim($this->mysqli_result($return,$i,"msg_posted"));
 
         if(substr($message, 0, 2) == "M0"){
 
@@ -19864,9 +19868,9 @@ qq;
       $i = 0;
       while($i < $num){
 
-        $inbox_id = trim(mysql_result($return,$i,"inbox_id"));
-        $message = trim(mysql_result($return,$i,"message"));
-        $posted = trim(mysql_result($return,$i,"msg_posted"));
+        $inbox_id = trim($this->mysqli_result($return,$i,"inbox_id"));
+        $message = trim($this->mysqli_result($return,$i,"message"));
+        $posted = trim($this->mysqli_result($return,$i,"msg_posted"));
 
         if(substr($message, 0, 2) == "GC"){
 
@@ -19924,9 +19928,9 @@ qq;
       $i = 0;
       while($i < $num){
 
-        $inbox_id = trim(mysql_result($return,$i,"inbox_id"));
-        $message = trim(mysql_result($return,$i,"message"));
-        $posted = trim(mysql_result($return,$i,"msg_posted"));
+        $inbox_id = trim($this->mysqli_result($return,$i,"inbox_id"));
+        $message = trim($this->mysqli_result($return,$i,"message"));
+        $posted = trim($this->mysqli_result($return,$i,"msg_posted"));
 
         if(substr($message, 0, 2) == "T0"){
 
@@ -19990,17 +19994,17 @@ qq;
 
     //Get game info
     $query = "SELECT * FROM c4m_msginbox WHERE inbox_id =".$InboxID;
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i = 0;
       while($i < $num){
 
-        $inbox_id = trim(mysql_result($return,$i,"inbox_id"));
-        $message = trim(mysql_result($return,$i,"message"));
-        $posted = trim(mysql_result($return,$i,"msg_posted"));
+        $inbox_id = trim($this->mysqli_result($return,$i,"inbox_id"));
+        $message = trim($this->mysqli_result($return,$i,"message"));
+        $posted = trim($this->mysqli_result($return,$i,"msg_posted"));
 
         if(substr($message, 0, 2) == "C0"){
 
@@ -20155,8 +20159,8 @@ qq;
 
       }
 
-      $return = mysql_query($query, $this->link) or die(mysql_error());
-      $num = mysql_numrows($return);
+      $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+      $num = mysqli_num_rows($return);
 
       // Place the results in the array
       if($num != 0){
@@ -20167,10 +20171,10 @@ qq;
         $ia = 0;
         while($i < $num){
 
-          $player_id = trim(mysql_result($return,$i,"player_id"));
-          $userid = trim(mysql_result($return,$i,"userid"));
-          $signup_time  = trim(mysql_result($return,$i,"signup_time"));
-          $email = trim(mysql_result($return,$i,"email"));
+          $player_id = trim($this->mysqli_result($return,$i,"player_id"));
+          $userid = trim($this->mysqli_result($return,$i,"userid"));
+          $signup_time  = trim($this->mysqli_result($return,$i,"signup_time"));
+          $email = trim($this->mysqli_result($return,$i,"email"));
 
           if($this->IsPlayerDisabled($player_id) == false){
             $wins = 0;
@@ -20221,8 +20225,8 @@ qq;
             $BuddyList = "false";
 
             $querybl = "SELECT * FROM c4m_buddylist WHERE buddy_id='".$PlayerPoints[$ii]['PlayerID']."' AND player_id ='".$oplayerid."'";
-            $returnbl = mysql_query($querybl, $this->link) or die(mysql_error());
-            $numbl = mysql_numrows($returnbl);
+            $returnbl = mysqli_query($this->link,$querybl) or die(mysqli_error($this->link));
+            $numbl = mysqli_num_rows($returnbl);
 
             if($numbl != 0){
               $BuddyList = "true";
@@ -20233,16 +20237,16 @@ qq;
             $clubid = 0;
 
             $querycb = "SELECT * FROM chess_club_members WHERE o_playerid ='".$PlayerPoints[$ii]['PlayerID']."' AND o_active='y'";
-            $returncb = mysql_query($querycb, $this->link) or die(mysql_error());
-            $numcb = mysql_numrows($returncb);
+            $returncb = mysqli_query($this->link,$querycb) or die(mysqli_error($this->link));
+            $numcb = mysqli_num_rows($returncb);
 
             if($numcb != 0){
 
-              $clubid = mysql_result($returncb, 0,"o_chessclubid");
+              $clubid = $this->mysqli_result($returncb, 0,"o_chessclubid");
 
               $querycb1 = "SELECT * FROM chess_club_members WHERE o_chessclubid='".$clubid."' AND o_playerid ='".$PlayerPoints[$ii]['PlayerID']."'";
-              $returncb1 = mysql_query($querycb1, $this->link) or die(mysql_error());
-              $numcb1 = mysql_numrows($returncb1);
+              $returncb1 = mysqli_query($this->link,$querycb1) or die(mysqli_error($this->link));
+              $numcb1 = mysqli_num_rows($returncb1);
 
               if($numcb1 != 0){
                 $Club = "true";
@@ -20311,34 +20315,34 @@ qq;
 
     //Get game where the player is white
     $queryw = "SELECT * FROM game WHERE w_player_id = ".$ID."";
-    $returnw = mysql_query($queryw, $this->link) or die(mysql_error());
-    $numw = mysql_numrows($returnw);
+    $returnw = mysqli_query($this->link,$queryw) or die(mysqli_error($this->link));
+    $numw = mysqli_num_rows($returnw);
 
     //get all the games from the c4m_tournamentgames table
     $queryt = "SELECT tg_gameid FROM c4m_tournamentgames";
-    $returnt = mysql_query($queryt, $this->link) or die(mysql_error());
-    $numt = mysql_numrows($returnt);
+    $returnt = mysqli_query($this->link,$queryt) or die(mysqli_error($this->link));
+    $numt = mysqli_num_rows($returnt);
 
     if($numw != 0){
 
       $i = 0;
       while($i < $numw){
 
-        $game_id = trim(mysql_result($returnw,$i,"game_id"));
-        $initiator = trim(mysql_result($returnw,$i,"initiator"));
-        $w_player_id = trim(mysql_result($returnw,$i,"w_player_id"));
-        $b_player_id = trim(mysql_result($returnw,$i,"b_player_id"));
-        $next_move = trim(mysql_result($returnw,$i,"next_move"));
-        $start_time = trim(mysql_result($returnw,$i,"start_time"));
-        $status = trim(mysql_result($returnw,$i,"status"));
-        $completion_status = trim(mysql_result($returnw,$i,"completion_status"));
+        $game_id = trim($this->mysqli_result($returnw,$i,"game_id"));
+        $initiator = trim($this->mysqli_result($returnw,$i,"initiator"));
+        $w_player_id = trim($this->mysqli_result($returnw,$i,"w_player_id"));
+        $b_player_id = trim($this->mysqli_result($returnw,$i,"b_player_id"));
+        $next_move = trim($this->mysqli_result($returnw,$i,"next_move"));
+        $start_time = trim($this->mysqli_result($returnw,$i,"start_time"));
+        $status = trim($this->mysqli_result($returnw,$i,"status"));
+        $completion_status = trim($this->mysqli_result($returnw,$i,"completion_status"));
 
         //Check if the game is a tournament game
         $ti = 0;
         $bexit = false;
         while($ti < $numt && $bexit == false){
 
-          $TGID = mysql_result($returnt, $ti, 0);
+          $TGID = $this->mysqli_result($returnt, $ti, 0);
 
           if($TGID == $game_id){
             $bexit = true;
@@ -20447,29 +20451,29 @@ qq;
 
     //Get game where the player is black
     $queryb = "SELECT * FROM game WHERE b_player_id = ".$ID."";
-    $returnb = mysql_query($queryb, $this->link) or die(mysql_error());
-    $numb = mysql_numrows($returnb);
+    $returnb = mysqli_query($this->link,$queryb) or die(mysqli_error($this->link));
+    $numb = mysqli_num_rows($returnb);
 
     if($numb != 0){
 
       $i = 0;
       while($i < $numb){
 
-        $game_id = trim(mysql_result($returnb,$i,"game_id"));
-        $initiator = trim(mysql_result($returnb,$i,"initiator"));
-        $w_player_id = trim(mysql_result($returnb,$i,"w_player_id"));
-        $b_player_id = trim(mysql_result($returnb,$i,"b_player_id"));
-        $next_move = trim(mysql_result($returnb,$i,"next_move"));
-        $start_time = trim(mysql_result($returnb,$i,"start_time"));
-        $status = trim(mysql_result($returnb,$i,"status"));
-        $completion_status = trim(mysql_result($returnb,$i,"completion_status"));
+        $game_id = trim($this->mysqli_result($returnb,$i,"game_id"));
+        $initiator = trim($this->mysqli_result($returnb,$i,"initiator"));
+        $w_player_id = trim($this->mysqli_result($returnb,$i,"w_player_id"));
+        $b_player_id = trim($this->mysqli_result($returnb,$i,"b_player_id"));
+        $next_move = trim($this->mysqli_result($returnb,$i,"next_move"));
+        $start_time = trim($this->mysqli_result($returnb,$i,"start_time"));
+        $status = trim($this->mysqli_result($returnb,$i,"status"));
+        $completion_status = trim($this->mysqli_result($returnb,$i,"completion_status"));
 
         //Check if the game is a tournament game
         $ti = 0;
         $bexit = false;
         while($ti < $numt && $bexit == false){
 
-          $TGID = mysql_result($returnt, $ti, 0);
+          $TGID = $this->mysqli_result($returnt, $ti, 0);
 
           if($TGID == $game_id){
             $bexit = true;
@@ -20591,7 +20595,7 @@ qq;
     //Get game where the player is white
     $insert = "INSERT INTO mobile_client_ip VALUES(NULL, '".$ID."', '".$IP."')";
 
-    if(mysql_query($insert, $this->link)){
+    if(mysqli_query($this->link,$insert)){
       return true;
     }else{
       return false;
@@ -20606,14 +20610,14 @@ qq;
   function ListAvailablePlayersAForMobile2($ConfigFile, $oplayerid){
 
     $query = "SELECT * FROM `player` ORDER BY `userid` ASC";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
       $i=0;
       while($i < $num){
-        $player_id = trim(mysql_result($return,$i,"player_id"));
-	  $userid = trim(mysql_result($return,$i,"userid"));
+        $player_id = trim($this->mysqli_result($return,$i,"player_id"));
+	  $userid = trim($this->mysqli_result($return,$i,"userid"));
         if($this->IsPlayerDisabled($player_id) == false){
           $wins = 0;
           $loss = 0;
@@ -20660,12 +20664,12 @@ qq;
   function GetMobileClientIPByPlayerID($ConfigFile, $ID){
 
     $query = "SELECT * FROM mobile_client_ip WHERE o_playerid='".$ID."' ORDER BY o_id DESC";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $clientip = trim(mysql_result($return,0,"o_ip"));
+      $clientip = trim($this->mysqli_result($return,0,"o_ip"));
 
       echo "<RESPONSE>\n";
       echo "<IP>";
@@ -20687,12 +20691,12 @@ qq;
     $type = "ERROR";
 
     $query1 = "SELECT * FROM server_version WHERE o_id='1'";
-    $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+    $num1 = mysqli_num_rows($return1);
 
     if($num1 != 0){
 
-      $o_serverid = mysql_result($return1,0,"o_serverid");
+      $o_serverid = $this->mysqli_result($return1,0,"o_serverid");
 
       $type = $o_serverid;
 
@@ -20712,15 +20716,15 @@ qq;
     $msg = "";
 
     $query = "SELECT * FROM c4m_gamechat WHERE tgc_gameid='".$GameID."' ORDER BY tgc_date DESC";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i=0;
       while($i < $num){
 
-        $Message = $this->FilterChatText(mysql_result($return, $i, "tgc_message"));
+        $Message = $this->FilterChatText($this->mysqli_result($return, $i, "tgc_message"));
 	$Message = htmlentities(rawurldecode($Message));
         $msg = $msg."".$Message."\n\n";
 
@@ -20755,15 +20759,15 @@ qq;
     $gametypecode = $this->GetGameTypeCode($GameID);
 
     $query = "SELECT * FROM cfm_game_options WHERE o_gameid = '".$GameID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $bRated = true;
 
     if($num != 0){
 
-      $o_rating = trim(mysql_result($return,0,"o_rating"));
-      $o_timetype = trim(mysql_result($return,0,"o_timetype"));
+      $o_rating = trim($this->mysqli_result($return,0,"o_rating"));
+      $o_timetype = trim($this->mysqli_result($return,0,"o_timetype"));
 
       if($o_rating == "gunrated"){
         $bRated = false;
@@ -20840,15 +20844,15 @@ qq;
   function TimedGameStatsForMobile($gid){
 
     $query1 = "SELECT * FROM timed_games WHERE id='".$gid."'";
-    $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-    $num1 = mysql_numrows($return1);
+    $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+    $num1 = mysqli_num_rows($return1);
 
     if($num1 != 0){
 
-      $moves1 = mysql_result($return1,0,"moves1");
-      $time1 = mysql_result($return1,0,"time1");
-      $moves2 = mysql_result($return1,0,"moves2");
-      $time2 = mysql_result($return1,0,"time2");
+      $moves1 = $this->mysqli_result($return1,0,"moves1");
+      $time1 = $this->mysqli_result($return1,0,"time1");
+      $moves2 = $this->mysqli_result($return1,0,"moves2");
+      $time2 = $this->mysqli_result($return1,0,"time2");
 
       echo "<TIMECONTROL1>";
       echo $moves1." ".$time1;
@@ -20895,7 +20899,7 @@ qq;
   function PlayerChatAddChatMessage($playerid, $Message){
     $Message = rawurlencode($Message);
     $insert = "INSERT INTO pc_chat_messages VALUES(NULL, ".$playerid.", '".$Message."', ".time().")";
-    mysql_query($insert, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
   }
 
@@ -20909,17 +20913,17 @@ qq;
     $strMSG = "";
 
     $query = "SELECT * FROM pc_chat_messages WHERE o_datesent >= ".$jtime." ORDER BY o_chatid DESC";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i=0;
       while($i < $num){
 
-        $o_playerid = mysql_result($return, $i, "o_playerid");
-        $o_message = mysql_result($return, $i, "o_message");
-        $o_datesent = mysql_result($return, $i, "o_datesent");
+        $o_playerid = $this->mysqli_result($return, $i, "o_playerid");
+        $o_message = $this->mysqli_result($return, $i, "o_message");
+        $o_datesent = $this->mysqli_result($return, $i, "o_datesent");
 
         $strPlayer = $this->GetUserIDByPlayerID($this->ChessCFGFileLocation, $o_playerid);
 
@@ -20946,18 +20950,18 @@ qq;
   function PlayerChatJoinAndMaintainChatStatus($playerid){
 
     $query = "SELECT * FROM pc_chat_players WHERE o_playerid=".$playerid."";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $update = "UPDATE pc_chat_players SET o_joined=".time()." WHERE o_playerid=".$playerid."";
-      mysql_query($update, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
     }else{
 
       $insert = "INSERT INTO pc_chat_players VALUES(NULL, ".$playerid.", ".time().")";
-      mysql_query($insert, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
     }
 
@@ -20974,22 +20978,22 @@ qq;
     $nCurTime = time();
 
     $query = "SELECT * FROM pc_chat_players";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i=0;
       while($i < $num){
 
-        $o_cplayer = mysql_result($return, $i, "o_cplayer");
-        $o_joined = mysql_result($return, $i, "o_joined");
+        $o_cplayer = $this->mysqli_result($return, $i, "o_cplayer");
+        $o_joined = $this->mysqli_result($return, $i, "o_joined");
 
         $nDifference = $nCurTime - $o_joined;
 
         if($nDifference >= $ntimeoutSec){
           $delete = "DELETE FROM pc_chat_players WHERE o_cplayer=".$o_cplayer."";
-          mysql_query($delete, $this->link) or die(mysql_error());
+          mysqli_query($this->link,$delete) or die(mysqli_error($this->link));
         }
 
         $i++;
@@ -21009,15 +21013,15 @@ qq;
     $strReturnJAVA = "";
 
     $query = "SELECT * FROM pc_chat_players";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i=0;
       while($i < $num){
 
-        $o_playerid = mysql_result($return, $i, "o_playerid");
+        $o_playerid = $this->mysqli_result($return, $i, "o_playerid");
         $strReturnJAVA = $strReturnJAVA."aPlayerList[".$i."]=\"".$this->GetUserIDByPlayerID($this->ChessCFGFileLocation, $o_playerid)."\";\n";
 
         $i++;
@@ -21037,8 +21041,8 @@ qq;
   function GetPlayerListSelectBoxV2($SelectName, $height=15, $width=170){
 
     $query = "SELECT * FROM player ORDER BY userid Asc";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     echo "<select NAME='".$SelectName."' multiple size='".$height."' style='width:".$width."'>";
 
@@ -21047,10 +21051,10 @@ qq;
       $i = 0;
       while($i < $num){
 
-        $player_id = trim(mysql_result($return,$i,"player_id"));
-        $userid = trim(mysql_result($return,$i,"userid"));
-        $signup_time  = trim(mysql_result($return,$i,"signup_time"));
-        $email = trim(mysql_result($return,$i,"email"));
+        $player_id = trim($this->mysqli_result($return,$i,"player_id"));
+        $userid = trim($this->mysqli_result($return,$i,"userid"));
+        $signup_time  = trim($this->mysqli_result($return,$i,"signup_time"));
+        $email = trim($this->mysqli_result($return,$i,"email"));
 
         if($this->IsPlayerDisabled($player_id) == false){
           echo "<option VALUE='".$player_id."'>".$userid."</option>";
@@ -21077,14 +21081,14 @@ qq;
 
     // Insert info for the tournament config table
     $insert = "INSERT INTO v2_tournament_config_onetomany VALUES(NULL, '".$strTName."', '".$strTDescription."', ".$nPlayerCutoffTime.", ".$nTStartTime.", ".$nTEndTime.", '".$strTimeZone."', '".$strGameTimeOut."', ".$nPlayerSignupType.", NOW(), 'p')";
-    mysql_query($insert, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
     $query = "SELECT LAST_INSERT_ID()";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-      $ntotmid = trim(mysql_result($return,0,0));
+      $ntotmid = trim($this->mysqli_result($return,0,0));
 
       // Add players to the tournament organizers table
       $nCount = count($aTOrganizers);
@@ -21133,16 +21137,16 @@ qq;
 
     // Get player clubid
     $query = "SELECT * FROM chess_club_members WHERE o_playerid=".$playerID." AND o_active='y'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-      $oclubid = mysql_result($return,0,"o_chessclubid");
+      $oclubid = $this->mysqli_result($return,0,"o_chessclubid");
     }
 
     // Insert Tournament player
     $insert = "INSERT INTO v2_tournament_players VALUES(NULL, ".$nTType.", ".$TID.", ".$playerID.", ".$oclubid.", '".$ostatus."', '".$strNote."')";
-    mysql_query($insert, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
   }
 
@@ -21155,7 +21159,7 @@ qq;
 
     // Insert Tournament organizer
     $insert = "INSERT INTO v2_tournament_organizers VALUES(NULL, ".$nTType.", ".$TID.", ".$playerID.")";
-    mysql_query($insert, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
   }
 
@@ -21185,17 +21189,17 @@ qq;
     echo "</tr>";
 
     $query = "SELECT * FROM v2_tournament_config_onetomany where o_status='p'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i=0;
       while($i < $num){
 
-        $o_totmid = mysql_result($return, $i, "o_totmid");
-        $o_name = mysql_result($return, $i, "o_name");
-        $o_dateadded = mysql_result($return, $i, "o_dateadded");
+        $o_totmid = $this->mysqli_result($return, $i, "o_totmid");
+        $o_name = $this->mysqli_result($return, $i, "o_name");
+        $o_dateadded = $this->mysqli_result($return, $i, "o_dateadded");
 
         echo "<tr>";
         echo "<td class='row2'>".$o_name."</td>";
@@ -21226,29 +21230,29 @@ qq;
     if($type == 1){
 
       $query = "SELECT * FROM v2_tournament_config_onetomany WHERE o_totmid=".$tid." AND o_status='p'";
-      $return = mysql_query($query, $this->link) or die(mysql_error());
-      $num = mysql_numrows($return);
+      $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+      $num = mysqli_num_rows($return);
 
       if($num != 0){
 
         $update = "UPDATE v2_tournament_config_onetomany SET o_status='a' WHERE o_totmid=".$tid." AND o_status='p'";
-        mysql_query($update, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
         // Message tournament players
         $queryp = "SELECT * FROM v2_tournament_players WHERE o_ttype=1 AND o_tid=".$tid."";
-        $returnp = mysql_query($queryp, $this->link) or die(mysql_error());
-        $nump = mysql_numrows($returnp);
+        $returnp = mysqli_query($this->link,$queryp) or die(mysqli_error($this->link));
+        $nump = mysqli_num_rows($returnp);
 
         if($nump != 0){
 
           $i=0;
           while($i < $nump){
 
-            $o_playerid = mysql_result($returnp, $i, "o_playerid");
+            $o_playerid = $this->mysqli_result($returnp, $i, "o_playerid");
 
             $message = "T2|".$tid."|1";
             $insert = "INSERT INTO message_queue(player_id, message, posted) VALUES(".$o_playerid.",'".$message."',".time().")";
-            mysql_query($insert, $this->link) or die(mysql_error());
+            mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
             $i++;
           }
@@ -21271,22 +21275,22 @@ qq;
     if($type == 1){
 
       $query = "SELECT * FROM v2_tournament_config_onetomany WHERE o_totmid=".$tid." AND o_status='p'";
-      $return = mysql_query($query, $this->link) or die(mysql_error());
-      $num = mysql_numrows($return);
+      $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+      $num = mysqli_num_rows($return);
 
       if($num != 0){
 
         // delete tournament players
         $delete = "DELETE FROM v2_tournament_players WHERE o_ttype=1 AND o_tid=".$tid."";
-        mysql_query($delete, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$delete) or die(mysqli_error($this->link));
 
         // delete tournament organizers
         $delete = "DELETE FROM v2_tournament_organizers WHERE o_ttype=1 AND o_tid=".$tid."";
-        mysql_query($delete, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$delete) or die(mysqli_error($this->link));
 
         // delete tournament config
         $delete = "DELETE FROM v2_tournament_config_onetomany WHERE o_totmid=".$tid."";
-        mysql_query($delete, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$delete) or die(mysqli_error($this->link));
 
       }
 
@@ -21305,36 +21309,36 @@ qq;
     $aTPlayers = array();
 
     $query = "SELECT * FROM v2_tournament_config_onetomany WHERE o_totmid=".$tid."";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $strname = mysql_result($return, 0, "o_name");
-      $strdescription = mysql_result($return, 0, "o_description");
-      $nplayercutoffdate = mysql_result($return, 0, "o_playercutoffdate");
-      $ntournamentstartdate = mysql_result($return, 0, "o_tournamentstartdate");
-      $ntournamentenddate = mysql_result($return, 0, "o_tournamentenddate");
-      $strtimezone = mysql_result($return, 0, "o_timezone");
-      $strgametimeout = mysql_result($return, 0, "o_gametimeout");
-      $nplayersignuptype = mysql_result($return, 0, "o_playersignuptype");
-      $strdateadded = mysql_result($return, 0, "o_dateadded");
-      $strstatus = mysql_result($return, 0, "o_status");
+      $strname = $this->mysqli_result($return, 0, "o_name");
+      $strdescription = $this->mysqli_result($return, 0, "o_description");
+      $nplayercutoffdate = $this->mysqli_result($return, 0, "o_playercutoffdate");
+      $ntournamentstartdate = $this->mysqli_result($return, 0, "o_tournamentstartdate");
+      $ntournamentenddate = $this->mysqli_result($return, 0, "o_tournamentenddate");
+      $strtimezone = $this->mysqli_result($return, 0, "o_timezone");
+      $strgametimeout = $this->mysqli_result($return, 0, "o_gametimeout");
+      $nplayersignuptype = $this->mysqli_result($return, 0, "o_playersignuptype");
+      $strdateadded = $this->mysqli_result($return, 0, "o_dateadded");
+      $strstatus = $this->mysqli_result($return, 0, "o_status");
 
       // Get tournament organizers
       $queryo = "SELECT * FROM v2_tournament_organizers WHERE o_ttype=1 AND o_tid=".$tid."";
-      $returno = mysql_query($queryo, $this->link) or die(mysql_error());
-      $numo = mysql_numrows($returno);
+      $returno = mysqli_query($this->link,$queryo) or die(mysqli_error($this->link));
+      $numo = mysqli_num_rows($returno);
 
       if($numo != 0){
 
         $i=0;
         while($i < $numo){
 
-          $aTOrganizers[$i][0] = mysql_result($returno, $i, "o_torg");
-          $aTOrganizers[$i][1] = mysql_result($returno, $i, "o_ttype");
-          $aTOrganizers[$i][2] = mysql_result($returno, $i, "o_tid");
-          $aTOrganizers[$i][3] = mysql_result($returno, $i, "o_playerid");
+          $aTOrganizers[$i][0] = $this->mysqli_result($returno, $i, "o_torg");
+          $aTOrganizers[$i][1] = $this->mysqli_result($returno, $i, "o_ttype");
+          $aTOrganizers[$i][2] = $this->mysqli_result($returno, $i, "o_tid");
+          $aTOrganizers[$i][3] = $this->mysqli_result($returno, $i, "o_playerid");
 
           $i++;
         }
@@ -21343,21 +21347,21 @@ qq;
 
       // Get tournament players
       $queryp = "SELECT * FROM v2_tournament_players WHERE o_ttype=1 AND o_tid=".$tid."";
-      $returnp = mysql_query($queryp, $this->link) or die(mysql_error());
-      $nump = mysql_numrows($returnp);
+      $returnp = mysqli_query($this->link,$queryp) or die(mysqli_error($this->link));
+      $nump = mysqli_num_rows($returnp);
 
       if($nump != 0){
 
         $i=0;
         while($i < $nump){
 
-          $aTPlayers[$i][0] = mysql_result($returnp, $i, "o_tplayer");
-          $aTPlayers[$i][1] = mysql_result($returnp, $i, "o_ttype");
-          $aTPlayers[$i][2] = mysql_result($returnp, $i, "o_tid");
-          $aTPlayers[$i][3] = mysql_result($returnp, $i, "o_playerid");
-          $aTPlayers[$i][4] = mysql_result($returnp, $i, "o_clubid");
-          $aTPlayers[$i][5] = mysql_result($returnp, $i, "o_status");
-          $aTPlayers[$i][6] = mysql_result($returnp, $i, "o_note");
+          $aTPlayers[$i][0] = $this->mysqli_result($returnp, $i, "o_tplayer");
+          $aTPlayers[$i][1] = $this->mysqli_result($returnp, $i, "o_ttype");
+          $aTPlayers[$i][2] = $this->mysqli_result($returnp, $i, "o_tid");
+          $aTPlayers[$i][3] = $this->mysqli_result($returnp, $i, "o_playerid");
+          $aTPlayers[$i][4] = $this->mysqli_result($returnp, $i, "o_clubid");
+          $aTPlayers[$i][5] = $this->mysqli_result($returnp, $i, "o_status");
+          $aTPlayers[$i][6] = $this->mysqli_result($returnp, $i, "o_note");
 
           $i++;
         }
@@ -21377,16 +21381,16 @@ qq;
 
     // one to many
     $query = "SELECT * FROM v2_tournament_config_onetomany, v2_tournament_players WHERE v2_tournament_config_onetomany.o_status='a' AND v2_tournament_players.o_playerid=".$playerid." AND v2_tournament_players.o_ttype=1 AND v2_tournament_players.o_tid=v2_tournament_config_onetomany.o_totmid AND v2_tournament_players.o_status='p'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i=0;
       while($i < $num){
 
-        $o_tid = mysql_result($return, $i, "o_tid");
-        $o_name = mysql_result($return, $i, "o_name");
+        $o_tid = $this->mysqli_result($return, $i, "o_tid");
+        $o_name = $this->mysqli_result($return, $i, "o_name");
 
         echo "<tr><td><font class='menubulletcolor'>";
         echo "&nbsp; &#8226; &nbsp<a href='./chess_v2_tournament_status.php?tid=".$o_tid."&type=1'>".$o_name."</a>";
@@ -21410,23 +21414,23 @@ qq;
     if($type == 1){
 
       $query = "SELECT * FROM v2_tournament_config_onetomany where o_totmid=".$tid." AND o_status='a'";
-      $return = mysql_query($query, $this->link) or die(mysql_error());
-      $num = mysql_numrows($return);
+      $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+      $num = mysqli_num_rows($return);
 
       if($num != 0){
 
         $ndatetime = time();
-        $o_playercutoffdate = mysql_result($return, 0, "o_playercutoffdate");
+        $o_playercutoffdate = $this->mysqli_result($return, 0, "o_playercutoffdate");
 
         if($ndatetime < $o_playercutoffdate){
 
           $queryp = "SELECT * FROM v2_tournament_players WHERE o_ttype=1 AND o_tid=".$tid." AND o_playerid=".$playerid."";
-          $returnp = mysql_query($queryp, $this->link) or die(mysql_error());
-          $nump = mysql_numrows($returnp);
+          $returnp = mysqli_query($this->link,$queryp) or die(mysqli_error($this->link));
+          $nump = mysqli_num_rows($returnp);
 
           if($nump != 0){
             $update = "UPDATE v2_tournament_players SET o_status='a' WHERE o_ttype=".$type." AND o_tid=".$tid." AND o_playerid=".$playerid."";
-            mysql_query($update, $this->link) or die(mysql_error());
+            mysqli_query($this->link,$update) or die(mysqli_error($this->link));
           }
 
         }
@@ -21457,17 +21461,17 @@ qq;
     echo "</tr>";
 
     $query = "SELECT * FROM v2_tournament_config_onetomany where o_status='a' AND o_playersignuptype=2";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i=0;
       while($i < $num){
 
-        $o_totmid = mysql_result($return, $i, "o_totmid");
-        $o_name = mysql_result($return, $i, "o_name");
-        $o_dateadded = mysql_result($return, $i, "o_dateadded");
+        $o_totmid = $this->mysqli_result($return, $i, "o_totmid");
+        $o_name = $this->mysqli_result($return, $i, "o_name");
+        $o_dateadded = $this->mysqli_result($return, $i, "o_dateadded");
 
         echo "<tr>";
         echo "<td class='row2'>".$o_name."</td>";
@@ -21477,8 +21481,8 @@ qq;
         echo "[<a href=\"javascript:PopupWindowTInfo('./admin/chess_tournament_info_v2.php?tid=".$o_totmid."&type=1')\">".$this->GetStringFromStringTable("IDS_CHESS_TOURNAMENT_V2_TXT_69")."</a>]";
 
         $queryp = "SELECT * FROM v2_tournament_players WHERE o_ttype=1 AND o_tid=".$o_totmid." AND o_playerid=".$playerid."";
-        $returnp = mysql_query($queryp, $this->link) or die(mysql_error());
-        $nump = mysql_numrows($returnp);
+        $returnp = mysqli_query($this->link,$queryp) or die(mysqli_error($this->link));
+        $nump = mysqli_num_rows($returnp);
 
         if($nump == 0){
           echo "[<a href='./chess_view_open_tournament_v2.php?join=".$o_totmid."&type=1'&pid=".$playerid.">".$this->GetStringFromStringTable("IDS_CHESS_TOURNAMENT_V2_TXT_78")."</a>]";
@@ -21507,19 +21511,19 @@ qq;
     if($type == 1){
 
       $query = "SELECT * FROM v2_tournament_config_onetomany where o_totmid=".$tid." AND o_status='a'";
-      $return = mysql_query($query, $this->link) or die(mysql_error());
-      $num = mysql_numrows($return);
+      $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+      $num = mysqli_num_rows($return);
 
       if($num != 0){
 
         $ndatetime = mktime();
-        $o_playercutoffdate = mysql_result($return, 0, "o_playercutoffdate");
+        $o_playercutoffdate = $this->mysqli_result($return, 0, "o_playercutoffdate");
 
         if($ndatetime < $o_playercutoffdate){
 
           $queryp = "SELECT * FROM v2_tournament_players WHERE o_ttype=1 AND o_tid=".$tid." AND o_playerid=".$playerid."";
-          $returnp = mysql_query($queryp, $this->link) or die(mysql_error());
-          $nump = mysql_numrows($returnp);
+          $returnp = mysqli_query($this->link,$queryp) or die(mysqli_error($this->link));
+          $nump = mysqli_num_rows($returnp);
 
           if($nump == 0){
             $this->v2CreateNewTournament_AddPlayer($type, $tid, $playerid, $strNote);
@@ -21568,16 +21572,16 @@ qq;
 
     // one to many
     $query = "SELECT * FROM v2_tournament_config_onetomany, v2_tournament_organizers where v2_tournament_config_onetomany.o_totmid = v2_tournament_organizers.o_tid AND v2_tournament_organizers.o_ttype=1 AND v2_tournament_config_onetomany.o_status='a' AND v2_tournament_organizers.o_playerid = ".$playerid."";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i=0;
       while($i < $num){
 
-        $o_totmid = mysql_result($return, $i, "o_totmid");
-        $o_name = mysql_result($return, $i, "o_name");
+        $o_totmid = $this->mysqli_result($return, $i, "o_totmid");
+        $o_name = $this->mysqli_result($return, $i, "o_name");
 
         echo "<tr>";
         echo "<td class='row2'><a href=\"javascript:PopupWindowTM('./tv2_console_index.php?tid=".$o_totmid."&type=1');\">".$o_name."</a></td>";
@@ -21601,18 +21605,18 @@ qq;
   function v2ConsoleJoinAndMaintainChatStatus($type, $tid, $playerid){
 
     $query = "SELECT * FROM v2_tournament_console_players WHERE o_ttype=".$type." AND o_tid=".$tid." AND o_playerid=".$playerid."";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $update = "UPDATE v2_tournament_console_players SET o_joined=".time()." WHERE o_ttype=".$type." AND o_tid=".$tid." AND o_playerid=".$playerid."";
-      mysql_query($update, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
     }else{
 
       $insert = "INSERT INTO v2_tournament_console_players VALUES(NULL, ".$type.", ".$tid.", ".$playerid.", ".time().")";
-      mysql_query($insert, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
     }
 
@@ -21628,15 +21632,15 @@ qq;
     $strReturnJAVA = "";
 
     $query = "SELECT * FROM v2_tournament_console_players WHERE o_ttype=".$type." AND o_tid=".$tid."";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i=0;
       while($i < $num){
 
-        $o_playerid = mysql_result($return, $i, "o_playerid");
+        $o_playerid = $this->mysqli_result($return, $i, "o_playerid");
         $strReturnJAVA = $strReturnJAVA."aPlayerList[".$i."]=\"".$this->GetUserIDByPlayerID($this->ChessCFGFileLocation, $o_playerid)."\";\n";
 
         $i++;
@@ -21659,22 +21663,22 @@ qq;
     $nCurTime = time();
 
     $query = "SELECT * FROM v2_tournament_console_players WHERE o_ttype=".$type." AND o_tid=".$tid."";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i=0;
       while($i < $num){
 
-        $o_cplayer = mysql_result($return, $i, "o_cplayer");
-        $o_joined = mysql_result($return, $i, "o_joined");
+        $o_cplayer = $this->mysqli_result($return, $i, "o_cplayer");
+        $o_joined = $this->mysqli_result($return, $i, "o_joined");
 
         $nDifference = $nCurTime - $o_joined;
 
         if($nDifference >= $ntimeoutSec){
           $delete = "DELETE FROM v2_tournament_console_players WHERE o_cplayer=".$o_cplayer."";
-          mysql_query($delete, $this->link) or die(mysql_error());
+          mysqli_query($this->link,$delete) or die(mysqli_error($this->link));
         }
 
         $i++;
@@ -21692,7 +21696,7 @@ qq;
   function v2ConsoleAddChatMessage($type, $tid, $playerid, $Message){
     $Message = rawurlencode($Message);
     $insert = "INSERT INTO v2_tournament_console_chat VALUES(NULL, ".$type.", ".$tid.", ".$playerid.", '".$Message."', ".time().")";
-    mysql_query($insert, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
   }
 
@@ -21706,17 +21710,17 @@ qq;
     $strMSG = "";
 
     $query = "SELECT * FROM v2_tournament_console_chat WHERE o_ttype=".$type." AND o_tid=".$tid." ORDER BY o_chatid DESC";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i=0;
       while($i < $num){
 
-        $o_playerid = mysql_result($return, $i, "o_playerid");
-        $o_message = mysql_result($return, $i, "o_message");
-        $o_datesent = mysql_result($return, $i, "o_datesent");
+        $o_playerid = $this->mysqli_result($return, $i, "o_playerid");
+        $o_message = $this->mysqli_result($return, $i, "o_message");
+        $o_datesent = $this->mysqli_result($return, $i, "o_datesent");
 
         $strPlayer = $this->GetUserIDByPlayerID($this->ChessCFGFileLocation, $o_playerid);
 
@@ -21745,8 +21749,8 @@ qq;
     if($type == 1){
 
       $queryx = "SELECT * FROM v2_tournament_game_config WHERE o_ttype=".$type." AND o_tid=".$tid." AND o_status='i'";
-      $returnx = mysql_query($queryx, $this->link) or die(mysql_error());
-      $numx = mysql_numrows($returnx);
+      $returnx = mysqli_query($this->link,$queryx) or die(mysqli_error($this->link));
+      $numx = mysqli_num_rows($returnx);
 
       // Check if games already exists
       if($numx == 0){
@@ -21754,29 +21758,29 @@ qq;
         $this->v2GetTournamentInformation_OneToMany($tid, $strname, $strdescription, $nplayercutoffdate, $ntournamentstartdate, $ntournamentenddate, $strtimezone, $strgametimeout, $nplayersignuptype, $strdateadded, $strstatus, $aTOrganizers, $aTPlayers);
 
         $query1 = "SELECT * FROM v2_tournament_players WHERE o_ttype=".$type." AND o_tid=".$tid." AND o_status='a' AND o_note = '*'";
-        $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-        $num1 = mysql_numrows($return1);
+        $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+        $num1 = mysqli_num_rows($return1);
 
         $nPlayer1 = 0;
 
         if($num1 != 0){
-          $nPlayer1 = mysql_result($return1, 0, "o_playerid");
+          $nPlayer1 = $this->mysqli_result($return1, 0, "o_playerid");
         }
 
         $gameid = $this->gen_unique();
 
         $insertgame = "INSERT INTO game(game_id, initiator, w_player_id, b_player_id, status, completion_status, start_time, next_move) VALUES('".$gameid."', $nPlayer1, $nPlayer1, 0, 'A', 'I', ".$time.", NULL)";
-        mysql_query($insertgame, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$insertgame) or die(mysqli_error($this->link));
 
         $insertgamematch = "INSERT INTO c4m_tournamentgames VALUES(NULL, 0, '".$gameid."', ".$nPlayer1.", 0, 'N', 'N', 'I' )";
-        mysql_query($insertgamematch, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$insertgamematch) or die(mysqli_error($this->link));
 
         // Convert the game timeout to seconds
         list($h1, $m1, $s1) = explode(":", $strgametimeout, 3);
         $tseconds = $time + (($h1 * 3600 ) + ($m1 * 60) + $s1);
 
         $insertgamematch2 = "INSERT INTO v2_tournament_game_config VALUES(NULL, ".$type.", ".$tid.", '".$gameid."', ".$nPlayer1.", 0, 'n', 'n', ".$ntournamentstartdate.", ".$ntournamentenddate.", 'i')";
-        mysql_query($insertgamematch2, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$insertgamematch2) or die(mysqli_error($this->link));
 
       }
 
@@ -22202,25 +22206,25 @@ qq;
     echo "</tr>";
 
     $query = "SELECT * FROM v2_tournament_config_onetomany where o_status='a'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i=0;
       while($i < $num){
 
-        $o_totmid = mysql_result($return, $i, "o_totmid");
-        $strname = mysql_result($return, $i, "o_name");
-        $strdescription = mysql_result($return, $i, "o_description");
-        $nplayercutoffdate = mysql_result($return, $i, "o_playercutoffdate");
-        $ntournamentstartdate = mysql_result($return, $i, "o_tournamentstartdate");
-        $ntournamentenddate = mysql_result($return, $i, "o_tournamentenddate");
-        $strtimezone = mysql_result($return, $i, "o_timezone");
-        $strgametimeout = mysql_result($return, $i, "o_gametimeout");
-        $nplayersignuptype = mysql_result($return, $i, "o_playersignuptype");
-        $strdateadded = mysql_result($return, $i, "o_dateadded");
-        $strstatus = mysql_result($return, $i, "o_status");
+        $o_totmid = $this->mysqli_result($return, $i, "o_totmid");
+        $strname = $this->mysqli_result($return, $i, "o_name");
+        $strdescription = $this->mysqli_result($return, $i, "o_description");
+        $nplayercutoffdate = $this->mysqli_result($return, $i, "o_playercutoffdate");
+        $ntournamentstartdate = $this->mysqli_result($return, $i, "o_tournamentstartdate");
+        $ntournamentenddate = $this->mysqli_result($return, $i, "o_tournamentenddate");
+        $strtimezone = $this->mysqli_result($return, $i, "o_timezone");
+        $strgametimeout = $this->mysqli_result($return, $i, "o_gametimeout");
+        $nplayersignuptype = $this->mysqli_result($return, $i, "o_playersignuptype");
+        $strdateadded = $this->mysqli_result($return, $i, "o_dateadded");
+        $strstatus = $this->mysqli_result($return, $i, "o_status");
 
         echo "<tr>";
         echo "<td class='row2'>";
@@ -22276,25 +22280,25 @@ qq;
     echo "</tr>";
 
     $query = "SELECT * FROM v2_tournament_config_onetomany where o_status='c'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i=0;
       while($i < $num){
 
-        $o_totmid = mysql_result($return, $i, "o_totmid");
-        $strname = mysql_result($return, $i, "o_name");
-        $strdescription = mysql_result($return, $i, "o_description");
-        $nplayercutoffdate = mysql_result($return, $i, "o_playercutoffdate");
-        $ntournamentstartdate = mysql_result($return, $i, "o_tournamentstartdate");
-        $ntournamentenddate = mysql_result($return, $i, "o_tournamentenddate");
-        $strtimezone = mysql_result($return, $i, "o_timezone");
-        $strgametimeout = mysql_result($return, $i, "o_gametimeout");
-        $nplayersignuptype = mysql_result($return, $i, "o_playersignuptype");
-        $strdateadded = mysql_result($return, $i, "o_dateadded");
-        $strstatus = mysql_result($return, $i, "o_status");
+        $o_totmid = $this->mysqli_result($return, $i, "o_totmid");
+        $strname = $this->mysqli_result($return, $i, "o_name");
+        $strdescription = $this->mysqli_result($return, $i, "o_description");
+        $nplayercutoffdate = $this->mysqli_result($return, $i, "o_playercutoffdate");
+        $ntournamentstartdate = $this->mysqli_result($return, $i, "o_tournamentstartdate");
+        $ntournamentenddate = $this->mysqli_result($return, $i, "o_tournamentenddate");
+        $strtimezone = $this->mysqli_result($return, $i, "o_timezone");
+        $strgametimeout = $this->mysqli_result($return, $i, "o_gametimeout");
+        $nplayersignuptype = $this->mysqli_result($return, $i, "o_playersignuptype");
+        $strdateadded = $this->mysqli_result($return, $i, "o_dateadded");
+        $strstatus = $this->mysqli_result($return, $i, "o_status");
 
         echo "<tr>";
         echo "<td class='row2'>";
@@ -22335,8 +22339,8 @@ qq;
   function v2GetCurrentTournamentGamesHTML($type, $tid, $timezone, $playerID){
 
     $query = "SELECT * FROM v2_tournament_game_config where o_ttype=".$type." AND o_tid=".$tid." AND o_status='i'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     echo "<br>";
 
@@ -22358,13 +22362,13 @@ qq;
       $i=0;
       while($i < $num){
 
-        $o_tgc = mysql_result($return, $i, "o_tgc");
-        $o_ttype = mysql_result($return, $i, "o_ttype");
-        $o_tid = mysql_result($return, $i, "o_tid");
-        $o_wplayerid = mysql_result($return, $i, "o_wplayerid");
-        $o_bplayerid = mysql_result($return, $i, "o_bplayerid");
-        $o_gmtstarttime = mysql_result($return, $i, "o_gmtstarttime");
-        $o_gmtendtime = mysql_result($return, $i, "o_gmtendtime");
+        $o_tgc = $this->mysqli_result($return, $i, "o_tgc");
+        $o_ttype = $this->mysqli_result($return, $i, "o_ttype");
+        $o_tid = $this->mysqli_result($return, $i, "o_tid");
+        $o_wplayerid = $this->mysqli_result($return, $i, "o_wplayerid");
+        $o_bplayerid = $this->mysqli_result($return, $i, "o_bplayerid");
+        $o_gmtstarttime = $this->mysqli_result($return, $i, "o_gmtstarttime");
+        $o_gmtendtime = $this->mysqli_result($return, $i, "o_gmtendtime");
 
         echo "<tr>";
         echo "<td class='row2'>";
@@ -22393,7 +22397,7 @@ qq;
 
     $Message = rawurlencode($Message);
     $insert = "INSERT INTO v2_tournament_onetomany_chat VALUES(NULL, ".$type.", ".$tid.", ".$playerid.", '".$Message."', '".$ctype."', ".mktime().")";
-    mysql_query($insert, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
   }
 
@@ -22407,18 +22411,18 @@ qq;
     $strMSG = "";
 
     $query = "SELECT * FROM v2_tournament_onetomany_chat WHERE o_ttype=".$type." AND o_tid=".$tid." ORDER BY o_chatid DESC";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i=0;
       while($i < $num){
 
-        $o_playerid = mysql_result($return, $i, "o_playerid");
-        $o_message = mysql_result($return, $i, "o_message");
-        $o_mtype = mysql_result($return, $i, "o_mtype");
-        $o_datesent = mysql_result($return, $i, "o_datesent");
+        $o_playerid = $this->mysqli_result($return, $i, "o_playerid");
+        $o_message = $this->mysqli_result($return, $i, "o_message");
+        $o_mtype = $this->mysqli_result($return, $i, "o_mtype");
+        $o_datesent = $this->mysqli_result($return, $i, "o_datesent");
 
         if($o_playerid != 0){
           $strPlayer = $this->GetUserIDByPlayerID($this->ChessCFGFileLocation, $o_playerid);
@@ -22459,18 +22463,18 @@ qq;
   function v2OTMJoinAndMaintainChatStatus($type, $tid, $playerid){
 
     $query = "SELECT * FROM v2_tournament_onetomany_players WHERE o_ttype=".$type." AND o_tid=".$tid." AND o_playerid=".$playerid."";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $update = "UPDATE v2_tournament_onetomany_players SET o_joined=".time()." WHERE o_ttype=".$type." AND o_tid=".$tid." AND o_playerid=".$playerid."";
-      mysql_query($update, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
     }else{
 
       $insert = "INSERT INTO v2_tournament_onetomany_players VALUES(NULL, ".$type.", ".$tid.", ".$playerid.", ".time().")";
-      mysql_query($insert, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
     }
 
@@ -22487,22 +22491,22 @@ qq;
     $nCurTime = time();
 
     $query = "SELECT * FROM v2_tournament_onetomany_players WHERE o_ttype=".$type." AND o_tid=".$tid."";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i=0;
       while($i < $num){
 
-        $o_cplayer = mysql_result($return, $i, "o_cplayer");
-        $o_joined = mysql_result($return, $i, "o_joined");
+        $o_cplayer = $this->mysqli_result($return, $i, "o_cplayer");
+        $o_joined = $this->mysqli_result($return, $i, "o_joined");
 
         $nDifference = $nCurTime - $o_joined;
 
         if($nDifference >= $ntimeoutSec){
           $delete = "DELETE FROM v2_tournament_onetomany_players WHERE o_cplayer=".$o_cplayer."";
-          mysql_query($delete, $this->link) or die(mysql_error());
+          mysqli_query($this->link,$delete) or die(mysqli_error($this->link));
         }
 
         $i++;
@@ -22522,15 +22526,15 @@ qq;
     $strReturnJAVA = "";
 
     $query = "SELECT * FROM v2_tournament_onetomany_players WHERE o_ttype=".$type." AND o_tid=".$tid."";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i=0;
       while($i < $num){
 
-        $o_playerid = mysql_result($return, $i, "o_playerid");
+        $o_playerid = $this->mysqli_result($return, $i, "o_playerid");
         $strReturnJAVA = $strReturnJAVA."aPlayerList[".$i."]=\"".$this->GetUserIDByPlayerID($this->ChessCFGFileLocation, $o_playerid)."\";\n";
 
         $i++;
@@ -22737,8 +22741,8 @@ qq;
   function v2OTMGenerateMPGameListHTML($type, $tid){
 
     $query = "SELECT * FROM v2_tournament_game_config where o_ttype=".$type." AND o_tid=".$tid." AND o_status='i'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     echo "<table width='100%'>";
 
@@ -22749,8 +22753,8 @@ qq;
       $bResetSwap = false;
       while($i < $num){
 
-        $o_tgc = mysql_result($return, $i, "o_tgc");
-        $o_gameid = mysql_result($return, $i, "o_gameid");
+        $o_tgc = $this->mysqli_result($return, $i, "o_tgc");
+        $o_gameid = $this->mysqli_result($return, $i, "o_gameid");
 
         if($swap == 0){
           echo "<tr>";
@@ -22802,14 +22806,14 @@ qq;
   function v2OTMGeneratePGameListHTML($type, $tid, $tgc){
 
     $query = "SELECT * FROM v2_tournament_game_config WHERE o_tgc=".$tgc." AND o_status='i'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     echo "<table width='100%'>";
 
     if($num != 0){
 
-      $o_gameid = mysql_result($return, $i, "o_gameid");
+      $o_gameid = $this->mysqli_result($return, $i, "o_gameid");
 
       echo "<td width='50%'><iframe id='".$o_gameid."' name='".$o_gameid."' scrolling='auto' frameborder='0' width='100%' height='500' src='./tv2mp_game.php?gameid=".$o_gameid."&tid=".$tid."&type=".$type."'></iframe></td>";
 
@@ -22827,25 +22831,25 @@ qq;
   function v2ManageTournamentGameQueueJAVA($pid, $type, $tid){
 
     $query = "SELECT * FROM v2_tournament_game_queue WHERE o_pid=".$pid."";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i=0;
       while($i < $num){
 
-        $o_tgq = mysql_result($return, $i, "o_tgq");
-        $o_gameid = mysql_result($return, $i, "o_gameid");
-        $o_pid = mysql_result($return, $i, "o_pid");
-        $o_reload = mysql_result($return, $i, "o_reload");
+        $o_tgq = $this->mysqli_result($return, $i, "o_tgq");
+        $o_gameid = $this->mysqli_result($return, $i, "o_gameid");
+        $o_pid = $this->mysqli_result($return, $i, "o_pid");
+        $o_reload = $this->mysqli_result($return, $i, "o_reload");
 
         if($o_pid == $pid && $o_reload='y'){
 
           echo "top.frGameList.document.getElementById('".$o_gameid."').src = './tv2mp_game.php?gameid=".$o_gameid."&tid=".$tid."&type=".$type."';";
 
           $delete = "DELETE FROM v2_tournament_game_queue WHERE o_tgq=".$o_tgq."";
-          mysql_query($delete, $this->link) or die(mysql_error());
+          mysqli_query($this->link,$delete) or die(mysqli_error($this->link));
 
 
         }
@@ -22868,18 +22872,18 @@ qq;
     if($pid == 0){
 
       $query = "SELECT * FROM v2_tournament_players WHERE o_ttype=".$type." AND o_tid=".$tid." AND o_status='a' AND o_note != '*'";
-      $return = mysql_query($query, $this->link) or die(mysql_error());
-      $num = mysql_numrows($return);
+      $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+      $num = mysqli_num_rows($return);
 
       if($num != 0){
 
         $i=0;
         while($i < $num){
 
-          $o_playerid = mysql_result($return, $i, "o_playerid");
+          $o_playerid = $this->mysqli_result($return, $i, "o_playerid");
 
           $insert = "INSERT INTO v2_tournament_game_queue VALUES(NULL, '".$gid."', $o_playerid, 'y')";
-          mysql_query($insert, $this->link) or die(mysql_error());
+          mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
           $i++;
         }
@@ -22889,7 +22893,7 @@ qq;
     }else{
 
       $insert = "INSERT INTO v2_tournament_game_queue VALUES(NULL, '".$gid."', $pid, 'y')";
-      mysql_query($insert, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
     }
 
@@ -22905,18 +22909,18 @@ qq;
 
     // delete black player queues
     $query = "SELECT * FROM v2_tournament_game_config WHERE o_ttype=".$type." AND o_tid=".$tid." AND o_bplayerid=".$pid." AND o_status='i'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i=0;
       while($i < $num){
 
-        $o_gameid = mysql_result($return, $i, "o_gameid");
+        $o_gameid = $this->mysqli_result($return, $i, "o_gameid");
 
         $delete = "DELETE FROM v2_tournament_game_queue WHERE o_gameid='".$o_gameid."' AND o_pid=".$pid."";
-        mysql_query($delete, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$delete) or die(mysqli_error($this->link));
 
         $i++;
       }
@@ -22925,18 +22929,18 @@ qq;
 
     // delete white player queues
     $query = "SELECT * FROM v2_tournament_game_config WHERE o_ttype=".$type." AND o_tid=".$tid." AND o_wplayerid=".$pid." AND o_status='i'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i=0;
       while($i < $num){
 
-        $o_gameid = mysql_result($return, $i, "o_gameid");
+        $o_gameid = $this->mysqli_result($return, $i, "o_gameid");
 
         $delete = "DELETE FROM v2_tournament_game_queue WHERE o_gameid='".$o_gameid."' AND o_pid=".$pid."";
-        mysql_query($delete, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$delete) or die(mysqli_error($this->link));
 
         $i++;
       }
@@ -22955,8 +22959,8 @@ qq;
     $bReturn = false;
 
     $query = "SELECT * FROM v2_tournament_players WHERE o_ttype=".$type." AND o_tid=".$tid." AND o_playerid=".$pid." AND o_note='*'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
       $bReturn = true;
@@ -22976,8 +22980,8 @@ qq;
     $bReturn = false;
 
     $query = "SELECT * FROM v2_tournament_players WHERE o_playerid=".$pid." AND o_ttype=".$type." AND o_tid=".$tid." AND o_status='a'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
       $bReturn = true;
@@ -22997,12 +23001,12 @@ qq;
     $ConfigFile = $this->ChessCFGFileLocation;
 
     $query = "SELECT * FROM v2_tournament_game_config WHERE o_ttype=".$type." AND o_tid=".$tid." AND o_tgc=".$tgc."";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $o_gameid = mysql_result($return, $i, "o_gameid");
+      $o_gameid = $this->mysqli_result($return, $i, "o_gameid");
 
       $fen = $this->GetFEN("", $o_gameid);
 
@@ -23127,22 +23131,22 @@ qq;
   function v2UpdateGameLoginAndPlayStatus($gid, $pid, $type, $tid){
 
     $query = "SELECT * FROM v2_tournament_game_config WHERE o_ttype=".$type." AND o_tid=".$tid." AND o_gameid='".$gid."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $o_wplayerid = mysql_result($return, 0, "o_wplayerid");
-      $o_bplayerid = mysql_result($return, 0, "o_bplayerid");
+      $o_wplayerid = $this->mysqli_result($return, 0, "o_wplayerid");
+      $o_bplayerid = $this->mysqli_result($return, 0, "o_bplayerid");
 
       if($o_wplayerid == $pid){
         $update = "UPDATE v2_tournament_game_config SET o_wplayerln='y' WHERE o_ttype=".$type." AND o_tid=".$tid." AND o_gameid='".$gid."'";
-        mysql_query($update, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$update) or die(mysqli_error($this->link));
       }
 
       if($o_bplayerid == $pid){
         $update = "UPDATE v2_tournament_game_config SET o_bplayerln='y' WHERE o_ttype=".$type." AND o_tid=".$tid." AND o_gameid='".$gid."'";
-        mysql_query($update, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$update) or die(mysqli_error($this->link));
       }
 
     }
@@ -23161,13 +23165,13 @@ qq;
     if($tgc == 0){
 
       $query = "SELECT * FROM v2_tournament_game_config WHERE o_ttype=".$type." AND o_tid=".$tid." AND o_status='i'";
-      $return = mysql_query($query, $this->link) or die(mysql_error());
-      $num = mysql_numrows($return);
+      $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+      $num = mysqli_num_rows($return);
 
       if($num != 0){
 
-        $o_gmtstarttime = mysql_result($return, 0, "o_gmtstarttime");
-        $o_gmtendtime = mysql_result($return, 0, "o_gmtendtime");
+        $o_gmtstarttime = $this->mysqli_result($return, 0, "o_gmtstarttime");
+        $o_gmtendtime = $this->mysqli_result($return, 0, "o_gmtendtime");
 
         if(mktime() >= $o_gmtstarttime && mktime() < $o_gmtendtime){
           $Status = "IDS_GAME_READY";
@@ -23180,13 +23184,13 @@ qq;
     }else{
 
       $query = "SELECT * FROM v2_tournament_game_config WHERE o_tgc=".$tgc."";
-      $return = mysql_query($query, $this->link) or die(mysql_error());
-      $num = mysql_numrows($return);
+      $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+      $num = mysqli_num_rows($return);
 
       if($num != 0){
 
-        $o_gmtstarttime = mysql_result($return, 0, "o_gmtstarttime");
-        $o_gmtendtime = mysql_result($return, 0, "o_gmtendtime");
+        $o_gmtstarttime = $this->mysqli_result($return, 0, "o_gmtstarttime");
+        $o_gmtendtime = $this->mysqli_result($return, 0, "o_gmtendtime");
 
         if(mktime() >= $o_gmtstarttime && mktime() < $o_gmtendtime){
 
@@ -23213,8 +23217,8 @@ qq;
     $breturn = false;
 
     $query = "SELECT * FROM v2_tournament_game_config WHERE o_ttype=".$type." AND o_tid=".$tid."";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
       $breturn = true;
@@ -23232,8 +23236,8 @@ qq;
   function v2FinishAndCloseTournament($type, $tid){
 
     $queryx = "SELECT * FROM v2_tournament_config_onetomany WHERE o_totmid=".$tid." AND o_status='a'";
-    $returnx = mysql_query($queryx, $this->link) or die(mysql_error());
-    $numx = mysql_numrows($returnx);
+    $returnx = mysqli_query($this->link,$queryx) or die(mysqli_error($this->link));
+    $numx = mysqli_num_rows($returnx);
 
     ///////////////////
     // Step 1
@@ -23250,20 +23254,20 @@ qq;
 
       // calculate game scores
       $query = "SELECT * FROM v2_tournament_game_config WHERE o_ttype=".$type." AND o_tid=".$tid." AND o_status='i'";
-      $return = mysql_query($query, $this->link) or die(mysql_error());
-      $num = mysql_numrows($return);
+      $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+      $num = mysqli_num_rows($return);
 
       if($num != 0){
 
         $i=0;
         while($i < $num){
 
-          $o_tgc = mysql_result($return, $i, "o_tgc");
-          $o_gameid = mysql_result($return, $i, "o_gameid");
-          $o_wplayerid = mysql_result($return, $i, "o_wplayerid");
-          $o_bplayerid = mysql_result($return, $i, "o_bplayerid");
-          $o_wplayerln = mysql_result($return, $i, "o_wplayerln");
-          $o_bplayerln = mysql_result($return, $i, "o_bplayerln");
+          $o_tgc = $this->mysqli_result($return, $i, "o_tgc");
+          $o_gameid = $this->mysqli_result($return, $i, "o_gameid");
+          $o_wplayerid = $this->mysqli_result($return, $i, "o_wplayerid");
+          $o_bplayerid = $this->mysqli_result($return, $i, "o_bplayerid");
+          $o_wplayerln = $this->mysqli_result($return, $i, "o_wplayerln");
+          $o_bplayerln = $this->mysqli_result($return, $i, "o_bplayerln");
 
           // Get the game information
           $initiator = "";
@@ -23309,7 +23313,7 @@ qq;
 
           // Set the game to complete
           $update = "UPDATE v2_tournament_game_config SET o_status='c' WHERE o_ttype=".$type." AND o_tid=".$tid." AND o_gameid='".$o_gameid."'";
-          mysql_query($update, $this->link) or die(mysql_error());
+          mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
           $i++;
         }
@@ -23325,7 +23329,7 @@ qq;
       echo $this->GetStringFromStringTable("IDS_CHESS_TOURNAMENT_V2_TXT_115")."<br>";
 
       $update = "UPDATE v2_tournament_config_onetomany SET o_status='c' WHERE o_totmid=".$tid."";
-      mysql_query($update, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
     }else{
       // Display log message
@@ -23347,12 +23351,12 @@ qq;
     $breturn = false;
 
     $query = "SELECT * FROM v2_tournament_config_onetomany WHERE o_totmid=".$tid."";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $o_playercutoffdate = mysql_result($return, 0, "o_playercutoffdate");
+      $o_playercutoffdate = $this->mysqli_result($return, 0, "o_playercutoffdate");
 
       if(mktime() >= $o_playercutoffdate){
         $breturn = true;
@@ -23374,8 +23378,8 @@ qq;
     $breturn = false;
 
     $query = "SELECT * FROM v2_tournament_config_onetomany WHERE o_totmid=".$tid." AND o_status='c'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
       $breturn = true;
@@ -23393,8 +23397,8 @@ qq;
   function v2GenerateTournamentResultTable($type, $tid){
 
     $query = "SELECT * FROM v2_tournament_game_config WHERE o_ttype=".$type." AND o_tid=".$tid." AND o_status='c'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     echo "<br>";
 
@@ -23418,9 +23422,9 @@ qq;
       $i=0;
       while($i < $num){
 
-        $o_gameid = mysql_result($return, $i, "o_gameid");
-        $o_wplayerid = mysql_result($return, $i, "o_wplayerid");
-        $o_bplayerid = mysql_result($return, $i, "o_bplayerid");
+        $o_gameid = $this->mysqli_result($return, $i, "o_gameid");
+        $o_wplayerid = $this->mysqli_result($return, $i, "o_wplayerid");
+        $o_bplayerid = $this->mysqli_result($return, $i, "o_bplayerid");
 
         $this->GetGameInfoByRef($this->ChessCFGFileLocation, $o_gameid, $initiator, $w_player_id, $b_player_id, $status, $completion_status, $start_time, $next_move);
 
@@ -23449,11 +23453,11 @@ qq;
     $nCount = 0;
 
     $query = "SELECT COUNT(*) FROM v2_tournament_config_onetomany WHERE o_status='p'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-      $nCount = mysql_result($return,0, 0);
+      $nCount = $this->mysqli_result($return,0, 0);
     }
 
     return $nCount;
@@ -23468,13 +23472,13 @@ qq;
   function v2AddTournamentGameMoveVote($gameid, $pid, $move){
 
     $query = "SELECT * FROM v2_tournament_onetomany_gamemove_vote WHERE o_gameid='".$gameid."' AND o_pid=".$pid."";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num == 0){
 
       $insert = "INSERT INTO v2_tournament_onetomany_gamemove_vote VALUES(NULL, '".$gameid."', ".$pid.", '".$move."', ".time().")";
-      mysql_query($insert, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
     }
 
@@ -23488,8 +23492,8 @@ qq;
   function v2GetTournamentGameMoveVote($gameid){
 
     $query = "SELECT * FROM v2_tournament_onetomany_gamemove_vote WHERE o_gameid='".$gameid."' ORDER BY o_move";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     echo "<table width='200' border='0' cellpadding='3' cellspacing='1' align='center' class='forumline'>";
     echo "<tr><td colspan='2' class='row1'>".$this->GetStringFromStringTable("IDS_CHESS_TOURNAMENT_V2_TXT_121")."</td></tr>";
@@ -23502,20 +23506,20 @@ qq;
 
         $nvote = 0;
 
-        $o_tgmv = mysql_result($return, $i, "o_tgmv");
-        $o_gameid = mysql_result($return, $i, "o_gameid");
-        $o_pid = mysql_result($return, $i, "o_pid");
-        $o_move = mysql_result($return, $i, "o_move");
+        $o_tgmv = $this->mysqli_result($return, $i, "o_tgmv");
+        $o_gameid = $this->mysqli_result($return, $i, "o_gameid");
+        $o_pid = $this->mysqli_result($return, $i, "o_pid");
+        $o_move = $this->mysqli_result($return, $i, "o_move");
 
         if($lastmove != $o_move){
 
           // Get move count
           $query1 = "SELECT count(*) FROM v2_tournament_onetomany_gamemove_vote WHERE o_gameid='".$gameid."' AND o_move='".$o_move."'";
-          $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-          $num1 = mysql_numrows($return1);
+          $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+          $num1 = mysqli_num_rows($return1);
 
           if($num1 != 0){
-            $nvote = mysql_result($return1, 0, 0);
+            $nvote = $this->mysqli_result($return1, 0, 0);
           }
 
           list($move1, $move2) = preg_split("/\|/", $o_move, 2);
@@ -23546,34 +23550,34 @@ qq;
     $bCheckMoveVotes = false;
 
     $queryt = "SELECT * FROM v2_tournament_config_onetomany WHERE o_totmid=".$tid."";
-    $returnt = mysql_query($queryt, $this->link) or die(mysql_error());
-    $numt = mysql_numrows($returnt);
+    $returnt = mysqli_query($this->link,$queryt) or die(mysqli_error($this->link));
+    $numt = mysqli_num_rows($returnt);
 
     $query = "SELECT * FROM v2_tournament_game_config WHERE o_tgc=".$tgc."";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0 && $numt != 0){
 
-      $gameid = mysql_result($return, 0, "o_gameid");
-      $gametimeout = mysql_result($returnt, 0, "o_gametimeout");
+      $gameid = $this->mysqli_result($return, 0, "o_gameid");
+      $gametimeout = $this->mysqli_result($returnt, 0, "o_gametimeout");
 
       // Convert the game timeout to seconds
       list($h1, $m1, $s1) = explode(":", $gametimeout, 3);
       $tseconds = (($h1 * 3600 ) + ($m1 * 60) + $s1);
 
       $query1 = "SELECT * FROM v2_tournament_onetomany_gamemove_vote WHERE o_gameid='".$gameid."' ORDER BY o_tgmv ASC LIMIT 1";
-      $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-      $num1 = mysql_numrows($return1);
+      $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+      $num1 = mysqli_num_rows($return1);
 
       $query2 = "SELECT * FROM move_history WHERE game_id = '".$gameid."' ORDER BY time DESC LIMIT 1";
-      $return2 = mysql_query($query2, $this->link) or die(mysql_error());
-      $num2 = mysql_numrows($return2);
+      $return2 = mysqli_query($this->link,$query2) or die(mysqli_error($this->link));
+      $num2 = mysqli_num_rows($return2);
 
       if($num1 != 0 && $num2 != 0){
 
-        $ntime1 = mysql_result($return1, 0, "o_time");
-        $ntime2 = mysql_result($return2, 0, "time");
+        $ntime1 = $this->mysqli_result($return1, 0, "o_time");
+        $ntime2 = $this->mysqli_result($return2, 0, "time");
 
         if((time() - $ntime1) >= $tseconds){
           $bCheckMoveVotes = true;
@@ -23588,8 +23592,8 @@ qq;
       $aMoveVotes = array();
 
       $query = "SELECT * FROM v2_tournament_onetomany_gamemove_vote WHERE o_gameid='".$gameid."' ORDER BY o_move";
-      $return = mysql_query($query, $this->link) or die(mysql_error());
-      $num = mysql_numrows($return);
+      $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+      $num = mysqli_num_rows($return);
 
       if($num != 0){
 
@@ -23600,20 +23604,20 @@ qq;
 
           $nvote = 0;
 
-          $o_tgmv = mysql_result($return, $i, "o_tgmv");
-          $o_gameid = mysql_result($return, $i, "o_gameid");
-          $o_pid = mysql_result($return, $i, "o_pid");
-          $o_move = mysql_result($return, $i, "o_move");
+          $o_tgmv = $this->mysqli_result($return, $i, "o_tgmv");
+          $o_gameid = $this->mysqli_result($return, $i, "o_gameid");
+          $o_pid = $this->mysqli_result($return, $i, "o_pid");
+          $o_move = $this->mysqli_result($return, $i, "o_move");
 
           if($lastmove != $o_move){
 
             // Get move count
             $query1 = "SELECT count(*) FROM v2_tournament_onetomany_gamemove_vote WHERE o_gameid='".$gameid."' AND o_move='".$o_move."'";
-            $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-            $num1 = mysql_numrows($return1);
+            $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+            $num1 = mysqli_num_rows($return1);
 
             if($num1 != 0){
-              $nvote = mysql_result($return1, 0, 0);
+              $nvote = $this->mysqli_result($return1, 0, 0);
             }
 
             list($move1, $move2) = preg_split("/\|/", $o_move, 2);
@@ -23653,15 +23657,15 @@ qq;
   function v2ClearTournamentGameMove_Vote($tgc, $type, $tid){
 
     $query = "SELECT * FROM v2_tournament_game_config WHERE o_tgc=".$tgc."";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $gameid = mysql_result($return, 0, "o_gameid");
+      $gameid = $this->mysqli_result($return, 0, "o_gameid");
 
       $delete = "DELETE FROM v2_tournament_onetomany_gamemove_vote WHERE o_gameid='".$gameid."'";
-      mysql_query($delete, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$delete) or die(mysqli_error($this->link));
 
     }
 
@@ -23677,11 +23681,11 @@ qq;
     $nSetting = 0;
 
     $query = "SELECT * FROM cfg_player_chat WHERE o_pcid=1";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-      $nSetting = mysql_result($return,0, "o_setting");
+      $nSetting = $this->mysqli_result($return,0, "o_setting");
     }
 
     return $nSetting;
@@ -23696,7 +23700,7 @@ qq;
   function UpdatePChatSettings($nSetting){
 
     $update = "UPDATE cfg_player_chat SET o_setting=".$nSetting." WHERE o_pcid=1";
-    mysql_query($update, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
   }
 
@@ -23710,11 +23714,11 @@ qq;
     $nSetting = 0;
 
     $query = "SELECT * FROM cfg_cron_job WHERE o_cjid=1";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-      $nSetting = mysql_result($return,0, "o_setting");
+      $nSetting = $this->mysqli_result($return,0, "o_setting");
     }
 
     return $nSetting;
@@ -23729,7 +23733,7 @@ qq;
   function UpdateCronJobSettings($nSetting){
 
     $update = "UPDATE cfg_cron_job SET o_setting=".$nSetting." WHERE o_cjid=1";
-    mysql_query($update, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
   }
 
@@ -23741,12 +23745,12 @@ qq;
   function ConfirmSID($sid, &$user, &$id){
 
     $query = "SELECT * FROM active_sessions WHERE session='".$sid."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $id = mysql_result($return,0, "player_id");
+      $id = $this->mysqli_result($return,0, "player_id");
       $user = $this->GetUserIDByPlayerID($this->ChessCFGFileLocation, $id);
 
     }
@@ -23763,8 +23767,8 @@ qq;
     echo "<RESPONSE>\n";
 
     $query = "SELECT * FROM move_history WHERE game_id = '".$gameid."' ORDER BY time ASC";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
@@ -23772,7 +23776,7 @@ qq;
       echo "<MOVES>\n";
 
       $i=0;
-      while($move = mysql_fetch_array($return)){
+      while($move = mysqli_fetch_array($return)){
 
         $i++;
 
@@ -23833,15 +23837,15 @@ qq;
     echo "<RESPONSE>\n";
 
     $query = "SELECT COUNT(move_id) FROM move_history WHERE game_id = '".$gameid."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
-    $move = mysql_fetch_array($return);
+    $move = mysqli_fetch_array($return);
     if($moves != $move["COUNT(move_id)"]){
 
       $sqlquery = "SELECT * FROM move_history WHERE game_id = '".$gameid."' ORDER BY time DESC LIMIT 1";
-      $result = mysql_query($sqlquery) or die(mysql_error());
-      $move = mysql_fetch_array($result);
+      $result = mysqli_query($this->link,$sqlquery) or die(mysqli_error($this->link));
+      $move = mysqli_fetch_array($result);
 
       echo "<NEWMOVE>";
       //echo "<DEBUG>".$move["move"]."</DEBUG>";
@@ -23903,8 +23907,8 @@ qq;
     $bReturn = false;
 
     $query = "SELECT * FROM game WHERE game_id='".$gameid."' AND ((w_player_id=".$playerid." OR b_player_id=".$playerid.") OR w_player_id='0' OR b_player_id='0')";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
       $bReturn = true;
@@ -23932,8 +23936,8 @@ qq;
       $query = "SELECT * FROM game WHERE (w_player_id=".$playerid." OR b_player_id=".$playerid.") AND status='A' AND completion_status='I'";
     }
 
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     echo "<table border='0' align='center' class='forumline' cellpadding='3' cellspacing='1' width='500'>";
     echo "<tr><td colspan='4' class='tableheadercolor'><b><font class='sitemenuheader'>".$strTitle."</font><b></td></tr>";
@@ -23966,11 +23970,11 @@ qq;
       $i=0;
       while($i < $num){
 
-        $game_id = mysql_result($return, $i,"game_id");
-        $start_time = mysql_result($return, $i,"start_time");
-        $w_player_id = mysql_result($return, $i,"w_player_id");
-        $b_player_id = mysql_result($return, $i,"b_player_id");
-        $completion_status = mysql_result($return, $i,"completion_status");
+        $game_id = $this->mysqli_result($return, $i,"game_id");
+        $start_time = $this->mysqli_result($return, $i,"start_time");
+        $w_player_id = $this->mysqli_result($return, $i,"w_player_id");
+        $b_player_id = $this->mysqli_result($return, $i,"b_player_id");
+        $completion_status = $this->mysqli_result($return, $i,"completion_status");
 
         echo "<tr>";
         echo "<td class='row2' align='center'>";
@@ -24046,12 +24050,12 @@ qq;
     $ConfigFile = $this->ChessCFGFileLocation;
 
     $query = "SELECT * FROM game WHERE game_id='".$gid."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $o_gameid = mysql_result($return, $i, "game_id");
+      $o_gameid = $this->mysqli_result($return, $i, "game_id");
 
       $fen = $this->GetFEN("", $o_gameid);
 
@@ -24175,13 +24179,13 @@ qq;
   function GetUserPassword($ConfigFile, $UserID){
 
     $query = "SELECT * FROM player WHERE userid = '".$UserID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $password = "";
 
     if($num != 0){
-       $password  = trim(mysql_result($return,0,"password"));
+       $password  = trim($this->mysqli_result($return,0,"password"));
     }
 
     return $password;
@@ -24198,15 +24202,15 @@ qq;
     $aUserList = array();
 
     $query = "SELECT * FROM player";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i = 0;
       while($i < $num){
 
-        $player_id = trim(mysql_result($return, $i, "player_id"));
+        $player_id = trim($this->mysqli_result($return, $i, "player_id"));
 
         array_push($aUserList, $player_id);
 
@@ -24231,8 +24235,8 @@ qq;
 
     //Get game info
     $query = "SELECT * FROM player LEFT JOIN player2 ON player.player_id = player2.player_id WHERE player2.player_id IS NULL ORDER BY player.userid Asc";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     // Check if the index is numeric
     if(!is_numeric($index)){
@@ -24308,10 +24312,10 @@ qq;
       $ii = 0;
       while($i < $num && $ii < $nMaxList){
 
-        $player_id = trim(mysql_result($return,$i,"player_id"));
-        $userid = trim(mysql_result($return,$i,"userid"));
-        $signup_time  = trim(mysql_result($return,$i,"signup_time"));
-        $email = trim(mysql_result($return,$i,"email"));
+        $player_id = trim($this->mysqli_result($return,$i,"player_id"));
+        $userid = trim($this->mysqli_result($return,$i,"userid"));
+        $signup_time  = trim($this->mysqli_result($return,$i,"signup_time"));
+        $email = trim($this->mysqli_result($return,$i,"email"));
 
         if($this->IsPlayerDisabled($player_id) == false){
 
@@ -24352,8 +24356,8 @@ qq;
   function DoesPlayerIDExists($PID){
 
     $query = "SELECT * FROM player WHERE player_id = ".$PID;
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $bExists = false;
 
@@ -24375,11 +24379,11 @@ qq;
     $strURL = "N/A";
 
     $query = "SELECT * FROM c4m_avatars WHERE a_playerid = ".$PID;
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-      $strURL = $this->SiteURL."/avatars/".mysql_result($return, 0, "a_imgname");
+      $strURL = $this->SiteURL."/avatars/".$this->mysqli_result($return, 0, "a_imgname");
     }
 
     return $strURL;
@@ -24393,11 +24397,11 @@ qq;
   function GetBuddyListmobile($PID){
 
     $query = "SELECT * FROM c4m_buddylist WHERE player_id = ".$PID;
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
     
 	echo "<BUDDIES>";
-	while($row = mysql_fetch_array($return, MYSQL_NUM))
+	while($row = mysqli_fetch_array($return, MYSQLI_NUM))
 	{
 		echo "<ID>";
 		echo $row[2];
@@ -24411,7 +24415,7 @@ qq;
 	
 
 //  if($num != 0){
-//	while ($row = mysql_fetch_array($return, MYSQL_NUM)) {
+//	while ($row = mysqli_fetch_array($return, MYSQLI_NUM)) {
 //	  echo "<ID>";
 //	  echo $row[2];
 //	  echo "</ID>";
@@ -24429,18 +24433,18 @@ qq;
   function SetChessPointCacheData($nPlayerID, $nPoints){
 
     $query = "SELECT * FROM cfm_point_caching WHERE player_id=".$nPlayerID;
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $update = "UPDATE cfm_point_caching SET points='".$nPoints."' WHERE player_id=".$nPlayerID;
-      mysql_query($update, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
     }else{
 
       $insert = "INSERT INTO cfm_point_caching values(".$nPlayerID.", '".$nPoints."')";
-      mysql_query($insert, $this->link) or die(mysql_error());
+      mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
     }
 
@@ -24456,11 +24460,11 @@ qq;
     $nPoints=0;
 
     $query = "SELECT * FROM cfm_point_caching WHERE player_id=".$nPlayerID;
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-      $nPoints = mysql_result($return, 0, "points");
+      $nPoints = $this->mysqli_result($return, 0, "points");
     }
 
     return $nPoints;
@@ -24481,7 +24485,7 @@ qq;
     }
 
     // Remove Item
-    mysql_query($query, $this->link) or die(mysql_error());
+    mysqli_query($this->link,$query) or die(mysqli_error($this->link));
 
   }
 
@@ -24495,8 +24499,8 @@ qq;
     $bReturn = false;
 
     $query = "SELECT * FROM player WHERE userid='".$UserID."' AND password='".$Pass."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
        $bReturn  = true;
@@ -24514,8 +24518,8 @@ qq;
   function CheckChessClubExistsByID($ClubID){
 
     $query = "SELECT * FROM chess_club WHERE o_id = '".$ClubID."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     $bExists = false;
 
@@ -24538,16 +24542,16 @@ qq;
 
       // get the member's club id
       $query = "SELECT * FROM chess_club_members WHERE o_playerid=".$PlayerID."";
-      $return = mysql_query($query, $this->link) or die(mysql_error());
-      $num = mysql_numrows($return);
+      $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+      $num = mysqli_num_rows($return);
 
       if($num != 0){
 
-        $o_chessclubid = mysql_result($return,0,"o_chessclubid");
+        $o_chessclubid = $this->mysqli_result($return,0,"o_chessclubid");
 
         $query1 = "SELECT * FROM chess_club_members WHERE o_chessclubid = '".$o_chessclubid."'";
-        $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-        $num1 = mysql_numrows($return1);
+        $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+        $num1 = mysqli_num_rows($return1);
 
         if($num1 != 0){
 
@@ -24557,9 +24561,9 @@ qq;
           $i=0;
           while($i < $num1){
 
-            $o_playerid = mysql_result($return1, $i, "o_playerid");
-            $o_owner = mysql_result($return1, $i, "o_owner");
-            $o_active = mysql_result($return1, $i, "o_active");
+            $o_playerid = $this->mysqli_result($return1, $i, "o_playerid");
+            $o_owner = $this->mysqli_result($return1, $i, "o_owner");
+            $o_active = $this->mysqli_result($return1, $i, "o_active");
 
             echo "<CLUBMEMBER>\n";
             echo "<PLAYERID>".$o_playerid."</PLAYERID>\n";
@@ -24635,14 +24639,14 @@ qq;
     $aDetails = array();
 
     $query = "SELECT chess_club.o_id, chess_club.o_clubname, chess_club_members.o_owner FROM chess_club, chess_club_members WHERE chess_club.o_id = chess_club_members.o_chessclubid AND chess_club_members.o_playerid=".$PlayerID." AND chess_club_members.o_active='y'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
-      $aDetails[0] = mysql_result($return, 0, "o_id");
-      $aDetails[1] = mysql_result($return, 0, "o_clubname");
-      $aDetails[2] = mysql_result($return, 0, "o_owner");
+      $aDetails[0] = $this->mysqli_result($return, 0, "o_id");
+      $aDetails[1] = $this->mysqli_result($return, 0, "o_clubname");
+      $aDetails[2] = $this->mysqli_result($return, 0, "o_owner");
 
     }
 
@@ -24657,30 +24661,30 @@ qq;
 
     // select all the players that are older than 7 days and have not logged in
     $query = "SELECT player.player_id, player.signup_time FROM player LEFT OUTER JOIN player_last_login ON player.player_id = player_last_login.o_playerid WHERE player_last_login.o_date IS NULL AND player.signup_time <= ".(time() - 604800)."";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
 
       $i=0;
       while($i < $num){
 
-        $player_id = mysql_result($return, $i, "player_id");
+        $player_id = $this->mysqli_result($return, $i, "player_id");
 
         // Check to see if the player has any games
         $query1 = "SELECT COUNT(game_id) FROM game WHERE w_player_id=".$player_id." OR b_player_id=".$player_id."";
-        $return1 = mysql_query($query1, $this->link) or die(mysql_error());
-        $num1 = mysql_numrows($return1);
+        $return1 = mysqli_query($this->link,$query1) or die(mysqli_error($this->link));
+        $num1 = mysqli_num_rows($return1);
 
         if($num1 != 0){
 
-          $nGameCount = mysql_result($return1, 0, 0);
+          $nGameCount = $this->mysqli_result($return1, 0, 0);
 
           if($nGameCount == 0){
 
             // Remove the player
             $delete = "DELETE FROM player WHERE player_id=".$player_id;
-            mysql_query($delete, $this->link) or die(mysql_error());
+            mysqli_query($this->link,$delete) or die(mysqli_error($this->link));
 
           }
 
@@ -24744,11 +24748,11 @@ qq;
 
     // Get the username if the player exists
     $query = "SELECT player.userid FROM player, c4m_invalid_players WHERE player.player_id = c4m_invalid_players.player_id AND c4m_invalid_players.olduserid = '".$OldUserName."' AND player.password = '".$Password."'";
-    $return = mysql_query($query, $this->link) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
+    $num = mysqli_num_rows($return);
 
     if($num != 0){
-      $strReturn = mysql_result($return, 0, "userid");
+      $strReturn = $this->mysqli_result($return, 0, "userid");
     }
 
     return $strReturn;
@@ -24771,22 +24775,22 @@ qq;
 
         // Change the username in all tables
         $update = "UPDATE player SET userid='".$NewUserName."' WHERE player_id=".$player_id."";
-        mysql_query($update, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
         $update = "UPDATE player2 SET userid='".$NewUserName."' WHERE player_id=".$player_id."";
-        mysql_query($update, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
         $update = "UPDATE player3 SET userid='".$NewUserName."' WHERE player_id=".$player_id."";
-        mysql_query($update, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
         $update = "UPDATE admin_player_credits_request SET o_userid='".$NewUserName."' WHERE o_playerid=".$player_id."";
-        mysql_query($update, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
         $update = "UPDATE whos_online_graph SET o_player='".$NewUserName."' WHERE o_player='".$OldUserName."'";
-        mysql_query($update, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
         $update = "UPDATE c4m_playerorders SET o_username='".$NewUserName."' WHERE o_username='".$OldUserName."'";
-        mysql_query($update, $this->link) or die(mysql_error());
+        mysqli_query($this->link,$update) or die(mysqli_error($this->link));
 
         $bReturn = true;
 
@@ -24917,7 +24921,7 @@ qq;
   */
   function Close(){
 
-    //mysql_close($this->link);
+    //mysqli_close($this->link);
 
   }
 

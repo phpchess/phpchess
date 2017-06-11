@@ -4,10 +4,10 @@
 
 	$sqlquery = "SELECT * FROM move_history WHERE game_id = '".$game_id."' ORDER BY time ASC";
 	$result = mysql_query($sqlquery) or die("Unable to execute query: ".mysql_error());
-	header("var_moves_no: ".mysql_numrows($result));
+	header("var_moves_no: ".mysqli_num_rows($result));
 
 	$i = 0;
-	while ($move = mysql_fetch_array($result))
+	while ($move = mysqli_fetch_array($result))
 	{
 		
 		if (strstr($move["move"], "O-O w")){

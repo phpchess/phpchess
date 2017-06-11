@@ -60,8 +60,8 @@ $db_dbnm = $conf['database_name'];
 $db_user = $conf['database_login'];
 $db_pass = $conf['database_pass'];
 
-$db_link = mysql_connect($db_host, $db_user, $db_pass);
-mysql_select_db($db_dbnm);
+$db_link = mysqli_connect($db_host, $db_user, $db_pass);
+mysqli_select_db($db_link,$db_dbnm);
 
   //////////////////////////////////////////////////////////////
   //Instantiate the CR3DCQuery Class

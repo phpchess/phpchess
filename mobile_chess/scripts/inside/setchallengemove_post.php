@@ -5,7 +5,7 @@
 	$sqlquery = "SELECT * FROM game WHERE game_id = '".$_SERVER["HTTP_GAMEID"]."'";
 	$result = mysql_query($sqlquery) or die("Unable to execute query: ".mysql_error());
 
-	$game = mysql_fetch_array($result);
+	$game = mysqli_fetch_array($result);
 
 	if ($game["w_player_id"] == $_SESSION["id"])
  	{

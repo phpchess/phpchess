@@ -32,7 +32,7 @@ class CServMsg{
   * CServMsg (Constructor)
   *
   */
-  function CServMsg($ConfigFile){
+  function __construct($ConfigFile){
 
     ////////////////////////////////////////////////////////////////////////////
     // Sets the chess config file location (absolute location on the server)
@@ -47,16 +47,21 @@ class CServMsg{
     $this->user = $conf['database_login'];
     $this->pass = $conf['database_pass'];
 
-    $this->linkCServMsg = mysql_connect($this->host, $this->user, $this->pass);
-    mysql_select_db($this->dbnm);
+    $this->linkCServMsg = mysqli_connect($this->host, $this->user, $this->pass);
+    mysqli_select_db($this->linkCServMsg,$this->dbnm);
 
     if(!$this->linkCServMsg){
-      die("CServMsg.php: ".mysql_error());
+      die("CServMsg.php: ".mysqli_error($this->linkCServMsg));
     }
 
   }
 
-
+  function mysqli_result($result, $number, $field=0) {
+      mysqli_data_seek($result, $number);
+      $row = mysqli_fetch_array($result);
+      return $row[$field];
+  }
+    
   /**********************************************************************
   * GetStringFromStringTable
   *
@@ -77,12 +82,12 @@ class CServMsg{
     }else{
 
       $query = "SELECT * FROM server_language WHERE o_id=1";
-      $return = mysql_query($query, $this->linkCServMsg) or die(mysql_error());
-      $num = mysql_numrows($return);
+      $return = mysqli_query($this->linkCServMsg,$query) or die(mysqli_error($this->linkCServMsg));
+      $num = mysqli_num_rows($return);
 
       if($num != 0){
 
-        $LanguageFile = $conf['absolute_directory_location']."includes/languages/".mysql_result($return, 0, "o_languagefile");
+        $LanguageFile = $conf['absolute_directory_location']."includes/languages/".$this->mysqli_result($return, 0, "o_languagefile");
 
       }
 
@@ -132,8 +137,8 @@ class CServMsg{
   function GetServerMessages($ConfigFile){
 
     $query = "SELECT * FROM c4m_servermessage ORDER BY sm_id DESC";
-    $return = mysql_query($query, $this->linkCServMsg) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->linkCServMsg,$query) or die(mysqli_error($this->linkCServMsg));
+    $num = mysqli_num_rows($return);
 
     echo "<br>";
 
@@ -151,9 +156,9 @@ class CServMsg{
       $i = 0;
       while($i < $num){
 
-        $sm_id = mysql_result($return,$i,"sm_id");
-        $sm_msg = mysql_result($return,$i,"sm_msg");
-        $sm_date = mysql_result($return,$i,"sm_date");
+        $sm_id = $this->mysqli_result($return,$i,"sm_id");
+        $sm_msg = $this->mysqli_result($return,$i,"sm_msg");
+        $sm_date = $this->mysqli_result($return,$i,"sm_date");
 
         echo "<tr>";
         echo "<td class='row1' valign='top'>".$sm_date."</td><td class='row2' valign='top'>".$sm_msg."</td>";
@@ -184,8 +189,8 @@ class CServMsg{
   function GetMessages($ConfigFile){
 
     $query = "SELECT * FROM c4m_servermessage";
-    $return = mysql_query($query, $this->linkCServMsg) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->linkCServMsg,$query) or die(mysqli_error($this->linkCServMsg));
+    $num = mysqli_num_rows($return);
     
     if($num != 0){
 
@@ -205,9 +210,9 @@ class CServMsg{
       $i = 0;
       while($i < $num){
 
-        $sm_id = mysql_result($return,$i,"sm_id");
-        $sm_msg = mysql_result($return,$i,"sm_msg");
-        $sm_date = mysql_result($return,$i,"sm_date");
+        $sm_id = $this->mysqli_result($return,$i,"sm_id");
+        $sm_msg = $this->mysqli_result($return,$i,"sm_msg");
+        $sm_date = $this->mysqli_result($return,$i,"sm_date");
 
         echo "<tr>";
         echo "<td valign='top'><input type='radio' value='".$sm_id."' name='rdodelete'></td>";
@@ -231,14 +236,14 @@ class CServMsg{
   function GetMessagesByID($ConfigFile, $id, &$rid, &$rtext, &$rdate){
 
     $query = "SELECT * FROM c4m_servermessage WHERE sm_id =".$id;
-    $return = mysql_query($query, $this->linkCServMsg) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->linkCServMsg,$query) or die(mysqli_error($this->linkCServMsg));
+    $num = mysqli_num_rows($return);
     
     if ($num != 0){
 
-        $rid = trim(mysql_result($return,0,"sm_id"));
-        $rtext = trim(mysql_result($return,0,"sm_msg"));
-        $rdate = trim(mysql_result($return,0,"sm_date"));
+        $rid = trim($this->mysqli_result($return,0,"sm_id"));
+        $rtext = trim($this->mysqli_result($return,0,"sm_msg"));
+        $rdate = trim($this->mysqli_result($return,0,"sm_date"));
 
     }else{
 
@@ -258,7 +263,7 @@ class CServMsg{
   function AddServerMessage($ConfigFile, $text){
 
     $query = "INSERT INTO c4m_servermessage VALUES(NULL,'".$text."',NOW())";
-    mysql_query($query, $this->linkCServMsg) or die(mysql_error());
+    mysqli_query($this->linkCServMsg,$query) or die(mysqli_error($this->linkCServMsg));
     
   }
 
@@ -270,7 +275,7 @@ class CServMsg{
   function DeleteServerMessage($ConfigFile, $id){
 
     $query = "DELETE FROM c4m_servermessage WHERE sm_id = ".$id;
-    mysql_query($query, $this->linkCServMsg) or die(mysql_error());
+    mysqli_query($this->linkCServMsg,$query) or die(mysqli_error($this->linkCServMsg));
     
   }
 
@@ -282,7 +287,7 @@ class CServMsg{
   function EditServerMessage($ConfigFile, $id, $text){
 
     $query = "UPDATE c4m_servermessage SET sm_msg = '".$text."' WHERE sm_id = ".$id;
-    mysql_query($query, $this->linkCServMsg) or die(mysql_error());
+    mysqli_query($this->linkCServMsg,$query) or die(mysqli_error($this->linkCServMsg));
     
   }
 
@@ -294,17 +299,17 @@ class CServMsg{
   function GetMessagesForMobile(){
 
     $query = "SELECT * FROM c4m_servermessage";
-    $return = mysql_query($query, $this->linkCServMsg) or die(mysql_error());
-    $num = mysql_numrows($return);
+    $return = mysqli_query($this->linkCServMsg,$query) or die(mysqli_error($this->linkCServMsg));
+    $num = mysqli_num_rows($return);
     
     if($num != 0){
 
       $i = 0;
       while($i < $num){
 
-        $sm_id = mysql_result($return,$i,"sm_id");
-        $sm_msg = mysql_result($return,$i,"sm_msg");
-        $sm_date = mysql_result($return,$i,"sm_date");
+        $sm_id = $this->mysqli_result($return,$i,"sm_id");
+        $sm_msg = $this->mysqli_result($return,$i,"sm_msg");
+        $sm_date = $this->mysqli_result($return,$i,"sm_date");
 
         echo "<SERVERMSG>\n";
 
@@ -331,7 +336,7 @@ class CServMsg{
   *
   */
   function Close(){
-    mysql_close($this->linkCServMsg);
+    mysqli_close($this->linkCServMsg);
   }
 
 } //end of class definition

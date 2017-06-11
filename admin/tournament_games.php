@@ -106,13 +106,13 @@
 	else
 	{
 		$id = (int)$_GET['id'];
-		$query = sprintf("SELECT t_id FROM c4m_tournament WHERE t_id = '%s'", mysql_real_escape_string($id));
-		$result = mysql_query($query, $oR3DCQuery->link);
+		$query = sprintf("SELECT t_id FROM c4m_tournament WHERE t_id = '%s'", mysqli_real_escape_string($oR3DCQuery->link,$id));
+		$result = mysqli_query($oR3DCQuery->link,$query);
 		if($result === false)
 		{
 			exit(_T('IDS_Admin_Tournament_Games_IDQUERYFAILED', $config));
 		}
-		$cnt = mysql_num_rows($result);
+		$cnt = mysqli_num_rows($result);
 		if($cnt == 0)
 		{
 			exit(_T('IDS_Admin_Tournament_Games_IDINVALID', $config));
@@ -146,25 +146,25 @@
 	function __get_games($id, $main, $config)
 	{
 		// Get player list, because we want to show the player names.
-		$result = mysql_query("SELECT player_id, userid FROM player", $main->link);
-		while($row = mysql_fetch_array($result, MYSQL_ASSOC))
+		$result = mysqli_query($main->link,"SELECT player_id, userid FROM player");
+		while($row = mysqli_fetch_array($result, MYSQLI_ASSOC))
 		{
 			$players[$row['player_id']] = $row['userid'];
 		}
 		// Now get all the games for this tournament.
-		$query = sprintf("SELECT game.* FROM game, c4m_tournamentgames WHERE tg_tmid = '%s' AND game.game_id = c4m_tournamentgames.tg_gameid", mysql_real_escape_string($id));
-		$result = mysql_query($query, $main->link) or die(mysql_error());
+		$query = sprintf("SELECT game.* FROM game, c4m_tournamentgames WHERE tg_tmid = '%s' AND game.game_id = c4m_tournamentgames.tg_gameid", mysqli_real_escape_string($main->link,$id));
+		$result = mysqli_query($main->link,$query) or die(mysqli_error($main->link));
 		if($result === false)
 		{
 			exit(_T('IDS_Admin_Tournament_Games_GAMESQUERYFAILED', $config));
 		}
-		$num = mysql_numrows($result);
+		$num = mysqli_num_rows($result);
 		$games = array();
 		$statuses = get_all_status_values($config);
 		$completion_statuses = get_all_completion_status_values($config);
 		if($num != 0){
 			$i = 0;
-			while($row = mysql_fetch_array($result, MYSQL_ASSOC)){
+			while($row = mysqli_fetch_array($result, MYSQLI_ASSOC)){
 				$g = array();
 				$g['game_id'] = $row['game_id'];
 				$g['white'] = $players[$row['w_player_id']] . '(' . $row['w_player_id'] . ')';
@@ -190,14 +190,14 @@
 	{
 		// Ensure the game exists for the tournament.
 		$query = sprintf("SELECT * FROM game, c4m_tournamentgames WHERE game.game_id = '%s' AND c4m_tournamentgames.tg_gameid = game.game_id AND c4m_tournamentgames.tg_tmid = '%s'",
-			mysql_real_escape_string($gid),
-			mysql_real_escape_string($tid));
-		$result = mysql_query($query, $main->link);
+			mysqli_real_escape_string($main->link,$gid),
+			mysqli_real_escape_string($main->link,$tid));
+		$result = mysqli_query($main->link,$query);
 		if($result === false)
 		{
 			$errormsg = _T('IDS_Admin_Tournament_Games_GAMEQUERYFAILED', $main->ChessCFGFileLocation);
 		}
-		$cnt = mysql_num_rows($result);
+		$cnt = mysqli_num_rows($result);
 		$errormsg = "";
 		if($cnt == 0)
 		{
@@ -206,43 +206,43 @@
 		else // Delete the game and any references to it.
 		{
 			// Games table.
-			$query = sprintf("DELETE FROM game WHERE game_id = '%s'", mysql_real_escape_string($gid));
-			$result = mysql_query($query, $main->link);
+			$query = sprintf("DELETE FROM game WHERE game_id = '%s'", mysqli_real_escape_string($main->link,$gid));
+			$result = mysqli_query($main->link,$query);
 			if($result === false)
 				$errormsg .= _T('IDS_Admin_Tournament_Games_QUERYERROR1', $main->ChessCFGFileLocation);
 			// Tournament games table.
-			$query = sprintf("DELETE FROM c4m_tournamentgames WHERE tg_gameid = '%s'", mysql_real_escape_string($gid));
-			$result = mysql_query($query, $main->link);
+			$query = sprintf("DELETE FROM c4m_tournamentgames WHERE tg_gameid = '%s'", mysqli_real_escape_string($main->link,$gid));
+			$result = mysqli_query($main->link,$query);
 			if($result === false)
 				$errormsg .= _T('IDS_Admin_Tournament_Games_QUERYERROR2', $main->ChessCFGFileLocation);
 			// Timing mode for games table.
-			$query = sprintf("DELETE FROM cfm_game_options WHERE o_gameid = '%s'", mysql_real_escape_string($gid));
-			$result = mysql_query($query, $main->link);
+			$query = sprintf("DELETE FROM cfm_game_options WHERE o_gameid = '%s'", mysqli_real_escape_string($main->link,$gid));
+			$result = mysqli_query($main->link,$query);
 			if($result === false)
 				$errormsg .= _T('IDS_Admin_Tournament_Games_QUERYERROR3', $main->ChessCFGFileLocation);
 			// Move history table.
-			$query = sprintf("DELETE FROM move_history WHERE game_id = '%s'", mysql_real_escape_string($gid));
-			$result = mysql_query($query, $main->link);
+			$query = sprintf("DELETE FROM move_history WHERE game_id = '%s'", mysqli_real_escape_string($main->link,$gid));
+			$result = mysqli_query($main->link,$query);
 			if($result === false)
 				$errormsg .= _T('IDS_Admin_Tournament_Games_QUERYERROR4', $main->ChessCFGFileLocation);// Move history table.
 			// Realtime games table.
-			$query = sprintf("DELETE FROM cfm_gamesrealtime WHERE id = '%s'", mysql_real_escape_string($gid));
-			$result = mysql_query($query, $main->link);
+			$query = sprintf("DELETE FROM cfm_gamesrealtime WHERE id = '%s'", mysqli_real_escape_string($main->link,$gid));
+			$result = mysqli_query($main->link,$query);
 			if($result === false)
 				$errormsg .= _T('IDS_Admin_Tournament_Games_QUERYERROR5', $main->ChessCFGFileLocation);// Realtime games table.
 			// Games chat table.
-			$query = sprintf("DELETE FROM c4m_gamechat WHERE tgc_gameid = '%s'", mysql_real_escape_string($gid));
-			$result = mysql_query($query, $main->link);
+			$query = sprintf("DELETE FROM c4m_gamechat WHERE tgc_gameid = '%s'", mysqli_real_escape_string($main->link,$gid));
+			$result = mysqli_query($main->link,$query);
 			if($result === false)
 				$errormsg .= _T('IDS_Admin_Tournament_Games_QUERYERROR6', $main->ChessCFGFileLocation);
 			// Games draw table.
-			$query = sprintf("DELETE FROM c4m_gamedraws WHERE tm_gameid = '%s'", mysql_real_escape_string($gid));
-			$result = mysql_query($query, $main->link);
+			$query = sprintf("DELETE FROM c4m_gamedraws WHERE tm_gameid = '%s'", mysqli_real_escape_string($main->link,$gid));
+			$result = mysqli_query($main->link,$query);
 			if($result === false)
 				$errormsg .= _T('IDS_Admin_Tournament_Games_QUERYERROR7', $main->ChessCFGFileLocation);
 			// Custom FENs table.
-			$query = sprintf("DELETE FROM c4m_newgameotherfen WHERE gameid = '%s'", mysql_real_escape_string($gid));
-			$result = mysql_query($query, $main->link);
+			$query = sprintf("DELETE FROM c4m_newgameotherfen WHERE gameid = '%s'", mysqli_real_escape_string($main->link,$gid));
+			$result = mysqli_query($main->link,$query);
 			if($result === false)
 				$errormsg .= _T('IDS_Admin_Tournament_Games_QUERYERROR8', $main->ChessCFGFileLocation);
 			

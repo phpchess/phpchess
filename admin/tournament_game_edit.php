@@ -107,20 +107,20 @@
 	else
 	{
 		$tid = (int)$_GET['tid'];
-		$query = sprintf("SELECT t_id, t_name, t_comment, t_startdate FROM c4m_tournament WHERE t_id = '%s'", mysql_real_escape_string($tid));
-		$result = mysql_query($query, $oR3DCQuery->link);
+		$query = sprintf("SELECT t_id, t_name, t_comment, t_startdate FROM c4m_tournament WHERE t_id = '%s'", mysqli_real_escape_string($oR3DCQuery->link,$tid));
+		$result = mysqli_query($oR3DCQuery->link,$query);
 		if($result === false)
 		{
 			exit(_T('IDS_Admin_Tournament_Games_Edit_QUERYFAILED', $config));
 		}
-		$cnt = mysql_num_rows($result);
+		$cnt = mysqli_num_rows($result);
 		if($cnt == 0)
 		{
 			$__pd['error'] = _T('IDS_Admin_Tournament_Games_Edit_IDINVALID', $config);
 		}
 		else
 		{
-			$t = mysql_fetch_array($result, MYSQL_ASSOC);
+			$t = mysqli_fetch_array($result, MYSQLI_ASSOC);
 			$__pd['tournament'] = $t;
 		}
 		
@@ -132,21 +132,21 @@
 	{
 		$gid = $_GET['gid'];
 		$query = sprintf("SELECT * FROM game, c4m_tournamentgames WHERE game.game_id = '%s' AND c4m_tournamentgames.tg_gameid = game.game_id AND c4m_tournamentgames.tg_tmid = '%s'",
-			mysql_real_escape_string($gid),
-			mysql_real_escape_string($tid));
-		$result = mysql_query($query, $oR3DCQuery->link);
+			mysqli_real_escape_string($oR3DCQuery->link,$gid),
+			mysqli_real_escape_string($oR3DCQuery->link,$tid));
+		$result = mysqli_query($oR3DCQuery->link,$query);
 		if($result === false)
 		{
 			exit(_T('IDS_Admin_Tournament_Games_Edit_GAMEIDQUERYFAILED', $config));
 		}
-		$cnt = mysql_num_rows($result);
+		$cnt = mysqli_num_rows($result);
 		if($cnt == 0)
 		{
 			$__pd['error'] = _T('IDS_Admin_Tournament_Games_Edit_GAMEIDINVALID', $config);
 		}
 		else
 		{
-			$game = mysql_fetch_array($result, MYSQL_ASSOC);
+			$game = mysqli_fetch_array($result, MYSQLI_ASSOC);
 		}
 	}
 	
@@ -234,12 +234,12 @@
 		{
 			// Update record in game table.
 			$query = sprintf("UPDATE game SET status = '%s', completion_status = '%s' WHERE game_id = '%s'",
-				mysql_real_escape_string($new_values['status']),
-				mysql_real_escape_string($new_values['completion_status']),
-				mysql_real_escape_string($gid)
+				mysqli_real_escape_string($main->link,$new_values['status']),
+				mysqli_real_escape_string($main->link,$new_values['completion_status']),
+				mysqli_real_escape_string($main->link,$gid)
 			);
 			$str = _T('IDS_Admin_Tournament_Games_Edit_ERRORUPDATING', $main->ChessCFGFileLocation);
-			mysql_query($query, $main->link) or die(preg_replace("/\{mysql_err\}/", mysql_error(), $str));
+			mysqli_query($main->link,$query) or die(preg_replace("/\{mysql_err\}/", mysqli_error($main->link, $str));
 		}
 		
 		return array('submit' => TRUE, 'errors' => $errors, 'new_values' => $new_values);
@@ -281,17 +281,17 @@
 		// Get disabled players and then all players. Any player that is disabled will be ignored.
 		// Is there a way to do this using one query?
 		$query = "SELECT player_id FROM player2";
-		$result = mysql_query($query, $main->link) or die(_T('IDS_Admin_Tournament_Games_Edit_ERRORDISABLED', $main->ChessCFGFileLocation));
+		$result = mysqli_query($main->link,$query) or die(_T('IDS_Admin_Tournament_Games_Edit_ERRORDISABLED', $main->ChessCFGFileLocation));
 		$disabled = array();
-		while($row = mysql_fetch_array($result, MYSQL_ASSOC))
+		while($row = mysqli_fetch_array($result, MYSQLI_ASSOC))
 		{
 			$disabled[] = $row['player_id'];
 		}
 		$query = "SELECT player_id, userid FROM player ORDER BY userid Asc";
-		$result = mysql_query($query, $main->link) or die(_T('IDS_Admin_Tournament_Games_Edit_ERRORUSERS', $main->ChessCFGFileLocation));
+		$result = mysqli_query($main->link,$query) or die(_T('IDS_Admin_Tournament_Games_Edit_ERRORUSERS', $main->ChessCFGFileLocation));
 		
 		$players = array();
-		while($row = mysql_fetch_array($result, MYSQL_ASSOC))
+		while($row = mysqli_fetch_array($result, MYSQLI_ASSOC))
 		{
 			if(!in_array($row['player_id'], $disabled))
 			{

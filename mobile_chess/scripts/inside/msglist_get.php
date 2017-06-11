@@ -8,17 +8,17 @@
     $sqlquery = "SELECT * FROM c4m_msginbox WHERE player_id = '".$_SESSION["id"]."'";
 	$result = mysql_query($sqlquery) or die("Unable to execute query: ".mysql_error());
 
-	if (!mysql_numrows($result))
+	if (!mysqli_num_rows($result))
 	{
 		header("var_msg_no: 0");
 	} else
 	{
-		$msg_no = mysql_numrows($result);
+		$msg_no = mysqli_num_rows($result);
 
 
 		$i = -1;
 
-		while ($msg = mysql_fetch_array($result))
+		while ($msg = mysqli_fetch_array($result))
 		{
 			$i++;
 			$inbox_id = trim($msg["inbox_id"]);
@@ -34,7 +34,7 @@
 
 				$sqlquery = "SELECT * FROM player WHERE player_id = '".$player_id."'";
 				$result1 = mysql_query($sqlquery) or die("Unable to execute query: ".mysql_error());
-                $player = mysql_fetch_array($result);
+                $player = mysqli_fetch_array($result);
 				header("var_msg_".$i."_id: ".$inbox_id);
 				header("var_msg_".$i."_title: ".$player["user_id"]);
 				header("var_msg_".$i."_type: move");*/
@@ -54,7 +54,7 @@
 				$player_id = substr($message, (strlen($message)-8), 8);
 				$sqlquery = "SELECT * FROM player WHERE player_id = '".$player_id."'";
 				$result1 = mysql_query($sqlquery) or die("Unable to execute query: ".mysql_error());
-                $player = mysql_fetch_array($result);
+                $player = mysqli_fetch_array($result);
 				header("var_msg_".$i."_id: ".$inbox_id);
 				header("var_msg_".$i."_title: ".$player["user_id"]);
 				header("var_msg_".$i."_type: challenge");
@@ -65,7 +65,7 @@
 				$tid = substr($message, 3,(strlen($message)-3));
 				$sqlquery = "SELECT * FROM c4m_tournament WHERE t_id = '".$tid."'";
 				$result1 = mysql_query($sqlquery) or die("Unable to execute query: ".mysql_error());
-				$tournament = mysql_fetch_array($result);
+				$tournament = mysqli_fetch_array($result);
 				header("var_msg_".$i."_id: ".$inbox_id);
 				header("var_msg_".$i."_title: ".$tournament["t_name"]);
 				header("var_msg_".$i."_type: tournamet");

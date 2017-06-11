@@ -1,4 +1,4 @@
-Welcome to release 4.2.1
+Welcome to release 4.3.0
 ========================
 
 This software is provided under the GNU Affero General Public License, 
@@ -6,18 +6,14 @@ the terms of which can be referenced here: https://www.gnu.org/licenses/agpl.htm
 
 We are asking you to be please give phpChess and its contributers credit when using, distributing, modifying otherwise working with the software.
 
-please ensure you read the intro.rtf, and visit http://www.phpchess.com/?page_id=425 - which is the installation and upgrade Q&A
-
-
 Quick Installation step for phpChess:
 =====================================
 
 a) copy all files and folders to you server using your favourite ftp program
-!!!!IMPORTANT!!!!
-b) rename the bin/config.txt file to config.php
-!!!!IMPORTANT!!!!
-c) Using a browser and open the installtion file http:///www.[your server address]/phpchess/install/
-d) follow the instructions
+b) rename the bin/config.txt file to config.php (if it is not already there
+c) IMPORTANT!!!Ensure that the /bin/ directory is writeable (CHMOD 777)
+d) Using a browser and open the installtion file http:///www.[your server address]/phpchess/install/
+e) follow the instructions
 
 Quick upgrade guide (4.1 or higher):
 ====================================
@@ -48,4 +44,4 @@ If you are installing phpChess new, there are no such issues to worry about.
 
 Have fun, all the best
 
-phpChess.com (c)phpchess 2001 - 2014
+phpChess.com (c)phpchess 2001 - 2017
