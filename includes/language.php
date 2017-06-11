@@ -78,7 +78,7 @@
           // We found the key
     
           list($Key, $strText, $junk) = preg_split("/\|\|/", $lines[$x-1], 3);
-
+	  $strText = utf8_encode($strText);
           $text = trim($strText);
 
           // Exit loop
@@ -173,7 +173,7 @@
               if (preg_match("/\b".$strTag."\b/i", $lines[$x-1])){
                 // We found the key
                 list($Key, $strText, $junk) = preg_split("/\|\|/", $lines[$x-1], 3);
-
+		$strText = utf8_encode($strText);
                 $Text = trim($strText);
 
                 // Exit loop

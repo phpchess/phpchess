@@ -1282,7 +1282,7 @@
           //Instantiate theCR3DCQuery Class
           $oR3DCQuery = new CR3DCQuery($config);
 
-          $aToReplace = array("<", ">", "\'", "\\\"", "“", "”", "„", "‘", "’", "‚");
+          $aToReplace = array("<", ">", "\'", "\\\"", "Â“", "Â”", "Â„", "Â‘", "Â’", "Â‚");
           $aReplaceWith = array("&lt;", "&gt;", "&#x27;", "&#x22;", "&#x201C;", "&#x201D;", "&#x201E;", "&#x2018;", "&#x2019;", "&#x201A;");
 
           $txtmsg = str_replace($aToReplace, $aReplaceWith, $txtmsg);
@@ -2093,8 +2093,11 @@
 
           $message = "<".$oR3DCQuery->GetUserIDByPlayerID($config, $player_id)."> ".$_GET['msg'];
 
-          $aToReplace = array("<", ">", "\'", "\\\"", "“", "”", "„", "‘", "’", "‚");
+          $aToReplace = array("<", ">", "\'", "\\\"", "Â“", "Â”", "Â„", "Â‘", "Â’", "Â‚");
           $aReplaceWith = array("&lt;", "&gt;", "&#x27;", "&#x22;", "&#x201C;", "&#x201D;", "&#x201E;", "&#x2018;", "&#x2019;", "&#x201A;");
+          
+          // Added the urlencode and htmlentities
+	  htmlentities(urlencode($message));
           $message = str_replace($aToReplace, $aReplaceWith, $message);
 
           $oR3DCQuery->SendGChat($config, $_GET['gameid'], $message);
@@ -2145,7 +2148,7 @@
           $oR3DCQuery->Close();
           unset($oR3DCQuery);
 
-          $aToReplace = array("<", ">", "\'", "\"", "“", "”", "„", "‘", "’", "‚");
+          $aToReplace = array("<", ">", "\'", "\"", "Â“", "Â”", "Â„", "Â‘", "Â’", "Â‚");
           $aReplaceWith = array("&lt;", "&gt;", "&#x27;", "&#x22;", "&#x201C;", "&#x201D;", "&#x201E;", "&#x2018;", "&#x2019;", "&#x201A;");
           $message = str_replace($aToReplace, $aReplaceWith, $message);
 

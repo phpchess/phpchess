@@ -67,6 +67,8 @@ function __construct($ConfigFile){
       die("CR3DCQuery.php: ".mysqli_error($this->link));
     }
 
+    mysql_set_charset('utf8', $this->link);
+
     $query = "SELECT * FROM c4m_skins LIMIT 1";
     $return = mysqli_query($this->link,$query) or die(mysqli_error($this->link));
     $num = mysqli_num_rows($return);
@@ -132,7 +134,7 @@ function __construct($ConfigFile){
 
           // We found the key
           list($Key, $strText, $junk) = explode("||", $lines[$x-1], 3);
-
+	  $strText = utf8_encode($strText);
           $text = trim($strText);
 
           // Exit loop
@@ -10298,6 +10300,11 @@ function __construct($ConfigFile){
   function SendTChat($ConfigFile, $GameID, $message){
 
     $message = rawurlencode($message);
+    // Replace French, Latin characters with HTML equivalents
+    $aToReplace = array("%E0","%E1","%E2","%E3","%E4","%E5","%E6","%E7","%E8","%E9","%EA","%EB","%EC","%ED","%EE","%EF","%F0","%F1","%F2","%F3","%F4","%F5","%F6","%F7","%F8","%F9","%FA","%FB","%FC","%FD","%FE","%FF","%20AC","201C","201D","%AB","%BB","A6","%C1","%C0","%C2","%C3","%C4","%C5","%C6","%C7","%C8","%C9","%CA","%CB","%CC","%CD","%CE","%CF","%D0","%D1","%D2","%D3","%D4","%D5","%D6","%D7","%D8","%D9","%DA","%DB","%DC","%DD","%DE","%DF");
+    $aReplaceWith = array("&#224;","&#225;","&#226;","&#227;","&#228;","&#229;","&#230;","&#231;","&#232;","&#233;","&#234;","&#235;","&#236;","&#237;","&#238;","&#239;","&#240;","&#241;","&#242;","&#243;","&#244;","&#245;","&#246;","&#247;","&#248;","&#249;","&#250;","&#251;","&#252;","&#253;","&#254;","&#255;","&#8364;","&#8220;","&#8221;","&#171;","&#187;","&#166;","&#193;","&#192;","&#194;","&#195;","&#196;","&#197;","&#198;","&#199;","&#200;","&#201;","&#202;","&#203;","&#204;","&#205;","&#206;","&#207;","&#208;","&#209;","&#210;","&#211;","&#212;","&#213;","&#214;","&#215;","&#216;","&#217;","&#218;","&#219;","&#220;","&#221;","&#222;","&#223;");
+    $message = str_replace($aToReplace, $aReplaceWith, $message);
+
     $insert = "INSERT INTO c4m_tournamentgamechat VALUES(NULL, '".$GameID."', '".$message."', NOW())";
     mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
@@ -11412,6 +11419,11 @@ function __construct($ConfigFile){
   function SendGChat($ConfigFile, $GameID, $message){
 
     $message = rawurlencode($message); 
+// Replace French, Latin characters with HTML equivalents
+    $aToReplace = array("%E0","%E1","%E2","%E3","%E4","%E5","%E6","%E7","%E8","%E9","%EA","%EB","%EC","%ED","%EE","%EF","%F0","%F1","%F2","%F3","%F4","%F5","%F6","%F7","%F8","%F9","%FA","%FB","%FC","%FD","%FE","%FF","%20AC","201C","201D","%AB","%BB","A6","%C1","%C0","%C2","%C3","%C4","%C5","%C6","%C7","%C8","%C9","%CA","%CB","%CC","%CD","%CE","%CF","%D0","%D1","%D2","%D3","%D4","%D5","%D6","%D7","%D8","%D9","%DA","%DB","%DC","%DD","%DE","%DF");
+    $aReplaceWith = array("&#224;","&#225;","&#226;","&#227;","&#228;","&#229;","&#230;","&#231;","&#232;","&#233;","&#234;","&#235;","&#236;","&#237;","&#238;","&#239;","&#240;","&#241;","&#242;","&#243;","&#244;","&#245;","&#246;","&#247;","&#248;","&#249;","&#250;","&#251;","&#252;","&#253;","&#254;","&#255;","&#8364;","&#8220;","&#8221;","&#171;","&#187;","&#166;","&#193;","&#192;","&#194;","&#195;","&#196;","&#197;","&#198;","&#199;","&#200;","&#201;","&#202;","&#203;","&#204;","&#205;","&#206;","&#207;","&#208;","&#209;","&#210;","&#211;","&#212;","&#213;","&#214;","&#215;","&#216;","&#217;","&#218;","&#219;","&#220;","&#221;","&#222;","&#223;");
+    $message = str_replace($aToReplace, $aReplaceWith, $message);
+
     $insert = "INSERT INTO c4m_gamechat VALUES(NULL, '".$GameID."', '".$message."', NOW())";
     mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
@@ -21695,6 +21707,10 @@ qq;
   */
   function v2ConsoleAddChatMessage($type, $tid, $playerid, $Message){
     $Message = rawurlencode($Message);
+    // Replace French, Latin characters with HTML equivalents
+    $aToReplace = array("%E0","%E1","%E2","%E3","%E4","%E5","%E6","%E7","%E8","%E9","%EA","%EB","%EC","%ED","%EE","%EF","%F0","%F1","%F2","%F3","%F4","%F5","%F6","%F7","%F8","%F9","%FA","%FB","%FC","%FD","%FE","%FF","%20AC","201C","201D","%AB","%BB","A6","%C1","%C0","%C2","%C3","%C4","%C5","%C6","%C7","%C8","%C9","%CA","%CB","%CC","%CD","%CE","%CF","%D0","%D1","%D2","%D3","%D4","%D5","%D6","%D7","%D8","%D9","%DA","%DB","%DC","%DD","%DE","%DF");
+    $aReplaceWith = array("&#224;","&#225;","&#226;","&#227;","&#228;","&#229;","&#230;","&#231;","&#232;","&#233;","&#234;","&#235;","&#236;","&#237;","&#238;","&#239;","&#240;","&#241;","&#242;","&#243;","&#244;","&#245;","&#246;","&#247;","&#248;","&#249;","&#250;","&#251;","&#252;","&#253;","&#254;","&#255;","&#8364;","&#8220;","&#8221;","&#171;","&#187;","&#166;","&#193;","&#192;","&#194;","&#195;","&#196;","&#197;","&#198;","&#199;","&#200;","&#201;","&#202;","&#203;","&#204;","&#205;","&#206;","&#207;","&#208;","&#209;","&#210;","&#211;","&#212;","&#213;","&#214;","&#215;","&#216;","&#217;","&#218;","&#219;","&#220;","&#221;","&#222;","&#223;");
+    $Message = str_replace($aToReplace, $aReplaceWith, $Message);
     $insert = "INSERT INTO v2_tournament_console_chat VALUES(NULL, ".$type.", ".$tid.", ".$playerid.", '".$Message."', ".time().")";
     mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 
@@ -22396,6 +22412,11 @@ qq;
   function v2OTMAddChatMessage($type, $tid, $playerid, $Message, $ctype){
 
     $Message = rawurlencode($Message);
+    // Replace French, Latin characters with HTML equivalents
+    $aToReplace = array("%E0","%E1","%E2","%E3","%E4","%E5","%E6","%E7","%E8","%E9","%EA","%EB","%EC","%ED","%EE","%EF","%F0","%F1","%F2","%F3","%F4","%F5","%F6","%F7","%F8","%F9","%FA","%FB","%FC","%FD","%FE","%FF","%20AC","201C","201D","%AB","%BB","A6","%C1","%C0","%C2","%C3","%C4","%C5","%C6","%C7","%C8","%C9","%CA","%CB","%CC","%CD","%CE","%CF","%D0","%D1","%D2","%D3","%D4","%D5","%D6","%D7","%D8","%D9","%DA","%DB","%DC","%DD","%DE","%DF");
+    $aReplaceWith = array("&#224;","&#225;","&#226;","&#227;","&#228;","&#229;","&#230;","&#231;","&#232;","&#233;","&#234;","&#235;","&#236;","&#237;","&#238;","&#239;","&#240;","&#241;","&#242;","&#243;","&#244;","&#245;","&#246;","&#247;","&#248;","&#249;","&#250;","&#251;","&#252;","&#253;","&#254;","&#255;","&#8364;","&#8220;","&#8221;","&#171;","&#187;","&#166;","&#193;","&#192;","&#194;","&#195;","&#196;","&#197;","&#198;","&#199;","&#200;","&#201;","&#202;","&#203;","&#204;","&#205;","&#206;","&#207;","&#208;","&#209;","&#210;","&#211;","&#212;","&#213;","&#214;","&#215;","&#216;","&#217;","&#218;","&#219;","&#220;","&#221;","&#222;","&#223;");
+    $Message = str_replace($aToReplace, $aReplaceWith, $Message);
+    
     $insert = "INSERT INTO v2_tournament_onetomany_chat VALUES(NULL, ".$type.", ".$tid.", ".$playerid.", '".$Message."', '".$ctype."', ".mktime().")";
     mysqli_query($this->link,$insert) or die(mysqli_error($this->link));
 

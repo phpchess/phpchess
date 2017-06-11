@@ -113,6 +113,8 @@ class CAdmin{
     
           list($Key, $strText, $junk) = preg_split("/\|\|/", $lines[$x-1], 3);
 
+	  $strText = utf8_encode($strText);
+
           $text = trim($strText);
 
           // Exit loop
