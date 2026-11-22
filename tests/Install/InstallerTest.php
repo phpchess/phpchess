@@ -91,7 +91,7 @@ final class InstallerTest extends TestCase
         self::assertSame(['server' => 'phpChess', 'version' => \PhpChess\Version::CURRENT, 'api' => 1], json_decode($browser->get('/api/v1/status')->body, true));
 
         // The admin exists, with a hashed password; another program's table is untouched.
-        $admin = $this->database->fetchRow('SELECT username, role, password_hash FROM pt_users');
+        $admin = $this->database->fetchRow('SELECT username, role, password_hash FROM phpc_test_users');
         self::assertNotNull($admin);
         self::assertSame('admin', $admin['username']);
         self::assertTrue(password_verify('a long password', (string) (is_string($admin['password_hash']) ? $admin['password_hash'] : '')));

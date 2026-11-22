@@ -46,7 +46,7 @@ final class MigrationRunnerTest extends TestCase
 
         self::assertSame(0, $runner->pendingStepCount());
         foreach (['settings', 'jobs', 'audit_log', 'rate_limits', 'users', 'schema_migrations'] as $table) {
-            self::assertTrue($this->database->tableExists('pt_' . $table), "pt_{$table} exists");
+            self::assertTrue($this->database->tableExists('phpc_test_' . $table), "phpc_test_{$table} exists");
         }
     }
 
@@ -89,7 +89,7 @@ final class MigrationRunnerTest extends TestCase
         } catch (PDOException) {
             // expected
         }
-        self::assertTrue($this->database->tableExists('pt_first'), 'the step before the failure stays done');
+        self::assertTrue($this->database->tableExists('phpc_test_first'), 'the step before the failure stays done');
         self::assertSame(2, $broken->pendingStepCount());
 
         // The fixed version carries on at step 2; step 1 is not run again.
@@ -140,7 +140,7 @@ final class MigrationRunnerTest extends TestCase
         ]);
         $runner->runPending();
 
-        self::assertFalse($this->database->tableExists('pt_temporary'));
+        self::assertFalse($this->database->tableExists('phpc_test_temporary'));
     }
 
     public function testColumnDefaultsWithOnUpdateAreAllowed(): void
@@ -148,7 +148,7 @@ final class MigrationRunnerTest extends TestCase
         $step = new MigrationStep('Timestamps', 'CREATE TABLE IF NOT EXISTS {stamped} (changed TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)');
         $runner = new MigrationRunner($this->database, [new Migration(99, 'Ok', [$step])]);
 
-        self::assertStringContainsString('`pt_stamped`', $runner->prepareSql($step));
+        self::assertStringContainsString('`phpc_test_stamped`', $runner->prepareSql($step));
     }
 
     private function threeStepMigration(string $secondStepSql): Migration

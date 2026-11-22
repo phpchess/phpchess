@@ -16,7 +16,7 @@ use Throwable;
  * Only code in src/Infra/ (the repositories) and the migrations use this class.
  * Every statement is prepared and every value is passed as a parameter, never
  * written into the SQL text. Table names come from code only, through table(),
- * which adds the install's prefix (for example "pc_settings").
+ * which adds the install's prefix (for example "phpc_settings").
  *
  * The connection sets its own strict sql_mode and UTC time zone, so phpChess
  * behaves the same whatever the server's defaults are.

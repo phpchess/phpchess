@@ -81,10 +81,10 @@ jobs:
           sudo systemctl restart apache2
 
       - name: Install test in the web root
-        run: php tools/install-test.php http://localhost:8081 127.0.0.1 phpchess_support phpchess phpchess-ci pa_
+        run: php tools/install-test.php http://localhost:8081 127.0.0.1 phpchess_support phpchess phpchess-ci phpc_root_
 
       - name: Install test in a subfolder
-        run: php tools/install-test.php http://localhost:8082/chess 127.0.0.1 phpchess_support phpchess phpchess-ci pb_
+        run: php tools/install-test.php http://localhost:8082/chess 127.0.0.1 phpchess_support phpchess phpchess-ci phpc_sub_
 
       - name: Keep the zip
         uses: actions/upload-artifact@v4

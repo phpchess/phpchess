@@ -194,7 +194,7 @@ final class InstallerController
             'database_name' => trim($request->formValue('database_name')),
             'database_user' => trim($request->formValue('database_user')),
             'database_password' => $request->formValue('database_password'),
-            'table_prefix' => trim($request->formValue('table_prefix', 'pc_')),
+            'table_prefix' => trim($request->formValue('table_prefix', 'phpc_')),
         ];
 
         // Picking from the list of databases: the other details were kept in the session.
@@ -497,7 +497,7 @@ final class InstallerController
         return $this->page($request, 'install/database', 'Step 3: Your database', 3, [
             'fields' => $fields + [
                 'database_host' => 'localhost', 'database_port' => '3306', 'database_name' => '',
-                'database_user' => '', 'table_prefix' => 'pc_',
+                'database_user' => '', 'table_prefix' => 'phpc_',
             ],
             'error' => $error,
             'checks' => $checks,

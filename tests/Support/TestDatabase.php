@@ -18,13 +18,13 @@ use PHPUnit\Framework\TestCase;
  * Without them the database tests are skipped, unless PHPCHESS_TEST_DB_REQUIRED=1
  * (as in CI), which makes a missing database a failure.
  *
- * Tests use the table prefix "pt_" and start from an empty set of "pt_" tables.
+ * Tests use the table prefix "phpc_test_" and start from an empty set of "phpc_test_" tables.
  * They also create a table of "another program" (other_app_users) to prove
  * that phpChess never touches tables that aren't its own (K11).
  */
 final class TestDatabase
 {
-    public const string PREFIX = 'pt_';
+    public const string PREFIX = 'phpc_test_';
     public const string FOREIGN_TABLE = 'other_app_users';
 
     /** The config for the test database, or skips/fails the test when it isn't set up. */
@@ -48,7 +48,7 @@ final class TestDatabase
         );
     }
 
-    /** A fresh connection with no "pt_" tables left from earlier tests. */
+    /** A fresh connection with no "phpc_test_" tables left from earlier tests. */
     public static function connectEmpty(TestCase $test): Database
     {
         $database = Database::connect(self::config($test));

@@ -11,7 +11,7 @@
  * Run:
  *     php tools/install-test.php <site-url> <db-host> <db-name> <db-user> <db-password> [prefix]
  * Example:
- *     php tools/install-test.php http://localhost/chess 127.0.0.1 phpchess_support root secret pc_
+ *     php tools/install-test.php http://localhost/chess 127.0.0.1 phpchess_support root secret phpc_
  */
 
 declare(strict_types=1);
@@ -23,7 +23,7 @@ if (count($argv) < 6) {
     exit(1);
 }
 [, $siteUrl, $databaseHost, $databaseName, $databaseUser, $databasePassword] = $argv;
-$tablePrefix = $argv[6] ?? 'pc_';
+$tablePrefix = $argv[6] ?? 'phpc_';
 $siteUrl = rtrim($siteUrl, '/');
 $cookieFile = sys_get_temp_dir() . '/phpchess-install-test-' . getmypid() . '.cookies';
 

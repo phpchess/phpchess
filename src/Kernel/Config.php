@@ -25,7 +25,7 @@ final class Config
         public readonly string $databaseName,
         public readonly string $databaseUser,
         public readonly string $databasePassword,
-        public readonly string $tablePrefix = 'pc_',
+        public readonly string $tablePrefix = 'phpc_',
         public readonly bool $installed = false,
         public readonly string $installerOwnerHash = '',
     ) {
@@ -71,7 +71,7 @@ final class Config
             databaseName: self::text($values, 'database_name', ''),
             databaseUser: self::text($values, 'database_user', ''),
             databasePassword: self::text($values, 'database_password', ''),
-            tablePrefix: self::text($values, 'table_prefix', 'pc_'),
+            tablePrefix: self::text($values, 'table_prefix', 'phpc_'),
             installed: ($values['installed'] ?? false) === true,
             installerOwnerHash: self::text($values, 'installer_owner_hash', ''),
         );

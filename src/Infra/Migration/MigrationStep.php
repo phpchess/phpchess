@@ -8,7 +8,7 @@ namespace PhpChess\Infra\Migration;
  * One step of a migration: a name and one SQL statement (INS-05, contract K11).
  *
  * Table names are written in braces, "{settings}"; the migration runner turns
- * them into the install's prefixed names ("`pc_settings`"). A statement that
+ * them into the install's prefixed names ("`phpc_settings`"). A statement that
  * names a table without braces is refused, so a migration can only ever touch
  * phpChess's own tables.
  *

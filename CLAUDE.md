@@ -27,4 +27,4 @@ A self-hosted chess server (PHP 8.3+, MariaDB/MySQL, plain shared hosting). Comp
 - Checks: `php tools/check-headers.php`, `php tools/check-sql.php` (K5), `php tools/check-external-urls.php` (K9); release zip: `php tools/build-release.php --composer="<php> tools/composer.phar"`.
 
 ## Status
-C0-1, C0-2 and C1-1 done (2026-11-22). Next: **C1-2 Identity, admin and look**. Local test install: `htdocs/pc6sub/phpchess` (database `phpchess`, prefix `pc_`).
+C0-1, C0-2 and C1-1 done (2026-11-22). Next: **C1-2 Identity, admin and look**. Local test install: `htdocs/pc6sub/phpchess` (database `phpchess`, prefix `phpc_`).

@@ -109,7 +109,7 @@ Each contract has an id. A chunk names the contracts it touches, and a test or a
 5. **On the way out**: one log line per request with time taken, and the pseudo-cron tick if one is due (§8).
 
 ## 6. Data
-- InnoDB, `utf8mb4_unicode_ci`, a configurable table prefix (default `pc_`), integer keys, foreign keys, explicit column lists, no zero dates.
+- InnoDB, `utf8mb4_unicode_ci`, a configurable table prefix (default `phpc_`), integer keys, foreign keys, explicit column lists, no zero dates.
 - The table set is listed in the analysis §11.3, plus the school tables (`groups`, `group_members`). It becomes migrations in C1-1 (core) and in later chunks (their own tables).
 - **Migrations (K11)**: files `migrations/NNNN_name.php`, each returning steps of one SQL statement with table names written `{name}`; the runner adds the prefix, refuses bare table names, `DROP DATABASE` and dropping tables no migration created, and records every step in `schema_migrations`. C1-1 ships `0001` (System: settings, jobs, audit_log, rate_limits) and `0002` (a first `users` table, so the installer can create the admin; C1-2 extends it).
 - **Game state**:
