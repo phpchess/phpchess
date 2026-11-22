@@ -1,3 +1,18 @@
+!!! UNSUPPORTED - DO NOT INSTALL ON A PUBLIC SERVER !!!
+=======================================================
+
+phpChess 4.x is deprecated and no longer maintained. This branch (4.x) and
+the tag v4.3-final are kept only as a historical record.
+
+The 4.x code base has known critical security issues, among them SQL
+injection throughout, an admin area that does not stop unauthorised
+requests, an installer that can be re-run, weak password storage and
+unrestricted file uploads. See SECURITY.md.
+
+phpChess 6 is a complete rebuild and replaces 4.x. It lives on the main
+branch of this repository. There is no upgrade path from 4.x.
+
+
 Welcome to release 4.3.0
 ========================
 
