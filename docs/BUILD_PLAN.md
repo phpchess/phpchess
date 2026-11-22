@@ -8,6 +8,7 @@ The plan is six blocks, split into eleven large chunks.
 **Definition of done, for every chunk:**
 - its scope is built, and its tests and the automated checks pass;
 - PHPStan reports no errors at max level;
+- every new or changed file meets the code conventions (ARCHITECTURE.md §11, contract K15): header comment, clear names and segments, method descriptions, plain code;
 - `composer audit` and the JavaScript audit are clean;
 - the feature status is flipped in FEATURES.md, in the same session;
 - ARCHITECTURE.md is updated wherever the chunk changed the shape;
@@ -33,7 +34,7 @@ Release 6.0 is C0-1 to C4-2, plus a check on a real shared host before release.
 
 ## C0-1 Definition
 - **Scope**: FEATURES.md, ARCHITECTURE.md, BUILD_PLAN.md and DECISIONS.md in `docs/`.
-- **Contracts**: defines K1–K14.
+- **Contracts**: defines K1–K15.
 - **Done**: the user has reviewed the four documents, and every 4.4 concept in the analysis §11.5 is either a feature id or a recorded drop.
 
 ## C0-2 Proofs

@@ -95,6 +95,7 @@ Each contract has an id. A chunk names the contracts it touches, and a test or a
 | K12 | **Time is the server's**: UTC, milliseconds; clocks are updated inside K2's transaction; lag compensation is capped. | clock tests |
 | K13 | **Every redirect or refusal ends the request**: the response object is returned, never followed by more code. | framework design; tests for denied access |
 | K14 | **Access is checked in the controller before the service runs** (role, ownership, class limits); services check again whatever protects data (e.g. "is this your game"). | tests: every endpoint as an outsider |
+| K15 | **Code is readable by a person (A21)**: every file follows §11. Clarity is not traded for speed or brevity; a measured performance problem is solved by a clear design, not a clever line. | review checklist for every chunk; PHPStan max level; CI checks that every PHP file has a header comment |
 
 ## 5. Request flow
 1. The web server sends every request to `public/index.php`: through the root `.htaccess` when the domain points at the install folder, or directly when it points at `public/`. On nginx, the installer's snippet does the same.
@@ -168,3 +169,31 @@ The contracts K2–K14 are the security model. The rest:
   6. lock.
 - **CI install test**: CI installs every release zip both into a web root and into a subfolder, and runs the self-test.
 - **Docker image** for school servers (INS-09): the same zip, with PHP, the web server and MariaDB.
+
+## 11. Code conventions: readable by a person (A21)
+
+The main value of phpChess is code that a person can read, audit and change without tools or AI, including a PHP student studying it on their own. These rules apply to every file, and a chunk is reviewed against them before it is done.
+
+**Finding things**
+- One class per file. The file name is the class name, and the folder is its module (§2, §3), so the URL, the controller, the service and the template for a feature can be found by name.
+- Names say what something is or does, in full words: `GameService::endGame()`, `$remainingMilliseconds`, `ChallengeRepository`. No abbreviations beyond the common ones (`id`, `url`, `fen`, `pgn`, `uci`, `san`).
+- Each feature id from FEATURES.md appears in the header of the files that build it, so a search for `G-05` finds the challenge code.
+
+**Reading a file from the top**
+- Every file starts with a header comment: what it is, its responsibility, and how it fits the rest (which module, who calls it, which contracts it keeps).
+- Files are divided into clear, labelled segments, for example `// --- Checking the move ---`, in the order the code runs.
+- Every public method has a short description: what it does, its inputs and output, and what it refuses. A block whose purpose isn't obvious from the code gets a comment above it saying why it is there.
+- Comments describe the code as it is now. Its history lives in Git, and decisions live in DECISIONS.md.
+
+**Keeping it plain**
+- Straightforward code over clever code: early returns, small methods with one job, explicit loops where a chain of calls would be harder to follow. No magic: no hidden behaviour through reflection, dynamic method names or code generation.
+- Types everywhere (`declare(strict_types=1)`, typed properties, parameters and returns), so PHPStan at max level and a reader can both trust what a value is.
+- No abstraction before it is needed twice. A pattern is introduced only when it makes the code easier to follow, and it is explained where it is defined.
+- Libraries are used where they are clearer than our own code, and named in the file that uses them.
+
+**Templates and JavaScript**
+- Templates are plain PHP with only display logic, and every printed value goes through `e()` (K6). Each template starts with a comment listing the variables it expects.
+- JavaScript follows the same rules: one module per file, a header comment, named functions, no minified source in the repository (the build output is separate from `assets-src/`).
+
+**Performance**
+- Performance budgets come from measurements, not assumptions. When a measured problem needs fixing, the fix keeps the code readable: a better query, an index or a cache with a clear name, never a hard-to-read shortcut.

@@ -11,12 +11,13 @@ Every feature phpChess 6 has, will have, or has dropped on purpose. Each one has
 - **Switch**: the install-level setting that can turn the feature off (school mode, A13). The server enforces every switch, and the UI hides the feature when it is off.
 - **Status**: planned · building · built. Flip it in the same session the chunk ships.
 
-Decisions A1–A20 are in [DECISIONS.md](DECISIONS.md).
+Decisions A1–A21 are in [DECISIONS.md](DECISIONS.md).
 
 ## Principles every feature follows
-1. **Mobile first (A18).** Every page is designed for a phone held in one hand first, then grown to tablet and desktop. Touch is the main input: drag-and-drop and tap-tap moves, large targets, no hover-only actions. Installed from the browser to the home screen, phpChess behaves like an app and receives notifications there (Web Push), on iPhone (iOS 16.4 or later, after "Add to Home Screen") and on Android. No native app is planned; one would be built only if Web Push proves not good enough in C2-2.
-2. **Improve, don't replicate (A19).** A 4.4 feature is the starting point, not the specification. Each one is rebuilt the way a player today expects it: starting a game is one tap, there is no wall between correspondence and live play, and the site knows who is online and acts on it.
-3. **Modern capabilities throughout (A20).** Wherever the browser offers a better way, it is used: drag-and-drop for moves, lists, divisions and uploads; live updates instead of reloads; share links and QR codes for invitations; offline viewing of your own games; dark mode. Each still follows A16: local libraries only, nothing that reaches outside the install, except push, which runs only while the "push notifications" switch is on.
+1. **Readable, documented code (A21).** Every file can be read, searched and understood by a person, including a PHP student, without tools or AI. Readability is never traded for efficiency, performance or brevity. This governs how every feature below is built; see [ARCHITECTURE.md §11](ARCHITECTURE.md#11-code-conventions-readable-by-a-person-a21).
+2. **Mobile first (A18).** Every page is designed for a phone held in one hand first, then grown to tablet and desktop. Touch is the main input: drag-and-drop and tap-tap moves, large targets, no hover-only actions. Installed from the browser to the home screen, phpChess behaves like an app and receives notifications there (Web Push), on iPhone (iOS 16.4 or later, after "Add to Home Screen") and on Android. No native app is planned; one would be built only if Web Push proves not good enough in C2-2.
+3. **Improve, don't replicate (A19).** A 4.4 feature is the starting point, not the specification. Each one is rebuilt the way a player today expects it: starting a game is one tap, there is no wall between correspondence and live play, and the site knows who is online and acts on it.
+4. **Modern capabilities throughout (A20).** Wherever the browser offers a better way, it is used: drag-and-drop for moves, lists, divisions and uploads; live updates instead of reloads; share links and QR codes for invitations; offline viewing of your own games; dark mode. Each still follows A16: local libraries only, nothing that reaches outside the install, except push, which runs only while the "push notifications" switch is on.
 
 ## INS — Install and operation
 | Id | Feature | Origin | Chunk | Switch | Status |
