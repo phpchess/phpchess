@@ -1,0 +1,18 @@
+# Dependencies: installed by Composer in development, bundled only into release zips (A17)
+/vendor/
+/node_modules/
+/tools/composer.phar
+
+# Install-specific and generated files: never committed
+/config/config.php
+/storage/
+/var/
+/build/
+.phpunit.cache/
+.phpunit.result.cache
+
+# Editors and OS
+.idea/
+.vscode/
+Thumbs.db
+.DS_Store

@@ -1,0 +1,7 @@
+# Keep LF in the repository and in release zips, whatever the editor uses.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.webp binary
+*.wasm binary
+*.phar binary
