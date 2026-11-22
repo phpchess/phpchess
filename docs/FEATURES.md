@@ -22,7 +22,7 @@ Decisions A1–A21 are in [DECISIONS.md](DECISIONS.md).
 ## INS — Install and operation
 | Id | Feature | Origin | Chunk | Switch | Status |
 |---|---|---|---|---|---|
-| INS-01 | Release zip with `vendor/` and built JavaScript; no Composer, npm or shell on the host (A17) | new | C1-1 | — | planned |
+| INS-01 | Release zip with `vendor/` and all JavaScript included; no Composer, npm or shell on the host (A17) | new | C1-1 | — | planned |
 | INS-02 | Installer: copy the files, open the address, follow the steps; works in the web root, in a subfolder, or with the domain pointed at `public/` | redesign | C1-1 | — | planned |
 | INS-03 | Pre-flight checks: PHP and extensions, database version and `sql_mode`, writable data folder, `.htaccess` honoured, HTTPS | redesign | C1-1 | — | planned |
 | INS-04 | Self-test that non-public folders are unreachable; stops with a plain-language fix, and shows an nginx snippet for a VPS | new | C1-1 | — | planned |

@@ -1,0 +1,44 @@
+<!doctype html>
+<!--
+  Engine proof (chunk C0-2): runs the GarboChess candidate-move scorer on test
+  positions with known answers, at several depths, and shows the time taken.
+
+  Temporary: this folder is removed in chunk C3-2, when the real computer
+  opponent replaces it (BUILD_PLAN.md, C0-2).
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Engine proof</title>
+<style>
+    :root { --text: #1d1d1f; --muted: #6e6e73; --line: #d2d2d7; --pass: #1a7f37; --fail: #c62828; --background: #ffffff; }
+    @media (prefers-color-scheme: dark) {
+        :root { --text: #f5f5f7; --muted: #a1a1a6; --line: #3a3a3c; --pass: #4cc26a; --fail: #ff6b6b; --background: #1c1c1e; }
+    }
+    body { font: 15px/1.45 system-ui, sans-serif; color: var(--text); background: var(--background); margin: 0; padding: 16px; }
+    h1 { font-size: 1.3rem; margin: 0 0 4px; }
+    p { color: var(--muted); margin: 0 0 12px; }
+    button { font: inherit; padding: 10px 16px; border-radius: 8px; border: 1px solid var(--line); background: var(--background); color: var(--text); }
+    .table-wrap { overflow-x: auto; margin-top: 12px; }
+    table { border-collapse: collapse; width: 100%; font-size: 0.85rem; }
+    th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    .pass { color: var(--pass); font-weight: 600; }
+    .fail { color: var(--fail); font-weight: 600; }
+    #summary { margin-top: 12px; font-weight: 600; }
+</style>
+</head>
+<body>
+    <h1>Engine proof: GarboChess candidate-move scorer</h1>
+    <p>Scores every legal move of each test position at depths 1 to 6 and checks the known answer. Runs in a Web Worker, so the page stays responsive.</p>
+    <button id="run">Run the proof</button>
+    <div id="summary"></div>
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>Position</th><th>Depth</th><th>Time (ms)</th><th>Moves</th><th>Best three</th><th>Worst</th><th>Expected</th></tr></thead>
+            <tbody id="results"></tbody>
+        </table>
+    </div>
+    <script src="proof.js"></script>
+</body>
+</html>

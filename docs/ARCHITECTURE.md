@@ -31,7 +31,7 @@ How phpChess 6 is put together, and why. Features are listed in [FEATURES.md](FE
 
 ```
 phpchess6/
-  public/          the only web-served folder: index.php, assets/ (css, js, img, engine)
+  public/          the only web-served folder: index.php, assets/ (css, js, img, vendor/ libraries)
   src/             PHP code, namespace PhpChess\ (PSR-4)
     Kernel/        bootstrap, config, errors, headers, session, CSRF, router
     Http/          request/response, controllers (Web\, Api\V1\)
@@ -45,7 +45,6 @@ phpchess6/
   config/          config.php written by the installer (never committed)
   storage/         uploads, logs, cache (not web-served)
   tests/           PHPUnit tests, mirrors src/
-  assets-src/      JavaScript and CSS sources, built into public/assets/
   tools/           development tools (composer.phar) - never released
   docs/            these documents
   .htaccess        root: routes everything to public/ (A17)
@@ -120,7 +119,7 @@ Each contract has an id. A chunk names the contracts it touches, and a test or a
 
 ## 7. Browser side
 - **Rendering**: server-rendered HTML pages (plain PHP templates), enhanced by JavaScript modules. It is not a single-page app. Pages work with JavaScript for reading, and the board needs it.
-- **Libraries** (A16): permissive licences, versions pinned, built into `public/assets/` with a lock file and an audit. Candidates: cm-chessboard (board), chess.js (move feedback), a drag-and-drop library (League), Stockfish.js (engine, the GPL exception).
+- **Libraries** (A16): permissive licences, versions pinned, kept as plain files in `public/assets/vendor/<name>/` with their licence and a `SOURCE.md` (origin, version, checksum, network check). The list and their status are in [LIBRARIES.md](LIBRARIES.md).
 - **Live state**: one polling client (API-03) for every live view. Its interval adapts: about 1 s while it's the opponent's move in a timed game, slower otherwise, and paused in a hidden tab.
 - **Computer opponent**:
   - **Where it runs**: a Web Worker hosts the engine; the main page never blocks.
@@ -131,7 +130,7 @@ Each contract has an id. A chunk names the contracts it touches, and a test or a
   - when a move is made, Notifications picks one channel: live (the opponent is on the game), push or in-app (online elsewhere, or the app is closed but push is on), or email (offline longer than the player's set delay);
   - every notice is recorded, so the same move is never sent twice.
 - **Mobile first (A18)**: layouts start at phone width; touch is the main input (drag-and-drop and tap-tap moves); the service worker gives offline viewing (UI-08) and Web Push (N-03).
-- **Build**: `assets-src/` is built into `public/assets/` on the development machine. The release zip carries the built files (A17).
+- **No build step**: the JavaScript in the repository is exactly what the browser runs — plain modules, readable, unminified (A21). No Node or npm is needed on the development machine or the host.
 
 ## 8. Background work
 - **The job runner** (INS-08): one entry point that runs due jobs, each with a database lock so two runners never overlap. The jobs:
@@ -157,9 +156,9 @@ The contracts K2–K14 are the security model. The rest:
 ## 10. Packaging and install (A17)
 - **The release zip**: a GitHub release built by CI. It contains:
   - `vendor/` from `--no-dev`;
-  - the built assets;
+  - `public/` with its JavaScript and vendored libraries, as in the repository;
   - the root and per-folder `.htaccess` files;
-  - no `tests/`, `tools/` or `assets-src/`.
+  - no `tests/` or `tools/`.
 - **The installer** runs at the site's address when no config exists:
   1. pre-flight;
   2. protection self-test;
@@ -193,7 +192,7 @@ The main value of phpChess is code that a person can read, audit and change with
 
 **Templates and JavaScript**
 - Templates are plain PHP with only display logic, and every printed value goes through `e()` (K6). Each template starts with a comment listing the variables it expects.
-- JavaScript follows the same rules: one module per file, a header comment, named functions, no minified source in the repository (the build output is separate from `assets-src/`).
+- JavaScript follows the same rules: one module per file, a header comment, named functions, no minified code of our own; what is in the repository is what runs.
 
 **Performance**
 - Performance budgets come from measurements, not assumptions. When a measured problem needs fixing, the fix keeps the code readable: a better query, an index or a cache with a clear name, never a hard-to-read shortcut.

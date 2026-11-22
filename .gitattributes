@@ -5,3 +5,6 @@
 *.webp binary
 *.wasm binary
 *.phar binary
+
+# Vendored libraries are kept byte-for-byte as published (their checksums are recorded).
+public/assets/vendor/** -text

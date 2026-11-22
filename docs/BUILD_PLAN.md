@@ -43,7 +43,7 @@ Release 6.0 is C0-1 to C4-2, plus a check on a real shared host before release.
   - **Engine proof**: Stockfish.js (single thread) in a Web Worker returns several candidate moves at a fixed node budget, on a desktop and on a slow phone, with timings written down.
   - **Development environment finished**:
     - MariaDB strict mode, the `pc60` database and Mailpit (LOCAL_SETUP.md §3–4);
-    - the JavaScript build tool chosen, with its licence checked;
+    - JavaScript without a build step (decided 2026-11-22, LIBRARIES.md);
     - a CI workflow on GitHub running the tests, PHPStan and the audits.
 - **Contracts**: K9 and K10, prepared.
 - **Done**: the library table is complete, with no blockers; the engine proof is measured; CI is green on the current skeleton.
@@ -136,6 +136,7 @@ Release 6.0 is C0-1 to C4-2, plus a check on a real shared host before release.
   - **Games**: computer games are stored, unrated.
   - **Admin**: the engine page.
   - **Calibration**: the ladder, with its anchors and number of games fixed before it runs.
+  - **Cleanup**: remove the temporary engine proof page `public/proof/` (from C0-2).
 - **Contracts**: K1 (the computer's moves go through the server like any other), K9.
 - **Tests**:
   - the selection layer with fixed engine outputs;

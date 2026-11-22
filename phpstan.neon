@@ -4,3 +4,4 @@ parameters:
         - src
         - tests
         - public
+        - tools/check-headers.php

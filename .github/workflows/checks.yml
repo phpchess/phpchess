@@ -1,0 +1,41 @@
+# Automated checks on every push and pull request (BUILD_PLAN.md, definition of done).
+#
+# Uses only GitHub's own checkout action and the PHP and Composer already
+# installed on the runner, so no third-party action runs with access to the code.
+
+name: Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v4
+
+      - name: Show the PHP and Composer versions used
+        run: |
+          php -v
+          composer --version
+
+      - name: Install development packages exactly as locked
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Known vulnerabilities in packages (composer audit)
+        run: composer audit
+
+      - name: Every PHP file has a header comment (K15)
+        run: php tools/check-headers.php
+
+      - name: Tests (PHPUnit)
+        run: vendor/bin/phpunit
+
+      - name: Static analysis (PHPStan, max level)
+        run: vendor/bin/phpstan analyse --no-progress
