@@ -31,13 +31,13 @@ How phpChess 6 is put together, and why. Features are listed in [FEATURES.md](FE
 
 ```
 phpchess6/
-  public/          the only web-served folder: index.php, assets/ (css, js, img, vendor/ libraries)
+  public/          the only web-served folder: index.php, cron.php (command line only), assets/ (css, js, img, vendor/ libraries)
   src/             PHP code, namespace PhpChess\ (PSR-4)
-    Kernel/        bootstrap, config, errors, headers, session, CSRF, router
-    Http/          request/response, controllers (Web\, Api\V1\)
-    Domain/        one folder per module (see §3): services, entities, rules
-    Infra/         repositories (PDO), mailer, clock, file storage, job runner
-    Install/       installer and pre-flight checks
+    Kernel/        Kernel, Config, ErrorHandler, SecurityHeaders, Session, Csrf, Router, Routes (the list of every address)
+    Http/          Request, Response, ApiError, Template, e(); controllers (Web\, Api\V1\)
+    Domain/        one folder per module (see §3): services, entities, rules (SystemNSAFESTATECHECK SO FAR)
+    Infra/         Database, Repository base, repositories per module (System\, Identity\, ...), Migration\, Jobs\; later mailer, clock, file storage
+    Install/       InstallerController, DatabaseFinder, PreflightCheck, ProtectionSelfTest, InstallLock (deleted after install, A23)
   templates/       plain PHP templates (core); templates/local/ = the server admin's overrides
   migrations/      numbered schema migrations
   lang/            language files per locale
@@ -45,7 +45,8 @@ phpchess6/
   config/          config.php written by the installer (never committed)
   storage/         uploads, logs, cache (not web-served)
   tests/           PHPUnit tests, mirrors src/
-  tools/           development tools (composer.phar) - never released
+  tools/           development tools - never released: composer.phar, the CI checks (check-headers, check-sql K5,
+                   check-external-urls K9), build-release.php (K10) and install-test.php
   docs/            these documents
   .htaccess        root: routes everything to public/ (A17)
 ```
@@ -110,6 +111,7 @@ Each contract has an id. A chunk names the contracts it touches, and a test or a
 ## 6. Data
 - InnoDB, `utf8mb4_unicode_ci`, a configurable table prefix (default `pc_`), integer keys, foreign keys, explicit column lists, no zero dates.
 - The table set is listed in the analysis §11.3, plus the school tables (`groups`, `group_members`). It becomes migrations in C1-1 (core) and in later chunks (their own tables).
+- **Migrations (K11)**: files `migrations/NNNN_name.php`, each returning steps of one SQL statement with table names written `{name}`; the runner adds the prefix, refuses bare table names, `DROP DATABASE` and dropping tables no migration created, and records every step in `schema_migrations`. C1-1 ships `0001` (System: settings, jobs, audit_log, rate_limits) and `0002` (a first `users` table, so the installer can create the admin; C1-2 extends it).
 - **Game state**:
   - `games` holds the current FEN, ply and clocks;
   - `game_moves` holds each move as UCI and SAN, the FEN after it, and the clock after it;
@@ -166,7 +168,10 @@ The contracts K2–K14 are the security model. The rest:
   4. admin account;
   5. migrations;
   6. lock.
-- **CI install test**: CI installs every release zip both into a web root and into a subfolder, and runs the self-test.
+
+  Step 3 asks only for the database login and finds or creates the database itself (`DatabaseFinder`, A23). Step 6 deletes the installer's own files (`src/Install`, `templates/install`); `/install` then no longer exists.
+  The step is worked out from the facts on every visit, so a reload carries on. Only the browser that saved the database details can finish (its session secret is hashed into the config). When `config/` is not writable, the page shows the config file to upload by FTP.
+- **CI install test**: CI (`.github/workflows/release.yml`) installs every release zip with Apache both into a web root and into a subfolder, and drives all six installer steps over HTTP (`tools/install-test.php`), self-test included.
 - **Docker image** for school servers (INS-09): the same zip, with PHP, the web server and MariaDB.
 
 ## 11. Code conventions: readable by a person (A21)

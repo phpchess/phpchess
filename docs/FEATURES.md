@@ -22,16 +22,16 @@ Decisions A1–A21 are in [DECISIONS.md](DECISIONS.md).
 ## INS — Install and operation
 | Id | Feature | Origin | Chunk | Switch | Status |
 |---|---|---|---|---|---|
-| INS-01 | Release zip with `vendor/` and all JavaScript included; no Composer, npm or shell on the host (A17) | new | C1-1 | — | planned |
-| INS-02 | Installer: copy the files, open the address, follow the steps; works in the web root, in a subfolder, or with the domain pointed at `public/` | redesign | C1-1 | — | planned |
-| INS-03 | Pre-flight checks: PHP and extensions, database version and `sql_mode`, writable data folder, `.htaccess` honoured, HTTPS | redesign | C1-1 | — | planned |
-| INS-04 | Self-test that non-public folders are unreachable; stops with a plain-language fix, and shows an nginx snippet for a VPS | new | C1-1 | — | planned |
-| INS-05 | Migrations: numbered, resumable, table prefix, never drop what they didn't create; also used for upgrades to later 6.x versions | redesign | C1-1 | — | planned |
-| INS-06 | Installer locks itself after installing; reopens only with a one-time setup token | redesign | C1-1 | — | planned |
-| INS-07 | Unsafe-state banner on every admin page: install folder reachable, config writable, errors displayed, no HTTPS, mail not set up, jobs not running for more than 24 h, migrations pending | redesign | C1-1 | — | planned |
-| INS-08 | Job runner: real cron when present, otherwise pseudo-cron triggered by page requests, guarded by a database lock | redesign | C1-1 | — | planned |
+| INS-01 | Release zip with `vendor/` and all JavaScript included; no Composer, npm or shell on the host (A17) | new | C1-1 | — | done (2026-11-22) |
+| INS-02 | Installer: copy the files, open the address, follow the steps; works in the web root, in a subfolder, or with the domain pointed at `public/` | redesign | C1-1 | — | done (2026-11-22) |
+| INS-03 | Pre-flight checks: PHP and extensions, database version and `sql_mode`, writable data folder, `.htaccess` honoured, HTTPS | redesign | C1-1 | — | done (2026-11-22) |
+| INS-04 | Self-test that non-public folders are unreachable; stops with a plain-language fix, and shows an nginx snippet for a VPS | new | C1-1 | — | done (2026-11-22) |
+| INS-05 | Migrations: numbered, resumable, table prefix, never drop what they didn't create; also used for upgrades to later 6.x versions | redesign | C1-1 | — | done (2026-11-22) |
+| INS-06 | Installer locks itself after installing; reopens only with a one-time setup token | redesign | C1-1 | — | done (2026-11-22) |
+| INS-07 | Unsafe-state banner on every admin page: install folder reachable, config writable, errors displayed, no HTTPS, mail not set up, jobs not running for more than 24 h, migrations pending | redesign | C1-1 | — | done (2026-11-22) |
+| INS-08 | Job runner: real cron when present, otherwise pseudo-cron triggered by page requests, guarded by a database lock | redesign | C1-1 | — | done (2026-11-22) |
 | INS-09 | Docker image (PHP, web server, MariaDB) for school servers | new | C2-2 | — | planned |
-| INS-10 | Fully offline operation: every asset served locally, no outside requests (A16) | new | C1-1 | — | planned |
+| INS-10 | Fully offline operation: every asset served locally, no outside requests (A16) | new | C1-1 | — | done (2026-11-22) |
 
 ## ID — Identity and accounts
 | Id | Feature | Origin | Chunk | Switch | Status |
@@ -163,10 +163,10 @@ Decisions A1–A21 are in [DECISIONS.md](DECISIONS.md).
 ## API — Client access
 | Id | Feature | Origin | Chunk | Switch | Status |
 |---|---|---|---|---|---|
-| API-01 | JSON API v1, used by the web client itself; reads by GET, all changes by POST | redesign | C1-1 (skeleton), C2-2 | — | planned |
+| API-01 | JSON API v1, used by the web client itself; reads by GET, all changes by POST | redesign | C1-1 (skeleton), C2-2 | — | skeleton done (C1-1, 2026-11-22); rest in C2-2 |
 | API-02 | Polling for game state with `since=<ply>`; ETag/304 on lists | redesign | C2-1 | — | planned |
 | API-03 | Short-poll transport, adaptive interval, behind an interface | new | C3-1 | — | planned |
-| API-04 | Rate limits and one error format for every endpoint | new | C1-1 | — | planned |
+| API-04 | Rate limits and one error format for every endpoint | new | C1-1 | — | done (2026-11-22) |
 
 ## ADM — Administration
 | Id | Feature | Origin | Chunk | Switch | Status |

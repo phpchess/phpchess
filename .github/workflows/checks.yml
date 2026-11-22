@@ -2,6 +2,8 @@
 #
 # Uses only GitHub's own checkout action and the PHP and Composer already
 # installed on the runner, so no third-party action runs with access to the code.
+# The database tests run against a MariaDB 10.11 service (the minimum, A1),
+# in a database called phpchess_support (A22).
 
 name: Checks
 
@@ -16,6 +18,29 @@ permissions:
 jobs:
   checks:
     runs-on: ubuntu-24.04
+
+    services:
+      mariadb:
+        image: mariadb:10.11
+        env:
+          MARIADB_DATABASE: phpchess_support
+          MARIADB_USER: phpchess
+          MARIADB_PASSWORD: phpchess-ci
+          MARIADB_ROOT_PASSWORD: phpchess-ci-root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+
+    env:
+      PHPCHESS_TEST_DB_REQUIRED: '1'
+      PHPCHESS_TEST_DB_HOST: 127.0.0.1
+      PHPCHESS_TEST_DB_PORT: '3306'
+      PHPCHESS_TEST_DB_NAME: phpchess_support
+      PHPCHESS_TEST_DB_USER: phpchess
+      PHPCHESS_TEST_DB_PASSWORD: phpchess-ci
+
     steps:
       - name: Get the code
         uses: actions/checkout@v4
@@ -34,7 +59,13 @@ jobs:
       - name: Every PHP file has a header comment (K15)
         run: php tools/check-headers.php
 
-      - name: Tests (PHPUnit)
+      - name: All SQL in repositories, as prepared statements (K5)
+        run: php tools/check-sql.php
+
+      - name: No outside requests from the browser (K9)
+        run: php tools/check-external-urls.php
+
+      - name: Tests (PHPUnit, with the database tests)
         run: vendor/bin/phpunit
 
       - name: Static analysis (PHPStan, max level)

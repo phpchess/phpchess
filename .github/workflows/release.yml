@@ -1,0 +1,93 @@
+# Release zip: build it, then install it twice like a person would (INS-01, INS-02, K10).
+#
+# 1. Builds the zip with vendor/ from --no-dev; the build itself fails if
+#    tests/, tools/ or a development package would be inside (K10).
+# 2. Installs it with Apache and .htaccess files, once into a web root
+#    (port 8081) and once into a subfolder (port 8082, /chess), and drives the
+#    web installer through all six steps with tools/install-test.php.
+# 3. Keeps the zip as a build artifact. Publishing a GitHub release is a
+#    separate, manual decision.
+#
+# Uses only GitHub's own actions (checkout, upload-artifact).
+
+name: Release zip
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  release-zip:
+    runs-on: ubuntu-24.04
+
+    services:
+      mariadb:
+        image: mariadb:10.11
+        env:
+          MARIADB_DATABASE: phpchess_support
+          MARIADB_USER: phpchess
+          MARIADB_PASSWORD: phpchess-ci
+          MARIADB_ROOT_PASSWORD: phpchess-ci-root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v4
+
+      - name: Build the release zip (fails on development files, K10)
+        run: php tools/build-release.php --composer=composer
+
+      - name: Install Apache with PHP and .htaccess support
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q apache2 libapache2-mod-php$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;') unzip
+          sudo a2enmod rewrite
+          echo 'Listen 8081' | sudo tee -a /etc/apache2/ports.conf
+          echo 'Listen 8082' | sudo tee -a /etc/apache2/ports.conf
+          sudo tee /etc/apache2/sites-available/phpchess-test.conf > /dev/null <<'CONF'
+          <VirtualHost *:8081>
+              DocumentRoot /srv/webroot
+              <Directory /srv/webroot>
+                  AllowOverride All
+                  Require all granted
+              </Directory>
+          </VirtualHost>
+          <VirtualHost *:8082>
+              DocumentRoot /srv/site
+              <Directory /srv/site>
+                  AllowOverride All
+                  Require all granted
+              </Directory>
+          </VirtualHost>
+          CONF
+          sudo a2ensite phpchess-test
+
+      - name: Unpack the zip into a web root and into a subfolder
+        run: |
+          unzip -q build/phpchess-*.zip -d /tmp/unpacked
+          sudo mkdir -p /srv/webroot /srv/site
+          sudo cp -a /tmp/unpacked/phpchess/. /srv/webroot/
+          sudo cp -a /tmp/unpacked/phpchess /srv/site/chess
+          sudo chown -R www-data:www-data /srv/webroot /srv/site
+          sudo systemctl restart apache2
+
+      - name: Install test in the web root
+        run: php tools/install-test.php http://localhost:8081 127.0.0.1 phpchess_support phpchess phpchess-ci pa_
+
+      - name: Install test in a subfolder
+        run: php tools/install-test.php http://localhost:8082/chess 127.0.0.1 phpchess_support phpchess phpchess-ci pb_
+
+      - name: Keep the zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: phpchess-release-zip
+          path: build/phpchess-*.zip

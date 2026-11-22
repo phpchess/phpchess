@@ -21,8 +21,8 @@ phpChess 6 is built in large chunks, each a working, tested whole. The full list
 |---|---|---|
 | C0-1 Definition | Feature list, architecture, build plan, decisions | ✅ Done |
 | C0-2 Proofs | Library check, engine-in-the-browser test, development environment, automated checks (CI) | ✅ Done |
-| C1-1 Application core and install | Request handling, database and migrations, the installer, the release zip, background jobs | ⏳ Next |
-| C1-2 Identity, admin and look | Accounts and roles, admin area, feature switches, mobile-first layout, skins, Appearance page, languages | Planned |
+| C1-1 Application core and install | Request handling, database and migrations, the installer, the release zip, background jobs | ✅ Done |
+| C1-2 Identity, admin and look | Accounts and roles, admin area, feature switches, mobile-first layout, skins, Appearance page, languages | ⏳ Next |
 | C2-1 Chess play | Rules, one-tap start, invites, one game model for every pace, live moves and notices, ratings | Planned |
 | C2-2 Community, school and app | Messages, profiles, school mode (classes, teacher accounts), installable app with push notifications | Planned |
 | C3-1 Timed play | Clocks with increment, lobby, changing pace mid-game | Planned |
@@ -37,6 +37,8 @@ phpChess 6 is built in large chunks, each a working, tested whole. The full list
 - Automated checks on every push: known vulnerabilities, a header comment in every PHP file, tests, and static analysis.
 - The computer opponent's engine proven in the browser: GarboChess scores every candidate move, finds mates and hanging pieces, and is fast enough on an iPhone ([engine proof](docs/proofs/engine-proof.md)).
 - The 4.x code frozen on the `4.x` branch with a security notice.
+- **Install without skills**: copy the release zip's files to any PHP + MySQL host and open the address. The installer checks the server, tests that private folders are protected, finds or creates the database from the hosting login, creates the admin account and the tables, then removes itself.
+- The application core: request handling with security headers and CSRF protection, the database layer and resumable migrations, background jobs (cron or page-triggered), rate limits, and the first API endpoint (`/api/v1/status`).
 
 ## Documentation
 - [Features](docs/FEATURES.md): what phpChess 6 does, and what was dropped on purpose.

@@ -3,7 +3,7 @@
 /**
  * Header check (contract K15, ARCHITECTURE.md §11).
  *
- * Every PHP file in src/, tests/ and public/ must start with a header comment
+ * Every PHP file in src/, tests/, public/, templates/, migrations/ and tools/ must start with a header comment
  * that says what the file is. This script lists the files that don't, and
  * exits with code 1 if there are any, so CI fails.
  *
@@ -14,7 +14,7 @@ declare(strict_types=1);
 
 // --- Settings ---
 
-$foldersToCheck = ['src', 'tests', 'public'];
+$foldersToCheck = ['src', 'tests', 'public', 'templates', 'migrations', 'tools'];
 
 // --- Finding the PHP files ---
 

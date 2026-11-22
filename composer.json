@@ -11,7 +11,8 @@
         "phpstan/phpstan": "^2.1"
     },
     "autoload": {
-        "psr-4": { "PhpChess\\": "src/" }
+        "psr-4": { "PhpChess\\": "src/" },
+        "files": ["src/Http/escape.php"]
     },
     "autoload-dev": {
         "psr-4": { "PhpChess\\Tests\\": "tests/" }

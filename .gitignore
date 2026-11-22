@@ -5,7 +5,11 @@
 
 # Install-specific and generated files: never committed
 /config/config.php
-/storage/
+/storage/*
+!/storage/.htaccess
+!/storage/logs/
+/storage/logs/*
+!/storage/logs/.gitkeep
 /var/
 /build/
 .phpunit.cache/

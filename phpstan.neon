@@ -4,4 +4,9 @@ parameters:
         - src
         - tests
         - public
+        - migrations
         - tools/check-headers.php
+        - tools/check-sql.php
+        - tools/check-external-urls.php
+        - tools/build-release.php
+        - tools/install-test.php

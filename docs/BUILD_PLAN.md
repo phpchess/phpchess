@@ -18,7 +18,7 @@ The plan is six blocks, split into eleven large chunks.
 |---|---|---|---|
 | 0 Ground | C0-1 Definition | this plan, the functionality list, the architecture | done (2026-11-22) |
 | | C0-2 Proofs | the library check, the engine proof, the development environment finished | done (2026-11-22) |
-| 1 Foundation | C1-1 Application core and install | kernel, router, database, migrations, installer, release zip, job runner | planned |
+| 1 Foundation | C1-1 Application core and install | kernel, router, database, migrations, installer, release zip, job runner | done (2026-11-22) |
 | | C1-2 Identity, admin and look | accounts, roles, admin, feature switches, skins, Appearance, languages | planned |
 | 2 Product | C2-1 Correspondence chess | rules, the move and game-end functions, challenges, board, ratings, notifications | planned |
 | | C2-2 Community, school and API | messages, profiles, content, school mode, API v1, PWA, Docker | planned |
@@ -42,7 +42,7 @@ Release 6.0 is C0-1 to C4-2, plus a check on a real shared host before release.
   - **Library check (A16)**, giving a library table with licence, version, audit result and "no network calls" checked. It covers cm-chessboard, chess.js, the drag-and-drop library, Stockfish.js and PHPMailer.
   - **Engine proof**: Stockfish.js (single thread) in a Web Worker returns several candidate moves at a fixed node budget, on a desktop and on a slow phone, with timings written down.
   - **Development environment finished**:
-    - MariaDB strict mode and the `pc60` database (LOCAL_SETUP.md §4);
+    - MariaDB strict mode and the local database (LOCAL_SETUP.md §4; named `phpchess` and `phpchess_support` since A22);
     - development mail goes to a log file, not to a mail catcher (decided 2026-11-22; built with the mailer in C1-2);
     - JavaScript without a build step (decided 2026-11-22, LIBRARIES.md);
     - a CI workflow on GitHub running the tests, PHPStan and the audits.
@@ -65,6 +65,7 @@ Release 6.0 is C0-1 to C4-2, plus a check on a real shared host before release.
   - the job runner lock;
   - the CI checks for K5, K9 and K10.
 - **Done**: a release zip installs into a subfolder of the local XAMPP by following the installer alone, with no command line.
+- **Result (2026-11-22)**: done. The release zip installed into `htdocs/pc6sub/phpchess` in a normal browser, with the database found by the installer (A23); the installer then removed itself. The installer also creates the database when allowed and deletes its own files (A23). A first `users` table (migration 0002) lets it create the admin; C1-2 extends it. The CI install test (`release.yml`) runs on the first push.
 
 ## C1-2 Identity, admin and look
 - **Scope**: ID-01 to ID-09, ID-13, SCH-01, UI-01 to UI-04, UI-06, UI-07, UI-09, ADM-01 to ADM-03.

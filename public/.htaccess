@@ -1,0 +1,22 @@
+# phpChess public/.htaccess (ARCHITECTURE.md §5): files are served as they are,
+# every other address goes to index.php, which finds the page.
+
+Options -Indexes
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Existing files (CSS, JavaScript, images) are served directly.
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^ - [L]
+
+    # Everything else is a page of the application.
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# The vendored libraries' notes and licences are fine to read; nothing else
+# here is private. Hidden files (".something") are never served.
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>

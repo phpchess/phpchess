@@ -1,0 +1,22 @@
+# phpChess root .htaccess (A17, INS-02): send every request into public/.
+#
+# Used when the domain (or a subfolder) points at the install folder itself.
+# When the domain points at public/, this file is never read.
+# Every other folder also has its own "deny" .htaccess, so it stays protected
+# even if this rewrite is switched off (INS-04 tests that).
+
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Requests already inside public/ go on unchanged.
+    RewriteCond %{REQUEST_URI} !/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+<IfModule !mod_rewrite.c>
+    # Without mod_rewrite the site cannot work from this folder; refuse
+    # rather than show files. Point the domain at public/ instead.
+    Require all denied
+</IfModule>

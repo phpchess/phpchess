@@ -1,0 +1,3 @@
+# phpChess: this folder is private and never served to the web (A17, INS-04).
+# Only public/ is web-visible; the installer's self-test checks this file works.
+Require all denied

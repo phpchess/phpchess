@@ -1,0 +1,120 @@
+/*
+ * Base styles for the installer, error and start pages (A18: mobile first).
+ *
+ * Written for a phone first; wider screens only get a centred card.
+ * Chunk C1-2 replaces this with the skin system (themes, Appearance page).
+ */
+
+/* --- Colours --- */
+:root {
+    --text: #1f2328;
+    --muted: #57606a;
+    --background: #f6f7f9;
+    --card: #ffffff;
+    --accent: #2f6f4f;
+    --error: #b42318;
+    --warning: #9a6700;
+    --success: #1a7f37;
+    --border: #d0d7de;
+}
+
+/* --- Page --- */
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--text);
+    background: var(--background);
+}
+
+.page {
+    max-width: 40rem;
+    min-height: 100vh;
+    margin: 0 auto;
+    padding: 1rem;
+    background: var(--card);
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+h1 { font-size: 1.4rem; margin: 0.5rem 0 1rem; }
+
+pre {
+    overflow-x: auto;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    background: var(--background);
+    font-size: 0.85rem;
+}
+
+/* --- Check lists --- */
+.checks { list-style: none; padding: 0; }
+
+.checks li {
+    display: grid;
+    margin-bottom: 0.5rem;
+    padding: 0.4rem 0.75rem;
+    border-left: 0.3rem solid var(--border);
+}
+
+.checks .check-passed { border-color: var(--success); }
+.checks .check-failed { border-color: var(--error); }
+.checks .check-warning { border-color: var(--warning); }
+.fix { font-size: 0.9rem; color: var(--muted); }
+
+/* --- Notices --- */
+.notice-error,
+.notice-warning,
+.notice-success { padding: 0.75rem; border-radius: 0.5rem; }
+
+.notice-error { background: #ffebe9; color: var(--error); }
+.notice-warning { background: #fff8c5; }
+.notice-success { background: #dafbe1; color: var(--success); }
+
+/* --- Forms and buttons: large touch targets --- */
+.form { display: grid; gap: 0.75rem; }
+.form label { display: grid; gap: 0.25rem; font-weight: 600; }
+
+input {
+    min-height: 2.75rem;
+    padding: 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 0.4rem;
+    font: inherit;
+}
+
+input[type="checkbox"] { min-height: auto; }
+
+button,
+.button {
+    display: inline-block;
+    min-height: 2.75rem;
+    margin-top: 0.5rem;
+    padding: 0.7rem 1.2rem;
+    border: 0;
+    border-radius: 0.5rem;
+    background: var(--accent);
+    color: #ffffff;
+    font: inherit;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* --- Wider screens --- */
+@media (min-width: 48rem) {
+    .page {
+        min-height: auto;
+        margin-top: 2rem;
+        padding: 2rem;
+        border-radius: 0.75rem;
+    }
+}
