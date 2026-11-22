@@ -1,0 +1,29 @@
+# phpChess 6 — working notes for Claude
+
+A self-hosted chess server (PHP 8.3+, MariaDB/MySQL, plain shared hosting). Complete rebuild of phpChess 4.x; 4.x is frozen on the `4.x` branch.
+
+## Where things live (read only what the task needs)
+- `docs/BUILD_PLAN.md`: the chunks, their scope (feature ids), contracts, tests and status. **Start here.**
+- `docs/FEATURES.md`: every feature with id, chunk, switch and status.
+- `docs/ARCHITECTURE.md`: layout, modules, contracts K1–K15, code conventions (§11).
+- `docs/DECISIONS.md`: the user's decisions A1–A21. New decisions are added here.
+- `docs/LIBRARIES.md`: every third-party library, licence, check and status.
+- Local setup (XAMPP, databases): `C:\Users\chriz\CBPROJS\htdocs\phpchess44\LOCAL_SETUP.md` (outside the repo).
+
+## Rules that override everything else
+- **Readable code (A21, K15)**: a person, including a PHP student, must be able to read and change any file without tools. Never trade readability for speed or brevity. Header comment on every file, clear names, labelled segments.
+- **Mobile first (A18)**, improve-don't-replicate (A19), local libraries only and no outside requests (A16).
+- **Chunks are large and stop for review**: finish a chunk, flip its status in BUILD_PLAN.md, FEATURES.md and the README progress table, then stop and ask before the next one.
+- **Definition of done**: tests, PHPStan max, `composer audit`, `php tools/check-headers.php` all pass (same as CI).
+- Never push, post or change GitHub settings without asking. Never run `git config`.
+
+## Working style
+- Token-friendly: short replies, results and decisions only. Side discussions get recorded in DECISIONS.md and kept short.
+- Number questions Q1, Q2, ... when asking more than one.
+
+## Tools
+- PHP: `C:\Users\chriz\CBPROJS\htdocs\xampp\php\php.exe`; Composer: `tools/composer.phar`.
+- Local site: http://pc6.localhost (basic-auth login), serves `public/` only. Database `pc60` (credentials in `xampp\passwords_pc60.txt`).
+
+## Status
+C0-1 and C0-2 done (2026-11-22). Next: **C1-1 Application core and install**.
