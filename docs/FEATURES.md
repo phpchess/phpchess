@@ -172,7 +172,7 @@ Decisions A1–A21 are in [DECISIONS.md](DECISIONS.md).
 | Id | Feature | Origin | Chunk | Switch | Status |
 |---|---|---|---|---|---|
 | ADM-01 | Users: list, approve, disable, archive, roles | 4.4 | C1-2 | — | planned |
-| ADM-02 | Settings, mail (SMTP), feature switches | 4.4 | C1-2 | — | planned |
+| ADM-02 | Settings, mail (SMTP, or a mail log file for development and offline installs), feature switches | 4.4 | C1-2 | — | planned |
 | ADM-03 | Audit log of admin actions | new | C1-2 | — | planned |
 | ADM-04 | Games: list, adjudicate through the game-end function (G-03), admin FEN game setup | 4.4 | C2-1 | — | planned |
 | ADM-05 | Content: news, server messages, tips, FAQ, pages | 4.4 | C2-2 | — | planned |

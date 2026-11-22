@@ -20,8 +20,8 @@ phpChess 6 is built in large chunks, each a working, tested whole. The full list
 | Chunk | What it delivers | Status |
 |---|---|---|
 | C0-1 Definition | Feature list, architecture, build plan, decisions | ✅ Done |
-| C0-2 Proofs | Library check, engine-in-the-browser test, development environment, automated checks (CI) | ⏳ Next |
-| C1-1 Application core and install | Request handling, database and migrations, the installer, the release zip, background jobs | Planned |
+| C0-2 Proofs | Library check, engine-in-the-browser test, development environment, automated checks (CI) | ✅ Done |
+| C1-1 Application core and install | Request handling, database and migrations, the installer, the release zip, background jobs | ⏳ Next |
 | C1-2 Identity, admin and look | Accounts and roles, admin area, feature switches, mobile-first layout, skins, Appearance page, languages | Planned |
 | C2-1 Chess play | Rules, one-tap start, invites, one game model for every pace, live moves and notices, ratings | Planned |
 | C2-2 Community, school and app | Messages, profiles, school mode (classes, teacher accounts), installable app with push notifications | Planned |
@@ -33,7 +33,9 @@ phpChess 6 is built in large chunks, each a working, tested whole. The full list
 
 **Built so far**
 - Project set-up: Composer (development tools only, no runtime packages), PHPUnit tests and PHPStan analysis at its strictest level, both passing.
-- The four planning documents in `docs/`.
+- The four planning documents in `docs/`, plus the [library table](docs/LIBRARIES.md).
+- Automated checks on every push: known vulnerabilities, a header comment in every PHP file, tests, and static analysis.
+- The computer opponent's engine proven in the browser: GarboChess scores every candidate move, finds mates and hanging pieces, and is fast enough on an iPhone ([engine proof](docs/proofs/engine-proof.md)).
 - The 4.x code frozen on the `4.x` branch with a security notice.
 
 ## Documentation

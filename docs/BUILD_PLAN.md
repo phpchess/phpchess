@@ -17,7 +17,7 @@ The plan is six blocks, split into eleven large chunks.
 | Block | Chunk | Builds | Status |
 |---|---|---|---|
 | 0 Ground | C0-1 Definition | this plan, the functionality list, the architecture | done (2026-11-22) |
-| | C0-2 Proofs | the library check, the engine proof, the development environment finished | planned |
+| | C0-2 Proofs | the library check, the engine proof, the development environment finished | done (2026-11-22) |
 | 1 Foundation | C1-1 Application core and install | kernel, router, database, migrations, installer, release zip, job runner | planned |
 | | C1-2 Identity, admin and look | accounts, roles, admin, feature switches, skins, Appearance, languages | planned |
 | 2 Product | C2-1 Correspondence chess | rules, the move and game-end functions, challenges, board, ratings, notifications | planned |
@@ -42,7 +42,8 @@ Release 6.0 is C0-1 to C4-2, plus a check on a real shared host before release.
   - **Library check (A16)**, giving a library table with licence, version, audit result and "no network calls" checked. It covers cm-chessboard, chess.js, the drag-and-drop library, Stockfish.js and PHPMailer.
   - **Engine proof**: Stockfish.js (single thread) in a Web Worker returns several candidate moves at a fixed node budget, on a desktop and on a slow phone, with timings written down.
   - **Development environment finished**:
-    - MariaDB strict mode, the `pc60` database and Mailpit (LOCAL_SETUP.md §3–4);
+    - MariaDB strict mode and the `pc60` database (LOCAL_SETUP.md §4);
+    - development mail goes to a log file, not to a mail catcher (decided 2026-11-22; built with the mailer in C1-2);
     - JavaScript without a build step (decided 2026-11-22, LIBRARIES.md);
     - a CI workflow on GitHub running the tests, PHPStan and the audits.
 - **Contracts**: K9 and K10, prepared.
