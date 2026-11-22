@@ -48,18 +48,18 @@ final class DatabaseFinder
         // --- 1. Connect, trying the other spelling of "this machine" too ---
         $server = null;
         $usedHost = $host;
-        $lastError = '';
+        $errors = [];
         foreach (self::hostsToTry($host) as $candidateHost) {
             try {
                 $server = DatabaseServer::connect($candidateHost, $port, $user, $password);
                 $usedHost = $candidateHost;
                 break;
             } catch (PDOException $error) {
-                $lastError = $error->getMessage();
+                $errors[] = $error->getMessage();
             }
         }
         if ($server === null) {
-            return self::result(self::CANNOT_CONNECT, $host, '', [], self::explainConnectionError($lastError));
+            return self::result(self::CANNOT_CONNECT, $host, '', [], self::explainConnectionErrors($errors));
         }
 
         $visible = $server->visibleDatabases();
@@ -140,7 +140,27 @@ final class DatabaseFinder
         return array_values(array_filter($names, DatabaseServer::isSafeDatabaseName(...)));
     }
 
-    /** Turns the server's error into advice a non-expert can follow. */
+    /**
+     * Turns the servers' errors into advice a non-expert can follow.
+     *
+     * When two host names were tried, the most telling error wins: a server
+     * that answered "access denied" was reached, so the password is the
+     * problem, even if the other name could not be reached at all.
+     *
+     * @param list<string> $errors one message per host tried
+     */
+    private static function explainConnectionErrors(array $errors): string
+    {
+        foreach ($errors as $error) {
+            if (str_contains($error, 'Access denied')) {
+                return self::explainConnectionError($error);
+            }
+        }
+
+        return self::explainConnectionError($errors[0] ?? '');
+    }
+
+    /** Turns one server error into advice a non-expert can follow. */
     private static function explainConnectionError(string $error): string
     {
         if (str_contains($error, 'Access denied')) {

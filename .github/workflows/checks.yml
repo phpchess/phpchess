@@ -69,4 +69,4 @@ jobs:
         run: vendor/bin/phpunit
 
       - name: Static analysis (PHPStan, max level)
-        run: vendor/bin/phpstan analyse --no-progress
+        run: vendor/bin/phpstan analyse --no-progress --memory-limit=1G
