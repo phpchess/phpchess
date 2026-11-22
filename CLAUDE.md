@@ -8,6 +8,7 @@ A self-hosted chess server (PHP 8.3+, MariaDB/MySQL, plain shared hosting). Comp
 - `docs/ARCHITECTURE.md`: layout, modules, contracts K1–K15, code conventions (§11).
 - `docs/DECISIONS.md`: the user's decisions A1–A21. New decisions are added here.
 - `docs/LIBRARIES.md`: every third-party library, licence, check and status.
+- `docs/BACKLOG.md`: agreed work not yet placed in a chunk (B1, B2, ...).
 - Local setup (XAMPP, databases): `C:\Users\chriz\CBPROJS\htdocs\phpchess44\LOCAL_SETUP.md` (outside the repo).
 
 ## Rules that override everything else

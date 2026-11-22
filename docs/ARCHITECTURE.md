@@ -132,6 +132,7 @@ Each contract has an id. A chunk names the contracts it touches, and a test or a
   - when a move is made, Notifications picks one channel: live (the opponent is on the game), push or in-app (online elsewhere, or the app is closed but push is on), or email (offline longer than the player's set delay);
   - every notice is recorded, so the same move is never sent twice.
 - **Mobile first (A18)**: layouts start at phone width; touch is the main input (drag-and-drop and tap-tap moves); the service worker gives offline viewing (UI-08) and Web Push (N-03).
+- **Skins made in the admin area (A24)**: an admin creates and edits skins in the browser, with no files or code: logo selection, colour schemes, default board and pieces, layout choices, and fun seasonal effects (for example winter or holiday themes, switched on by date or by hand). A skin is stored as data (skin.json, theme.css as CSS variables, images) under `skins/`, never as PHP (A5, UI-01, UI-02). Ready-made skins can be copied and adjusted.
 - **No build step**: the JavaScript in the repository is exactly what the browser runs — plain modules, readable, unminified (A21). No Node or npm is needed on the development machine or the host.
 
 ## 8. Background work
