@@ -327,6 +327,17 @@ final class TimedPlayTest extends TestCase
         self::assertNotNull($match['game_id']);
     }
 
+    public function testMyOwnCorrespondenceChallengeDoesNotBlockATimedPlayButton(): void
+    {
+        $challenges = $this->play->challenges();
+        $oldId = $challenges->createOpen($this->whiteId, 'random', 3, true, self::NOW);
+
+        $timed = $challenges->quickPlay($this->whiteId, 3, true, self::NOW, '5+3', self::NOW_MS);
+
+        self::assertNotSame($oldId, $timed['challenge_id']);
+        self::assertSame('5+3', $this->play->challengeRepository()->find((int) $timed['challenge_id'])?->timeControl);
+    }
+
     // --- The poll (API-03) ---
 
     public function testThePollMarksDeliveryAndAnswersShortWhenNothingChanged(): void

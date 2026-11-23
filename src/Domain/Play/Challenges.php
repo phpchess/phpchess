@@ -194,14 +194,15 @@ final class Challenges
         $daysPerMove = $this->checkedDays($daysPerMove);
         $wantedControl = $this->checkedTimeControl($timeControl, $userId);
         foreach ($this->challenges->waitingOpen($now) as $challenge) {
-            if ($challenge->challengerId === $userId) {
-                return ['game_id' => null, 'challenge_id' => $challenge->id];
-            }
             $samePace = $wantedControl === null
                 ? $challenge->timeControl === null && $challenge->daysPerMove === $daysPerMove
                 : $challenge->timeControl === $wantedControl;
             if (!$samePace || $challenge->isRated !== $isRated) {
                 continue;
+            }
+            // My own waiting challenge with this pace: keep waiting on it, no second one.
+            if ($challenge->challengerId === $userId) {
+                return ['game_id' => null, 'challenge_id' => $challenge->id];
             }
             try {
                 return ['game_id' => $this->accept($challenge->id, $userId, $now, $nowMs), 'challenge_id' => null];

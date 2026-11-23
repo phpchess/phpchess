@@ -30,7 +30,7 @@
 
 /** The install's address path, such as "/chess" ("" in the web root). */
 const BASE_PATH = new URL(self.registration.scope).pathname.replace(/\/$/, '');
-const VERSION = 'phpchess-c2-2-1';
+const VERSION = 'phpchess-c3-1-1';
 const PAGE_CACHE = VERSION + '-pages';
 const ASSET_CACHE = VERSION + '-assets';
 const OFFLINE_PAGE = BASE_PATH + '/offline';
