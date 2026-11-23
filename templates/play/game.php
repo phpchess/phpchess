@@ -154,8 +154,6 @@ $showAbortRequest = $canAbort && $abortRule === Games::ABORT_ASK_ADMIN;
         </a>
 
         <?php if ($isPlayer && $game->isRunning()) : ?>
-            <span class="icon-bar-gap" aria-hidden="true"></span>
-
             <?php if ($game->drawOfferedBy === null) : ?>
                 <form method="post" action="<?= e($gamePath) ?>/draw/offer" class="inline-form">
                     <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">

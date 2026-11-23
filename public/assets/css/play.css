@@ -24,17 +24,17 @@ body { --board-light: #eeeed2; --board-dark: #769656; }
  * Sizes come from the window itself (vw, vh), not from the page:
  *   width:  the window minus a small border (3rem);
  *   height: the window minus the site header, the players and clock line,
- *           the status line and the icon bar (13rem), so the board and the
+ *           the status line and the icon bar (14rem), so the board and the
  *           buttons under it are in view without scrolling.
  * Play and planning mode use this size; the moves (play mode) come below.
  */
 .page:has(> .game-page) { max-width: none; margin-top: 0; padding: 0.5rem; }
 .game-page {
-    --board-size: min(calc(100vw - 3rem), calc(100vh - 13rem));
+    --board-size: min(calc(100vw - 3rem), calc(100vh - 14rem));
     --move-column: 17rem;
 }
 @supports (height: 100dvh) {
-    .game-page { --board-size: min(calc(100vw - 3rem), calc(100dvh - 13rem)); }
+    .game-page { --board-size: min(calc(100vw - 3rem), calc(100dvh - 14rem)); }
 }
 .game-page > * { width: var(--board-size); min-width: 16rem; margin-left: auto; margin-right: auto; }
 
@@ -45,7 +45,7 @@ body { --board-light: #eeeed2; --board-dark: #769656; }
  */
 @media (min-width: 40rem) {
     .game-page.mode-replay {
-        --board-size: min(calc(100vw - 4.5rem - var(--move-column)), calc(100vh - 13rem));
+        --board-size: min(calc(100vw - 4.5rem - var(--move-column)), calc(100vh - 14rem));
         display: grid;
         grid-template-columns: var(--board-size) var(--move-column);
         column-gap: 1.5rem;
@@ -53,12 +53,12 @@ body { --board-light: #eeeed2; --board-dark: #769656; }
         align-items: start;
     }
     @supports (height: 100dvh) {
-        .game-page.mode-replay { --board-size: min(calc(100vw - 4.5rem - var(--move-column)), calc(100dvh - 13rem)); }
+        .game-page.mode-replay { --board-size: min(calc(100vw - 4.5rem - var(--move-column)), calc(100dvh - 14rem)); }
     }
-    .game-page.mode-replay > * { grid-column: 1; margin: 0; }
+    .game-page.mode-replay > * { grid-column: 1; margin-left: 0; margin-right: 0; }
     .game-page.mode-replay > .move-panel {
         grid-column: 2;
-        grid-row: 1 / span 20;
+        grid-row: 4 / span 20;   /* level with the board: under the players, status and "Replay" lines */
         width: auto;
         max-height: calc(100vh - 6rem);
     }
@@ -96,7 +96,7 @@ body { --board-light: #eeeed2; --board-dark: #769656; }
     color: #fff;
     text-align: center;
 }
-.board-frame.is-off-board { outline: 4px solid var(--board-dark); outline-offset: 2px; }
+.board-frame.is-off-board { outline: 4px solid var(--board-dark); outline-offset: 2px; margin-bottom: 6px; }
 .planning-tools, .centred { text-align: center; justify-content: center; }
 
 .cm-chessboard.phpchess .board .square.white { fill: var(--board-light); }
@@ -135,11 +135,11 @@ body { --board-light: #eeeed2; --board-dark: #769656; }
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 0.35rem;
-    margin: 0.5rem 0;
+    gap: 1rem;
+    margin-top: 0.75rem;
+    margin-bottom: 0.5rem;
 }
 .icon-bar[hidden] { display: none; }
-.icon-bar-gap { width: 1rem; }
 /* Buttons that need the board script stay hidden without it. */
 .game-page:not(.has-script) .needs-script { display: none; }
 .icon-button {
@@ -241,3 +241,4 @@ details.confirm summary { cursor: pointer; }
 
 /* --- Invite QR code --- */
 .qr-frame svg { width: 100%; max-width: 18rem; height: auto; }
+.game-page.mode-replay .move-table { margin-top: 0; }
