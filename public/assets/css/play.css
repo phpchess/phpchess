@@ -20,20 +20,49 @@ body { --board-light: #eeeed2; --board-dark: #769656; }
 /* --- The game page: one column, the board as big as the screen allows --- */
 
 /*
- * The board is a square, so the shorter side of the window decides its size:
- * never wider than the page, never taller than the window minus the site
- * header, the player line above and the icon bar below (about 13rem), so
- * the whole board is always in view without scrolling.
+ * The board is a square, so the shorter side of the window decides its size.
+ * Sizes come from the window itself (vw, vh), not from the page:
+ *   width:  the window minus a small border (3rem);
+ *   height: the window minus the site header, the players and clock line,
+ *           the status line and the icon bar (13rem), so the board and the
+ *           buttons under it are in view without scrolling.
+ * Play and planning mode use this size; the moves (play mode) come below.
  */
-.page:has(> .game-page) { max-width: 60rem; }
-@media (max-width: 47.99rem) {
-    .page:has(> .game-page) { padding: 0.5rem 0.25rem; }
+.page:has(> .game-page) { max-width: none; margin-top: 0; padding: 0.5rem; }
+.game-page {
+    --board-size: min(calc(100vw - 3rem), calc(100vh - 13rem));
+    --move-column: 17rem;
 }
-.game-page { --board-size: min(100%, calc(100vh - 13rem)); }
 @supports (height: 100dvh) {
-    .game-page { --board-size: min(100%, calc(100dvh - 13rem)); }
+    .game-page { --board-size: min(calc(100vw - 3rem), calc(100dvh - 13rem)); }
 }
 .game-page > * { width: var(--board-size); min-width: 16rem; margin-left: auto; margin-right: auto; }
+
+/*
+ * Replay mode (class mode-replay, set by game-page.js): the move table goes
+ * to the right of the board, so the board gives up the table's width.
+ * On a narrow phone the table stays below the board.
+ */
+@media (min-width: 40rem) {
+    .game-page.mode-replay {
+        --board-size: min(calc(100vw - 4.5rem - var(--move-column)), calc(100vh - 13rem));
+        display: grid;
+        grid-template-columns: var(--board-size) var(--move-column);
+        column-gap: 1.5rem;
+        justify-content: center;
+        align-items: start;
+    }
+    @supports (height: 100dvh) {
+        .game-page.mode-replay { --board-size: min(calc(100vw - 4.5rem - var(--move-column)), calc(100dvh - 13rem)); }
+    }
+    .game-page.mode-replay > * { grid-column: 1; margin: 0; }
+    .game-page.mode-replay > .move-panel {
+        grid-column: 2;
+        grid-row: 1 / span 20;
+        width: auto;
+        max-height: calc(100vh - 6rem);
+    }
+}
 
 .board-frame {
     touch-action: none;   /* dragging a piece must not scroll the page */
@@ -176,32 +205,6 @@ details.confirm summary { cursor: pointer; }
 .move-table tbody tr:nth-child(odd) { background: var(--colour-page-background); }
 .move-table td:first-child { color: var(--colour-muted-text); width: 3rem; }
 .move-panel { max-height: 22rem; overflow-y: auto; }
-
-/*
- * Landscape (a wide screen held sideways): the moves go to the right of the
- * board, the board keeps the left column. Portrait keeps them below.
- */
-@media (orientation: landscape) and (min-width: 48rem) {
-    .page:has(> .game-page) { max-width: 80rem; }
-    .game-page {
-        --board-size: min(calc(100% - 18rem), calc(100vh - 13rem));
-        display: grid;
-        grid-template-columns: var(--board-size) minmax(14rem, 22rem);
-        column-gap: 1.5rem;
-        justify-content: center;
-        align-items: start;
-    }
-    @supports (height: 100dvh) {
-        .game-page { --board-size: min(calc(100% - 18rem), calc(100dvh - 13rem)); }
-    }
-    .game-page > * { grid-column: 1; width: auto; min-width: 0; }
-    .game-page > .move-panel {
-        grid-column: 2;
-        grid-row: 1 / span 20;
-        max-height: calc(100vh - 8rem);
-        margin: 0;
-    }
-}
 
 .move-button[aria-current="step"] { background: var(--colour-accent); color: var(--colour-accent-text); }
 

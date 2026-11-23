@@ -127,6 +127,7 @@ function showMode(newMode) {
     stopReplayTimer();
     mode = newMode;
 
+    page.classList.toggle('mode-replay', mode === MODE_REPLAY);   // moves beside the board (play.css)
     playTools.hidden = mode !== MODE_PLAY;
     replayTools.hidden = mode !== MODE_REPLAY;
     planningTools.hidden = mode !== MODE_PLANNING;
