@@ -11,6 +11,8 @@ namespace PhpChess\Domain\Play;
  * - open:   anyone may accept it (the lobby, and the "Play" button, G-20);
  * - direct: sent to one player;
  * - invite: a share link or QR code; whoever opens the link first may accept (G-21).
+ * A challenge is timed when it has a time control (G-14); an open timed
+ * challenge is shown only while its poster is on the Play page (G-16).
  * Times are Unix seconds in UTC.
  */
 final class Challenge
@@ -43,6 +45,8 @@ final class Challenge
         public readonly ?int $gameId,
         public readonly int $createdAt,
         public readonly int $expiresAt,
+        /** "5+3" for a timed game (C3-1), null for correspondence. */
+        public readonly ?string $timeControl = null,
     ) {
     }
 

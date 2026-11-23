@@ -83,6 +83,20 @@ body { --board-light: #eeeed2; --board-dark: #769656; }
 .header-queen { width: 1.8rem; height: 1.8rem; flex: none; }
 .header-clock { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 1.1rem; text-align: center; }
 .header-clock.is-short { color: var(--colour-error); }
+
+/* Timed games (G-14): each player's clock next to the name; the running one stands out. */
+.player-clock {
+    flex: none;
+    padding: 0.1rem 0.4rem;
+    border: 1px solid currentColor;
+    border-radius: 0.3rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    font-size: 1.1rem;
+    opacity: 0.6;
+}
+.player-clock.is-running { opacity: 1; background: var(--colour-accent-soft, rgba(0, 120, 0, 0.12)); }
+.player-clock.is-short { color: var(--colour-error); }
 .game-status { text-align: center; margin: 0 auto 0.3rem; }
 
 /* Replay and planning: a title in the second board colours over the board, and a frame around it. */

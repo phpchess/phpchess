@@ -77,16 +77,16 @@ Decisions A1–A21 are in [DECISIONS.md](DECISIONS.md).
 | G-11 | Game archive, game viewer with replay, PGN export | 4.4 | C2-1 | — | built |
 | G-12 | Game chat: off, fixed phrases only, or free | 4.4 | C2-2 | game chat | done (C2-2, 2026-11-23) |
 | G-13 | Watching other players' games | 4.4 | C2-1 | player list visibility | built |
-| G-14 | Clock with base plus increment for the faster controls in G-07; shortest 5+3, admin can raise it (A12) | redesign | C3-1 | — | planned |
-| G-15 | Server-authoritative clock with lag compensation | new | C3-1 | — | planned |
-| G-16 | Lobby: post a game offer, accept one; abort when no first move is made; disconnect handling | new | C3-1 | — | planned |
-| G-17 | Premoves in timed games | new | C3-1 | — | planned |
-| G-18 | Admin limit for the number of live timed games | new | C3-1 | — | planned |
+| G-14 | Clock with base plus increment for the faster controls in G-07; shortest 5+3, admin can raise it (A12) | redesign | C3-1 | — | built |
+| G-15 | Server-authoritative clock with lag compensation | new | C3-1 | — | built |
+| G-16 | Lobby: post a game offer, accept one; abort when no first move is made; disconnect handling | new | C3-1 | — | built |
+| G-17 | Premoves in timed games | new | C3-1 | — | built |
+| G-18 | Admin limit for the number of live timed games | new | C3-1 | — | built |
 | G-19 | Conditional (pre-entered) moves in correspondence | new | later | — | planned |
 | G-20 | **One-tap start**: a "Play" button with remembered defaults (time control, rated or not); quick pairing with whoever is waiting, or a challenge to a friend | new | C2-1 | — | built |
 | G-21 | Invite by share link or QR code (Web Share on phones), e.g. a teacher pairing a class | new | C2-1 | — | built |
 | G-22 | Rematch with one tap | new | C2-1 | — | built |
-| G-23 | A game can switch pace when both players agree (e.g. play live while both are online, then continue as correspondence) | new | C3-1 | — | planned |
+| G-23 | A game can switch pace when both players agree (e.g. play live while both are online, then continue as correspondence) | new | C3-1 | — | built |
 
 ## N — Notifications
 | Id | Feature | Origin | Chunk | Switch | Status |
@@ -165,7 +165,7 @@ Decisions A1–A21 are in [DECISIONS.md](DECISIONS.md).
 |---|---|---|---|---|---|
 | API-01 | JSON API v1, used by the web client itself; reads by GET, all changes by POST | redesign | C1-1 (skeleton), C2-2 | — | done (C1-1 skeleton; C2-2 complete, 2026-11-23) |
 | API-02 | Polling for game state with `since=<ply>`; ETag/304 on lists | redesign | C2-1 | — | built |
-| API-03 | Short-poll transport, adaptive interval, behind an interface | new | C3-1 | — | planned |
+| API-03 | Short-poll transport, adaptive interval, behind an interface | new | C3-1 | — | built |
 | API-04 | Rate limits and one error format for every endpoint | new | C1-1 | — | done (2026-11-22) |
 
 ## ADM — Administration

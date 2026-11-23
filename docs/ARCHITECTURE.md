@@ -125,6 +125,8 @@ Each contract has an id. A chunk names the contracts it touches, and a test or a
 - **Rendering**: server-rendered HTML pages (plain PHP templates), enhanced by JavaScript modules. It is not a single-page app. Pages work with JavaScript for reading, and the board needs it.
 - **Libraries** (A16): permissive licences, versions pinned, kept as plain files in `public/assets/vendor/<name>/` with their licence and a `SOURCE.md` (origin, version, checksum, network check). The list and their status are in [LIBRARIES.md](LIBRARIES.md).
 - **Live state**: one polling client (API-03) for every live view. Its interval adapts: about 1 s while it's the opponent's move in a timed game, slower otherwise, and paused in a hidden tab.
+  - Built in C3-1: `public/assets/js/board/transport.js` (interface `startTransport({url, onNews})` → `askNow()`, `stop()`), server side `src/Http/GamePoll.php`. The server sends `next_poll_ms` (admin settings) and a `version`; a poll that sends the version back gets a short `{"unchanged": true}` answer.
+  - **Timed clocks (K12, A46)**: `src/Domain/Play/TimedClock.php`. The mover's clock starts when their page first receives the move (`turn_delivered_ms`, at most 2 s after it was saved), and each move gives back up to 300 ms; so polling costs no clock time. Flags are decided inside the game lock on every move and poll, the clock job is the backup. Measurements: [proofs/c3-1-load-test.md](proofs/c3-1-load-test.md).
 - **Computer opponent**:
   - **Where it runs**: a Web Worker hosts the engine; the main page never blocks.
   - **How it chooses**: the selection layer asks for several candidate moves at a fixed node or depth budget (AI-04), then picks by the character's rules.

@@ -6,7 +6,10 @@ namespace PhpChess\Http\Web\Play;
 
 use PhpChess\Domain\Play\Challenge;
 use PhpChess\Domain\Play\Game;
+use PhpChess\Domain\Play\Games;
 use PhpChess\Domain\Play\PlayRefused;
+use PhpChess\Domain\Play\TimedClock;
+use PhpChess\Domain\Play\Vacations;
 use PhpChess\Http\QrCode;
 use PhpChess\Http\Request;
 use PhpChess\Http\Response;
@@ -14,11 +17,18 @@ use PhpChess\Kernel\Services;
 
 /**
  * The "Play" page: the one-tap Play button, challenges and invite links
- * (G-05, G-06, G-20, G-21, A28, A35).
+ * (G-05, G-06, G-20, G-21, A28, A35), with time controls for timed play
+ * (G-14, G-16) and the rules page (A46).
+ *
+ * The form field "time_control" chooses the pace: empty for correspondence
+ * (days per move), or "5+3" etc. for a timed game.
  *
  * Addresses (Routes.php), members only unless noted:
  *   GET  /play                          Play button, my games to move in, challenges, the lobby
  *   POST /play/quick                    one-tap start with the remembered defaults (G-20)
+ *   GET  /play/news                     JSON for the Play page's polling: keeps my open timed
+ *                                       challenges listed, and names a new timed game to go to (G-16)
+ *   GET  /rules                         the rules of this site, written from the admin's settings (A46)
  *   POST /challenges                    a new open, direct or invite challenge
  *   POST /challenges/{id}/accept | decline | cancel
  *   GET  /challenges/{id}/invite        the invite link and QR code, shown to its creator once
@@ -72,7 +82,63 @@ final class ChallengeController
             'playDefaults' => $this->services->preferenceRepository()->playDefaults($user->id),
             'maximumDays' => $play->challenges()->maximumDays(),
             'isFenAllowed' => $play->challenges()->isFenAllowed(),
+            'timeControls' => $play->games()->allowedTimeControls(),
         ]);
+    }
+
+    /**
+     * The Play page's polling (G-16): the poster of an open timed challenge
+     * stays listed while this page asks; when someone accepts, the answer
+     * names the new game and the page goes there. "open_ids" lets the page
+     * reload when the list of open challenges changed.
+     */
+    public function news(Request $request): Response
+    {
+        $user = $this->pages->user();
+        $now = $this->services->now;
+        $play = $this->services->play();
+        $play->challengeRepository()->markPosterSeen($user->id, $now);
+        $openIds = array_map(fn (Challenge $challenge): int => $challenge->id, $play->challengeRepository()->waitingOpen($now));
+
+        return Response::json([
+            'new_game_id' => $play->gameRepository()->newTimedGameNotSeenBy($user->id),
+            'open_ids' => $openIds,
+            'next_poll_ms' => 3000,
+        ])->withHeader('Cache-Control', 'no-store');
+    }
+
+    /** The rules of this site for players, written from the admin's settings (A46). */
+    public function rules(Request $request): Response
+    {
+        return $this->services->pages()->render($request, 'play/rules', $this->pages->text('rules.title'), $this->rulesData());
+    }
+
+    /**
+     * Everything the rules page says, read from the settings. The admin's
+     * play settings page shows the same page.
+     *
+     * @return array<string, mixed>
+     */
+    public function rulesData(): array
+    {
+        $play = $this->services->play();
+        $games = $play->games();
+        $settings = $this->services->settings();
+
+        return [
+            'timeControls' => $games->allowedTimeControls(),
+            'maxLiveGames' => $games->maxLiveGames(),
+            'maxLiveGamesPerPlayer' => $games->maxLiveGamesPerPlayer(),
+            'maximumDays' => $games->maximumDays(),
+            'abortRule' => $games->abortRule(),
+            'vacationDays' => Vacations::DAYS_PER_YEAR,
+            'openDays' => $settings->getInt('challenge.open_days', 7),
+            'directDays' => $settings->getInt('challenge.direct_days', 14),
+            'inviteDays' => $settings->getInt('challenge.invite_days', 7),
+            'deliveryWaitMs' => TimedClock::MAX_DELIVERY_WAIT_MS,
+            'lagAllowanceMs' => TimedClock::LAG_ALLOWANCE_MS,
+            'onlineSeconds' => Games::ONLINE_SECONDS,
+        ];
     }
 
     /** The one-tap Play button: pairs with whoever waits, or opens a challenge (G-20). */
@@ -82,8 +148,9 @@ final class ChallengeController
         $challenges = $this->services->play()->challenges();
         $daysPerMove = (int) $request->formValue('days_per_move', '3');
         $isRated = $request->formValue('rated') === 'yes';
+        $timeControl = $request->formValue('time_control');
         try {
-            $result = $challenges->quickPlay($user->id, $daysPerMove, $isRated, $this->services->now);
+            $result = $challenges->quickPlay($user->id, $daysPerMove, $isRated, $this->services->now, $timeControl, $this->services->nowMs());
         } catch (PlayRefused $refusal) {
             return $this->pages->refused($request, '/play', $refusal);
         }
@@ -107,6 +174,7 @@ final class ChallengeController
         $daysPerMove = (int) $request->formValue('days_per_move', '3');
         $isRated = $request->formValue('rated') === 'yes';
         $startFen = $request->formValue('start_fen');
+        $timeControl = $request->formValue('time_control');
 
         try {
             switch ($request->formValue('kind')) {
@@ -115,16 +183,16 @@ final class ChallengeController
                     if ($opponent === null || !$opponent->isActive()) {
                         throw new PlayRefused('challenge.opponent_unknown');
                     }
-                    $challenges->createDirect($user->id, $opponent->id, $colour, $daysPerMove, $isRated, $startFen, $now);
+                    $challenges->createDirect($user->id, $opponent->id, $colour, $daysPerMove, $isRated, $startFen, $now, $timeControl);
 
                     return $this->pages->done($request, '/play', 'challenge.sent');
                 case Challenge::KIND_INVITE:
-                    $invite = $challenges->createInvite($user->id, $colour, $daysPerMove, $isRated, $startFen, $now);
+                    $invite = $challenges->createInvite($user->id, $colour, $daysPerMove, $isRated, $startFen, $now, $timeControl);
                     $this->services->session->set(self::NEW_INVITE_KEY, $invite['token']);
 
                     return Response::redirect($request->basePath . '/challenges/' . $invite['challenge_id'] . '/invite');
                 default:
-                    $challenges->createOpen($user->id, $colour, $daysPerMove, $isRated, $now);
+                    $challenges->createOpen($user->id, $colour, $daysPerMove, $isRated, $now, $timeControl);
 
                     return $this->pages->done($request, '/play', 'challenge.opened');
             }
@@ -163,7 +231,7 @@ final class ChallengeController
     public function accept(Request $request, array $parts): Response
     {
         try {
-            $gameId = $this->services->play()->challenges()->accept(PlayPages::idFrom($parts), $this->pages->user()->id, $this->services->now);
+            $gameId = $this->services->play()->challenges()->accept(PlayPages::idFrom($parts), $this->pages->user()->id, $this->services->now, $this->services->nowMs());
         } catch (PlayRefused $refusal) {
             return $this->pages->refused($request, '/play', $refusal);
         }

@@ -19,13 +19,17 @@ final class ChallengeRepository extends Repository
 {
     // --- Creating ---
 
-    public function create(string $kind, int $challengerId, ?int $opponentId, ?string $inviteTokenHash, string $colour, int $daysPerMove, bool $isRated, ?string $startFen, int $now, int $expiresAt): int
+    /** Creates a waiting challenge; $timeControl "5+3" makes it timed, null correspondence. */
+    public function create(string $kind, int $challengerId, ?int $opponentId, ?string $inviteTokenHash, string $colour, int $daysPerMove, bool $isRated, ?string $startFen, int $now, int $expiresAt, ?string $timeControl = null): int
     {
         $this->database->run(
             'INSERT INTO ' . $this->table('challenges')
-            . ' (kind, challenger_id, opponent_id, invite_token_hash, colour, days_per_move, is_rated, start_fen, state, created_at, expires_at)'
-            . " VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'waiting', ?, ?)",
-            [$kind, $challengerId, $opponentId, $inviteTokenHash, $colour, $daysPerMove, $isRated ? 1 : 0, $startFen, self::dateTime($now), self::dateTime($expiresAt)],
+            . ' (kind, challenger_id, opponent_id, invite_token_hash, colour, days_per_move, is_rated, start_fen, state, created_at, expires_at, time_control, seen_at)'
+            . " VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'waiting', ?, ?, ?, ?)",
+            [
+                $kind, $challengerId, $opponentId, $inviteTokenHash, $colour, $daysPerMove, $isRated ? 1 : 0, $startFen,
+                self::dateTime($now), self::dateTime($expiresAt), $timeControl, self::dateTime($now),
+            ],
         );
 
         return $this->database->lastInsertId();
@@ -44,16 +48,28 @@ final class ChallengeRepository extends Repository
     }
 
     /**
-     * Waiting open challenges, oldest first: the lobby.
+     * Waiting open challenges, oldest first: the lobby. A timed one shows
+     * only while its poster's Play page is open: seen in the last
+     * $onlineSeconds (G-16, A46).
      *
      * @return list<Challenge>
      */
-    public function waitingOpen(int $now, int $limit = 100): array
+    public function waitingOpen(int $now, int $limit = 100, int $onlineSeconds = 30): array
     {
         return $this->toChallenges($this->database->fetchAll(
-            'SELECT * FROM ' . $this->table('challenges') . " WHERE kind = 'open' AND state = 'waiting' AND expires_at > ? ORDER BY id LIMIT " . max(1, $limit),
-            [self::dateTime($now)],
+            'SELECT * FROM ' . $this->table('challenges') . " WHERE kind = 'open' AND state = 'waiting' AND expires_at > ?"
+            . ' AND (time_control IS NULL OR seen_at >= ?) ORDER BY id LIMIT ' . max(1, $limit),
+            [self::dateTime($now), self::dateTime($now - $onlineSeconds)],
         ));
+    }
+
+    /** Notes that the poster of open timed challenges is still on the Play page (G-16). */
+    public function markPosterSeen(int $challengerId, int $now): void
+    {
+        $this->database->run(
+            'UPDATE ' . $this->table('challenges') . " SET seen_at = ? WHERE challenger_id = ? AND kind = 'open' AND state = 'waiting' AND time_control IS NOT NULL",
+            [self::dateTime($now), $challengerId],
+        );
     }
 
     /**
@@ -152,6 +168,7 @@ final class ChallengeRepository extends Repository
             gameId: self::intOrNull($row['game_id']),
             createdAt: self::timestampOrNull($row['created_at']) ?? 0,
             expiresAt: self::timestampOrNull($row['expires_at']) ?? 0,
+            timeControl: isset($row['time_control']) ? self::textOf($row['time_control']) : null,
         );
     }
 }

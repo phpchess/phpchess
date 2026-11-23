@@ -11,7 +11,10 @@
  *             then it is sent to POST /games/{id}/move and the server decides
  *             (K1); on a refusal the board goes back to the server's position.
  *             While the move is on its way the board is dimmed and takes no
- *             input. The opponent's moves come in live (live-updates.js).
+ *             input. The opponent's moves come in live (transport.js).
+ *             In a timed game, a move made while the opponent is to move
+ *             is sent as a premove (G-17): it is played the moment the
+ *             opponent has moved, at no time on the clock.
  *   replay    The replay bar steps and plays through the game; the moves are
  *             a table (number | White | Black), each move clickable; tapping a
  *             move in play mode also starts replay at that move.
@@ -22,15 +25,19 @@
  *
  * Above the board the clock counts down to the move deadline: days and
  * hours while there is more than a day left, then hours:minutes:seconds.
+ * A timed game has a clock next to each player instead (G-14): the server
+ * sends both clocks, the page counts the running one down from the moment
+ * the answer arrived, and asks the server at once when it reaches zero
+ * (the server decides the flag, K12).
  *
  * Libraries (local, A16): cm-chessboard 8.15.8 and chess.js 1.4.0 in /assets/vendor/.
  */
 
 import {Chessboard, COLOR, INPUT_EVENT_TYPE} from '../../vendor/cm-chessboard/src/Chessboard.js';
-import {Markers} from '../../vendor/cm-chessboard/src/extensions/markers/Markers.js';
+import {Markers, MARKER_TYPE} from '../../vendor/cm-chessboard/src/extensions/markers/Markers.js';
 import {PromotionDialog, PROMOTION_DIALOG_RESULT_TYPE} from '../../vendor/cm-chessboard/src/extensions/promotion-dialog/PromotionDialog.js';
 import {Chess} from '../../vendor/chess.js/chess.js';
-import {startLiveUpdates} from './live-updates.js';
+import {startTransport} from './transport.js';
 
 // --- Reading what the server put on the page ---
 
@@ -50,6 +57,7 @@ const movePanel = document.getElementById('move-panel');
 const moveList = document.getElementById('move-list');
 const moveTable = document.getElementById('move-table');
 const clock = document.getElementById('game-clock');
+const playerClocks = {w: document.getElementById('clock-w'), b: document.getElementById('clock-b')};
 
 const MODE_PLAY = 'play';
 const MODE_REPLAY = 'replay';
@@ -70,6 +78,16 @@ let planningGame = null;    // a chess.js game while planning
 let isSending = false;      // a move is on its way to the server
 let replayTimer = null;     // the running replay "play", or null
 let board = null;
+let transport = null;      // the live connection (transport.js), while the game runs
+
+// The timed clocks as the server last sent them, and when that answer arrived.
+let clockSnapshot = serverState.clock;
+let clockReceivedAt = performance.now();
+let askedAtZero = false;   // the running clock showed zero and the server was asked
+let opponentIdleSeconds = null;
+
+/** How long the opponent's board may be silent before "opponent disconnected" shows (A46). */
+const OPPONENT_GONE_SECONDS = 10;
 
 // --- Building the board ---
 
@@ -163,6 +181,14 @@ function isViewersTurn() {
         && serverState.side_to_move === viewerColour;
 }
 
+/** True while a premove may be made: a timed game, the opponent to move (G-17). */
+function mayPremove() {
+    return serverState.state === 'running'
+        && viewerColour !== ''
+        && serverState.time_control !== null
+        && serverState.side_to_move !== viewerColour;
+}
+
 function updateMoveInput() {
     board.disableMoveInput();
     board.removeMarkers();
@@ -170,7 +196,10 @@ function updateMoveInput() {
         board.enableMoveInput(handlePlanningInput);
     } else if (mode === MODE_PLAY && isViewersTurn() && !isSending) {
         board.enableMoveInput(handleRealInput, viewerColour === 'b' ? COLOR.black : COLOR.white);
+    } else if (mode === MODE_PLAY && mayPremove() && !isSending) {
+        board.enableMoveInput(handlePremoveInput, viewerColour === 'b' ? COLOR.black : COLOR.white);
     }
+    showPremove();
 }
 
 // --- Moving on the board ---
@@ -178,6 +207,58 @@ function updateMoveInput() {
 function handleRealInput(event) {
     const game = new Chess(positions[serverState.ply]);
     return handleInput(event, game, (uci) => sendMove(uci));
+}
+
+/**
+ * A move while the opponent thinks becomes a premove (G-17). It is not
+ * checked here (the position will have changed by then): the server plays
+ * it after the opponent's move when it is legal then, and drops it if not.
+ * A pawn going to the last rank becomes a queen. The piece stays where it
+ * is; the two squares are marked until the premove is played or dropped.
+ */
+function handlePremoveInput(event) {
+    switch (event.type) {
+        case INPUT_EVENT_TYPE.moveInputStarted:
+            return true;
+        case INPUT_EVENT_TYPE.validateMoveInput: {
+            const piece = board.getPiece(event.squareFrom) || '';
+            const toLastRank = event.squareTo[1] === (viewerColour === 'w' ? '8' : '1');
+            const promotion = piece.charAt(1) === 'p' && toLastRank ? 'q' : '';
+            sendPremove(event.squareFrom + event.squareTo + promotion);
+            return false;
+        }
+        default:
+            return true;
+    }
+}
+
+async function sendPremove(uci) {
+    const body = new URLSearchParams({_csrf: csrfToken, ply: String(serverState.ply), move: uci});
+    try {
+        const response = await fetch(basePath + '/games/' + serverState.id + '/premove', {
+            method: 'POST',
+            headers: {'Accept': 'application/json'},
+            body: body,
+            credentials: 'same-origin',
+        });
+        const answer = await response.json();
+        if (response.ok) {
+            applyServerState(answer);
+            showStatus(page.dataset.textPremove);
+        } else if (transport) {
+            transport.askNow();
+        }
+    } catch (error) {
+        // No connection: no premove; the player moves when it is their turn.
+    }
+}
+
+/** Marks the squares of a waiting premove. */
+function showPremove() {
+    if (mode === MODE_PLAY && serverState.premove) {
+        board.addMarker(MARKER_TYPE.square, serverState.premove.slice(0, 2));
+        board.addMarker(MARKER_TYPE.square, serverState.premove.slice(2, 4));
+    }
 }
 
 function handlePlanningInput(event) {
@@ -307,10 +388,16 @@ window.addEventListener('online', sendQueuedMove);
 
 /** Adds new moves and state from the server (after our move, or from polling). */
 function applyServerState(newState) {
+    takeInClock(newState);
+    if (newState.unchanged) {
+        return;   // a short answer: only the clocks and presence were news
+    }
     const hadPly = serverState.ply;
     const wasRunning = serverState.state === 'running';
     const offersChanged = newState.draw_offered_by !== serverState.draw_offered_by
-        || newState.rematch_offered_by !== serverState.rematch_offered_by;
+        || newState.rematch_offered_by !== serverState.rematch_offered_by
+        || JSON.stringify(newState.pace_offer) !== JSON.stringify(serverState.pace_offer)
+        || newState.time_control !== serverState.time_control;
 
     const knownMoves = serverState.moves.filter((move) => move.ply <= hadPly);
     const newMoves = newState.moves.filter((move) => move.ply > hadPly);
@@ -319,6 +406,9 @@ function applyServerState(newState) {
     // The game buttons (draw, abort, rematch, game over) are drawn by the server: reload for those.
     const abortButtonMustGo = hadPly === 0 && serverState.ply > 0;
     if ((wasRunning && serverState.state !== 'running') || offersChanged || abortButtonMustGo) {
+        if (transport) {
+            transport.stop();
+        }
         window.location.reload();
         return;
     }
@@ -342,6 +432,7 @@ async function refreshFromServer() {
     const response = await fetch(basePath + '/games/' + serverState.id + '/state?since=0', {headers: {'Accept': 'application/json'}, credentials: 'same-origin'});
     if (response.ok) {
         serverState = {...(await response.json())};
+        takeInClock(serverState);
         rebuildPositions(serverState.moves);
         showMode(MODE_PLAY);
     }
@@ -357,11 +448,13 @@ function showTurnStatus() {
     if (serverState.state !== 'running') {
         return;   // the server's "Game over: 1-0, checkmate" stays
     }
-    if (isViewersTurn()) {
-        showStatus(page.dataset.textYourMove);
-    } else {
-        showStatus(serverState.side_to_move === 'w' ? page.dataset.textWaitingWhite : page.dataset.textWaitingBlack);
+    let text = isViewersTurn()
+        ? page.dataset.textYourMove
+        : (serverState.side_to_move === 'w' ? page.dataset.textWaitingWhite : page.dataset.textWaitingBlack);
+    if (serverState.time_control !== null && opponentIdleSeconds !== null && opponentIdleSeconds > OPPONENT_GONE_SECONDS) {
+        text += ' · ' + page.dataset.textOpponentGone;
     }
+    showStatus(text);
 }
 
 /** Draws the moves again: a line in play mode, a table in replay; the shown move is marked. */
@@ -427,7 +520,60 @@ function moveButton(san, ply) {
     return button;
 }
 
-// --- The clock above the board ---
+// --- The timed clocks next to the players (G-14) ---
+
+/** Keeps the clocks and the opponent's presence from a server answer. */
+function takeInClock(answer) {
+    if (answer.clock !== undefined) {
+        clockSnapshot = answer.clock;
+        clockReceivedAt = performance.now();
+        askedAtZero = false;
+    }
+    if (answer.opponent_idle_s !== undefined) {
+        const wasGone = opponentIdleSeconds !== null && opponentIdleSeconds > OPPONENT_GONE_SECONDS;
+        opponentIdleSeconds = answer.opponent_idle_s;
+        const isGone = opponentIdleSeconds !== null && opponentIdleSeconds > OPPONENT_GONE_SECONDS;
+        if (wasGone !== isGone && mode === MODE_PLAY) {
+            showTurnStatus();
+        }
+    }
+}
+
+/** "4:58", or "0:09.4" in the last ten seconds. */
+function formatClock(milliseconds) {
+    const left = Math.max(0, milliseconds);
+    const minutes = Math.floor(left / 60000);
+    const seconds = Math.floor((left % 60000) / 1000);
+    if (left < 10000) {
+        return minutes + ':' + String(seconds).padStart(2, '0') + '.' + Math.floor((left % 1000) / 100);
+    }
+    return minutes + ':' + String(seconds).padStart(2, '0');
+}
+
+/** Shows both clocks; the running one counts down from the last answer. */
+function updatePlayerClocks() {
+    if (!clockSnapshot || !playerClocks.w || !playerClocks.b) {
+        return;
+    }
+    const passed = performance.now() - clockReceivedAt;
+    for (const colour of ['w', 'b']) {
+        let left = colour === 'w' ? clockSnapshot.white_ms : clockSnapshot.black_ms;
+        const isRunning = clockSnapshot.running === colour;
+        if (isRunning) {
+            left -= passed;
+        }
+        playerClocks[colour].textContent = formatClock(left);
+        playerClocks[colour].classList.toggle('is-running', isRunning);
+        playerClocks[colour].classList.toggle('is-short', left < 20000);
+        // At zero the server decides (K12): ask it now, once.
+        if (isRunning && left <= 0 && !askedAtZero && transport) {
+            askedAtZero = true;
+            transport.askNow();
+        }
+    }
+}
+
+// --- The clock above the board (correspondence) ---
 
 /** Shows the time left until the move deadline, once a second. */
 function updateClock() {
@@ -545,6 +691,8 @@ page.classList.add('has-script');   // shows the buttons that need this script
 setUpBoard();
 updateClock();
 window.setInterval(updateClock, 1000);
+updatePlayerClocks();
+window.setInterval(updatePlayerClocks, 100);
 
 page.addEventListener('click', (event) => {
     const toolButton = event.target.closest('[data-board-action]');
@@ -572,8 +720,8 @@ document.addEventListener('keydown', (event) => {
 });
 
 if (serverState.state === 'running') {
-    startLiveUpdates({
-        stateUrl: () => basePath + '/games/' + serverState.id + '/state?since=' + serverState.ply,
+    transport = startTransport({
+        url: () => basePath + '/games/' + serverState.id + '/state?since=' + serverState.ply + '&v=' + serverState.version,
         onNews: applyServerState,
     });
 }

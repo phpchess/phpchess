@@ -23,8 +23,11 @@ final class Game
     public const string RESULT_DRAW = 'draw';
     public const string RESULT_ABORTED = 'aborted';
 
-    /** The speed of a correspondence game (days per move). Rapid and blitz arrive in C3-1. */
+    /** The speed of a correspondence game (days per move). Timed speeds are in TimeControl (C3-1). */
     public const string SPEED_CORRESPONDENCE = 'correspondence';
+
+    /** A pace offer for correspondence ends in "d": "3d" is 3 days per move (G-23). */
+    public const string PACE_DAYS_SUFFIX = 'd';
 
     public function __construct(
         public readonly int $id,
@@ -48,6 +51,19 @@ final class Game
         public readonly ?int $endedAt,
         public readonly ?int $whiteSeenAt,
         public readonly ?int $blackSeenAt,
+        // --- Timed play (C3-1); all null in a correspondence game ---
+        public readonly ?string $timeControl = null,
+        public readonly ?int $incrementMs = null,
+        public readonly ?int $whiteMsLeft = null,
+        public readonly ?int $blackMsLeft = null,
+        public readonly ?int $turnSavedMs = null,
+        public readonly ?int $turnDeliveredMs = null,
+        // --- A waiting premove (G-17) and a pace proposal (G-23) ---
+        public readonly ?int $premoveBy = null,
+        public readonly ?string $premoveUci = null,
+        public readonly ?int $premovePly = null,
+        public readonly ?int $paceOfferedBy = null,
+        public readonly ?string $paceOffer = null,
     ) {
     }
 
@@ -56,6 +72,18 @@ final class Game
     public function isRunning(): bool
     {
         return $this->state === self::STATE_RUNNING;
+    }
+
+    /** True for a game with a chess clock (base + increment), false for correspondence. */
+    public function isTimed(): bool
+    {
+        return $this->timeControl !== null;
+    }
+
+    /** The time left at the start of the current turn for a colour, in ms (timed games). */
+    public function msLeftAtTurnStart(string $colour): int
+    {
+        return (int) ($colour === Position::WHITE ? $this->whiteMsLeft : $this->blackMsLeft);
     }
 
     public function position(): Position

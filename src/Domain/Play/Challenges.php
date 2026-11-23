@@ -25,6 +25,10 @@ use PhpChess\Infra\System\SettingsRepository;
  *   challenge.invite_days    default 7 (and an invite link is used once)
  *   play.fen_in_direct       players may give a start position in direct
  *                            and invite challenges, default on
+ *
+ * Timed challenges (C3-1): every create function takes a time control
+ * ("5+3"; empty for correspondence), checked against the admin's floor and
+ * the live-game limits (Games::checkedTimeControl, checkLiveLimits).
  */
 final class Challenges
 {
@@ -40,8 +44,10 @@ final class Challenges
     // --- Creating ---
 
     /** Creates an open challenge anyone may accept. Returns its id. */
-    public function createOpen(int $challengerId, string $colour, int $daysPerMove, bool $isRated, int $now): int
+    public function createOpen(int $challengerId, string $colour, int $daysPerMove, bool $isRated, int $now, string $timeControl = ''): int
     {
+        $timeControl = $this->checkedTimeControl($timeControl, $challengerId);
+
         return $this->challenges->create(
             Challenge::KIND_OPEN,
             $challengerId,
@@ -53,16 +59,18 @@ final class Challenges
             null,
             $now,
             $now + $this->expiryDays('challenge.open_days', 7) * Clocks::SECONDS_PER_DAY,
+            $timeControl,
         );
     }
 
     /** Sends a challenge to one player, who is told about it (N-01). Returns its id. */
-    public function createDirect(int $challengerId, int $opponentId, string $colour, int $daysPerMove, bool $isRated, string $startFen, int $now): int
+    public function createDirect(int $challengerId, int $opponentId, string $colour, int $daysPerMove, bool $isRated, string $startFen, int $now, string $timeControl = ''): int
     {
         if ($opponentId === $challengerId) {
             throw new PlayRefused('play.not_against_yourself');
         }
         $this->games->checkClassRule($challengerId, $opponentId);
+        $timeControl = $this->checkedTimeControl($timeControl, $challengerId);
         $challengeId = $this->challenges->create(
             Challenge::KIND_DIRECT,
             $challengerId,
@@ -74,6 +82,7 @@ final class Challenges
             $this->checkedFen($startFen),
             $now,
             $now + $this->expiryDays('challenge.direct_days', 14) * Clocks::SECONDS_PER_DAY,
+            $timeControl,
         );
         $this->notices->tellAboutChallenge($opponentId, Notices::CHALLENGE_RECEIVED, $challengeId, null, $challengerId, $now);
 
@@ -86,8 +95,9 @@ final class Challenges
      *
      * @return array{challenge_id: int, token: string}
      */
-    public function createInvite(int $challengerId, string $colour, int $daysPerMove, bool $isRated, string $startFen, int $now): array
+    public function createInvite(int $challengerId, string $colour, int $daysPerMove, bool $isRated, string $startFen, int $now, string $timeControl = ''): array
     {
+        $timeControl = $this->checkedTimeControl($timeControl, $challengerId);
         $token = bin2hex(random_bytes(16));
         $challengeId = $this->challenges->create(
             Challenge::KIND_INVITE,
@@ -100,6 +110,7 @@ final class Challenges
             $this->checkedFen($startFen),
             $now,
             $now + $this->expiryDays('challenge.invite_days', 7) * Clocks::SECONDS_PER_DAY,
+            $timeControl,
         );
 
         return ['challenge_id' => $challengeId, 'token' => $token];
@@ -112,9 +123,9 @@ final class Challenges
      * PlayRefused when it is your own, not meant for you, or already taken
      * or expired.
      */
-    public function accept(int $challengeId, int $userId, int $now): int
+    public function accept(int $challengeId, int $userId, int $now, ?int $nowMs = null): int
     {
-        return $this->database->transaction(function () use ($challengeId, $userId, $now): int {
+        return $this->database->transaction(function () use ($challengeId, $userId, $now, $nowMs): int {
             $challenge = $this->challenges->find($challengeId);
             if ($challenge === null || !$challenge->isWaiting($now)) {
                 throw new PlayRefused('challenge.no_longer_open');
@@ -130,7 +141,7 @@ final class Challenges
             }
 
             [$whiteId, $blackId] = self::colours($challenge, $userId);
-            $gameId = $this->games->start($whiteId, $blackId, $challenge->daysPerMove, $challenge->isRated, $challenge->startFen ?? '', $now);
+            $gameId = $this->games->start($whiteId, $blackId, $challenge->daysPerMove, $challenge->isRated, $challenge->startFen ?? '', $now, $challenge->timeControl, $nowMs);
             $this->challenges->setGame($challenge->id, $gameId);
             $this->notices->tellAboutChallenge($challenge->challengerId, Notices::CHALLENGE_ACCEPTED, $challenge->id, $gameId, $userId, $now);
 
@@ -172,30 +183,35 @@ final class Challenges
     // --- The one-tap "Play" button (G-20) ---
 
     /**
-     * Pairs the player with whoever is waiting with the same days per move
-     * and rated setting; when nobody is, opens a challenge for them.
+     * Pairs the player with whoever is waiting with the same pace (days per
+     * move, or the same time control) and rated setting; when nobody is,
+     * opens a challenge for them.
      *
      * @return array{game_id: int|null, challenge_id: int|null}
      */
-    public function quickPlay(int $userId, int $daysPerMove, bool $isRated, int $now): array
+    public function quickPlay(int $userId, int $daysPerMove, bool $isRated, int $now, string $timeControl = '', ?int $nowMs = null): array
     {
         $daysPerMove = $this->checkedDays($daysPerMove);
+        $wantedControl = $this->checkedTimeControl($timeControl, $userId);
         foreach ($this->challenges->waitingOpen($now) as $challenge) {
             if ($challenge->challengerId === $userId) {
                 return ['game_id' => null, 'challenge_id' => $challenge->id];
             }
-            if ($challenge->daysPerMove !== $daysPerMove || $challenge->isRated !== $isRated) {
+            $samePace = $wantedControl === null
+                ? $challenge->timeControl === null && $challenge->daysPerMove === $daysPerMove
+                : $challenge->timeControl === $wantedControl;
+            if (!$samePace || $challenge->isRated !== $isRated) {
                 continue;
             }
             try {
-                return ['game_id' => $this->accept($challenge->id, $userId, $now), 'challenge_id' => null];
+                return ['game_id' => $this->accept($challenge->id, $userId, $now, $nowMs), 'challenge_id' => null];
             } catch (PlayRefused) {
                 // Someone else was first; try the next one.
                 continue;
             }
         }
 
-        return ['game_id' => null, 'challenge_id' => $this->createOpen($userId, Challenge::COLOUR_RANDOM, $daysPerMove, $isRated, $now)];
+        return ['game_id' => null, 'challenge_id' => $this->createOpen($userId, Challenge::COLOUR_RANDOM, $daysPerMove, $isRated, $now, $wantedControl ?? '')];
     }
 
     // --- Settings and checks ---
@@ -219,6 +235,22 @@ final class Challenges
         }
 
         return $daysPerMove;
+    }
+
+    /**
+     * The time control of a new timed challenge ("5+3"), or null for
+     * correspondence (empty text). Refused when the admin does not allow it,
+     * or the challenger already plays as many timed games as allowed (G-18).
+     */
+    private function checkedTimeControl(string $timeControl, int $challengerId): ?string
+    {
+        if (trim($timeControl) === '') {
+            return null;
+        }
+        $control = $this->games->checkedTimeControl($timeControl);
+        $this->games->checkLiveLimits([$challengerId]);
+
+        return $control->text();
     }
 
     private function checkedFen(string $startFen): ?string

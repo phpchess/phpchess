@@ -108,6 +108,8 @@ final class Routes
 
         // --- Play: challenges, the Play button and invites (G-05, G-20, G-21) ---
         $router->get('/play', fn (Request $request): Response => $challenges->lobby($request), Access::MEMBERS);
+        $router->get('/play/news', fn (Request $request): Response => $challenges->news($request), Access::MEMBERS);
+        $router->get('/rules', fn (Request $request): Response => $challenges->rules($request), Access::MEMBERS);
         $router->post('/play/quick', fn (Request $request): Response => $challenges->quickPlay($request), Access::MEMBERS);
         $router->post('/challenges', fn (Request $request): Response => $challenges->create($request), Access::MEMBERS);
         $router->post('/challenges/{id}/accept', fn (Request $request, array $parts): Response => $challenges->accept($request, $parts), Access::MEMBERS);
@@ -130,6 +132,11 @@ final class Routes
         $router->post('/games/{id}/draw/decline', fn (Request $request, array $parts): Response => $games->declineDraw($request, $parts), Access::MEMBERS);
         $router->post('/games/{id}/abort', fn (Request $request, array $parts): Response => $games->abort($request, $parts), Access::MEMBERS);
         $router->post('/games/{id}/abort/request', fn (Request $request, array $parts): Response => $games->requestAbort($request, $parts), Access::MEMBERS);
+        $router->post('/games/{id}/premove', fn (Request $request, array $parts): Response => $games->premove($request, $parts), Access::MEMBERS);
+        $router->post('/games/{id}/premove/clear', fn (Request $request, array $parts): Response => $games->clearPremove($request, $parts), Access::MEMBERS);
+        $router->post('/games/{id}/pace/offer', fn (Request $request, array $parts): Response => $games->offerPace($request, $parts), Access::MEMBERS);
+        $router->post('/games/{id}/pace/accept', fn (Request $request, array $parts): Response => $games->acceptPace($request, $parts), Access::MEMBERS);
+        $router->post('/games/{id}/pace/decline', fn (Request $request, array $parts): Response => $games->declinePace($request, $parts), Access::MEMBERS);
         $router->post('/games/{id}/rematch', fn (Request $request, array $parts): Response => $games->rematch($request, $parts), Access::MEMBERS);
         $router->post('/games/{id}/chat', fn (Request $request, array $parts): Response => $games->chat($request, $parts), Access::MEMBERS, FeatureSwitches::GAME_CHAT);
 

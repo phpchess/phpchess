@@ -25,14 +25,22 @@
  *
  * Icons are drawn once in templates/play/icons.php and used by id.
  *
+ * Timed games (C3-1, A46): each player's clock stands next to their name
+ * and the time control in the middle; the script counts the running clock
+ * down from what the server said. While the opponent is to move, a move on
+ * the board is kept as a premove (G-17). Under the offers, the players can
+ * propose a new pace for the game (G-23).
+ *
  * Variables: $game (Game), $moves (list of array{ply, uci, san, fen_after}),
  * $usernames (array of id => name), $viewerId (int), $stateJson (string),
  * $canAbort (bool), $abortRule (string), $whiteRating and $blackRating
  * (array{rating: int, games_played: int, is_newbie: bool, is_provisional: bool}),
- * $boardTheme and $planningBoardTheme (string), $basePath, $csrfToken, $t, $template.
+ * $boardTheme and $planningBoardTheme (string), $paceChoices (list of "5+3" / "3d"),
+ * $currentPace (string), $basePath, $csrfToken, $t, $template.
  */
 
 use PhpChess\Domain\Chess\Position;
+use PhpChess\Domain\Play\Game;
 use PhpChess\Domain\Play\Games;
 
 $viewerColour = $game->colourOf($viewerId);
@@ -48,6 +56,14 @@ $pieceSymbols = [
     'K' => '♔', 'Q' => '♕', 'R' => '♖', 'B' => '♗', 'N' => '♘', 'P' => '♙',
     'k' => '♚', 'q' => '♛', 'r' => '♜', 'b' => '♝', 'n' => '♞', 'p' => '♟',
 ];
+
+/** A pace as words: "5+3" or "3 days per move". */
+$paceText = fn (string $pace): string => str_ends_with($pace, Game::PACE_DAYS_SUFFIX)
+    ? $t->text('challenge.summary', ['days' => (int) $pace])
+    : $t->text('play.pace_timed', ['control' => $pace]);
+
+/** A clock for the page before the script runs: "4:58". */
+$clockText = fn (?int $milliseconds): string => $milliseconds === null ? '' : intdiv(max(0, $milliseconds), 60000) . ':' . str_pad((string) intdiv(max(0, $milliseconds) % 60000, 1000), 2, '0', STR_PAD_LEFT);
 
 /** A player's name with the rating as A30 says: nothing for a newbie, "?" while provisional. */
 $playerName = function (int $playerId, array $rating) use ($usernames, $t): string {
@@ -84,22 +100,32 @@ $showAbortRequest = $canAbort && $abortRule === Games::ABORT_ASK_ADMIN;
      data-text-planning="<?= e($t->text('game.planning_board')) ?>"
      data-text-replay="<?= e($t->text('game.replay')) ?>"
      data-text-white="<?= e($t->text('game.white')) ?>"
-     data-text-black="<?= e($t->text('game.black')) ?>">
+     data-text-black="<?= e($t->text('game.black')) ?>"
+     data-text-premove="<?= e($t->text('game.premove_set')) ?>"
+     data-text-opponent-gone="<?= e($t->text('game.opponent_disconnected')) ?>">
 
     <!-- ===== Above the board: White | clock | Black ===== -->
     <div class="game-header">
         <span class="header-player">
             <svg class="header-queen" viewBox="0 0 40 40" aria-label="<?= e($t->text('game.white')) ?>"><use href="<?= e($spriteUrl) ?>#wq"/></svg>
             <span><?= $whitePlayerHtml ?></span>
+            <?php if ($game->isTimed()) : ?>
+                <span class="player-clock" id="clock-w"><?= e($clockText($game->whiteMsLeft)) ?></span>
+            <?php endif; ?>
         </span>
         <span class="header-clock" id="game-clock"
               data-deadline="<?= e($game->isRunning() && $game->moveDeadlineAt !== null ? gmdate('Y-m-d\TH:i:s\Z', $game->moveDeadlineAt) : '') ?>"
               title="<?= e($game->moveDeadlineAt !== null ? $t->text('game.deadline', ['time' => gmdate('Y-m-d H:i', $game->moveDeadlineAt) . ' UTC']) : '') ?>">
-            <?php if ($game->isRunning() && $game->moveDeadlineAt !== null) : ?>
+            <?php if ($game->isTimed()) : ?>
+                <?= e($game->timeControl) ?>
+            <?php elseif ($game->isRunning() && $game->moveDeadlineAt !== null) : ?>
                 <?= e(gmdate('Y-m-d H:i', $game->moveDeadlineAt)) ?>
             <?php endif; ?>
         </span>
         <span class="header-player header-player-black">
+            <?php if ($game->isTimed()) : ?>
+                <span class="player-clock" id="clock-b"><?= e($clockText($game->blackMsLeft)) ?></span>
+            <?php endif; ?>
             <span><?= $blackPlayerHtml ?></span>
             <svg class="header-queen" viewBox="0 0 40 40" aria-label="<?= e($t->text('game.black')) ?>"><use href="<?= e($spriteUrl) ?>#bq"/></svg>
         </span>
@@ -244,6 +270,47 @@ $showAbortRequest = $canAbort && $abortRule === Games::ABORT_ASK_ADMIN;
             </div>
         <?php elseif ($game->drawOfferedBy === $viewerId) : ?>
             <p class="muted centred"><?= e($t->text('game.draw_offered_by_you')) ?></p>
+        <?php endif; ?>
+
+        <!-- Changing pace (G-23): both players agree -->
+        <?php if ($game->paceOfferedBy === $opponentId && $game->paceOffer !== null) : ?>
+            <div class="offer-box">
+                <p><?= e($t->text('game.pace_offered_to_you', ['pace' => $paceText($game->paceOffer)])) ?></p>
+                <div class="button-row">
+                    <form method="post" action="<?= e($gamePath) ?>/pace/accept" class="inline-form">
+                        <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                        <button type="submit"><?= e($t->text('game.accept_pace')) ?></button>
+                    </form>
+                    <form method="post" action="<?= e($gamePath) ?>/pace/decline" class="inline-form">
+                        <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                        <button type="submit" class="button-secondary"><?= e($t->text('game.decline_pace')) ?></button>
+                    </form>
+                </div>
+            </div>
+        <?php elseif ($game->paceOfferedBy === $viewerId && $game->paceOffer !== null) : ?>
+            <form method="post" action="<?= e($gamePath) ?>/pace/decline" class="inline-form centred">
+                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                <span class="muted"><?= e($t->text('game.pace_offered_by_you', ['pace' => $paceText($game->paceOffer)])) ?></span>
+                <button type="submit" class="button-secondary"><?= e($t->text('game.withdraw_pace')) ?></button>
+            </form>
+        <?php else : ?>
+            <details class="confirm centred">
+                <summary><?= e($t->text('game.change_pace')) ?></summary>
+                <form method="post" action="<?= e($gamePath) ?>/pace/offer" class="form">
+                    <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                    <label><?= e($t->text('play.pace')) ?>
+                        <select name="pace">
+                            <?php foreach ($paceChoices as $pace) : ?>
+                                <?php if ($pace !== $currentPace) : ?>
+                                    <option value="<?= e($pace) ?>"><?= e($paceText($pace)) ?></option>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        </select>
+                    </label>
+                    <p class="hint"><?= e($t->text('game.change_pace_hint')) ?></p>
+                    <button type="submit"><?= e($t->text('game.propose_pace')) ?></button>
+                </form>
+            </details>
         <?php endif; ?>
 
         <?php if ($showAbortRequest) : ?>

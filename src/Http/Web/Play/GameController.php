@@ -12,6 +12,7 @@ use PhpChess\Domain\Play\Game;
 use PhpChess\Domain\Play\Games;
 use PhpChess\Domain\Play\PlayRefused;
 use PhpChess\Domain\Rating\Ratings;
+use PhpChess\Http\GamePoll;
 use PhpChess\Http\GameStateJson;
 use PhpChess\Http\Request;
 use PhpChess\Http\Response;
@@ -25,10 +26,14 @@ use PhpChess\Kernel\Services;
  *   GET  /games                       my running and finished games (the archive, G-11)
  *   GET  /games/watch                 running games of everyone (G-13; switch "player list visibility")
  *   GET  /games/{id}                  the board, move list, clock and buttons (A36)
- *   GET  /games/{id}/state?since=N    the game as JSON for the board's polling (G-10)
+ *   GET  /games/{id}/state?since=N&v=V the game as JSON for the board's polling (G-10, API-03, GamePoll)
  *   GET  /games/{id}/pgn              the game as a PGN file (G-11)
  *   POST /games/{id}/move             one move: fields ply and move (UCI or SAN)
  *   POST /games/{id}/resign | draw/offer | draw/accept | draw/decline | abort | abort/request | rematch
+ *   POST /games/{id}/premove          a premove while the opponent thinks (G-17): fields ply and move
+ *   POST /games/{id}/premove/clear    takes the premove back
+ *   POST /games/{id}/pace/offer       proposes a new pace (G-23): field pace, "10+5" or "3d"
+ *   POST /games/{id}/pace/accept | pace/decline
  *
  * A POST from the board script asks for JSON (header Accept: application/json)
  * and gets the new state; a plain form (no script, or the keyboard field) is
@@ -93,7 +98,8 @@ final class GameController
         $moves = $this->services->play()->gameRepository()->moves($game->id);
         $usernames = $this->usernamesFor([$game]);
         $ratings = $this->services->play()->ratings();
-        $state = GameStateJson::of($game, $moves, $usernames, $user->id);
+        $state = GameStateJson::of($game, $moves, $usernames, $user->id, $this->services->nowMs());
+        $play = $this->services->play()->games();
 
         return $this->services->pages()->render($request, 'play/game', $this->pages->text('game.title', [
             'white' => $usernames[$game->whiteId] ?? '?',
@@ -111,6 +117,8 @@ final class GameController
             'boardTheme' => $this->services->currentPreferences()->boardTheme,
             'planningBoardTheme' => $this->services->settings()->getString('play.planning_board_theme', 'blue'),
             'chat' => $this->chatFor($game),
+            'paceChoices' => [...$play->allowedTimeControls(), ...array_map(fn (int $days): string => $days . Game::PACE_DAYS_SUFFIX, [1, 2, 3, 5, 7, 14])],
+            'currentPace' => Games::paceOf($game),
         ]);
     }
 
@@ -169,14 +177,10 @@ final class GameController
         if ($game === null || !$this->pages->mayWatch($game, $user)) {
             return Response::json(['error' => ['code' => 'not_found', 'message' => $this->pages->text('play.game_not_found')]], 404);
         }
-        if ($game->isPlayer($user->id)) {
-            $this->services->play()->games()->markSeen($game, $user->id, $this->services->now);
-            $this->services->play()->noticeRepository()->markGameRead($user->id, $game->id, $this->services->now);
-        }
         $since = max(0, (int) $request->queryValue('since', '0'));
+        $answer = (new GamePoll($this->services))->answer($game, $user->id, $since, $request->queryValue('v', ''));
 
-        return Response::json(GameStateJson::of($game, $gameRepository->moves($game->id, $since), $this->usernamesFor([$game]), $user->id))
-            ->withHeader('Cache-Control', 'no-store');
+        return Response::json($answer)->withHeader('Cache-Control', 'no-store');
     }
 
     // --- Moves (K2) ---
@@ -195,6 +199,7 @@ final class GameController
                 (int) $request->formValue('ply', '-1'),
                 $request->formValue('move'),
                 $this->services->now,
+                $this->services->nowMs(),
             );
         } catch (PlayRefused $refusal) {
             return $this->answer($request, $gameId, $refusal);
@@ -243,6 +248,53 @@ final class GameController
     public function abort(Request $request, array $parts): Response
     {
         return $this->runAction($request, $parts, fn (int $gameId, int $userId, int $now) => $this->services->play()->games()->abort($gameId, $userId, $now));
+    }
+
+    // --- Premoves (G-17) and changing pace (G-23) ---
+
+    /**
+     * @param array<string, string> $parts
+     */
+    public function premove(Request $request, array $parts): Response
+    {
+        $ply = (int) $request->formValue('ply', '-1');
+        $move = $request->formValue('move');
+
+        return $this->runAction($request, $parts, fn (int $gameId, int $userId, int $now) => $this->services->play()->games()->premove($gameId, $userId, $ply, $move));
+    }
+
+    /**
+     * @param array<string, string> $parts
+     */
+    public function clearPremove(Request $request, array $parts): Response
+    {
+        return $this->runAction($request, $parts, fn (int $gameId, int $userId, int $now) => $this->services->play()->games()->clearPremove($gameId, $userId));
+    }
+
+    /**
+     * @param array<string, string> $parts
+     */
+    public function offerPace(Request $request, array $parts): Response
+    {
+        $pace = $request->formValue('pace');
+
+        return $this->runAction($request, $parts, fn (int $gameId, int $userId, int $now) => $this->services->play()->games()->proposePace($gameId, $userId, $pace, $now, $this->services->nowMs()));
+    }
+
+    /**
+     * @param array<string, string> $parts
+     */
+    public function acceptPace(Request $request, array $parts): Response
+    {
+        return $this->runAction($request, $parts, fn (int $gameId, int $userId, int $now) => $this->services->play()->games()->acceptPace($gameId, $userId, $now, $this->services->nowMs()));
+    }
+
+    /**
+     * @param array<string, string> $parts
+     */
+    public function declinePace(Request $request, array $parts): Response
+    {
+        return $this->runAction($request, $parts, fn (int $gameId, int $userId, int $now) => $this->services->play()->games()->declinePace($gameId, $userId));
     }
 
     /**
@@ -359,7 +411,7 @@ final class GameController
         }
         $since = max(0, (int) $request->formValue('ply', '0'));
 
-        return Response::json(GameStateJson::of($game, $this->services->play()->gameRepository()->moves($game->id, $since), $this->usernamesFor([$game]), $this->pages->user()->id));
+        return Response::json((new GamePoll($this->services))->answer($game, $this->pages->user()->id, $since, ''));
     }
 
     /**

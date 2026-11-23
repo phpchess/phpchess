@@ -87,7 +87,17 @@ final class Services
         public readonly int $now,
         private readonly Closure $connectDatabase,
         private readonly ?Mailer $mailerOverride = null,
+        private readonly ?int $fixedNowMs = null,
     ) {
+    }
+
+    /**
+     * The time in Unix milliseconds, for the chess clock (K12). Tests that
+     * fix $now get $now × 1000.
+     */
+    public function nowMs(): int
+    {
+        return $this->fixedNowMs ?? $this->now * 1000;
     }
 
     // --- Database and System ---

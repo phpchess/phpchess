@@ -77,7 +77,7 @@ final class MembersController
     public function acceptChallenge(Request $request, array $parts): Response
     {
         try {
-            $gameId = $this->services->play()->challenges()->accept(MemberPages::idFrom($parts), $this->user()->id, $this->services->now);
+            $gameId = $this->services->play()->challenges()->accept(MemberPages::idFrom($parts), $this->user()->id, $this->services->now, $this->services->nowMs());
         } catch (PlayRefused $refusal) {
             return ApiError::response(409, $refusal->languageKey, $this->services->translator()->text($refusal->languageKey, $refusal->values));
         }

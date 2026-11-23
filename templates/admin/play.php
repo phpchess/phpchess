@@ -6,12 +6,15 @@
  * $inviteDays, $emailDelayMinutes (int); $abortRule, $defaultEmailMode, $planningBoardTheme,
  * $adjudicationReasons (string); $fenInDirect (bool);
  * $allowedEmailModes (list of string);
+ * timed play (A46): $minTimeControl (string), $maxLiveGames, $maxLiveGamesPerPlayer,
+ * $pollFastMs, $pollOwnMs, $pollSlowMs (int);
  * $warnings, $currentAdminPath, $basePath, $csrfToken, $t, $template.
  */
 
 use PhpChess\Domain\Identity\Preferences;
 use PhpChess\Domain\Notify\MoveEmails;
 use PhpChess\Domain\Play\Games;
+use PhpChess\Domain\Play\TimeControl;
 
 ?>
 <?= $template->render('admin/header', ['warnings' => $warnings, 'currentAdminPath' => $currentAdminPath, 'basePath' => $basePath, 't' => $t]) ?>
@@ -73,6 +76,36 @@ use PhpChess\Domain\Play\Games;
         <input type="text" name="adjudication_reasons" value="<?= e($adjudicationReasons) ?>">
     </label>
     <p class="hint"><?= e($t->text('admin.play.adjudication_reasons_hint')) ?></p>
+
+    <!-- ===== Timed play (A12, G-18, API-03, A46) ===== -->
+    <fieldset>
+        <legend><?= e($t->text('admin.play.timed')) ?></legend>
+        <label><?= e($t->text('admin.play.min_time_control')) ?>
+            <select name="min_time_control">
+                <?php foreach (TimeControl::FLOORS as $floor) : ?>
+                    <option value="<?= e($floor) ?>"<?= $floor === $minTimeControl ? ' selected' : '' ?>><?= e($floor) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+        <label><?= e($t->text('admin.play.max_live_games')) ?>
+            <input type="number" name="max_live_games" min="1" max="10000" value="<?= e($maxLiveGames) ?>">
+        </label>
+        <label><?= e($t->text('admin.play.max_live_games_per_player')) ?>
+            <input type="number" name="max_live_games_per_player" min="1" max="100" value="<?= e($maxLiveGamesPerPlayer) ?>">
+        </label>
+        <label><?= e($t->text('admin.play.poll_fast_ms')) ?>
+            <input type="number" name="poll_fast_ms" min="500" max="10000" step="100" value="<?= e($pollFastMs) ?>">
+        </label>
+        <label><?= e($t->text('admin.play.poll_own_ms')) ?>
+            <input type="number" name="poll_own_ms" min="500" max="30000" step="100" value="<?= e($pollOwnMs) ?>">
+        </label>
+        <label><?= e($t->text('admin.play.poll_slow_ms')) ?>
+            <input type="number" name="poll_slow_ms" min="2000" max="120000" step="1000" value="<?= e($pollSlowMs) ?>">
+        </label>
+        <p class="hint"><?= e($t->text('admin.play.timed_hint')) ?></p>
+    </fieldset>
+
+    <p><a href="<?= e($basePath) ?>/rules"><?= e($t->text('admin.play.rules_link')) ?></a></p>
 
     <button type="submit"><?= e($t->text('admin.save')) ?></button>
 </form>

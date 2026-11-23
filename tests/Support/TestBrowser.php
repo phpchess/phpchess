@@ -27,7 +27,7 @@ final class TestBrowser
 
     private string $lastCsrfToken = '';
 
-    public function __construct(private readonly Kernel $kernel, private readonly string $basePath = '/chess')
+    public function __construct(private readonly Kernel $kernel, private readonly string $basePath = '/chess', private readonly string $clientIp = '127.0.0.1')
     {
         $this->session = Session::inMemory();
     }
@@ -39,7 +39,7 @@ final class TestBrowser
      */
     public function get(string $path, array $query = []): Response
     {
-        return $this->send(new Request('GET', $path, $this->basePath, query: $query, cookies: $this->cookies, host: 'example.test'));
+        return $this->send(new Request('GET', $path, $this->basePath, query: $query, cookies: $this->cookies, host: 'example.test', clientIp: $this->clientIp));
     }
 
     /**
@@ -53,7 +53,7 @@ final class TestBrowser
             $fields['_csrf'] = $this->lastCsrfToken;
         }
 
-        return $this->send(new Request('POST', $path, $this->basePath, form: $fields, cookies: $this->cookies, host: 'example.test'));
+        return $this->send(new Request('POST', $path, $this->basePath, form: $fields, cookies: $this->cookies, host: 'example.test', clientIp: $this->clientIp));
     }
 
     /**
@@ -63,7 +63,7 @@ final class TestBrowser
      */
     public function getWithHeaders(string $path, array $headers): Response
     {
-        return $this->send(new Request('GET', $path, $this->basePath, headers: self::lowerCaseNames($headers), cookies: $this->cookies, host: 'example.test'));
+        return $this->send(new Request('GET', $path, $this->basePath, headers: self::lowerCaseNames($headers), cookies: $this->cookies, host: 'example.test', clientIp: $this->clientIp));
     }
 
     /**
@@ -75,7 +75,7 @@ final class TestBrowser
     {
         $fields['_csrf'] ??= $this->lastCsrfToken;
 
-        return $this->send(new Request('POST', $path, $this->basePath, form: $fields, headers: ['accept' => 'application/json'], cookies: $this->cookies, host: 'example.test'));
+        return $this->send(new Request('POST', $path, $this->basePath, form: $fields, headers: ['accept' => 'application/json'], cookies: $this->cookies, host: 'example.test', clientIp: $this->clientIp));
     }
 
     /**
@@ -98,7 +98,7 @@ final class TestBrowser
      */
     public function apiWithToken(string $method, string $path, string $token, array $fields = []): Response
     {
-        $request = new Request($method, $path, $this->basePath, form: $fields, headers: ['authorization' => 'Bearer ' . $token], host: 'example.test');
+        $request = new Request($method, $path, $this->basePath, form: $fields, headers: ['authorization' => 'Bearer ' . $token], host: 'example.test', clientIp: $this->clientIp);
 
         return $this->kernel->handle($request, Session::inMemory());
     }

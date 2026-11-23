@@ -10,6 +10,8 @@ use PhpChess\Domain\Play\Clocks;
 use PhpChess\Domain\Play\Game;
 use PhpChess\Domain\Play\Games;
 use PhpChess\Domain\Play\PlayRefused;
+use PhpChess\Domain\Play\TimeControl;
+use PhpChess\Http\GamePoll;
 use PhpChess\Domain\Rating\Ratings;
 use PhpChess\Http\Request;
 use PhpChess\Http\Response;
@@ -24,7 +26,9 @@ use PhpChess\Kernel\Services;
  *   POST /admin/games/new               set up a game between two players from a FEN
  *   GET/POST /admin/play                the play settings: days per move, rating start
  *                                       value, abort rule, challenge expiry, move emails,
- *                                       start positions, adjudication reasons
+ *                                       start positions, adjudication reasons, and timed
+ *                                       play: the floor, live-game limits, poll intervals.
+ *                                       The page links to /rules, which players see.
  */
 final class GamesController
 {
@@ -131,6 +135,12 @@ final class GamesController
             'defaultEmailMode' => $this->services->moveEmails()->defaultMode(),
             'emailDelayMinutes' => $settings->getInt('mail.move_email_delay_minutes', 60),
             'adjudicationReasons' => implode(', ', $this->adjudicationReasons()),
+            'minTimeControl' => $settings->getString('play.min_time_control', TimeControl::DEFAULT_FLOOR),
+            'maxLiveGames' => $this->services->play()->games()->maxLiveGames(),
+            'maxLiveGamesPerPlayer' => $this->services->play()->games()->maxLiveGamesPerPlayer(),
+            'pollFastMs' => $settings->getInt('play.poll_fast_ms', GamePoll::DEFAULT_FAST_MS),
+            'pollOwnMs' => $settings->getInt('play.poll_own_ms', GamePoll::DEFAULT_OWN_MOVE_MS),
+            'pollSlowMs' => $settings->getInt('play.poll_slow_ms', GamePoll::DEFAULT_SLOW_MS),
         ]);
     }
 
@@ -167,6 +177,15 @@ final class GamesController
             }
         }
         $settings->set('adjudication.reasons', implode(',', $reasons === [] ? ['other'] : array_unique($reasons)));
+
+        // --- Timed play (A12, G-18, API-03, A46) ---
+        $floor = $request->formValue('min_time_control');
+        $settings->set('play.min_time_control', in_array($floor, TimeControl::FLOORS, true) ? $floor : TimeControl::DEFAULT_FLOOR);
+        $settings->set('play.max_live_games', max(1, min(10000, (int) $request->formValue('max_live_games', (string) Games::DEFAULT_MAX_LIVE_GAMES))));
+        $settings->set('play.max_live_games_per_player', max(1, min(100, (int) $request->formValue('max_live_games_per_player', '1'))));
+        $settings->set('play.poll_fast_ms', max(500, min(10000, (int) $request->formValue('poll_fast_ms', (string) GamePoll::DEFAULT_FAST_MS))));
+        $settings->set('play.poll_own_ms', max(500, min(30000, (int) $request->formValue('poll_own_ms', (string) GamePoll::DEFAULT_OWN_MOVE_MS))));
+        $settings->set('play.poll_slow_ms', max(2000, min(120000, (int) $request->formValue('poll_slow_ms', (string) GamePoll::DEFAULT_SLOW_MS))));
 
         $this->adminPages->audit($request, 'settings.play', 'Play settings saved.');
 

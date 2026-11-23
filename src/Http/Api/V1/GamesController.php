@@ -7,6 +7,7 @@ namespace PhpChess\Http\Api\V1;
 use PhpChess\Domain\Play\Game;
 use PhpChess\Domain\Play\PlayRefused;
 use PhpChess\Http\ApiError;
+use PhpChess\Http\GamePoll;
 use PhpChess\Http\GameStateJson;
 use PhpChess\Http\Request;
 use PhpChess\Http\Response;
@@ -66,8 +67,9 @@ final class GamesController
             return ApiError::response(404, 'not_found', 'There is no such game.');
         }
         $since = max(0, (int) $request->queryValue('since', '0'));
+        $answer = (new GamePoll($this->services))->answer($game, $this->currentUserId(), $since, $request->queryValue('v', ''));
 
-        return $this->stateResponse($game, $since);
+        return Response::json($answer)->withHeader('Cache-Control', 'no-store');
     }
 
     /**
@@ -78,7 +80,7 @@ final class GamesController
         $gameId = (int) ($parts['id'] ?? 0);
         $expectedPly = (int) $request->formValue('ply', '-1');
         try {
-            $game = $this->services->play()->games()->move($gameId, $this->currentUserId(), $expectedPly, $request->formValue('move'), $this->services->now);
+            $game = $this->services->play()->games()->move($gameId, $this->currentUserId(), $expectedPly, $request->formValue('move'), $this->services->now, $this->services->nowMs());
         } catch (PlayRefused $refusal) {
             $status = $refusal->languageKey === 'play.not_your_game' ? 404 : 409;
 
@@ -95,7 +97,7 @@ final class GamesController
         $usernames = $this->services->users()->usernamesOf([$game->whiteId, $game->blackId]);
         $moves = $this->services->play()->gameRepository()->moves($game->id, $since);
 
-        return Response::json(GameStateJson::of($game, $moves, $usernames, $this->currentUserId()))->withHeader('Cache-Control', 'no-store');
+        return Response::json(GameStateJson::of($game, $moves, $usernames, $this->currentUserId(), $this->services->nowMs()))->withHeader('Cache-Control', 'no-store');
     }
 
     /**

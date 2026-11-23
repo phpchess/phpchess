@@ -39,6 +39,27 @@ final class GameRepository extends Repository
         return $this->database->lastInsertId();
     }
 
+    /**
+     * Creates a running timed game (G-14) and returns its id. Both clocks
+     * start full; White's clock runs from now (A46: there is no abort timer).
+     */
+    public function createTimed(int $whiteId, int $blackId, string $speed, string $timeControl, int $baseMs, int $incrementMs, bool $isRated, string $startFen, int $nowMs, int $flagDeadlineMs): int
+    {
+        $this->database->run(
+            'INSERT INTO ' . $this->table('games')
+            . ' (white_id, black_id, speed, is_rated, start_fen, current_fen, ply, state, started_at, move_deadline_at,'
+            . ' time_control, increment_ms, white_ms_left, black_ms_left, turn_saved_ms)'
+            . " VALUES (?, ?, ?, ?, ?, ?, 0, 'running', ?, ?, ?, ?, ?, ?, ?)",
+            [
+                $whiteId, $blackId, $speed, $isRated ? 1 : 0, $startFen, $startFen,
+                self::dateTimeMs($nowMs), self::dateTimeMs($flagDeadlineMs),
+                $timeControl, $incrementMs, $baseMs, $baseMs, $nowMs,
+            ],
+        );
+
+        return $this->database->lastInsertId();
+    }
+
     // --- Reading ---
 
     public function find(int $gameId): ?Game
@@ -147,6 +168,36 @@ final class GameRepository extends Repository
     }
 
     /**
+     * The newest running timed game this player has not opened yet: someone
+     * accepted their open challenge, so the Play page goes there (G-16).
+     */
+    public function newTimedGameNotSeenBy(int $userId): ?int
+    {
+        return self::intOrNull($this->database->fetchValue(
+            'SELECT id FROM ' . $this->table('games') . " WHERE state = 'running' AND time_control IS NOT NULL"
+            . ' AND ((white_id = ? AND white_seen_at IS NULL) OR (black_id = ? AND black_seen_at IS NULL)) ORDER BY id DESC LIMIT 1',
+            [$userId, $userId],
+        ));
+    }
+
+    /** How many timed games are running on the whole site (G-18). */
+    public function countRunningTimed(): int
+    {
+        return self::intOf($this->database->fetchValue(
+            'SELECT COUNT(*) FROM ' . $this->table('games') . " WHERE state = 'running' AND time_control IS NOT NULL",
+        ));
+    }
+
+    /** How many timed games a player has running (G-18). */
+    public function countRunningTimedOf(int $userId): int
+    {
+        return self::intOf($this->database->fetchValue(
+            'SELECT COUNT(*) FROM ' . $this->table('games') . " WHERE state = 'running' AND time_control IS NOT NULL AND (white_id = ? OR black_id = ?)",
+            [$userId, $userId],
+        ));
+    }
+
+    /**
      * Running correspondence games of a player, for vacations (A29).
      *
      * @return list<Game>
@@ -212,7 +263,8 @@ final class GameRepository extends Repository
     {
         $this->database->run(
             'UPDATE ' . $this->table('games') . " SET state = 'finished', result = ?, end_reason = ?, ended_at = ?,"
-            . " move_deadline_at = NULL, draw_offered_by = NULL WHERE id = ? AND state = 'running'",
+            . ' move_deadline_at = NULL, draw_offered_by = NULL, premove_by = NULL, premove_uci = NULL, premove_ply = NULL,'
+            . " pace_offered_by = NULL, pace_offer = NULL WHERE id = ? AND state = 'running'",
             [$result, $reason, self::dateTime($now), $gameId],
         );
     }
@@ -242,11 +294,90 @@ final class GameRepository extends Repository
         );
     }
 
+    // --- The chess clock (G-14, G-15, K12) ---
+
+    /**
+     * Writes both clocks after a move in a timed game (inside Games::move's
+     * transaction): the new turn begins now and is not yet delivered.
+     * The deadline is the latest moment the new mover's flag can fall.
+     */
+    public function setClocks(int $gameId, int $whiteMsLeft, int $blackMsLeft, int $turnSavedMs, int $flagDeadlineMs): void
+    {
+        $this->database->run(
+            'UPDATE ' . $this->table('games') . ' SET white_ms_left = ?, black_ms_left = ?, turn_saved_ms = ?, turn_delivered_ms = NULL,'
+            . ' move_deadline_at = ? WHERE id = ?',
+            [$whiteMsLeft, $blackMsLeft, $turnSavedMs, self::dateTimeMs($flagDeadlineMs), $gameId],
+        );
+    }
+
+    /**
+     * Notes the moment the player to move first received the last move
+     * (lag compensation, K12). Only the first delivery of this very turn
+     * counts: the ply and "not yet delivered" are part of the condition, so
+     * a poll that read the game before a newer move can not mark that one.
+     */
+    public function markDelivered(int $gameId, int $ply, int $nowMs): void
+    {
+        $this->database->run(
+            'UPDATE ' . $this->table('games') . " SET turn_delivered_ms = ? WHERE id = ? AND ply = ? AND state = 'running'"
+            . ' AND time_control IS NOT NULL AND turn_delivered_ms IS NULL',
+            [$nowMs, $gameId, $ply],
+        );
+    }
+
+    /** Stores a premove (G-17), or clears it with nulls. */
+    public function setPremove(int $gameId, ?int $userId, ?string $uci, ?int $ply): void
+    {
+        $this->database->run(
+            'UPDATE ' . $this->table('games') . ' SET premove_by = ?, premove_uci = ?, premove_ply = ? WHERE id = ?',
+            [$userId, $uci, $ply, $gameId],
+        );
+    }
+
+    // --- Changing pace (G-23) ---
+
+    /** Stores a pace proposal ("10+5" or "3d"), or clears it with nulls. */
+    public function setPaceOffer(int $gameId, ?int $userId, ?string $offer): void
+    {
+        $this->database->run(
+            'UPDATE ' . $this->table('games') . ' SET pace_offered_by = ?, pace_offer = ? WHERE id = ?',
+            [$userId, $offer, $gameId],
+        );
+    }
+
+    /** Makes the game timed: both clocks restart at the base time, the mover's clock runs from now. */
+    public function switchToTimed(int $gameId, string $timeControl, int $baseMs, int $incrementMs, int $nowMs, int $flagDeadlineMs): void
+    {
+        $this->database->run(
+            'UPDATE ' . $this->table('games') . ' SET time_control = ?, increment_ms = ?, white_ms_left = ?, black_ms_left = ?,'
+            . ' turn_saved_ms = ?, turn_delivered_ms = NULL, days_per_move = NULL, move_deadline_at = ?,'
+            . ' pace_offered_by = NULL, pace_offer = NULL, premove_by = NULL, premove_uci = NULL, premove_ply = NULL WHERE id = ?',
+            [$timeControl, $incrementMs, $baseMs, $baseMs, $nowMs, self::dateTimeMs($flagDeadlineMs), $gameId],
+        );
+    }
+
+    /** Makes the game correspondence: days per move, no clocks, no premove. */
+    public function switchToCorrespondence(int $gameId, int $daysPerMove, int $moveDeadlineAt): void
+    {
+        $this->database->run(
+            'UPDATE ' . $this->table('games') . ' SET time_control = NULL, increment_ms = NULL, white_ms_left = NULL, black_ms_left = NULL,'
+            . ' turn_saved_ms = NULL, turn_delivered_ms = NULL, days_per_move = ?, move_deadline_at = ?,'
+            . ' pace_offered_by = NULL, pace_offer = NULL, premove_by = NULL, premove_uci = NULL, premove_ply = NULL WHERE id = ?',
+            [$daysPerMove, self::dateTime($moveDeadlineAt), $gameId],
+        );
+    }
+
     /** Notes that a player has the game open now (G-10, live delivery). */
     public function markSeen(int $gameId, string $colour, int $now): void
     {
         $column = $colour === 'w' ? 'white_seen_at' : 'black_seen_at';
         $this->database->run('UPDATE ' . $this->table('games') . ' SET ' . $column . ' = ? WHERE id = ?', [self::dateTime($now), $gameId]);
+    }
+
+    /** Unix milliseconds as a database time with milliseconds. */
+    private static function dateTimeMs(int $milliseconds): string
+    {
+        return gmdate('Y-m-d H:i:s', intdiv($milliseconds, 1000)) . sprintf('.%03d', $milliseconds % 1000);
     }
 
     // --- Turning rows into Games ---
@@ -299,6 +430,17 @@ final class GameRepository extends Repository
             endedAt: self::timestampOrNull($row['ended_at']),
             whiteSeenAt: self::timestampOrNull($row['white_seen_at']),
             blackSeenAt: self::timestampOrNull($row['black_seen_at']),
+            timeControl: isset($row['time_control']) ? self::textOf($row['time_control']) : null,
+            incrementMs: self::intOrNull($row['increment_ms'] ?? null),
+            whiteMsLeft: self::intOrNull($row['white_ms_left'] ?? null),
+            blackMsLeft: self::intOrNull($row['black_ms_left'] ?? null),
+            turnSavedMs: self::intOrNull($row['turn_saved_ms'] ?? null),
+            turnDeliveredMs: self::intOrNull($row['turn_delivered_ms'] ?? null),
+            premoveBy: self::intOrNull($row['premove_by'] ?? null),
+            premoveUci: isset($row['premove_uci']) ? self::textOf($row['premove_uci']) : null,
+            premovePly: self::intOrNull($row['premove_ply'] ?? null),
+            paceOfferedBy: self::intOrNull($row['pace_offered_by'] ?? null),
+            paceOffer: isset($row['pace_offer']) ? self::textOf($row['pace_offer']) : null,
         );
     }
 }

@@ -9,7 +9,8 @@ use PhpChess\Infra\Play\ChallengeRepository;
 use PhpChess\Infra\Play\GameRepository;
 
 /**
- * The clock job: ends correspondence games whose move deadline has passed,
+ * The clock job: ends games whose move deadline has passed (correspondence)
+ * or whose flag has fallen without a poll noticing it (timed, a backup),
  * and closes challenges past their expiry (G-07, G-08, A33, A35).
  *
  * Runs every minute. Each overdue game goes through Games::endIfOverdue(),
@@ -45,7 +46,8 @@ final class GameClockJob implements Job
 
         $endedCount = 0;
         foreach ($this->gameRecords->overdueGameIds($now, self::GAMES_PER_RUN) as $gameId) {
-            if ($this->games->endIfOverdue($gameId, $now)) {
+            $nowMs = $this->fixedNow === null ? (int) floor(microtime(true) * 1000) : $now * 1000;
+            if ($this->games->endIfOverdue($gameId, $now, $nowMs)) {
                 $endedCount++;
             }
         }

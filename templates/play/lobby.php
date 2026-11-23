@@ -7,7 +7,13 @@
  * Variables: $viewerId (int), $myGames (list of Game), $myChallenges and
  * $openChallenges (list of Challenge), $usernames (array of id => name),
  * $opponents (array of id => name), $playDefaults (array{days_per_move: int, rated: bool}),
- * $maximumDays (int), $isFenAllowed (bool), $basePath, $csrfToken, $t, $template.
+ * $maximumDays (int), $isFenAllowed (bool), $timeControls (list of "5+3" texts),
+ * $basePath, $csrfToken, $t, $template.
+ *
+ * Every form has a pace choice: correspondence (days per move) or a time
+ * control (G-14). The page asks /play/news every few seconds (lobby.js):
+ * that keeps my open timed challenges listed, and goes to the game as soon
+ * as someone accepts one (G-16).
  */
 
 use PhpChess\Domain\Play\Challenge;
@@ -23,11 +29,20 @@ foreach ($openChallenges as $openChallenge) {
 }
 ?>
 <h1><?= e($t->text('play.title')) ?></h1>
+<p><a href="<?= e($basePath) ?>/rules"><?= e($t->text('rules.link')) ?></a></p>
 
 <form method="post" action="<?= e($basePath) ?>/play/quick" class="form play-now">
     <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
     <button type="submit" class="button button-large"><?= e($t->text('play.button')) ?></button>
     <div class="form-row">
+        <label><?= e($t->text('play.pace')) ?>
+            <select name="time_control">
+                <option value=""><?= e($t->text('play.pace_correspondence')) ?></option>
+                <?php foreach ($timeControls as $control) : ?>
+                    <option value="<?= e($control) ?>"><?= e($t->text('play.pace_timed', ['control' => $control])) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
         <label><?= e($t->text('play.days_per_move')) ?>
             <input type="number" name="days_per_move" min="1" max="<?= e($maximumDays) ?>" value="<?= e($defaultDays) ?>">
         </label>
@@ -63,7 +78,11 @@ foreach ($openChallenges as $openChallenge) {
                     <?php endif; ?>
                 </p>
                 <p class="muted">
-                    <?= e($t->text('challenge.summary', ['days' => $challenge->daysPerMove])) ?>
+                    <?php if ($challenge->timeControl !== null) : ?>
+                        <?= e($t->text('play.pace_timed', ['control' => $challenge->timeControl])) ?>
+                    <?php else : ?>
+                        <?= e($t->text('challenge.summary', ['days' => $challenge->daysPerMove])) ?>
+                    <?php endif; ?>
                     · <?= e($t->text($challenge->isRated ? 'play.rated' : 'game.unrated')) ?>
                     · <?= e($t->text('challenge.colour.' . $challenge->colour)) ?>
                     <?php if ($challenge->startFen !== null) : ?>
@@ -120,6 +139,14 @@ foreach ($openChallenges as $openChallenge) {
                 <?php endforeach; ?>
             </select>
         </label>
+        <label><?= e($t->text('play.pace')) ?>
+            <select name="time_control">
+                <option value=""><?= e($t->text('play.pace_correspondence')) ?></option>
+                <?php foreach ($timeControls as $control) : ?>
+                    <option value="<?= e($control) ?>"><?= e($t->text('play.pace_timed', ['control' => $control])) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
         <label><?= e($t->text('play.days_per_move')) ?>: <output id="days-output"><?= e($defaultDays) ?></output>
             <input type="range" name="days_per_move" min="1" max="<?= e($maximumDays) ?>" value="<?= e($defaultDays) ?>" data-shows-in="days-output">
         </label>
@@ -134,3 +161,6 @@ foreach ($openChallenges as $openChallenge) {
     </form>
 </details>
 <script src="<?= e($basePath) ?>/assets/js/play/range-output.js" defer></script>
+<script type="module" src="<?= e($basePath) ?>/assets/js/play/lobby.js" id="lobby-script"
+        data-news-url="<?= e($basePath) ?>/play/news" data-base-path="<?= e($basePath) ?>"
+        data-open-ids="<?= e(implode(',', array_map(fn ($challenge) => $challenge->id, $openChallenges))) ?>"></script>

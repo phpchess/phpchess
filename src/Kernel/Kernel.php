@@ -144,6 +144,7 @@ final class Kernel
                 $this->currentTime(),
                 $this->connectDatabase,
                 $this->mailer,
+                $this->now === null ? (int) floor(microtime(true) * 1000) : null,
             );
             Routes::addApplication($router, $services);
         }
