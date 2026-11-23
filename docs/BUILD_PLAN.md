@@ -20,7 +20,7 @@ The plan is six blocks, split into eleven large chunks.
 | | C0-2 Proofs | the library check, the engine proof, the development environment finished | done (2026-11-22) |
 | 1 Foundation | C1-1 Application core and install | kernel, router, database, migrations, installer, release zip, job runner | done (2026-11-22) |
 | | C1-2 Identity, admin and look | accounts, roles, admin, feature switches, skins, languages (Appearance editor: backlog B3) | done |
-| 2 Product | C2-1 Correspondence chess | rules, the move and game-end functions, challenges, board, ratings, notifications | planned |
+| 2 Product | C2-1 Correspondence chess | rules, the move and game-end functions, challenges, board, ratings, notifications | done (2026-11-23) |
 | | C2-2 Community, school and API | messages, profiles, content, school mode, API v1, PWA, Docker | planned |
 | 3 Live and computer | C3-1 Timed play | clock, lobby, polling transport, limits, measurements | planned |
 | | C3-2 Computer opponent | engine in the browser, selection layer, characters, calibration | planned |

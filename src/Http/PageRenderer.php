@@ -40,6 +40,7 @@ final class PageRenderer
         private readonly string $siteName,
         private readonly ?User $user,
         private readonly Preferences $preferences,
+        private readonly int $unreadNoticeCount = 0,
     ) {
     }
 
@@ -69,6 +70,7 @@ final class PageRenderer
             'language' => $this->translator->language,
             'flashMessages' => $this->takeFlashMessages(),
             'currentPath' => $request->path,
+            'unreadNoticeCount' => $this->unreadNoticeCount,
         ]);
 
         return Response::html($layoutHtml, $status);

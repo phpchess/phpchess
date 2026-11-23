@@ -17,7 +17,7 @@ use PhpChess\Kernel\Services;
  * The logged-in member's own settings: preferences and password (ID-13).
  *
  * Addresses (Routes.php), members only:
- *   GET/POST /account/preferences   language, light/dark, board, pieces, email notices
+ *   GET/POST /account/preferences   language, light/dark, board, pieces, email notices, move emails (A34)
  *   GET/POST /account/password      change the password (the old one is asked for)
  */
 final class PreferencesController
@@ -35,6 +35,8 @@ final class PreferencesController
         return $this->services->pages()->render($request, 'account/preferences', $this->text('preferences.title'), [
             'preferences' => $this->services->preferenceRepository()->findForUser($user->id),
             'languages' => $this->services->translator()->availableLanguages(),
+            'moveEmailModes' => $this->services->moveEmails()->allowedModes(),
+            'moveEmail' => $this->services->moveEmails()->modeFor($user->id),
         ]);
     }
 
@@ -52,6 +54,11 @@ final class PreferencesController
             emailNotices: $request->formValue('email_notices') === 'yes',
         );
         $this->services->preferenceRepository()->save($user->id, $preferences);
+        // How move and challenge emails arrive (A34), among the modes the admin allows.
+        $moveEmail = $request->formValue('move_email');
+        if (in_array($moveEmail, $this->services->moveEmails()->allowedModes(), true)) {
+            $this->services->preferenceRepository()->saveMoveEmail($user->id, $moveEmail);
+        }
 
         return $this->services->pages()->redirectWithMessage($request, '/account/preferences', 'success', $this->text('preferences.saved'));
     }

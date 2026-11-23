@@ -1,0 +1,119 @@
+/*
+ * The play pages (C2-1): board, move list, game buttons, lists, the
+ * notice badge, the QR code. Mobile first (A18): the board fills the
+ * phone's width; on wider screens the move list goes beside it.
+ *
+ * Board colours come from the member's board choice (ID-13):
+ * the frame gets the class board-theme-<name>, which sets two variables
+ * used by both the plain table board (no JavaScript) and cm-chessboard
+ * (style class "phpchess").
+ */
+
+/* --- Board colours per theme --- */
+.board-theme-green { --board-light: #eeeed2; --board-dark: #769656; }
+.board-theme-brown { --board-light: #f0d9b5; --board-dark: #b58863; }
+.board-theme-blue  { --board-light: #dee3e6; --board-dark: #8ca2ad; }
+.board-theme-grey  { --board-light: #e8e8e8; --board-dark: #a0a0a0; }
+
+/* --- The board --- */
+.board-frame {
+    width: 100%;
+    max-width: 36rem;
+    margin: 0 auto;
+    touch-action: none;   /* dragging a piece must not scroll the page */
+}
+
+.cm-chessboard.phpchess .board .square.white { fill: var(--board-light); }
+.cm-chessboard.phpchess .board .square.black { fill: var(--board-dark); }
+.cm-chessboard.phpchess .board .border { fill: var(--board-dark); stroke: var(--board-dark); stroke-width: 0; }
+.cm-chessboard.phpchess .coordinates .coordinate { font-size: 7px; user-select: none; }
+.cm-chessboard.phpchess .coordinates .coordinate.white { fill: var(--board-dark); }
+.cm-chessboard.phpchess .coordinates .coordinate.black { fill: var(--board-light); }
+
+/* The piece under the finger while dragging (see game-page.js: no inline style attributes, K9). */
+.cm-chessboard-draggable-piece { pointer-events: none; position: absolute; z-index: 100; }
+
+/* The board without JavaScript: a table of piece symbols. */
+.text-board {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    aspect-ratio: 1;
+}
+.text-board td {
+    text-align: center;
+    font-size: clamp(1.4rem, 8vw, 2.6rem);
+    line-height: 1;
+    padding: 0;
+    color: #000;
+}
+.text-board .square-light { background: var(--board-light); }
+.text-board .square-dark { background: var(--board-dark); }
+
+/* --- Around the board --- */
+.game-player { margin: 0.4rem 0; font-weight: 600; }
+.game-status { font-size: 1.1rem; margin: 0.6rem 0 0.2rem; }
+.board-tools button { min-width: 2.75rem; min-height: 2.75rem; }
+.move-form input[name="move"] { max-width: 10rem; }
+
+.move-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.5rem;
+    padding: 0;
+    list-style: none;
+}
+.move-number { color: var(--colour-muted-text); margin-right: 0.15rem; }
+.move-button {
+    background: none;
+    border: 0;
+    padding: 0.2rem 0.3rem;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    border-radius: 0.25rem;
+}
+.move-button[aria-current="step"] { background: var(--colour-accent); color: var(--colour-accent-text); }
+
+.game-buttons { margin-top: 1rem; align-items: center; }
+details.confirm summary { cursor: pointer; display: inline-block; }
+.button-danger { background: var(--colour-error); color: #fff; }
+
+@media (min-width: 60rem) {
+    .game-page {
+        display: grid;
+        grid-template-columns: minmax(0, 36rem) 1fr;
+        column-gap: 2rem;
+    }
+    .game-page > * { grid-column: 2; }
+    .game-page > .game-player-top,
+    .game-page > .board-frame,
+    .game-page > .game-player-bottom { grid-column: 1; }
+    .game-page > .game-player-top { grid-row: 1; }
+    .game-page > .board-frame { grid-row: 2 / span 8; }
+    .game-page > .game-player-bottom { grid-row: 10; }
+}
+
+/* --- Lists --- */
+.button-large { font-size: 1.25rem; padding: 0.8rem 2rem; }
+.play-now { margin-bottom: 1.5rem; }
+.game-card-your-move { border-left: 4px solid var(--colour-accent); }
+.notice-unread { font-weight: 600; }
+.badge {
+    display: inline-block;
+    min-width: 1.4em;
+    padding: 0 0.35em;
+    border-radius: 0.7em;
+    background: var(--colour-error);
+    color: #fff;
+    font-size: 0.8em;
+    text-align: center;
+}
+
+.data-table { border-collapse: collapse; width: 100%; }
+.data-table th, .data-table td { text-align: left; padding: 0.4rem 0.5rem; border-bottom: 1px solid var(--colour-border); }
+
+.rating-chart { width: 100%; max-width: 36rem; height: auto; color: var(--colour-accent); }
+
+/* --- Invite QR code --- */
+.qr-frame svg { width: 100%; max-width: 18rem; height: auto; }

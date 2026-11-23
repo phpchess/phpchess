@@ -10,6 +10,7 @@ use PhpChess\Domain\Identity\LoginService;
 use PhpChess\Domain\Identity\PasswordResetService;
 use PhpChess\Domain\Identity\Preferences;
 use PhpChess\Domain\Language\Translator;
+use PhpChess\Domain\Notify\MoveEmails;
 use PhpChess\Domain\Look\Skin;
 use PhpChess\Domain\System\FeatureSwitches;
 use PhpChess\Domain\System\SetupToken;
@@ -53,6 +54,7 @@ final class Services
     private ?Mailer $mailer = null;
     private ?Skin $skin = null;
     private ?PageRenderer $pages = null;
+    private ?PlayParts $play = null;
 
     /**
      * @param Closure(Config): Database $connectDatabase
@@ -177,6 +179,34 @@ final class Services
         return $user === null ? Preferences::defaults() : $this->preferenceRepository()->findForUser($user->id);
     }
 
+    // --- Play (C2-1) ---
+
+    /** Games, challenges, vacations, ratings and notices, built in PlayParts. */
+    public function play(): PlayParts
+    {
+        return $this->play ??= new PlayParts($this->database(), $this->settings());
+    }
+
+    public function moveEmails(): MoveEmails
+    {
+        return new MoveEmails(
+            $this->play()->noticeRepository(),
+            $this->users(),
+            $this->preferenceRepository(),
+            $this->settings(),
+            $this->mailer(),
+            $this->translator(),
+        );
+    }
+
+    /** The badge count of the logged-in user's unread notices (N-01); 0 for visitors. */
+    public function unreadNoticeCount(): int
+    {
+        $user = $this->authentication()->currentUser();
+
+        return $user === null ? 0 : $this->play()->noticeRepository()->countUnread($user->id);
+    }
+
     // --- Mail ---
 
     /** The mailer chosen on the mail settings page: the log file (default) or SMTP (ADM-02). */
@@ -189,11 +219,19 @@ final class Services
             return $this->mailer;
         }
 
-        $settings = $this->settings();
-        $fromAddress = $settings->getString('mail.from_address', 'noreply@' . $this->request->host);
+        return $this->mailer = self::mailerFromSettings($this->settings(), $this->appRoot, $this->request->host);
+    }
+
+    /**
+     * The mailer the settings choose, for a request and for the background
+     * jobs alike: the log file (default) or SMTP (ADM-02).
+     */
+    public static function mailerFromSettings(SettingsRepository $settings, string $appRoot, string $host): Mailer
+    {
+        $fromAddress = $settings->getString('mail.from_address', 'noreply@' . $host);
 
         if ($settings->getString('mail.transport', 'log') === 'smtp') {
-            return $this->mailer = new SmtpMailer(
+            return new SmtpMailer(
                 $settings->getString('mail.smtp_host'),
                 $settings->getInt('mail.smtp_port', 587),
                 $settings->getString('mail.smtp_username'),
@@ -204,7 +242,7 @@ final class Services
             );
         }
 
-        return $this->mailer = new LogFileMailer($this->appRoot . '/storage/logs/mail.log', $fromAddress);
+        return new LogFileMailer($appRoot . '/storage/logs/mail.log', $fromAddress);
     }
 
     // --- Language and look ---
@@ -256,6 +294,7 @@ final class Services
             $this->settings()->getString('site.name', 'phpChess'),
             $this->authentication()->currentUser(),
             $this->currentPreferences(),
+            $this->unreadNoticeCount(),
         );
     }
 }

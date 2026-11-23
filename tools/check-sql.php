@@ -8,6 +8,9 @@
  * database directly, and when code inside src/Infra/ calls PDO's query() or
  * exec() with anything but a fixed text, which could carry input into SQL.
  *
+ * It also keeps contract K3: only GameRepository::writeResult() writes a
+ * game's result, and only the game-end code in Games.php calls it.
+ *
  * Run from the project root:  php tools/check-sql.php
  */
 
@@ -23,6 +26,10 @@ $databaseCalls = '/\$(this->)?(database|pdo)->(query|exec|prepare|run|fetchAll|f
 
 /** PDO calls inside src/Infra/ that build SQL from a variable instead of a fixed text. */
 $unsafePdoCalls = '/->(query|exec)\s*\(\s*(?![\'"]\s*[A-Z])/';
+
+/** The one file allowed to write games.result, and the one allowed to call writeResult() (K3). */
+$resultWriterFile = 'src' . DIRECTORY_SEPARATOR . 'Infra' . DIRECTORY_SEPARATOR . 'Play' . DIRECTORY_SEPARATOR . 'GameRepository.php';
+$gameEndFile = 'src' . DIRECTORY_SEPARATOR . 'Domain' . DIRECTORY_SEPARATOR . 'Play' . DIRECTORY_SEPARATOR . 'Games.php';
 
 // --- Finding the files ---
 
@@ -66,6 +73,13 @@ foreach ($foldersToCheck as $folder) {
             if ($isRepositoryCode && preg_match($unsafePdoCalls, $line) === 1) {
                 $problems[] = "{$path}:{$lineNumber}: PDO query()/exec() with a variable; use run() with parameters (K5)";
             }
+
+            if ($path !== $resultWriterFile && preg_match('/\bSET\b.*\bresult\s*=/', $line) === 1) {
+                $problems[] = "{$path}:{$lineNumber}: writes a game result outside GameRepository::writeResult() (K3)";
+            }
+            if ($path !== $gameEndFile && $path !== $resultWriterFile && str_contains($line, '->writeResult(')) {
+                $problems[] = "{$path}:{$lineNumber}: calls writeResult() outside Games::end() (K3)";
+            }
         }
     }
 }
@@ -73,7 +87,7 @@ foreach ($foldersToCheck as $folder) {
 // --- Result ---
 
 if ($problems === []) {
-    echo "SQL check passed: all SQL is in src/Infra/ and uses prepared statements.\n";
+    echo "SQL check passed: all SQL is in src/Infra/ and uses prepared statements; only Games::end() writes game results (K3).\n";
     exit(0);
 }
 

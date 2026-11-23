@@ -202,6 +202,83 @@ final class UserRepository extends Repository
     }
 
     /**
+     * The ids of the active admins, to tell them about abort requests (A33).
+     *
+     * @return list<int>
+     */
+    public function activeAdminIds(): array
+    {
+        $rows = $this->database->fetchAll(
+            'SELECT id FROM ' . $this->table('users') . " WHERE role = 'admin' AND state = 'active' ORDER BY id",
+        );
+
+        return array_map(fn (array $row): int => self::intOf($row['id']), $rows);
+    }
+
+    // --- Presence (ID-12) ---
+
+    /**
+     * Notes that the user is here now. Written at most once a minute per
+     * user, so a busy page does not write on every request.
+     */
+    public function markSeen(int $userId, int $now): void
+    {
+        $this->database->run(
+            'UPDATE ' . $this->table('users') . ' SET last_seen_at = ? WHERE id = ? AND (last_seen_at IS NULL OR last_seen_at < ?)',
+            [gmdate('Y-m-d H:i:s.000', $now), $userId, gmdate('Y-m-d H:i:s.000', $now - 60)],
+        );
+    }
+
+    /** When the user was last seen on the site (Unix seconds), or null when never. */
+    public function lastSeenAt(int $userId): ?int
+    {
+        return self::timestampOrNull($this->database->fetchValue('SELECT last_seen_at FROM ' . $this->table('users') . ' WHERE id = ?', [$userId]));
+    }
+
+    /**
+     * Ids and names of active accounts, by name, for choosing an opponent.
+     *
+     * @return array<int, string> id => username
+     */
+    public function activeUsernames(int $limit = 500): array
+    {
+        $rows = $this->database->fetchAll(
+            'SELECT id, username FROM ' . $this->table('users') . " WHERE state = 'active' ORDER BY username LIMIT " . max(1, $limit),
+        );
+        $names = [];
+        foreach ($rows as $row) {
+            $names[self::intOf($row['id'])] = self::textOf($row['username']);
+        }
+
+        return $names;
+    }
+
+    /**
+     * The names of some accounts.
+     *
+     * @param list<int> $userIds
+     * @return array<int, string> id => username
+     */
+    public function usernamesOf(array $userIds): array
+    {
+        $userIds = array_values(array_unique($userIds));
+        if ($userIds === []) {
+            return [];
+        }
+        $placeholders = implode(', ', array_fill(0, count($userIds), '?'));
+        $rows = $this->database->fetchAll(
+            'SELECT id, username FROM ' . $this->table('users') . ' WHERE id IN (' . $placeholders . ')',
+            $userIds,
+        );
+        $names = [];
+        foreach ($rows as $row) {
+            $names[self::intOf($row['id'])] = self::textOf($row['username']);
+        }
+
+        return $names;
+    }
+
+    /**
      * Sets one column. $assignment is a fixed text from this class ("state = ?"),
      * never from input; the value is a parameter (K5).
      */

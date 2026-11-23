@@ -47,7 +47,7 @@ Decisions A1–A21 are in [DECISIONS.md](DECISIONS.md).
 | ID-09 | Rename keeps the account id | redesign | C1-2 | — | done |
 | ID-10 | API access tokens per device, revocable in settings | redesign | C2-2 | — | planned |
 | ID-11 | The user's own data export and account deletion | new | C2-2 | — | planned |
-| ID-12 | Presence (online / offline), kept separate from account state | 4.4 | C2-1 | player list visibility | planned |
+| ID-12 | Presence (online / offline), kept separate from account state | 4.4 | C2-1 | player list visibility | built |
 | ID-13 | User preferences: board, pieces, language, notifications | 4.4 | C1-2 | — | done (notification choices come with the notifications) |
 
 ## SCH — School mode (A13)
@@ -64,46 +64,46 @@ Decisions A1–A21 are in [DECISIONS.md](DECISIONS.md).
 ## G — Play
 | Id | Feature | Origin | Chunk | Switch | Status |
 |---|---|---|---|---|---|
-| G-01 | One server rules engine: legality, check, mate, stalemate, threefold repetition, 50-move rule, insufficient material | redesign | C2-1 | — | planned |
-| G-02 | One move function: turn, legality, clock, game end, all in one locked transaction; repeated requests are harmless | redesign | C2-1 | — | planned |
-| G-03 | One game-end function: result plus reason, written once; every way a game ends goes through it | redesign | C2-1 | — | planned |
-| G-04 | Board sized for a phone: drag-and-drop or tap-tap moves, instant feedback, keyboard play on desktop; the server checks every move | redesign | C2-1 | — | planned |
-| G-05 | Open and direct challenges: colour, time control, rated or not, expiry; an open challenge can be accepted only once | redesign | C2-1 | — | planned |
-| G-06 | Game from a custom start position (FEN) | 4.4 | C2-1 | — | planned |
-| G-07 | **One game model**: any time control, from 5+3 up to days per move, in the same kind of game; no separate correspondence and live modes (A19) | redesign | C2-1 | — | planned |
-| G-08 | Vacation in correspondence | new | C2-1 | — | planned |
-| G-09 | Draw offer and acceptance, resignation, abort before the first moves | 4.4 | C2-1 | — | planned |
-| G-10 | **Presence-aware delivery**: while both players are on the game page, moves appear live; if the opponent leaves, they get an in-app or push notice; if they are offline for a set time, a move email. Never duplicated. The player sets their preferences (N-01–N-04) | redesign | C2-1 | — | planned |
-| G-11 | Game archive, game viewer with replay, PGN export | 4.4 | C2-1 | — | planned |
+| G-01 | One server rules engine: legality, check, mate, stalemate, threefold repetition, 50-move rule, insufficient material | redesign | C2-1 | — | built |
+| G-02 | One move function: turn, legality, clock, game end, all in one locked transaction; repeated requests are harmless | redesign | C2-1 | — | built |
+| G-03 | One game-end function: result plus reason, written once; every way a game ends goes through it | redesign | C2-1 | — | built |
+| G-04 | Board sized for a phone: drag-and-drop or tap-tap moves, instant feedback, keyboard play on desktop; the server checks every move | redesign | C2-1 | — | built |
+| G-05 | Open and direct challenges: colour, time control, rated or not, expiry; an open challenge can be accepted only once | redesign | C2-1 | — | built |
+| G-06 | Game from a custom start position (FEN) | 4.4 | C2-1 | — | built |
+| G-07 | **One game model**: any time control, from 5+3 up to days per move, in the same kind of game; no separate correspondence and live modes (A19) | redesign | C2-1 | — | built |
+| G-08 | Vacation in correspondence | new | C2-1 | — | built |
+| G-09 | Draw offer and acceptance, resignation, abort before the first moves | 4.4 | C2-1 | — | built |
+| G-10 | **Presence-aware delivery**: while both players are on the game page, moves appear live; if the opponent leaves, they get an in-app or push notice; if they are offline for a set time, a move email. Never duplicated. The player sets their preferences (N-01–N-04) | redesign | C2-1 | — | built |
+| G-11 | Game archive, game viewer with replay, PGN export | 4.4 | C2-1 | — | built |
 | G-12 | Game chat: off, fixed phrases only, or free | 4.4 | C2-2 | game chat | planned |
-| G-13 | Watching other players' games | 4.4 | C2-1 | player list visibility | planned |
+| G-13 | Watching other players' games | 4.4 | C2-1 | player list visibility | built |
 | G-14 | Clock with base plus increment for the faster controls in G-07; shortest 5+3, admin can raise it (A12) | redesign | C3-1 | — | planned |
 | G-15 | Server-authoritative clock with lag compensation | new | C3-1 | — | planned |
 | G-16 | Lobby: post a game offer, accept one; abort when no first move is made; disconnect handling | new | C3-1 | — | planned |
 | G-17 | Premoves in timed games | new | C3-1 | — | planned |
 | G-18 | Admin limit for the number of live timed games | new | C3-1 | — | planned |
 | G-19 | Conditional (pre-entered) moves in correspondence | new | later | — | planned |
-| G-20 | **One-tap start**: a "Play" button with remembered defaults (time control, rated or not); quick pairing with whoever is waiting, or a challenge to a friend | new | C2-1 | — | planned |
-| G-21 | Invite by share link or QR code (Web Share on phones), e.g. a teacher pairing a class | new | C2-1 | — | planned |
-| G-22 | Rematch with one tap | new | C2-1 | — | planned |
+| G-20 | **One-tap start**: a "Play" button with remembered defaults (time control, rated or not); quick pairing with whoever is waiting, or a challenge to a friend | new | C2-1 | — | built |
+| G-21 | Invite by share link or QR code (Web Share on phones), e.g. a teacher pairing a class | new | C2-1 | — | built |
+| G-22 | Rematch with one tap | new | C2-1 | — | built |
 | G-23 | A game can switch pace when both players agree (e.g. play live while both are online, then continue as correspondence) | new | C3-1 | — | planned |
 
 ## N — Notifications
 | Id | Feature | Origin | Chunk | Switch | Status |
 |---|---|---|---|---|---|
-| N-01 | In-app notices: your move, challenges, messages, tournament rounds; a badge count | redesign | C2-1 | — | planned |
-| N-02 | Move and challenge emails when offline, queued and throttled, with a one-click link to the game | 4.4 | C2-1 | email requirement | planned |
+| N-01 | In-app notices: your move, challenges, messages, tournament rounds; a badge count | redesign | C2-1 | — | built |
+| N-02 | Move and challenge emails when offline, queued and throttled, with a one-click link to the game | 4.4 | C2-1 | email requirement | built |
 | N-03 | Web Push to the installed app (iPhone and Android) and to desktop browsers; opt-in after a tap, revocable | new | C2-2 | push notifications | planned |
 | N-04 | Quiet hours and per-kind choice (push, email, none) | new | C2-2 | — | planned |
 
 ## R — Ratings
 | Id | Feature | Origin | Chunk | Switch | Status |
 |---|---|---|---|---|---|
-| R-01 | Elo per speed (correspondence, rapid, blitz), applied once per game | redesign | C2-1 | — | planned |
-| R-02 | Provisional ratings for new players | new | C2-1 | — | planned |
-| R-03 | Rating history and chart | new | C2-1 | — | planned |
-| R-04 | Rating list, top players, player statistics | 4.4 | C2-1 | player list visibility | planned |
-| R-05 | "Rated" is a property of the game, respected by every way it ends | redesign | C2-1 | — | planned |
+| R-01 | Elo per speed (correspondence, rapid, blitz), applied once per game | redesign | C2-1 | — | built |
+| R-02 | Provisional ratings for new players | new | C2-1 | — | built |
+| R-03 | Rating history and chart | new | C2-1 | — | built |
+| R-04 | Rating list, top players, player statistics | 4.4 | C2-1 | player list visibility | built |
+| R-05 | "Rated" is a property of the game, respected by every way it ends | redesign | C2-1 | — | built |
 
 ## AI — Computer opponent (A14)
 | Id | Feature | Origin | Chunk | Switch | Status |
@@ -164,7 +164,7 @@ Decisions A1–A21 are in [DECISIONS.md](DECISIONS.md).
 | Id | Feature | Origin | Chunk | Switch | Status |
 |---|---|---|---|---|---|
 | API-01 | JSON API v1, used by the web client itself; reads by GET, all changes by POST | redesign | C1-1 (skeleton), C2-2 | — | skeleton done (C1-1, 2026-11-22); rest in C2-2 |
-| API-02 | Polling for game state with `since=<ply>`; ETag/304 on lists | redesign | C2-1 | — | planned |
+| API-02 | Polling for game state with `since=<ply>`; ETag/304 on lists | redesign | C2-1 | — | built |
 | API-03 | Short-poll transport, adaptive interval, behind an interface | new | C3-1 | — | planned |
 | API-04 | Rate limits and one error format for every endpoint | new | C1-1 | — | done (2026-11-22) |
 
@@ -174,7 +174,7 @@ Decisions A1–A21 are in [DECISIONS.md](DECISIONS.md).
 | ADM-01 | Users: list, approve, disable, archive, roles | 4.4 | C1-2 | — | done |
 | ADM-02 | Settings, mail (SMTP, or a mail log file for development and offline installs), feature switches | 4.4 | C1-2 | — | done |
 | ADM-03 | Audit log of admin actions | new | C1-2 | — | done |
-| ADM-04 | Games: list, adjudicate through the game-end function (G-03), admin FEN game setup | 4.4 | C2-1 | — | planned |
+| ADM-04 | Games: list, adjudicate through the game-end function (G-03), admin FEN game setup | 4.4 | C2-1 | — | built |
 | ADM-05 | Content: news, server messages, tips, FAQ, pages | 4.4 | C2-2 | — | planned |
 | ADM-06 | Tournaments: create, edit, run, correct results through the game-end function | 4.4 | C4-1 | — | planned |
 | ADM-07 | Newsletter to all users (admin only, queued, throttled) | 4.4 | C2-2 | — | planned |

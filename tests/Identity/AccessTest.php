@@ -47,6 +47,11 @@ final class AccessTest extends TestCase
 
         foreach ($this->routesWith([Access::MEMBERS, Access::ADMINS, Access::ADMINS_BEFORE_CONFIRMATION]) as $route) {
             $response = $this->open($browser, $route);
+            if (str_starts_with($route->pattern, '/api/')) {
+                // The API answers in JSON instead of sending to the login page.
+                self::assertSame(401, $response->status, "{$route->method} {$route->pattern}");
+                continue;
+            }
             self::assertSame(303, $response->status, "{$route->method} {$route->pattern}");
             self::assertStringContainsString('/chess/login?next=', $response->header('Location'), "{$route->method} {$route->pattern}");
         }

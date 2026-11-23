@@ -11,6 +11,13 @@ use PhpChess\Domain\Look\Skin;
 use PhpChess\Domain\System\FeatureSwitches;
 use PhpChess\Http\Template;
 use PhpChess\Tests\Support\TestInstallFolder;
+use PhpChess\Domain\Chess\Rules;
+use PhpChess\Domain\Notify\MoveEmails;
+use PhpChess\Domain\Notify\Notices;
+use PhpChess\Domain\Play\Challenge;
+use PhpChess\Domain\Play\Game;
+use PhpChess\Domain\Play\Games;
+use PhpChess\Domain\Rating\Ratings;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -72,6 +79,43 @@ final class LanguageAndLookTest extends TestCase
         foreach ($translator->availableLanguages() as $language) {
             $keys[] = 'language.' . $language;
         }
+
+        // --- Play (C2-1) ---
+        foreach ([Challenge::KIND_OPEN, Challenge::KIND_DIRECT, Challenge::KIND_INVITE] as $kind) {
+            $keys[] = 'challenge.yours.' . $kind;
+        }
+        foreach (Challenge::COLOURS as $colour) {
+            $keys[] = 'challenge.colour.' . $colour;
+        }
+        foreach (MoveEmails::MODES as $mode) {
+            $keys[] = 'move_email.' . $mode;
+        }
+        foreach (Games::ABORT_RULES as $rule) {
+            $keys[] = 'admin.play.abort_rule.' . $rule;
+        }
+        foreach (array_keys(Ratings::STRENGTH_BANDS) as $band) {
+            $keys[] = 'register.strength.' . $band;
+        }
+        foreach ([Game::RESULT_WHITE_WON, Game::RESULT_BLACK_WON, Game::RESULT_DRAW, Game::RESULT_ABORTED] as $result) {
+            $keys[] = 'result.' . $result;
+        }
+        $endReasons = [
+            Rules::ENDING_CHECKMATE, Rules::ENDING_STALEMATE, Rules::ENDING_INSUFFICIENT_MATERIAL,
+            Rules::ENDING_THREEFOLD_REPETITION, Rules::ENDING_FIFTY_MOVES,
+            Games::REASON_RESIGNATION, Games::REASON_DRAW_AGREED, Games::REASON_ABORTED,
+            Games::REASON_ABORT_COUNTED_AS_LOSS, Games::REASON_TIMEOUT, Games::REASON_TIMEOUT_DRAW, 'adjudicated',
+        ];
+        foreach ($endReasons as $reason) {
+            $keys[] = 'end_reason.' . $reason;
+        }
+        $noticeKinds = [
+            Notices::YOUR_MOVE, Notices::GAME_ENDED, Notices::DRAW_OFFERED, Notices::REMATCH_OFFERED,
+            Notices::CHALLENGE_RECEIVED, Notices::CHALLENGE_ACCEPTED, Notices::ABORT_REQUESTED,
+        ];
+        foreach ($noticeKinds as $kind) {
+            $keys[] = 'notice.' . $kind;
+        }
+        $keys[] = 'ratings.speed.' . Game::SPEED_CORRESPONDENCE;
 
         foreach ($keys as $key) {
             self::assertTrue($translator->hasKey($key), $key);

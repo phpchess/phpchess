@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PhpChess\Kernel;
 
 use PhpChess\Domain\System\FeatureSwitches;
+use PhpChess\Http\Api\V1\GamesController as ApiGamesController;
 use PhpChess\Http\Api\V1\StatusController;
 use PhpChess\Http\Request;
 use PhpChess\Http\Response;
@@ -12,9 +13,16 @@ use PhpChess\Http\Web\AccountController;
 use PhpChess\Http\Web\Admin\AdminPages;
 use PhpChess\Http\Web\Admin\AuditController;
 use PhpChess\Http\Web\Admin\DashboardController;
+use PhpChess\Http\Web\Admin\GamesController as AdminGamesController;
 use PhpChess\Http\Web\Admin\SettingsController;
 use PhpChess\Http\Web\Admin\UsersController;
 use PhpChess\Http\Web\HomeController;
+use PhpChess\Http\Web\Play\ChallengeController;
+use PhpChess\Http\Web\Play\GameController;
+use PhpChess\Http\Web\Play\NoticeController;
+use PhpChess\Http\Web\Play\PlayPages;
+use PhpChess\Http\Web\Play\RatingController;
+use PhpChess\Http\Web\Play\VacationController;
 use PhpChess\Http\Web\PreferencesController;
 use PhpChess\Http\Web\SkinController;
 use PhpChess\Install\InstallerController;
@@ -53,6 +61,14 @@ final class Routes
         $users = new UsersController($services, $adminPages);
         $settings = new SettingsController($services, $adminPages);
         $audit = new AuditController($services, $adminPages);
+        $adminGames = new AdminGamesController($services, $adminPages);
+        $playPages = new PlayPages($services);
+        $games = new GameController($services, $playPages);
+        $challenges = new ChallengeController($services, $playPages);
+        $ratings = new RatingController($services, $playPages);
+        $notices = new NoticeController($services, $playPages);
+        $vacation = new VacationController($services, $playPages);
+        $playerList = FeatureSwitches::PLAYER_LIST_VISIBILITY;
 
         // --- Pages for everyone ---
         $router->get('/', fn (Request $request): Response => $home->home($request));
@@ -80,6 +96,41 @@ final class Routes
         $router->get('/account/password', fn (Request $request): Response => $preferences->showPasswordForm($request), Access::MEMBERS);
         $router->post('/account/password', fn (Request $request): Response => $preferences->changePassword($request), Access::MEMBERS);
 
+        // --- Play: challenges, the Play button and invites (G-05, G-20, G-21) ---
+        $router->get('/play', fn (Request $request): Response => $challenges->lobby($request), Access::MEMBERS);
+        $router->post('/play/quick', fn (Request $request): Response => $challenges->quickPlay($request), Access::MEMBERS);
+        $router->post('/challenges', fn (Request $request): Response => $challenges->create($request), Access::MEMBERS);
+        $router->post('/challenges/{id}/accept', fn (Request $request, array $parts): Response => $challenges->accept($request, $parts), Access::MEMBERS);
+        $router->post('/challenges/{id}/decline', fn (Request $request, array $parts): Response => $challenges->decline($request, $parts), Access::MEMBERS);
+        $router->post('/challenges/{id}/cancel', fn (Request $request, array $parts): Response => $challenges->cancel($request, $parts), Access::MEMBERS);
+        $router->get('/challenges/{id}/invite', fn (Request $request, array $parts): Response => $challenges->showNewInvite($request, $parts), Access::MEMBERS);
+        $router->get('/invite/{token}', fn (Request $request, array $parts): Response => $challenges->showInvite($request, $parts));
+        $router->post('/invite/{token}', fn (Request $request, array $parts): Response => $challenges->acceptInvite($request, $parts), Access::MEMBERS);
+
+        // --- Games: board, moves, buttons, archive, watching, PGN (G-02 to G-13, G-22) ---
+        $router->get('/games', fn (Request $request): Response => $games->myGames($request), Access::MEMBERS);
+        $router->get('/games/watch', fn (Request $request): Response => $games->watchList($request), Access::MEMBERS, $playerList);
+        $router->get('/games/{id}', fn (Request $request, array $parts): Response => $games->show($request, $parts), Access::MEMBERS);
+        $router->get('/games/{id}/state', fn (Request $request, array $parts): Response => $games->state($request, $parts), Access::MEMBERS);
+        $router->get('/games/{id}/pgn', fn (Request $request, array $parts): Response => $games->pgn($request, $parts), Access::MEMBERS);
+        $router->post('/games/{id}/move', fn (Request $request, array $parts): Response => $games->move($request, $parts), Access::MEMBERS);
+        $router->post('/games/{id}/resign', fn (Request $request, array $parts): Response => $games->resign($request, $parts), Access::MEMBERS);
+        $router->post('/games/{id}/draw/offer', fn (Request $request, array $parts): Response => $games->offerDraw($request, $parts), Access::MEMBERS);
+        $router->post('/games/{id}/draw/accept', fn (Request $request, array $parts): Response => $games->acceptDraw($request, $parts), Access::MEMBERS);
+        $router->post('/games/{id}/draw/decline', fn (Request $request, array $parts): Response => $games->declineDraw($request, $parts), Access::MEMBERS);
+        $router->post('/games/{id}/abort', fn (Request $request, array $parts): Response => $games->abort($request, $parts), Access::MEMBERS);
+        $router->post('/games/{id}/abort/request', fn (Request $request, array $parts): Response => $games->requestAbort($request, $parts), Access::MEMBERS);
+        $router->post('/games/{id}/rematch', fn (Request $request, array $parts): Response => $games->rematch($request, $parts), Access::MEMBERS);
+
+        // --- Ratings (R-03, R-04), notices (N-01), vacation (G-08) ---
+        $router->get('/ratings', fn (Request $request): Response => $ratings->list($request), Access::MEMBERS, $playerList);
+        $router->get('/players/{id}/ratings', fn (Request $request, array $parts): Response => $ratings->history($request, $parts), Access::MEMBERS, $playerList);
+        $router->get('/notices', fn (Request $request): Response => $notices->list($request), Access::MEMBERS);
+        $router->post('/notices/read-all', fn (Request $request): Response => $notices->markAllRead($request), Access::MEMBERS);
+        $router->get('/account/vacation', fn (Request $request): Response => $vacation->show($request), Access::MEMBERS);
+        $router->post('/account/vacation', fn (Request $request): Response => $vacation->take($request), Access::MEMBERS);
+        $router->post('/account/vacation/cancel', fn (Request $request): Response => $vacation->cancel($request), Access::MEMBERS);
+
         // --- Admin (ADM-01 to ADM-03, SCH-01, INS-06); the password is confirmed first (ID-08) ---
         $router->get('/admin/confirm', fn (Request $request): Response => $dashboard->showConfirm($request), Access::ADMINS_BEFORE_CONFIRMATION);
         $router->post('/admin/confirm', fn (Request $request): Response => $dashboard->confirm($request), Access::ADMINS_BEFORE_CONFIRMATION);
@@ -100,9 +151,20 @@ final class Routes
         $router->get('/admin/switches', fn (Request $request): Response => $settings->showSwitches($request), Access::ADMINS);
         $router->post('/admin/switches', fn (Request $request): Response => $settings->saveSwitches($request), Access::ADMINS);
         $router->get('/admin/audit', fn (Request $request): Response => $audit->list($request), Access::ADMINS);
+        $router->get('/admin/games', fn (Request $request): Response => $adminGames->list($request), Access::ADMINS);
+        $router->post('/admin/games/new', fn (Request $request): Response => $adminGames->create($request), Access::ADMINS);
+        $router->post('/admin/games/{id}/adjudicate', fn (Request $request, array $parts): Response => $adminGames->adjudicate($request, $parts), Access::ADMINS);
+        $router->get('/admin/play', fn (Request $request): Response => $adminGames->showSettings($request), Access::ADMINS);
+        $router->post('/admin/play', fn (Request $request): Response => $adminGames->saveSettings($request), Access::ADMINS);
 
-        // --- API v1 (API-01) ---
+        // --- API v1: status (API-01) ---
         $apiStatus = new StatusController();
         $router->get('/api/v1/status', fn (Request $request): Response => $apiStatus->status($request));
+
+        // --- API v1: games (API-02) ---
+        $apiGames = new ApiGamesController($services);
+        $router->get('/api/v1/games', fn (Request $request): Response => $apiGames->list($request), Access::MEMBERS);
+        $router->get('/api/v1/games/{id}', fn (Request $request, array $parts): Response => $apiGames->show($request, $parts), Access::MEMBERS);
+        $router->post('/api/v1/games/{id}/move', fn (Request $request, array $parts): Response => $apiGames->move($request, $parts), Access::MEMBERS);
     }
 }

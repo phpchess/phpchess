@@ -3,6 +3,7 @@
  * The member's preferences (ID-13): language, light/dark, board, pieces, email notices.
  *
  * Variables: $preferences (Preferences), $languages (list of string),
+ * $moveEmailModes (list of string, the admin's choices), $moveEmail (string),
  * $basePath, $csrfToken, $t.
  */
 
@@ -47,7 +48,16 @@ use PhpChess\Domain\Identity\Preferences;
 
     <label class="checkbox"><input type="checkbox" name="email_notices" value="yes"<?= $preferences->emailNotices ? ' checked' : '' ?>> <?= e($t->text('preferences.email_notices')) ?></label>
 
+    <label><?= e($t->text('preferences.move_email')) ?>
+        <select name="move_email">
+            <?php foreach ($moveEmailModes as $mode) : ?>
+                <option value="<?= e($mode) ?>"<?= $mode === $moveEmail ? ' selected' : '' ?>><?= e($t->text('move_email.' . $mode)) ?></option>
+            <?php endforeach; ?>
+        </select>
+    </label>
+
     <button type="submit"><?= e($t->text('preferences.button')) ?></button>
 </form>
 
 <p><a href="<?= e($basePath) ?>/account/password"><?= e($t->text('password.title')) ?></a></p>
+<p><a href="<?= e($basePath) ?>/account/vacation"><?= e($t->text('vacation.title')) ?></a></p>

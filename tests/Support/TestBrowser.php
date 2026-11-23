@@ -56,6 +56,42 @@ final class TestBrowser
     }
 
     /**
+     * Opens a page with extra request headers (names in lower case are added for you).
+     *
+     * @param array<string, string> $headers
+     */
+    public function getWithHeaders(string $path, array $headers): Response
+    {
+        return $this->send(new Request('GET', $path, $this->basePath, headers: self::lowerCaseNames($headers), cookies: $this->cookies, host: 'example.test'));
+    }
+
+    /**
+     * Sends a form as the board script does: asking for a JSON answer.
+     *
+     * @param array<string, string> $fields
+     */
+    public function postJson(string $path, array $fields = []): Response
+    {
+        $fields['_csrf'] ??= $this->lastCsrfToken;
+
+        return $this->send(new Request('POST', $path, $this->basePath, form: $fields, headers: ['accept' => 'application/json'], cookies: $this->cookies, host: 'example.test'));
+    }
+
+    /**
+     * @param array<string, string> $headers
+     * @return array<string, string>
+     */
+    private static function lowerCaseNames(array $headers): array
+    {
+        $lowerCased = [];
+        foreach ($headers as $name => $value) {
+            $lowerCased[strtolower($name)] = $value;
+        }
+
+        return $lowerCased;
+    }
+
+    /**
      * Loads a page first, then sends its form: the usual way a person fills in a form.
      *
      * @param array<string, string> $fields

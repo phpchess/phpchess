@@ -13,12 +13,19 @@ use PhpChess\Http\Template;
 use PhpChess\Infra\Database;
 use PhpChess\Infra\Identity\LoginAttemptRepository;
 use PhpChess\Infra\Identity\TokenRepository;
+use PhpChess\Domain\Notify\MoveEmails;
+use PhpChess\Domain\System\FeatureSwitches;
+use PhpChess\Infra\Identity\PreferenceRepository;
+use PhpChess\Infra\Identity\UserRepository;
 use PhpChess\Infra\Jobs\CleanupJob;
+use PhpChess\Infra\Jobs\GameClockJob;
+use PhpChess\Infra\Jobs\MoveEmailJob;
 use PhpChess\Infra\Jobs\JobRunner;
 use PhpChess\Infra\Mail\Mailer;
 use PhpChess\Infra\System\JobRepository;
 use PhpChess\Infra\System\RateLimiter;
 use PhpChess\Infra\System\SettingsRepository;
+use PhpChess\Domain\Language\Translator;
 use PhpChess\Install\InstallerController;
 use RuntimeException;
 use Throwable;
@@ -174,10 +181,15 @@ final class Kernel
             }
         }
 
-        // 7. The controller answers (K13: its Response is the end of the request).
+        // 7. Presence (ID-12) and the site address for emails sent by jobs.
+        if ($services !== null) {
+            $this->notePresenceAndAddress($request, $services);
+        }
+
+        // 8. The controller answers (K13: its Response is the end of the request).
         $response = ($route->handler)($request, $match->pathParts);
 
-        // 8. Cookies the login set or rotated (remember-me, ID-05).
+        // 9. Cookies the login set or rotated (remember-me, ID-05).
         return $services === null ? $response : $this->withAuthenticationCookies($response, $services);
     }
 
@@ -220,6 +232,22 @@ final class Kernel
         return null;
     }
 
+    /**
+     * Notes that the logged-in user is here (presence, ID-12; written at most
+     * once a minute), and remembers the site's address (setting
+     * site.base_url) so the background jobs can put links in emails.
+     */
+    private function notePresenceAndAddress(Request $request, Services $services): void
+    {
+        $user = $services->authentication()->currentUser();
+        if ($user !== null) {
+            $services->users()->markSeen($user->id, $this->currentTime());
+        }
+        if (!$request->isApi() && $request->host !== '' && $services->settings()->getString('site.base_url') !== $request->baseUrl()) {
+            $services->settings()->set('site.base_url', $request->baseUrl());
+        }
+    }
+
     private function withAuthenticationCookies(Response $response, Services $services): Response
     {
         foreach ($services->authentication()->cookiesToSet() as $cookie) {
@@ -252,17 +280,33 @@ final class Kernel
     public function jobRunner(): JobRunner
     {
         $database = $this->database();
+        $settings = new SettingsRepository($database);
+        $play = new PlayParts($database, $settings);
+        $mailer = $this->mailer ?? Services::mailerFromSettings($settings, $this->appRoot, 'localhost');
+        $translator = new Translator($this->appRoot . '/lang', $settings->getString('site.language', Translator::FALLBACK_LANGUAGE));
+        $moveEmails = new MoveEmails(
+            $play->noticeRepository(),
+            new UserRepository($database),
+            new PreferenceRepository($database),
+            $settings,
+            $mailer,
+            $translator,
+        );
 
         return new JobRunner(
             $database,
-            new SettingsRepository($database),
+            $settings,
             new JobRepository($database),
-            [new CleanupJob(
-                $database,
-                $this->appRoot . '/storage/logs',
-                new TokenRepository($database),
-                new LoginAttemptRepository($database),
-            )],
+            [
+                new CleanupJob(
+                    $database,
+                    $this->appRoot . '/storage/logs',
+                    new TokenRepository($database),
+                    new LoginAttemptRepository($database),
+                ),
+                new GameClockJob($play->games(), $play->gameRepository(), $play->challengeRepository(), $this->now),
+                new MoveEmailJob($moveEmails, new FeatureSwitches($settings), $settings, $this->now),
+            ],
         );
     }
 

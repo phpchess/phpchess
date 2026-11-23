@@ -55,6 +55,58 @@ final class PreferenceRepository extends Repository
         );
     }
 
+    // --- Move emails (A34) and the "Play" defaults (G-20) ---
+
+    /** The player's move-email choice; '' means "the site's default". */
+    public function moveEmailFor(int $userId): string
+    {
+        $value = $this->database->fetchValue('SELECT move_email FROM ' . $this->table('user_preferences') . ' WHERE user_id = ?', [$userId]);
+
+        return self::text($value);
+    }
+
+    public function saveMoveEmail(int $userId, string $mode): void
+    {
+        $this->ensureRow($userId);
+        $this->database->run('UPDATE ' . $this->table('user_preferences') . ' SET move_email = ? WHERE user_id = ?', [$mode, $userId]);
+    }
+
+    /**
+     * The remembered settings of the "Play" button.
+     *
+     * @return array{days_per_move: int, rated: bool}
+     */
+    public function playDefaults(int $userId): array
+    {
+        $row = $this->database->fetchRow(
+            'SELECT play_days_per_move, play_rated FROM ' . $this->table('user_preferences') . ' WHERE user_id = ?',
+            [$userId],
+        );
+        if ($row === null) {
+            return ['days_per_move' => 3, 'rated' => true];
+        }
+
+        return ['days_per_move' => (int) self::text($row['play_days_per_move']), 'rated' => (int) self::text($row['play_rated']) === 1];
+    }
+
+    public function savePlayDefaults(int $userId, int $daysPerMove, bool $isRated): void
+    {
+        $this->ensureRow($userId);
+        $this->database->run(
+            'UPDATE ' . $this->table('user_preferences') . ' SET play_days_per_move = ?, play_rated = ? WHERE user_id = ?',
+            [$daysPerMove, $isRated ? 1 : 0, $userId],
+        );
+    }
+
+    /** Makes the user's row with the defaults, if there is none yet. */
+    private function ensureRow(int $userId): void
+    {
+        $this->database->run(
+            'INSERT IGNORE INTO ' . $this->table('user_preferences') . ' (user_id, updated_at) VALUES (?, UTC_TIMESTAMP(3))',
+            [$userId],
+        );
+    }
+
     private static function text(mixed $value): string
     {
         return is_scalar($value) ? (string) $value : '';

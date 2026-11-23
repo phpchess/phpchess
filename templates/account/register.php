@@ -28,6 +28,15 @@
     <label><?= e($t->text('account.password_again')) ?>
         <input type="password" name="password_again" autocomplete="new-password" required minlength="10">
     </label>
+    <label><?= e($t->text('register.strength')) ?>
+        <select name="strength">
+            <?php foreach (array_keys(\PhpChess\Domain\Rating\Ratings::STRENGTH_BANDS) as $band) : ?>
+                <option value="<?= e($band) ?>"><?= e($t->text('register.strength.' . $band)) ?></option>
+            <?php endforeach; ?>
+        </select>
+    </label>
+    <p class="hint"><?= e($t->text('register.strength_hint')) ?></p>
+
     <button type="submit"><?= e($t->text('register.button')) ?></button>
 </form>
 

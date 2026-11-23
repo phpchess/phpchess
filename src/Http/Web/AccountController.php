@@ -65,6 +65,9 @@ final class AccountController
             return $this->registrationForm($request, $username, $email, $this->text($refusal->languageKey, $refusal->values), 422);
         }
 
+        // The player's own idea of their strength sets the start rating (A30).
+        $this->services->play()->ratings()->setStartFromBand($user->id, $request->formValue('strength', 'unknown'));
+
         $messageKey = match (true) {
             $user->isActive() => 'register.done_active',
             $this->services->accountService()->whyPending($user) === 'login.email_not_verified' => 'register.done_check_email',
