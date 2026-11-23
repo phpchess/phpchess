@@ -12,10 +12,16 @@
  *             (K1); on a refusal the board goes back to the server's position.
  *             While the move is on its way the board is dimmed and takes no
  *             input. The opponent's moves come in live (live-updates.js).
- *   replay    The replay bar steps and plays through the game; tapping a move
- *             in the list also starts replay at that move.
- *   planning  A board in other colours with its own title: try moves for both
- *             sides; nothing is sent. "Close planning board" goes back.
+ *   replay    The replay bar steps and plays through the game; the moves are
+ *             a table (number | White | Black), each move clickable; tapping a
+ *             move in play mode also starts replay at that move.
+ *   planning  Try moves for both sides; nothing is sent. "Close planning
+ *             board" goes back.
+ *   Replay and planning show a title over the board and the admin's second
+ *   board colours, so they can not be taken for the live board.
+ *
+ * Above the board the clock counts down to the move deadline: days and
+ * hours while there is more than a day left, then hours:minutes:seconds.
  *
  * Libraries (local, A16): cm-chessboard 8.15.8 and chess.js 1.4.0 in /assets/vendor/.
  */
@@ -41,6 +47,9 @@ const replayTools = document.getElementById('replay-tools');
 const planningTools = document.getElementById('planning-tools');
 const planningTitle = document.getElementById('planning-title');
 const movePanel = document.getElementById('move-panel');
+const moveList = document.getElementById('move-list');
+const moveTable = document.getElementById('move-table');
+const clock = document.getElementById('game-clock');
 
 const MODE_PLAY = 'play';
 const MODE_REPLAY = 'replay';
@@ -121,13 +130,15 @@ function showMode(newMode) {
     playTools.hidden = mode !== MODE_PLAY;
     replayTools.hidden = mode !== MODE_REPLAY;
     planningTools.hidden = mode !== MODE_PLANNING;
-    planningTitle.hidden = mode !== MODE_PLANNING;
     movePanel.hidden = mode === MODE_PLANNING;
 
-    // The planning board gets the admin's planning colours instead of the member's own.
-    const theme = mode === MODE_PLANNING ? page.dataset.planningBoardTheme : page.dataset.boardTheme;
-    boardFrame.className = 'board-frame board-theme-' + theme + (mode === MODE_PLANNING ? ' is-planning' : '');
+    // Replay and planning get a title and the admin's second colours instead of the member's own.
+    const isOffBoard = mode !== MODE_PLAY;
+    const theme = isOffBoard ? page.dataset.planningBoardTheme : page.dataset.boardTheme;
+    boardFrame.className = 'board-frame board-theme-' + theme + (isOffBoard ? ' is-off-board' : '');
     planningTitle.className = 'planning-title board-theme-' + page.dataset.planningBoardTheme;
+    planningTitle.hidden = !isOffBoard;
+    planningTitle.textContent = mode === MODE_PLANNING ? page.dataset.textPlanning : page.dataset.textReplay;
 
     if (mode === MODE_PLANNING) {
         planningGame = new Chess(positions[viewedPly]);
@@ -290,6 +301,8 @@ function applyServerState(newState) {
     if (mode === MODE_PLAY) {
         showTurnStatus();
     }
+    clock.dataset.deadline = serverState.move_deadline_at || '';
+    updateClock();
     updateMoveInput();
 }
 
@@ -315,47 +328,93 @@ function showTurnStatus() {
     if (isViewersTurn()) {
         showStatus(page.dataset.textYourMove);
     } else {
-        const moverName = serverState.side_to_move === 'w' ? serverState.white.name : serverState.black.name;
-        showStatus(page.dataset.textWaiting.replace('{name}', moverName));
+        showStatus(serverState.side_to_move === 'w' ? page.dataset.textWaitingWhite : page.dataset.textWaitingBlack);
     }
 }
 
-/** Draws the move list again, numbered like a score sheet; in replay the shown move is marked. */
+/** Draws the moves again: a line in play mode, a table in replay; the shown move is marked. */
 function drawMoveList() {
-    const list = document.getElementById('move-list');
-    list.innerHTML = '';
+    const isTable = mode === MODE_REPLAY;
+    moveList.hidden = isTable;
+    moveTable.hidden = !isTable;
+    moveList.innerHTML = '';
+    const tableBody = moveTable.tBodies[0];
+    tableBody.innerHTML = '';
+
     const startParts = serverState.start_fen.split(' ');
     let moveNumber = parseInt(startParts[5] || '1', 10);
     let isWhiteMove = startParts[1] === 'w';
+    let tableRow = null;
 
     sanMoves.forEach((san, index) => {
-        const item = document.createElement('li');
-        if (isWhiteMove || index === 0) {
-            const number = document.createElement('span');
-            number.className = 'move-number';
-            number.textContent = moveNumber + (isWhiteMove ? '.' : '...');
-            item.appendChild(number);
+        const button = moveButton(san, index + 1);
+
+        if (isTable) {
+            // A new row for each White move (or for the first move, when Black starts).
+            if (isWhiteMove || tableRow === null) {
+                tableRow = tableBody.insertRow();
+                tableRow.insertCell().textContent = String(moveNumber);
+                tableRow.insertCell();
+                tableRow.insertCell();
+            }
+            tableRow.cells[isWhiteMove ? 1 : 2].appendChild(button);
+        } else {
+            const item = document.createElement('li');
+            if (isWhiteMove || index === 0) {
+                const number = document.createElement('span');
+                number.className = 'move-number';
+                number.textContent = moveNumber + (isWhiteMove ? '.' : '...');
+                item.appendChild(number);
+            }
+            item.appendChild(button);
+            moveList.appendChild(item);
         }
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'move-button';
-        button.dataset.ply = String(index + 1);
-        button.textContent = san;
-        if (index + 1 === viewedPly) {
-            button.setAttribute('aria-current', 'step');
-        }
-        item.appendChild(button);
-        list.appendChild(item);
+
         if (!isWhiteMove) {
             moveNumber++;
         }
         isWhiteMove = !isWhiteMove;
     });
 
-    const current = list.querySelector('[aria-current="step"]');
+    const current = movePanel.querySelector('[aria-current="step"]');
     if (current) {
         current.scrollIntoView({block: 'nearest'});
     }
+}
+
+/** One clickable move; the one on the board is marked. */
+function moveButton(san, ply) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'move-button';
+    button.dataset.ply = String(ply);
+    button.textContent = san;
+    if (mode === MODE_REPLAY && ply === viewedPly) {
+        button.setAttribute('aria-current', 'step');
+    }
+    return button;
+}
+
+// --- The clock above the board ---
+
+/** Shows the time left until the move deadline, once a second. */
+function updateClock() {
+    const deadline = clock.dataset.deadline ? Date.parse(clock.dataset.deadline) : NaN;
+    if (serverState.state !== 'running' || Number.isNaN(deadline)) {
+        clock.textContent = '';
+        return;
+    }
+    const secondsLeft = Math.max(0, Math.floor((deadline - Date.now()) / 1000));
+    const days = Math.floor(secondsLeft / 86400);
+    const hours = Math.floor((secondsLeft % 86400) / 3600);
+    const minutes = Math.floor((secondsLeft % 3600) / 60);
+    const seconds = secondsLeft % 60;
+    if (days >= 1) {
+        clock.textContent = page.dataset.textDays.replace('{days}', String(days)).replace('{hours}', String(hours));
+    } else {
+        clock.textContent = [hours, minutes, seconds].map((part) => String(part).padStart(2, '0')).join(':');
+    }
+    clock.classList.toggle('is-short', days === 0 && hours < 12);
 }
 
 // --- Replay (A36) ---
@@ -450,7 +509,10 @@ function uciToMove(uci) {
 
 // --- Starting ---
 
+page.classList.add('has-script');   // shows the buttons that need this script
 setUpBoard();
+updateClock();
+window.setInterval(updateClock, 1000);
 
 page.addEventListener('click', (event) => {
     const toolButton = event.target.closest('[data-board-action]');

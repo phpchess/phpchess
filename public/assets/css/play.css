@@ -17,52 +17,58 @@
 /* Default colours for pages outside a themed area. */
 body { --board-light: #eeeed2; --board-dark: #769656; }
 
-/* --- The game page: a big board, the side panel beside it on wide screens --- */
+/* --- The game page: one column, the board as big as the screen allows --- */
 
-/* The game page may use the whole width; other pages keep their narrow column. */
-.page:has(> .game-page) { max-width: 78rem; }
+/*
+ * The board is a square, so the shorter side of the window decides its size:
+ * never wider than the page, never taller than the window minus the site
+ * header, the player line above and the icon bar below (about 13rem), so
+ * the whole board is always in view without scrolling.
+ */
+.page:has(> .game-page) { max-width: 60rem; }
 @media (max-width: 47.99rem) {
     .page:has(> .game-page) { padding: 0.5rem 0.25rem; }
 }
+.game-page { --board-size: min(100%, calc(100vh - 13rem)); }
+@supports (height: 100dvh) {
+    .game-page { --board-size: min(100%, calc(100dvh - 13rem)); }
+}
+.game-page > * { width: var(--board-size); min-width: 16rem; margin-left: auto; margin-right: auto; }
 
-.game-page { display: block; }
-
-.board-column { width: 100%; }
-
-/* The board fills the width on a phone; on a wide screen it is as big as the window's height allows. */
 .board-frame {
-    width: 100%;
-    margin: 0 auto;
     touch-action: none;   /* dragging a piece must not scroll the page */
     transition: opacity 0.15s;
 }
 .board-frame.is-busy { opacity: 0.6; cursor: progress; }
 
-@media (min-width: 60rem) {
-    .game-page {
-        display: grid;
-        grid-template-columns: minmax(0, auto) minmax(16rem, 22rem);
-        column-gap: 1.5rem;
-        align-items: start;
-        justify-content: center;
-    }
-    .board-column, .board-frame { width: min(calc(100vh - 12rem), 52rem); }
+/* Above the board: White left, the clock in the middle, Black right. */
+.game-header {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.2rem;
 }
+.header-player { display: flex; align-items: center; gap: 0.3rem; min-width: 0; overflow-wrap: anywhere; }
+.header-player-black { justify-content: flex-end; text-align: right; }
+.header-queen { width: 1.8rem; height: 1.8rem; flex: none; }
+.header-clock { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 1.1rem; text-align: center; }
+.header-clock.is-short { color: var(--colour-error); }
+.game-status { text-align: center; margin: 0 auto 0.3rem; }
 
-.player-bar { margin: 0.3rem 0.25rem; }
-
-/* Planning: its own title and colours (the admin's choice), so it can not be taken for the real board. */
+/* Replay and planning: a title in the second board colours over the board, and a frame around it. */
 .planning-title {
-    margin: 0 0 0.4rem;
-    padding: 0.3rem 0.6rem;
-    font-size: 1.1rem;
+    margin-top: 0;
+    margin-bottom: 0.3rem;
+    padding: 0.2rem 0.6rem;
+    font-size: 1rem;
     border-radius: 0.4rem;
     background: var(--board-dark);
     color: #fff;
     text-align: center;
 }
-.planning-tools { text-align: center; }
-.board-frame.is-planning { outline: 4px solid var(--board-dark); outline-offset: 2px; }
+.board-frame.is-off-board { outline: 4px solid var(--board-dark); outline-offset: 2px; }
+.planning-tools, .centred { text-align: center; justify-content: center; }
 
 .cm-chessboard.phpchess .board .square.white { fill: var(--board-light); }
 .cm-chessboard.phpchess .board .square.black { fill: var(--board-dark); }
@@ -104,6 +110,9 @@ body { --board-light: #eeeed2; --board-dark: #769656; }
     margin: 0.5rem 0;
 }
 .icon-bar[hidden] { display: none; }
+.icon-bar-gap { width: 1rem; }
+/* Buttons that need the board script stay hidden without it. */
+.game-page:not(.has-script) .needs-script { display: none; }
 .icon-button {
     display: inline-flex;
     align-items: center;
@@ -126,14 +135,12 @@ body { --board-light: #eeeed2; --board-dark: #769656; }
 .icon-button.is-busy > * { visibility: hidden; }
 .icon-button.is-busy::after { right: 50%; margin-right: -0.5rem; }
 
-/* --- Beside the board --- */
-.game-status { font-size: 1.1rem; margin: 0.6rem 0 0.2rem; }
-.game-buttons { justify-content: flex-start; align-items: center; }
-.offer-box { padding: 0.5rem 0.75rem; border-radius: 0.5rem; background: var(--colour-warning-background); }
-details.confirm { display: inline-block; }
-details.confirm[open] { display: block; }
+/* --- Under the board --- */
+.offer-box { padding: 0.5rem 0.75rem; border-radius: 0.5rem; background: var(--colour-warning-background); text-align: center; }
+.offer-box .button-row { justify-content: center; }
+details.confirm { display: inline-flex; align-items: center; gap: 0.35rem; }
 details.confirm summary { cursor: pointer; }
-.button-danger { background: var(--colour-error); color: #fff; }
+.button-danger { background: var(--colour-error); color: #fff; margin: 0; }
 
 .move-panel[hidden] { display: none; }
 .move-list {
@@ -162,6 +169,14 @@ details.confirm summary { cursor: pointer; }
     cursor: pointer;
     border-radius: 0.25rem;
 }
+/* Replay: the moves as a table, number | White | Black. */
+.move-table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; }
+.move-table[hidden] { display: none; }
+.move-table th, .move-table td { padding: 0.1rem 0.4rem; text-align: left; }
+.move-table tbody tr:nth-child(odd) { background: var(--colour-page-background); }
+.move-table td:first-child { color: var(--colour-muted-text); width: 3rem; }
+.move-panel { max-height: 22rem; overflow-y: auto; }
+
 .move-button[aria-current="step"] { background: var(--colour-accent); color: var(--colour-accent-text); }
 
 /* --- Lists --- */
