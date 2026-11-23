@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PhpChess\Infra\Migration;
 
+use PDOException;
 use PhpChess\Infra\Database;
 use RuntimeException;
 
@@ -134,13 +135,33 @@ final class MigrationRunner
                     return $stepsRun;
                 }
 
-                $this->database->run($this->prepareSql($step));
+                $this->runStep($step);
                 $this->recordStep($migration->number, $stepNumber, $step->name);
                 $stepsRun[] = sprintf('%04d.%d %s', $migration->number, $stepNumber, $step->name);
             }
         }
 
         return $stepsRun;
+    }
+
+    /**
+     * Runs one step. When the request died after an ALTER TABLE but before the
+     * step was recorded, repeating it fails with "duplicate column" (1060) or
+     * "duplicate key" (1061). That only means the step is already done, so it
+     * counts as done. (MySQL 8 has no "ADD COLUMN IF NOT EXISTS".)
+     */
+    private function runStep(MigrationStep $step): void
+    {
+        try {
+            $this->database->run($this->prepareSql($step));
+        } catch (PDOException $error) {
+            $errorInfo = is_array($error->errorInfo) ? $error->errorInfo : [];
+            $driverCode = $errorInfo[1] ?? null;
+            if ($driverCode === 1060 || $driverCode === 1061) {
+                return;
+            }
+            throw $error;
+        }
     }
 
     // --- Checking a step (K11) and filling in table names ---

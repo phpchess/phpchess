@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace PhpChess\Tests\Install;
+namespace PhpChess\Tests\Domain;
 
-use PhpChess\Install\InstallLock;
+use PhpChess\Domain\System\SetupToken;
 use PhpChess\Tests\Support\TestInstallFolder;
 use PHPUnit\Framework\TestCase;
 
 /**
  * Tests the one-time setup token that reopens a locked installer (INS-06).
  */
-final class InstallLockTest extends TestCase
+final class SetupTokenTest extends TestCase
 {
     private TestInstallFolder $folder;
 
@@ -27,7 +27,7 @@ final class InstallLockTest extends TestCase
 
     public function testATokenWorksOnce(): void
     {
-        $lock = new InstallLock($this->folder->path);
+        $lock = new SetupToken($this->folder->path);
         $token = $lock->createSetupToken(1000);
 
         self::assertTrue($lock->useSetupToken($token, 1001));
@@ -36,7 +36,7 @@ final class InstallLockTest extends TestCase
 
     public function testAWrongTokenIsRefused(): void
     {
-        $lock = new InstallLock($this->folder->path);
+        $lock = new SetupToken($this->folder->path);
         $lock->createSetupToken(1000);
 
         self::assertFalse($lock->useSetupToken('wrong', 1001));
@@ -45,7 +45,7 @@ final class InstallLockTest extends TestCase
 
     public function testAnExpiredTokenIsRefused(): void
     {
-        $lock = new InstallLock($this->folder->path);
+        $lock = new SetupToken($this->folder->path);
         $token = $lock->createSetupToken(1000);
 
         self::assertFalse($lock->useSetupToken($token, 1000 + 3601));
@@ -53,7 +53,7 @@ final class InstallLockTest extends TestCase
 
     public function testOnlyTheHashIsStored(): void
     {
-        $lock = new InstallLock($this->folder->path);
+        $lock = new SetupToken($this->folder->path);
         $token = $lock->createSetupToken(1000);
 
         self::assertStringNotContainsString($token, (string) file_get_contents($this->folder->path . '/storage/setup-token.json'));

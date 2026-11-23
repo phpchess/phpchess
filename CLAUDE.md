@@ -25,7 +25,7 @@ A self-hosted chess server (PHP 8.3+, MariaDB/MySQL, plain shared hosting). Comp
 ## Tools
 - PHP: `C:\Users\chriz\CBPROJS\htdocs\xampp\php\php.exe`; Composer: `tools/composer.phar`.
 - Local site: http://pc6.localhost (basic-auth login), serves `public/` only. Databases (A22): `phpchess` (site) and `phpchess_support` (tests); user `pc60`, credentials in `xampp\passwords_pc60.txt`. Tests read the database from `PHPCHESS_TEST_DB_*` environment variables (`tests/Support/TestDatabase.php`).
-- Checks: `php tools/check-headers.php`, `php tools/check-sql.php` (K5), `php tools/check-external-urls.php` (K9); release zip: `php tools/build-release.php --composer="<php> tools/composer.phar"`.
+- Checks: `php tools/check-headers.php`, `php tools/check-sql.php` (K5), `php tools/check-escaping.php` (K6), `php tools/check-external-urls.php` (K9); release zip: `php tools/build-release.php --composer="<php> tools/composer.phar"`.
 
 ## Status
 C0-1, C0-2 and C1-1 done (2026-11-22). Next: **C1-2 Identity, admin and look**. Local test install: `htdocs/pc6sub/phpchess` (database `phpchess`, prefix `phpc_`).

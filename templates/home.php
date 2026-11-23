@@ -1,23 +1,23 @@
 <?php
 /**
- * The start page (a placeholder until chunk C1-2 builds the real one).
+ * The start page (C1-2: a welcome; C2-1 adds the games).
  *
- * Variables: $basePath (string), $version (string).
+ * Variables: $version (string), $registrationIsOpen (bool), $user (User|null),
+ * $basePath, $t (Translator).
  */
 ?>
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>phpChess</title>
-    <link rel="stylesheet" href="<?= e($basePath) ?>/assets/css/base.css">
-</head>
-<body>
-<main class="page">
-    <h1>phpChess</h1>
-    <p class="notice-success">phpChess <?= e($version) ?> is installed and running.</p>
-    <p>Accounts, the admin area and chess play arrive in the next development steps.</p>
-</main>
-</body>
-</html>
+<h1><?= e($t->text('home.heading')) ?></h1>
+
+<?php if ($user === null) : ?>
+    <p><?= e($t->text('home.welcome_visitor')) ?></p>
+    <p class="button-row">
+        <a class="button" href="<?= e($basePath) ?>/login"><?= e($t->text('layout.login')) ?></a>
+        <?php if ($registrationIsOpen) : ?>
+            <a class="button button-secondary" href="<?= e($basePath) ?>/register"><?= e($t->text('register.title')) ?></a>
+        <?php endif; ?>
+    </p>
+<?php else : ?>
+    <p><?= e($t->text('home.welcome_member', ['name' => $user->username])) ?></p>
+<?php endif; ?>
+
+<p class="muted"><?= e($t->text('home.version', ['version' => $version])) ?></p>

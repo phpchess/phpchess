@@ -3,7 +3,7 @@
  * The installer's page frame (INS-02): header, step counter, content.
  *
  * Variables: $title (string), $stepNumber (int, 0 = no step shown),
- * $basePath (string), $content (string, HTML already rendered and escaped).
+ * $basePath (string), $contentHtml (string, HTML already rendered and escaped).
  */
 ?>
 <!doctype html>
@@ -23,7 +23,7 @@
         <?php endif; ?>
     </header>
     <h1><?= e($title) ?></h1>
-    <?= $content /* already-escaped HTML of the step template */ ?>
+    <?= $contentHtml ?>
 </main>
 </body>
 </html>

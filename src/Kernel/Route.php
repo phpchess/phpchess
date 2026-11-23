@@ -9,13 +9,16 @@ use PhpChess\Http\Request;
 use PhpChess\Http\Response;
 
 /**
- * One route: an HTTP method, a path pattern and the code that answers it.
+ * One route: an HTTP method, a path pattern, who may open it, and the code that answers it.
  *
  * Path patterns are plain paths with named parts in braces, for example
  * "/game/{id}". A named part matches one path segment (no "/").
  *
  * Only GET and POST exist (contract K7): GET reads, POST changes. A route that
  * changes state is registered as POST, so the router refuses it on GET.
+ *
+ * "access" says who may open it (Access, K14). "featureSwitch" names the
+ * switch it belongs to; when that switch is off the route answers 404 (K8).
  */
 final class Route
 {
@@ -23,11 +26,15 @@ final class Route
      * @param 'GET'|'POST' $method
      * @param Closure(Request, array<string, string>): Response $handler
      *        receives the request and the named path parts, returns the response
+     * @param string      $access         one of the Access constants
+     * @param string|null $featureSwitch  a FeatureSwitches name, or null when always on
      */
     public function __construct(
         public readonly string $method,
         public readonly string $pattern,
         public readonly Closure $handler,
+        public readonly string $access = Access::EVERYONE,
+        public readonly ?string $featureSwitch = null,
     ) {
     }
 

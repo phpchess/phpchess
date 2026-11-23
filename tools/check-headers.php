@@ -65,7 +65,7 @@ function hasHeaderComment(string $path): bool
         }
 
         $skippable = [T_OPEN_TAG, T_WHITESPACE, T_DECLARE, T_STRING, T_LNUMBER,
-            T_NAMESPACE, T_NAME_QUALIFIED, T_USE, T_COMMENT];
+            T_NAMESPACE, T_NAME_QUALIFIED, T_USE, T_AS, T_COMMENT];
         if (!in_array($type, $skippable, true)) {
             // Real code (a class, a function, an echo) came before any header.
             return false;

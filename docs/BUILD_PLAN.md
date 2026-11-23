@@ -68,10 +68,10 @@ Release 6.0 is C0-1 to C4-2, plus a check on a real shared host before release.
 - **Result (2026-11-22)**: done. The release zip installed into `htdocs/pc6sub/phpchess` in a normal browser, with the database found by the installer (A23); the installer then removed itself. The installer also creates the database when allowed and deletes its own files (A23). A first `users` table (migration 0002) lets it create the admin; C1-2 extends it. The CI install test (`release.yml`) runs on the first push.
 
 ## C1-2 Identity, admin and look
-- **Scope**: ID-01 to ID-09, ID-13, SCH-01, UI-01 to UI-04, UI-06, UI-07, UI-09, ADM-01 to ADM-03.
+- **Scope**: ID-01 to ID-09, ID-13, SCH-01, UI-01, UI-03, UI-04, UI-06, UI-07, UI-09, ADM-01 to ADM-03. UI-02 (the skin editor) moved to the backlog (A25, B3); the skin format is built ready for it.
   - **Accounts**: registration, approval, verification, login, remember-me, reset, account states and roles.
   - **Admin**: re-authentication, the user administration, settings and mail, the feature switches page and the audit log.
-  - **Look**: mobile-first layout (A18), the drag-and-drop base used by later chunks, the default skin, the Appearance page, the responsive layout with dark mode, accessibility, the language files, and the reuse of the 4.4 English strings.
+  - **Look**: mobile-first layout (A18), the drag-and-drop base used by later chunks, the default skin (in the editor-ready format of A25), the responsive layout with dark mode, accessibility, the language files, and the reuse of the 4.4 English strings.
 - **Contracts**: K6, K8, K13, K14.
 - **Tests**:
   - each account flow, including the abuse cases: wrong token, expired token, reuse, throttling;

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="phpChess">
+  <!-- The phpChess default logo: a simple pawn on a rounded square. -->
+  <rect x="2" y="2" width="60" height="60" rx="12" fill="#2f6f4f"/>
+  <circle cx="32" cy="20" r="8" fill="#ffffff"/>
+  <path d="M24 30 h16 l-3 14 h7 v8 H20 v-8 h7 z" fill="#ffffff"/>
+</svg>

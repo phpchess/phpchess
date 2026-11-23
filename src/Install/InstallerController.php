@@ -12,6 +12,7 @@ use PhpChess\Infra\Database;
 use PhpChess\Infra\Identity\UserRepository;
 use PhpChess\Infra\Migration\MigrationRunner;
 use PhpChess\Infra\System\SettingsRepository;
+use PhpChess\Domain\System\SetupToken;
 use PhpChess\Kernel\Config;
 use PhpChess\Kernel\Csrf;
 use PhpChess\Kernel\Session;
@@ -75,7 +76,7 @@ final class InstallerController
 
         if ($config !== null && $config->installed) {
             $token = $request->queryValue('token');
-            if ($token !== '' && (new InstallLock($this->appRoot))->useSetupToken($token, $this->now)) {
+            if ($token !== '' && (new SetupToken($this->appRoot))->useSetupToken($token, $this->now)) {
                 $this->session->renewId();
                 $this->session->set(self::REOPENED, true);
                 $this->session->remove(self::PREFLIGHT_PASSED);
@@ -517,8 +518,8 @@ final class InstallerController
             'basePath' => $request->basePath,
             'csrfToken' => $this->csrf->token(),
         ];
-        $content = $this->template->render($templateName, $variables + $common);
-        $html = $this->template->render('install/layout', $common + ['content' => $content]);
+        $contentHtml = $this->template->render($templateName, $variables + $common);
+        $html = $this->template->render('install/layout', $common + ['contentHtml' => $contentHtml]);
 
         return Response::html($html, $status);
     }

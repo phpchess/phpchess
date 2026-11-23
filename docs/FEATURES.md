@@ -151,7 +151,7 @@ Decisions A1–A21 are in [DECISIONS.md](DECISIONS.md).
 | Id | Feature | Origin | Chunk | Switch | Status |
 |---|---|---|---|---|---|
 | UI-01 | Skins: CSS variables and assets, no code (A5) | redesign | C1-2 | — | planned |
-| UI-02 | Appearance page: create and edit skins in the admin area: logo, colour schemes, fonts, default board and pieces, layout choices, seasonal fun effects; no code changes (A24) | new | C1-2 | — | planned |
+| UI-02 | Appearance page: create and edit skins in the admin area: logo, colour schemes, fonts, default board and pieces, layout choices, seasonal fun effects; no code changes (A24) | new | backlog (B3) | — | planned |
 | UI-03 | Mobile-first layout: phone first, then tablet and desktop; touch targets, one-hand use; dark mode (A18) | new | C1-2 | — | planned |
 | UI-04 | Accessibility: contrast, keyboard, screen-reader labels | new | C1-2 | — | planned |
 | UI-05 | Installable as an app (PWA): home-screen icon, full-screen, start page, app badge | new | C2-2 | — | planned |

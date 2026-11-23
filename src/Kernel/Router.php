@@ -30,20 +30,34 @@ final class Router
      * Adds a route that only reads.
      *
      * @param Closure(Request, array<string, string>): Response $handler
+     * @param string      $access         who may open it (Access)
+     * @param string|null $featureSwitch  the switch it belongs to (K8), or null
      */
-    public function get(string $pattern, Closure $handler): void
+    public function get(string $pattern, Closure $handler, string $access = Access::EVERYONE, ?string $featureSwitch = null): void
     {
-        $this->routes[] = new Route('GET', $pattern, $handler);
+        $this->routes[] = new Route('GET', $pattern, $handler, $access, $featureSwitch);
     }
 
     /**
      * Adds a route that changes something (K7: POST with a CSRF token).
      *
      * @param Closure(Request, array<string, string>): Response $handler
+     * @param string      $access         who may open it (Access)
+     * @param string|null $featureSwitch  the switch it belongs to (K8), or null
      */
-    public function post(string $pattern, Closure $handler): void
+    public function post(string $pattern, Closure $handler, string $access = Access::EVERYONE, ?string $featureSwitch = null): void
     {
-        $this->routes[] = new Route('POST', $pattern, $handler);
+        $this->routes[] = new Route('POST', $pattern, $handler, $access, $featureSwitch);
+    }
+
+    /**
+     * Every registered route, for checks such as "every admin page refuses outsiders" (K14).
+     *
+     * @return list<Route>
+     */
+    public function allRoutes(): array
+    {
+        return $this->routes;
     }
 
     // --- Matching a request ---

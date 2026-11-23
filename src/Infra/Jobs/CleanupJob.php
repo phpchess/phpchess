@@ -5,14 +5,17 @@ declare(strict_types=1);
 namespace PhpChess\Infra\Jobs;
 
 use PhpChess\Infra\Database;
+use PhpChess\Infra\Identity\LoginAttemptRepository;
+use PhpChess\Infra\Identity\TokenRepository;
 
 /**
  * The cleanup job: removes data that is no longer needed (INS-08, retention).
  *
- * In C1-1 it removes old rate-limit counters and old log files. Later chunks
- * add their own cleanup here (expired tokens, old notifications), and C1-2
- * gives admins the cleanup pages that phpChess 4.x had as scripts (A22).
- * Each run deletes a limited number of rows, so it stays short.
+ * Removes old rate-limit counters, expired and used tokens, login attempts
+ * older than 90 days, and old log files. Later chunks add their own cleanup
+ * here (old notifications), and admin cleanup pages like phpChess 4.x's
+ * scripts follow later (A22). Each run deletes a limited number of rows, so
+ * it stays short.
  */
 final class CleanupJob implements Job
 {
@@ -27,6 +30,8 @@ final class CleanupJob implements Job
     public function __construct(
         private readonly Database $database,
         private readonly string $logFolder,
+        private readonly TokenRepository $tokens,
+        private readonly LoginAttemptRepository $loginAttempts,
     ) {
     }
 
@@ -48,9 +53,12 @@ final class CleanupJob implements Job
             . ' LIMIT ' . self::ROWS_PER_RUN,
         )->rowCount();
 
+        $deletedTokens = $this->tokens->deleteOldTokens();
+        $deletedAttempts = $this->loginAttempts->deleteOlderThan90Days();
         $deletedLogs = $this->deleteOldLogFiles();
 
-        return "{$deletedCounters} rate-limit rows and {$deletedLogs} old log files removed";
+        return "{$deletedCounters} rate-limit rows, {$deletedTokens} tokens, {$deletedAttempts} login attempts"
+            . " and {$deletedLogs} old log files removed";
     }
 
     /** Deletes the daily request logs (requests-YYYY-MM-DD.log) older than LOG_KEEP_DAYS. */

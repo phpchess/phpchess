@@ -18,11 +18,13 @@ final class Response
 {
     /**
      * @param array<string, string> $headers  header name => value
+     * @param list<Cookie>          $cookies  cookies to set or remove
      */
     public function __construct(
         public readonly int $status = 200,
         public readonly string $body = '',
         public readonly array $headers = [],
+        public readonly array $cookies = [],
     ) {
     }
 
@@ -66,7 +68,28 @@ final class Response
         $headers = $this->headers;
         $headers[$name] = $value;
 
-        return new self($this->status, $this->body, $headers);
+        return new self($this->status, $this->body, $headers, $this->cookies);
+    }
+
+    /** Returns a copy that also sets (or removes) one cookie. */
+    public function withCookie(Cookie $cookie): self
+    {
+        $cookies = $this->cookies;
+        $cookies[] = $cookie;
+
+        return new self($this->status, $this->body, $this->headers, $cookies);
+    }
+
+    /** The cookie of this name set by this response, or null. */
+    public function cookie(string $name): ?Cookie
+    {
+        foreach ($this->cookies as $cookie) {
+            if ($cookie->name === $name) {
+                return $cookie;
+            }
+        }
+
+        return null;
     }
 
     /** The value of one header, or "" when it is not set. */
@@ -83,6 +106,15 @@ final class Response
         http_response_code($this->status);
         foreach ($this->headers as $name => $value) {
             header($name . ': ' . $value);
+        }
+        foreach ($this->cookies as $cookie) {
+            setcookie($cookie->name, $cookie->value, [
+                'expires' => $cookie->expiresAt,
+                'path' => $cookie->path,
+                'secure' => $cookie->secure,
+                'httponly' => true,
+                'samesite' => 'Lax',
+            ]);
         }
         echo $this->body;
     }

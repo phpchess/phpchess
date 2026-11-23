@@ -57,7 +57,9 @@ final class UnsafeStateCheck
         if (!$isHttps) {
             $warnings[] = 'The site is not using HTTPS, so passwords are sent unprotected.';
         }
-        if (!$this->settings->getBool('mail.configured', false)) {
+        // Only a server that sends email needs it set up (a school may switch email off).
+        $needsMail = $this->settings->getBool('switch.' . FeatureSwitches::EMAIL_REQUIREMENT, true);
+        if ($needsMail && !$this->settings->getBool('mail.configured', false)) {
             $warnings[] = 'Email is not set up yet, so players get no email notices or password resets.';
         }
 

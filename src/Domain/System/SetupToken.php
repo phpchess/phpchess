@@ -2,18 +2,19 @@
 
 declare(strict_types=1);
 
-namespace PhpChess\Install;
+namespace PhpChess\Domain\System;
 
 /**
- * The installer's lock and the one-time setup token (INS-06).
+ * The one-time setup token that reopens the locked installer (INS-06).
  *
  * Once installed (config "installed" = true) the installer refuses to run.
  * To open it again, for example to run the migrations of an update, an admin
- * creates a setup token (from the admin pages, C1-2). The token works once,
+ * creates a setup token on the admin pages (C1-2), uploads the new release
+ * (which brings the installer back), and opens the link. The token works once,
  * for one hour. Only its hash is stored, in storage/setup-token.json, so a
  * leaked storage folder does not give the token away.
  */
-final class InstallLock
+final class SetupToken
 {
     private const int TOKEN_LIFETIME_SECONDS = 3600;
 

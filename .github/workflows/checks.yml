@@ -62,6 +62,9 @@ jobs:
       - name: All SQL in repositories, as prepared statements (K5)
         run: php tools/check-sql.php
 
+      - name: Every printed value is escaped (K6)
+        run: php tools/check-escaping.php
+
       - name: No outside requests from the browser (K9)
         run: php tools/check-external-urls.php
 

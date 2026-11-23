@@ -72,7 +72,14 @@ final class InstallerTest extends TestCase
 
         // Step 5: migrations.
         self::assertStringContainsString('Step 5', $browser->get('/install')->body);
-        self::assertSame(303, $browser->post('/install/migrations')->status);
+        // The steps run in batches of 10; each click runs the next batch, then it moves on (303).
+        $batches = 0;
+        do {
+            $batch = $browser->post('/install/migrations');
+            $batches++;
+        } while ($batch->status === 200 && $batches < 10);
+        self::assertSame(303, $batch->status);
+        self::assertGreaterThan(1, $batches, 'more than one batch: resuming works through the web too');
 
         // Step 6: lock.
         self::assertStringContainsString('Step 6', $browser->get('/install')->body);

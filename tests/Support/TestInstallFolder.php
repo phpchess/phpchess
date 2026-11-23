@@ -24,6 +24,8 @@ final class TestInstallFolder
         $repository = dirname(__DIR__, 2);
         self::copyFolder($repository . '/templates', $this->path . '/templates');
         self::copyFolder($repository . '/migrations', $this->path . '/migrations');
+        self::copyFolder($repository . '/lang', $this->path . '/lang');
+        self::copyFolder($repository . '/skins', $this->path . '/skins');
     }
 
     /** Deletes the folder and everything in it. */

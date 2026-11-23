@@ -1,0 +1,132 @@
+/*
+ * The site's layout: header, menu, cards, admin pages (UI-03 mobile first, UI-04).
+ *
+ * Like base.css, it only uses the skin's CSS variables. The class on <body>
+ * names the skin's layout ("layout-top-bar"); new layouts add their rules
+ * here under their own class.
+ */
+
+/* --- Skip link: the first thing a keyboard user reaches (UI-04) --- */
+.skip-link {
+    position: absolute;
+    left: -999rem;
+}
+
+.skip-link:focus {
+    left: 1rem;
+    top: 1rem;
+    z-index: 10;
+    padding: 0.5rem 1rem;
+    background: var(--colour-surface);
+}
+
+/* Hidden on screen, still read by screen readers. */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+/* --- Header and menu (layout "top-bar") --- */
+.site-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--colour-surface);
+    border-bottom: 1px solid var(--colour-border);
+}
+
+.site-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--colour-text);
+    font-family: var(--font-headings);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.site-menu ul, .admin-menu ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.site-menu a, .admin-menu a, .link-button {
+    display: inline-block;
+    min-height: 2.75rem;
+    margin: 0;
+    padding: 0.6rem 0.75rem;
+    border-radius: 0.4rem;
+    background: none;
+    color: var(--colour-accent);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+[aria-current="page"] {
+    background: var(--colour-page-background);
+    text-decoration: underline;
+}
+
+.site-footer {
+    padding: 1rem;
+    text-align: center;
+    color: var(--colour-muted-text);
+    font-size: 0.85rem;
+}
+
+/* --- Forms --- */
+.inline-form { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin: 0; }
+.form-row { grid-template-columns: 1fr; }
+.checkbox { display: flex !important; align-items: center; gap: 0.5rem; font-weight: normal !important; }
+fieldset { border: 1px solid var(--colour-border); border-radius: 0.5rem; padding: 0.75rem; }
+.button-row { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+.button-secondary {
+    background: var(--colour-surface);
+    color: var(--colour-accent);
+    border: 2px solid var(--colour-accent);
+}
+
+/* --- Feature switches --- */
+.switch-row {
+    display: flex !important;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--colour-border);
+    font-weight: normal !important;
+}
+
+/* --- Cards (lists of users, audit entries) --- */
+.card-list { display: grid; gap: 0.75rem; padding: 0; list-style: none; }
+
+.card {
+    padding: 0.75rem;
+    border: 1px solid var(--colour-border);
+    border-radius: 0.5rem;
+}
+
+.card-title { margin: 0; font-size: 1rem; }
+.card-actions { display: grid; gap: 0.5rem; margin-top: 0.5rem; }
+
+/* --- Admin --- */
+.admin-banner h2 { margin-top: 0; font-size: 1rem; }
+.admin-menu { margin-bottom: 1rem; border-bottom: 1px solid var(--colour-border); }
+.copyable { user-select: all; white-space: pre-wrap; word-break: break-all; }
+
+/* --- Wider screens --- */
+@media (min-width: 48rem) {
+    .form-row { grid-template-columns: 2fr 1fr auto; align-items: end; }
+    .card-actions { display: flex; flex-wrap: wrap; }
+}

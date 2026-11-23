@@ -1,21 +1,32 @@
 /*
- * Base styles for the installer, error and start pages (A18: mobile first).
+ * Base styles for every page (A18 mobile first, UI-01 skins, UI-04 accessibility).
  *
- * Written for a phone first; wider screens only get a centred card.
- * Chunk C1-2 replaces this with the skin system (themes, Appearance page).
+ * Every colour and font is a CSS variable. The skin sets them (/skin/theme.css,
+ * made from skins/<name>/skin.json); the values below are only the fallback
+ * for the installer, which runs before any skin exists. So a skin never needs
+ * CSS of its own: it only names its colours (A25).
+ *
+ * Written for a phone first; wider screens get a centred column.
  */
 
-/* --- Colours --- */
+/* --- Fallback values (the default skin's light colours) --- */
 :root {
-    --text: #1f2328;
-    --muted: #57606a;
-    --background: #f6f7f9;
-    --card: #ffffff;
-    --accent: #2f6f4f;
-    --error: #b42318;
-    --warning: #9a6700;
-    --success: #1a7f37;
-    --border: #d0d7de;
+    --colour-text: #1f2328;
+    --colour-muted-text: #57606a;
+    --colour-page-background: #f6f7f9;
+    --colour-surface: #ffffff;
+    --colour-border: #d0d7de;
+    --colour-accent: #2f6f4f;
+    --colour-accent-text: #ffffff;
+    --colour-error: #b42318;
+    --colour-error-background: #ffebe9;
+    --colour-warning: #7a5200;
+    --colour-warning-background: #fff8c5;
+    --colour-success: #1a7f37;
+    --colour-success-background: #dafbe1;
+    --colour-focus: #0969da;
+    --font-text: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-headings: var(--font-text);
 }
 
 /* --- Page --- */
@@ -23,11 +34,11 @@
 
 body {
     margin: 0;
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-family: var(--font-text);
     font-size: 1rem;
     line-height: 1.5;
-    color: var(--text);
-    background: var(--background);
+    color: var(--colour-text);
+    background: var(--colour-page-background);
 }
 
 .page {
@@ -35,24 +46,37 @@ body {
     min-height: 100vh;
     margin: 0 auto;
     padding: 1rem;
-    background: var(--card);
+    background: var(--colour-surface);
 }
 
 .page-header {
     display: flex;
     justify-content: space-between;
-    color: var(--muted);
+    color: var(--colour-muted-text);
     font-size: 0.9rem;
 }
 
+h1, h2, h3 { font-family: var(--font-headings); }
 h1 { font-size: 1.4rem; margin: 0.5rem 0 1rem; }
+h2 { font-size: 1.15rem; }
+
+a { color: var(--colour-accent); }
 
 pre {
     overflow-x: auto;
     padding: 0.75rem;
     border-radius: 0.5rem;
-    background: var(--background);
+    background: var(--colour-page-background);
     font-size: 0.85rem;
+}
+
+.muted, .hint { color: var(--colour-muted-text); }
+.hint { display: block; font-size: 0.9rem; font-weight: normal; }
+
+/* --- Keyboard focus is always visible (UI-04) --- */
+:focus-visible {
+    outline: 3px solid var(--colour-focus);
+    outline-offset: 2px;
 }
 
 /* --- Check lists --- */
@@ -62,36 +86,38 @@ pre {
     display: grid;
     margin-bottom: 0.5rem;
     padding: 0.4rem 0.75rem;
-    border-left: 0.3rem solid var(--border);
+    border-left: 0.3rem solid var(--colour-border);
 }
 
-.checks .check-passed { border-color: var(--success); }
-.checks .check-failed { border-color: var(--error); }
-.checks .check-warning { border-color: var(--warning); }
-.fix { font-size: 0.9rem; color: var(--muted); }
+.checks .check-passed { border-color: var(--colour-success); }
+.checks .check-failed { border-color: var(--colour-error); }
+.checks .check-warning { border-color: var(--colour-warning); }
+.fix { font-size: 0.9rem; color: var(--colour-muted-text); }
 
 /* --- Notices --- */
 .notice-error,
 .notice-warning,
 .notice-success { padding: 0.75rem; border-radius: 0.5rem; }
 
-.notice-error { background: #ffebe9; color: var(--error); }
-.notice-warning { background: #fff8c5; }
-.notice-success { background: #dafbe1; color: var(--success); }
+.notice-error { background: var(--colour-error-background); color: var(--colour-error); }
+.notice-warning { background: var(--colour-warning-background); color: var(--colour-text); }
+.notice-success { background: var(--colour-success-background); color: var(--colour-success); }
 
-/* --- Forms and buttons: large touch targets --- */
+/* --- Forms and buttons: large touch targets (A18) --- */
 .form { display: grid; gap: 0.75rem; }
 .form label { display: grid; gap: 0.25rem; font-weight: 600; }
 
-input {
+input, select {
     min-height: 2.75rem;
     padding: 0.6rem;
-    border: 1px solid var(--border);
+    border: 1px solid var(--colour-border);
     border-radius: 0.4rem;
+    background: var(--colour-surface);
+    color: var(--colour-text);
     font: inherit;
 }
 
-input[type="checkbox"] { min-height: auto; }
+input[type="checkbox"], input[type="radio"] { min-height: auto; width: 1.25rem; height: 1.25rem; }
 
 button,
 .button {
@@ -101,8 +127,8 @@ button,
     padding: 0.7rem 1.2rem;
     border: 0;
     border-radius: 0.5rem;
-    background: var(--accent);
-    color: #ffffff;
+    background: var(--colour-accent);
+    color: var(--colour-accent-text);
     font: inherit;
     font-weight: 600;
     text-decoration: none;

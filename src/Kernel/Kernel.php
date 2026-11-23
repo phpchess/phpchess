@@ -5,19 +5,22 @@ declare(strict_types=1);
 namespace PhpChess\Kernel;
 
 use Closure;
-use PhpChess\Http\Api\V1\StatusController;
+use PhpChess\Domain\Identity\User;
 use PhpChess\Http\ApiError;
 use PhpChess\Http\Request;
 use PhpChess\Http\Response;
 use PhpChess\Http\Template;
-use PhpChess\Http\Web\HomeController;
 use PhpChess\Infra\Database;
+use PhpChess\Infra\Identity\LoginAttemptRepository;
+use PhpChess\Infra\Identity\TokenRepository;
 use PhpChess\Infra\Jobs\CleanupJob;
 use PhpChess\Infra\Jobs\JobRunner;
+use PhpChess\Infra\Mail\Mailer;
 use PhpChess\Infra\System\JobRepository;
 use PhpChess\Infra\System\RateLimiter;
 use PhpChess\Infra\System\SettingsRepository;
 use PhpChess\Install\InstallerController;
+use RuntimeException;
 use Throwable;
 
 /**
@@ -26,10 +29,13 @@ use Throwable;
  * Called by public/index.php. In the order it runs:
  *   1. load the config; without a finished install, only the installer answers;
  *   2. find the route (404 / 405 otherwise, K7);
- *   3. on POST, check the CSRF token (419 otherwise, K7);
- *   4. on the API, count the request against the rate limit (429, API-04);
- *   5. run the controller, which returns a Response (K13);
- *   6. add the security headers (K9) and write one log line.
+ *   3. a switched-off feature answers 404 (K8);
+ *   4. check who may open the route (Access, K14): login page, 403, or the
+ *      admin's password confirmation (ID-08);
+ *   5. on POST, check the CSRF token (419 otherwise, K7);
+ *   6. on the API, count the request against the rate limit (429, API-04);
+ *   7. run the controller, which returns a Response (K13);
+ *   8. add the cookies, the security headers (K9) and write one log line.
  * Any error on the way is logged and answered with a plain 500 page.
  *
  * After the response has been sent, afterResponse() runs the pseudo-cron (§8).
@@ -47,16 +53,18 @@ final class Kernel
     private ?Database $database = null;
 
     /**
-     * @param string                        $appRoot          the install folder (above public/)
+     * @param string                           $appRoot          the install folder (above public/)
      * @param (Closure(Config): Database)|null $connectDatabase  tests pass their own; default Database::connect
-     * @param (Closure(string): ?string)|null  $fetchUrl         for the installer self-test; tests fake it
-     * @param int|null                      $now              the time to use; tests fix it
+     * @param (Closure(string): ?string)|null  $fetchUrl         for the installer self-test; tests fake it; null = real HTTP
+     * @param int|null                         $now              the time to use; tests fix it
+     * @param Mailer|null                      $mailer           tests pass one that keeps the emails; null = the settings' choice
      */
     public function __construct(
         private readonly string $appRoot,
         ?Closure $connectDatabase = null,
         ?Closure $fetchUrl = null,
         private readonly ?int $now = null,
+        private readonly ?Mailer $mailer = null,
     ) {
         $this->connectDatabase = $connectDatabase ?? Database::connect(...);
         $this->fetchUrl = $fetchUrl;
@@ -89,6 +97,7 @@ final class Kernel
         $this->config = Config::load($this->appRoot);
         $isInstalled = $this->config !== null && $this->config->installed;
         $csrf = new Csrf($session);
+        $services = null;
 
         // 1. Build the list of addresses for this state of the install.
         $router = new Router();
@@ -105,8 +114,18 @@ final class Kernel
             );
             Routes::addInstaller($router, $installer);
         }
-        if ($isInstalled) {
-            Routes::addApplication($router, new HomeController($this->template), new StatusController());
+        if ($this->config !== null && $this->config->installed) {
+            $services = new Services(
+                $this->appRoot,
+                $this->config,
+                $request,
+                $session,
+                $csrf,
+                $this->currentTime(),
+                $this->connectDatabase,
+                $this->mailer,
+            );
+            Routes::addApplication($router, $services);
         }
 
         // 2. Find the route.
@@ -126,24 +145,88 @@ final class Kernel
             return $this->errorResponse($request, 405, 'method_not_allowed', 'This address does not accept this kind of request.')
                 ->withHeader('Allow', implode(', ', $match->allowedMethods));
         }
+        $route = $match->route;
 
-        // 3. Every change needs this session's CSRF token (K7).
-        if ($match->route->method === 'POST' && !$csrf->isValidRequest($request)) {
+        // 3. A switched-off feature does not exist (K8).
+        if ($route->featureSwitch !== null && $services !== null && !$services->switches()->isOn($route->featureSwitch)) {
+            return $this->errorResponse($request, 404, 'not_found', 'There is no page at this address.');
+        }
+
+        // 4. Who may open it (K14, ID-08).
+        if ($services !== null) {
+            $refusal = $this->refuseWithoutAccess($route, $request, $services);
+            if ($refusal !== null) {
+                return $this->withAuthenticationCookies($refusal, $services);
+            }
+        }
+
+        // 5. Every change needs this session's CSRF token (K7).
+        if ($route->method === 'POST' && !$csrf->isValidRequest($request)) {
             return $this->errorResponse($request, 419, 'csrf_failed', 'This form has expired. Please go back, reload the page and try again.');
         }
 
-        // 4. API rate limit (API-04).
-        if ($isInstalled && $request->isApi()) {
-            $limiter = new RateLimiter($this->database());
+        // 6. API rate limit (API-04).
+        if ($services !== null && $request->isApi()) {
             $now = $this->currentTime();
-            if (!$limiter->hit('api:ip:' . $request->clientIp, self::API_REQUESTS_PER_MINUTE, 60, $now)) {
+            if (!$services->rateLimiter()->hit('api:ip:' . $request->clientIp, self::API_REQUESTS_PER_MINUTE, 60, $now)) {
                 return ApiError::response(429, 'rate_limited', 'Too many requests. Please wait a moment.')
                     ->withHeader('Retry-After', (string) RateLimiter::secondsUntilNextWindow(60, $now));
             }
         }
 
-        // 5. The controller answers (K13: its Response is the end of the request).
-        return ($match->route->handler)($request, $match->pathParts);
+        // 7. The controller answers (K13: its Response is the end of the request).
+        $response = ($route->handler)($request, $match->pathParts);
+
+        // 8. Cookies the login set or rotated (remember-me, ID-05).
+        return $services === null ? $response : $this->withAuthenticationCookies($response, $services);
+    }
+
+    /**
+     * Checks the route's Access rule. Returns the refusal, or null when the
+     * visitor may go on:
+     * - not logged in, on a members or admin page: to the login page (401 on the API);
+     * - logged in without the admin role, on an admin page: 403;
+     * - an admin whose password confirmation is older than 30 minutes: to the confirmation page.
+     */
+    private function refuseWithoutAccess(Route $route, Request $request, Services $services): ?Response
+    {
+        if ($route->access === Access::EVERYONE) {
+            return null;
+        }
+
+        $user = $services->authentication()->currentUser();
+        if ($user === null) {
+            if ($request->isApi()) {
+                return ApiError::response(401, 'login_required', 'Please log in first.');
+            }
+
+            return Response::redirect($request->basePath . '/login?next=' . rawurlencode($request->path));
+        }
+
+        if ($route->access === Access::MEMBERS) {
+            return null;
+        }
+
+        if ($user->role !== User::ROLE_ADMIN) {
+            return $this->errorResponse($request, 403, 'forbidden', 'This page is for admins only.');
+        }
+
+        if ($route->access === Access::ADMINS && !$services->authentication()->isAdminConfirmed($this->currentTime())) {
+            $next = $route->method === 'GET' ? $request->path : '/admin';
+
+            return Response::redirect($request->basePath . '/admin/confirm?next=' . rawurlencode($next));
+        }
+
+        return null;
+    }
+
+    private function withAuthenticationCookies(Response $response, Services $services): Response
+    {
+        foreach ($services->authentication()->cookiesToSet() as $cookie) {
+            $response = $response->withCookie($cookie);
+        }
+
+        return $response;
     }
 
     // --- After the response (pseudo-cron, ARCHITECTURE.md §8) ---
@@ -174,7 +257,12 @@ final class Kernel
             $database,
             new SettingsRepository($database),
             new JobRepository($database),
-            [new CleanupJob($database, $this->appRoot . '/storage/logs')],
+            [new CleanupJob(
+                $database,
+                $this->appRoot . '/storage/logs',
+                new TokenRepository($database),
+                new LoginAttemptRepository($database),
+            )],
         );
     }
 
@@ -203,7 +291,7 @@ final class Kernel
         if ($this->database === null) {
             $this->config ??= Config::load($this->appRoot);
             if ($this->config === null) {
-                throw new \RuntimeException('phpChess is not installed yet.');
+                throw new RuntimeException('phpChess is not installed yet.');
             }
             $this->database = ($this->connectDatabase)($this->config);
         }

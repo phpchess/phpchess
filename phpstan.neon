@@ -10,3 +10,5 @@ parameters:
         - tools/check-external-urls.php
         - tools/build-release.php
         - tools/install-test.php
+        - tools/check-escaping.php
+        - tools/import-44-strings.php

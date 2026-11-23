@@ -37,7 +37,7 @@ phpchess6/
     Http/          Request, Response, ApiError, Template, e(); controllers (Web\, Api\V1\)
     Domain/        one folder per module (see §3): services, entities, rules (SystemNSAFESTATECHECK SO FAR)
     Infra/         Database, Repository base, repositories per module (System\, Identity\, ...), Migration\, Jobs\; later mailer, clock, file storage
-    Install/       InstallerController, DatabaseFinder, PreflightCheck, ProtectionSelfTest, InstallLock (deleted after install, A23)
+    Install/       InstallerController, DatabaseFinder, PreflightCheck, ProtectionSelfTest (all deleted after install, A23)
   templates/       plain PHP templates (core); templates/local/ = the server admin's overrides
   migrations/      numbered schema migrations
   lang/            language files per locale
