@@ -87,6 +87,24 @@ final class GameRepository extends Repository
         return $this->toGames($rows);
     }
 
+    /**
+     * The running games where it is the opponent's turn, the latest move first
+     * (the start page's "My games", A44).
+     *
+     * @return list<Game>
+     */
+    public function listOpponentToMove(int $userId, int $limit): array
+    {
+        $rows = $this->database->fetchAll(
+            'SELECT * FROM ' . $this->table('games') . ' WHERE state = ?'
+            . " AND ((white_id = ? AND current_fen LIKE '% b %') OR (black_id = ? AND current_fen LIKE '% w %'))"
+            . ' ORDER BY COALESCE(last_move_at, started_at) DESC, id DESC LIMIT ' . max(1, $limit),
+            [Game::STATE_RUNNING, $userId, $userId],
+        );
+
+        return $this->toGames($rows);
+    }
+
     /** How many running games wait for this player's move (for the pages of the list above). */
     public function countWaitingFor(int $userId): int
     {

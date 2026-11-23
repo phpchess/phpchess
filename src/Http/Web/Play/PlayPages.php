@@ -66,6 +66,11 @@ final class PlayPages
         if ($game->isPlayer($user->id) || $user->isAdmin()) {
             return true;
         }
+        // A teacher may always see their students' games (SCH-06).
+        $rules = $this->services->play()->classRules();
+        if ($user->role === User::ROLE_TEACHER && ($rules->mayLookAfter($user, $game->whiteId) || $rules->mayLookAfter($user, $game->blackId))) {
+            return true;
+        }
 
         return $this->services->switches()->isOn(FeatureSwitches::PLAYER_LIST_VISIBILITY);
     }

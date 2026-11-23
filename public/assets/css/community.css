@@ -1,0 +1,252 @@
+/*
+ * The C2-2 pages: the dashboard (A44), players and profiles, messages,
+ * game chat, content, school pages and login cards, the server message.
+ *
+ * Mobile first (A18): every rule is for a phone; the wider rules come at
+ * the end, under "min-width". Only the skin's CSS variables are used for
+ * colours, so every skin works.
+ */
+
+/* --- A wider page for the dashboard (A44) --- */
+.page.page-wide {
+    max-width: 72rem;
+}
+
+/* --- The dashboard: one column on a phone, two from 52rem --- */
+.dashboard {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.dashboard section {
+    margin-bottom: 1.5rem;
+}
+
+/* --- Simple text lists (open challenges, live games, buddies) --- */
+.text-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.text-list li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.25rem 0.75rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--colour-border);
+}
+
+.button-small {
+    padding: 0.35rem 0.75rem;
+    min-height: 2.25rem;
+    font-size: 0.9rem;
+}
+
+.form-inline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+/* --- The server message (C-07) on every page --- */
+.server-message {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    border-left: 4px solid var(--colour-accent);
+    background: var(--colour-page-background);
+}
+
+/* --- Tip of the day and news (C-06, C-08) --- */
+.tip-of-the-day,
+.news {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--colour-border);
+}
+
+.faq-entry {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--colour-border);
+}
+
+.faq-entry summary {
+    font-weight: bold;
+    cursor: pointer;
+    min-height: 2.75rem;
+    display: flex;
+    align-items: center;
+}
+
+/* --- Avatars and profiles (C-01, C-02) --- */
+.avatar {
+    border-radius: 50%;
+    vertical-align: middle;
+}
+
+.avatar-letter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--colour-accent);
+    color: #fff;
+    font-weight: bold;
+}
+
+.avatar-32 { width: 32px; height: 32px; font-size: 1rem; }
+.avatar-64 { width: 64px; height: 64px; font-size: 1.75rem; }
+.avatar-128 { width: 128px; height: 128px; font-size: 3.5rem; }
+
+.profile-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+}
+
+.avatar-choice {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.avatar-choice label {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.online-dot {
+    display: inline-block;
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    background: var(--colour-success);
+}
+
+/* --- Messages (C-04) --- */
+.message-list {
+    list-style: none;
+    margin: 0 0 1rem;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.message {
+    max-width: 85%;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.75rem;
+    background: var(--colour-page-background);
+    align-self: flex-start;
+}
+
+.message.is-mine {
+    align-self: flex-end;
+    border: 1px solid var(--colour-accent);
+}
+
+.message p {
+    margin: 0 0 0.25rem;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.card.is-unread {
+    border-left: 4px solid var(--colour-accent);
+}
+
+.message-preview {
+    display: block;
+    color: var(--colour-muted-text);
+}
+
+/* --- Game chat (G-12) --- */
+.game-chat {
+    margin-top: 1.5rem;
+}
+
+.chat-lines {
+    list-style: none;
+    padding: 0;
+}
+
+.chat-lines li {
+    padding: 0.25rem 0;
+    overflow-wrap: anywhere;
+}
+
+.chat-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+/* --- Account: danger zone and tokens --- */
+.danger-zone {
+    margin-top: 2rem;
+    padding: 1rem;
+    border: 2px solid var(--colour-error);
+    border-radius: 0.5rem;
+}
+
+.token {
+    display: block;
+    padding: 0.5rem;
+    overflow-wrap: anywhere;
+    user-select: all;
+}
+
+.table-scroll {
+    overflow-x: auto;
+}
+
+/* --- Login cards (SCH-04), made to be printed and cut out --- */
+.login-cards {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+    gap: 1rem;
+}
+
+.login-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    border: 1px dashed var(--colour-border);
+    break-inside: avoid;
+}
+
+.login-card-link {
+    font-size: 0.7rem;
+    overflow-wrap: anywhere;
+    text-align: center;
+}
+
+@media print {
+    .site-header,
+    .site-footer,
+    .server-message,
+    .no-print {
+        display: none;
+    }
+}
+
+/* --- Wider screens --- */
+@media (min-width: 52rem) {
+    .dashboard {
+        grid-template-columns: 3fr 2fr;
+        align-items: start;
+    }
+}

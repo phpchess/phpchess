@@ -6,10 +6,22 @@ namespace PhpChess\Kernel;
 
 use PhpChess\Domain\System\FeatureSwitches;
 use PhpChess\Http\Api\V1\GamesController as ApiGamesController;
+use PhpChess\Http\Api\V1\MembersController as ApiMembersController;
 use PhpChess\Http\Api\V1\StatusController;
 use PhpChess\Http\Request;
 use PhpChess\Http\Response;
+use PhpChess\Http\Web\Account\DevicesController;
+use PhpChess\Http\Web\Account\NotificationsController;
+use PhpChess\Http\Web\Account\OwnDataController;
 use PhpChess\Http\Web\AccountController;
+use PhpChess\Http\Web\Admin\ArchiveController;
+use PhpChess\Http\Web\Admin\CommunityAdminController;
+use PhpChess\Http\Web\AppController;
+use PhpChess\Http\Web\Community\MessagesController;
+use PhpChess\Http\Web\Community\PlayersController;
+use PhpChess\Http\Web\ContentController;
+use PhpChess\Http\Web\MemberPages;
+use PhpChess\Http\Web\School\SchoolController;
 use PhpChess\Http\Web\Admin\AdminPages;
 use PhpChess\Http\Web\Admin\AuditController;
 use PhpChess\Http\Web\Admin\DashboardController;
@@ -19,7 +31,6 @@ use PhpChess\Http\Web\Admin\UsersController;
 use PhpChess\Http\Web\HomeController;
 use PhpChess\Http\Web\Play\ChallengeController;
 use PhpChess\Http\Web\Play\GameController;
-use PhpChess\Http\Web\Play\NoticeController;
 use PhpChess\Http\Web\Play\PlayPages;
 use PhpChess\Http\Web\Play\RatingController;
 use PhpChess\Http\Web\Play\VacationController;
@@ -66,7 +77,6 @@ final class Routes
         $games = new GameController($services, $playPages);
         $challenges = new ChallengeController($services, $playPages);
         $ratings = new RatingController($services, $playPages);
-        $notices = new NoticeController($services, $playPages);
         $vacation = new VacationController($services, $playPages);
         $playerList = FeatureSwitches::PLAYER_LIST_VISIBILITY;
 
@@ -121,15 +131,16 @@ final class Routes
         $router->post('/games/{id}/abort', fn (Request $request, array $parts): Response => $games->abort($request, $parts), Access::MEMBERS);
         $router->post('/games/{id}/abort/request', fn (Request $request, array $parts): Response => $games->requestAbort($request, $parts), Access::MEMBERS);
         $router->post('/games/{id}/rematch', fn (Request $request, array $parts): Response => $games->rematch($request, $parts), Access::MEMBERS);
+        $router->post('/games/{id}/chat', fn (Request $request, array $parts): Response => $games->chat($request, $parts), Access::MEMBERS, FeatureSwitches::GAME_CHAT);
 
-        // --- Ratings (R-03, R-04), notices (N-01), vacation (G-08) ---
+        // --- Ratings (R-03, R-04), vacation (G-08); notices are kept for admins only (A44) ---
         $router->get('/ratings', fn (Request $request): Response => $ratings->list($request), Access::MEMBERS, $playerList);
         $router->get('/players/{id}/ratings', fn (Request $request, array $parts): Response => $ratings->history($request, $parts), Access::MEMBERS, $playerList);
-        $router->get('/notices', fn (Request $request): Response => $notices->list($request), Access::MEMBERS);
-        $router->post('/notices/read-all', fn (Request $request): Response => $notices->markAllRead($request), Access::MEMBERS);
         $router->get('/account/vacation', fn (Request $request): Response => $vacation->show($request), Access::MEMBERS);
         $router->post('/account/vacation', fn (Request $request): Response => $vacation->take($request), Access::MEMBERS);
         $router->post('/account/vacation/cancel', fn (Request $request): Response => $vacation->cancel($request), Access::MEMBERS);
+
+        self::addCommunityAndSchool($router, $services);
 
         // --- Admin (ADM-01 to ADM-03, SCH-01, INS-06); the password is confirmed first (ID-08) ---
         $router->get('/admin/confirm', fn (Request $request): Response => $dashboard->showConfirm($request), Access::ADMINS_BEFORE_CONFIRMATION);
@@ -157,6 +168,25 @@ final class Routes
         $router->get('/admin/play', fn (Request $request): Response => $adminGames->showSettings($request), Access::ADMINS);
         $router->post('/admin/play', fn (Request $request): Response => $adminGames->saveSettings($request), Access::ADMINS);
 
+        // --- Admin: content, community, newsletter, notices (ADM-05, ADM-07, A44), archive (A42) ---
+        $communityAdmin = new CommunityAdminController($services, $adminPages);
+        $archive = new ArchiveController($services, $adminPages);
+        $router->get('/admin/content', fn (Request $request): Response => $communityAdmin->content($request), Access::ADMINS);
+        $router->post('/admin/content', fn (Request $request): Response => $communityAdmin->createContent($request), Access::ADMINS);
+        $router->post('/admin/content/{id}', fn (Request $request, array $parts): Response => $communityAdmin->updateContent($request, $parts), Access::ADMINS);
+        $router->post('/admin/content/{id}/delete', fn (Request $request, array $parts): Response => $communityAdmin->deleteContent($request, $parts), Access::ADMINS);
+        $router->get('/admin/community', fn (Request $request): Response => $communityAdmin->settings($request), Access::ADMINS);
+        $router->post('/admin/community', fn (Request $request): Response => $communityAdmin->saveSettings($request), Access::ADMINS);
+        $router->get('/admin/newsletter', fn (Request $request): Response => $communityAdmin->newsletter($request), Access::ADMINS);
+        $router->post('/admin/newsletter', fn (Request $request): Response => $communityAdmin->sendNewsletter($request), Access::ADMINS);
+        $router->get('/admin/notices', fn (Request $request): Response => $communityAdmin->notices($request), Access::ADMINS);
+        $router->get('/admin/archive', fn (Request $request): Response => $archive->show($request), Access::ADMINS);
+        $router->post('/admin/archive/check', fn (Request $request): Response => $archive->check($request), Access::ADMINS);
+        $router->post('/admin/archive/write', fn (Request $request): Response => $archive->write($request), Access::ADMINS);
+        $router->get('/admin/archive/download', fn (Request $request): Response => $archive->download($request), Access::ADMINS);
+        $router->post('/admin/archive/remove', fn (Request $request): Response => $archive->remove($request), Access::ADMINS);
+        $router->post('/admin/archive/restore', fn (Request $request): Response => $archive->restore($request), Access::ADMINS);
+
         // --- API v1: status (API-01) ---
         $apiStatus = new StatusController();
         $router->get('/api/v1/status', fn (Request $request): Response => $apiStatus->status($request));
@@ -166,5 +196,88 @@ final class Routes
         $router->get('/api/v1/games', fn (Request $request): Response => $apiGames->list($request), Access::MEMBERS);
         $router->get('/api/v1/games/{id}', fn (Request $request, array $parts): Response => $apiGames->show($request, $parts), Access::MEMBERS);
         $router->post('/api/v1/games/{id}/move', fn (Request $request, array $parts): Response => $apiGames->move($request, $parts), Access::MEMBERS);
+
+        // --- API v1: the member, challenges, messages, players (API-01) ---
+        $api = new ApiMembersController($services);
+        $messagesSwitch = FeatureSwitches::DIRECT_MESSAGES;
+        $router->get('/api/v1/me', fn (Request $request): Response => $api->me($request), Access::MEMBERS);
+        $router->get('/api/v1/challenges', fn (Request $request): Response => $api->challenges($request), Access::MEMBERS);
+        $router->post('/api/v1/challenges/{id}/accept', fn (Request $request, array $parts): Response => $api->acceptChallenge($request, $parts), Access::MEMBERS);
+        $router->get('/api/v1/messages', fn (Request $request): Response => $api->conversations($request), Access::MEMBERS, $messagesSwitch);
+        $router->get('/api/v1/messages/{name}', fn (Request $request, array $parts): Response => $api->conversation($request, $parts), Access::MEMBERS, $messagesSwitch);
+        $router->post('/api/v1/messages/{name}', fn (Request $request, array $parts): Response => $api->send($request, $parts), Access::MEMBERS, $messagesSwitch);
+        $router->get('/api/v1/buddies', fn (Request $request): Response => $api->buddies($request), Access::MEMBERS);
+        $router->get('/api/v1/players/online', fn (Request $request): Response => $api->online($request), Access::MEMBERS, $playerList);
+    }
+
+    /** Community, content, own data, devices, notifications, the app and school mode (C2-2). */
+    private static function addCommunityAndSchool(Router $router, Services $services): void
+    {
+        $memberPages = new MemberPages($services);
+        $content = new ContentController($services);
+        $app = new AppController($services);
+        $players = new PlayersController($services, $memberPages);
+        $messages = new MessagesController($services, $memberPages);
+        $ownData = new OwnDataController($services, $memberPages);
+        $devices = new DevicesController($services, $memberPages);
+        $notifications = new NotificationsController($services, $memberPages);
+        $school = new SchoolController($services, $memberPages);
+        $playerList = FeatureSwitches::PLAYER_LIST_VISIBILITY;
+        $messagesSwitch = FeatureSwitches::DIRECT_MESSAGES;
+        $uploads = FeatureSwitches::FILE_UPLOADS;
+        $push = FeatureSwitches::PUSH_NOTIFICATIONS;
+        $schoolMode = FeatureSwitches::SCHOOL_MODE;
+
+        // --- Content for everyone (C-06, C-09) and the installable app (UI-05, UI-08) ---
+        $router->get('/faq', fn (Request $request): Response => $content->faq($request));
+        $router->get('/news', fn (Request $request): Response => $content->news($request));
+        $router->get('/pages/{slug}', fn (Request $request, array $parts): Response => $content->page($request, $parts));
+        $router->get('/manifest.webmanifest', fn (Request $request): Response => $app->manifest($request));
+        $router->get('/sw.js', fn (Request $request): Response => $app->serviceWorker($request));
+        $router->get('/offline', fn (Request $request): Response => $app->offline($request));
+
+        // --- Players, profiles, buddies, avatars (C-01 to C-03, C-10) ---
+        $router->get('/players', fn (Request $request): Response => $players->list($request), Access::MEMBERS);
+        $router->get('/players/{name}', fn (Request $request, array $parts): Response => $players->profile($request, $parts));
+        $router->post('/players/{name}/buddy', fn (Request $request, array $parts): Response => $players->addBuddy($request, $parts), Access::MEMBERS);
+        $router->post('/players/{name}/unbuddy', fn (Request $request, array $parts): Response => $players->removeBuddy($request, $parts), Access::MEMBERS);
+        $router->get('/account/profile', fn (Request $request): Response => $players->editProfile($request), Access::MEMBERS);
+        $router->post('/account/profile', fn (Request $request): Response => $players->saveProfile($request), Access::MEMBERS);
+        $router->post('/account/avatar', fn (Request $request): Response => $players->chooseAvatar($request), Access::MEMBERS);
+        $router->post('/account/avatar/upload', fn (Request $request): Response => $players->uploadAvatar($request), Access::MEMBERS, $uploads);
+        $router->get('/avatars/{id}', fn (Request $request, array $parts): Response => $players->avatarImage($request, $parts));
+
+        // --- Direct messages (C-04) ---
+        $router->get('/messages', fn (Request $request): Response => $messages->inbox($request), Access::MEMBERS, $messagesSwitch);
+        $router->get('/messages/{name}', fn (Request $request, array $parts): Response => $messages->conversation($request, $parts), Access::MEMBERS, $messagesSwitch);
+        $router->get('/messages/{name}/new', fn (Request $request, array $parts): Response => $messages->newMessages($request, $parts), Access::MEMBERS, $messagesSwitch);
+        $router->post('/messages/{name}', fn (Request $request, array $parts): Response => $messages->send($request, $parts), Access::MEMBERS, $messagesSwitch);
+
+        // --- My data, devices and notifications (ID-10, ID-11, N-03, N-04) ---
+        $router->get('/account/data', fn (Request $request): Response => $ownData->show($request), Access::MEMBERS);
+        $router->get('/account/data/export', fn (Request $request): Response => $ownData->export($request), Access::MEMBERS);
+        $router->post('/account/delete', fn (Request $request): Response => $ownData->delete($request), Access::MEMBERS);
+        $router->get('/account/devices', fn (Request $request): Response => $devices->list($request), Access::MEMBERS);
+        $router->post('/account/devices', fn (Request $request): Response => $devices->create($request), Access::MEMBERS);
+        $router->post('/account/devices/{id}/revoke', fn (Request $request, array $parts): Response => $devices->revoke($request, $parts), Access::MEMBERS);
+        $router->get('/account/notifications', fn (Request $request): Response => $notifications->show($request), Access::MEMBERS);
+        $router->post('/account/notifications', fn (Request $request): Response => $notifications->save($request), Access::MEMBERS);
+        $router->post('/account/push/subscribe', fn (Request $request): Response => $notifications->subscribe($request), Access::MEMBERS, $push);
+        $router->post('/account/push/{id}/remove', fn (Request $request, array $parts): Response => $notifications->remove($request, $parts), Access::MEMBERS, $push);
+
+        // --- School mode (SCH-02 to SCH-06); the login cards are for everyone ---
+        $router->get('/school', fn (Request $request): Response => $school->classes($request), Access::TEACHERS, $schoolMode);
+        $router->post('/school/classes', fn (Request $request): Response => $school->createClass($request), Access::TEACHERS, $schoolMode);
+        $router->get('/school/classes/{id}', fn (Request $request, array $parts): Response => $school->showClass($request, $parts), Access::TEACHERS, $schoolMode);
+        $router->post('/school/classes/{id}/students', fn (Request $request, array $parts): Response => $school->addStudents($request, $parts), Access::TEACHERS, $schoolMode);
+        $router->post('/school/classes/{id}/members', fn (Request $request, array $parts): Response => $school->addMember($request, $parts), Access::TEACHERS, $schoolMode);
+        $router->post('/school/classes/{id}/members/{user}/remove', fn (Request $request, array $parts): Response => $school->removeMember($request, $parts), Access::TEACHERS, $schoolMode);
+        $router->post('/school/classes/{id}/members/{user}/revoke-card', fn (Request $request, array $parts): Response => $school->revokeCard($request, $parts), Access::TEACHERS, $schoolMode);
+        $router->post('/school/classes/{id}/members/{user}/password', fn (Request $request, array $parts): Response => $school->setPassword($request, $parts), Access::TEACHERS, $schoolMode);
+        $router->post('/school/classes/{id}/limit', fn (Request $request, array $parts): Response => $school->setLimit($request, $parts), Access::TEACHERS, $schoolMode);
+        $router->post('/school/classes/{id}/cards', fn (Request $request, array $parts): Response => $school->printCards($request, $parts), Access::TEACHERS, $schoolMode);
+        $router->get('/school/students/{user}/games', fn (Request $request, array $parts): Response => $school->studentGames($request, $parts), Access::TEACHERS, $schoolMode);
+        $router->get('/c/{token}', fn (Request $request, array $parts): Response => $school->showCardLogin($request, $parts), Access::EVERYONE, $schoolMode);
+        $router->post('/c/{token}', fn (Request $request, array $parts): Response => $school->cardLogin($request, $parts), Access::EVERYONE, $schoolMode);
     }
 }

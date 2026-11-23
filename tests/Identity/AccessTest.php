@@ -44,8 +44,13 @@ final class AccessTest extends TestCase
     public function testVisitorsAreSentToTheLoginPageFromEveryMembersAndAdminPage(): void
     {
         $browser = $this->site->browser();
+        // Every switch on, so no route hides behind its switch's 404 (K8).
+        $switches = new FeatureSwitches($this->site->settings());
+        foreach (array_keys(FeatureSwitches::ALL) as $switchName) {
+            $switches->set($switchName, true);
+        }
 
-        foreach ($this->routesWith([Access::MEMBERS, Access::ADMINS, Access::ADMINS_BEFORE_CONFIRMATION]) as $route) {
+        foreach ($this->routesWith([Access::MEMBERS, Access::TEACHERS, Access::ADMINS, Access::ADMINS_BEFORE_CONFIRMATION]) as $route) {
             $response = $this->open($browser, $route);
             if (str_starts_with($route->pattern, '/api/')) {
                 // The API answers in JSON instead of sending to the login page.

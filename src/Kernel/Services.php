@@ -5,7 +5,26 @@ declare(strict_types=1);
 namespace PhpChess\Kernel;
 
 use Closure;
+use PhpChess\Domain\Community\Avatars;
+use PhpChess\Domain\Community\GameChat;
+use PhpChess\Domain\Community\Messages;
+use PhpChess\Domain\Community\WordFilter;
 use PhpChess\Domain\Identity\AccountService;
+use PhpChess\Domain\Identity\OwnData;
+use PhpChess\Domain\Notify\NotificationChoices;
+use PhpChess\Domain\School\Classes;
+use PhpChess\Domain\System\Archive;
+use PhpChess\Infra\Community\BuddyRepository;
+use PhpChess\Infra\Community\GameChatRepository;
+use PhpChess\Infra\Community\MessageRepository;
+use PhpChess\Infra\Community\ProfileRepository;
+use PhpChess\Infra\Content\ContentRepository;
+use PhpChess\Infra\Content\NewsletterRepository;
+use PhpChess\Infra\Identity\ApiTokenRepository;
+use PhpChess\Infra\Identity\OwnDataRepository;
+use PhpChess\Infra\Notify\PushSubscriptionRepository;
+use PhpChess\Infra\School\SchoolRepository;
+use PhpChess\Infra\System\ArchiveRepository;
 use PhpChess\Domain\Identity\LoginService;
 use PhpChess\Domain\Identity\PasswordResetService;
 use PhpChess\Domain\Identity\Preferences;
@@ -142,7 +161,13 @@ final class Services
 
     public function authentication(): Authentication
     {
-        return $this->authentication ??= new Authentication($this->session, $this->users(), $this->loginService(), $this->request);
+        return $this->authentication ??= new Authentication(
+            $this->session,
+            $this->users(),
+            $this->loginService(),
+            $this->request,
+            new ApiTokenRepository($this->database()),
+        );
     }
 
     public function accountService(): AccountService
@@ -196,15 +221,131 @@ final class Services
             $this->settings(),
             $this->mailer(),
             $this->translator(),
+            $this->notificationChoices(),
         );
     }
 
-    /** The badge count of the logged-in user's unread notices (N-01); 0 for visitors. */
-    public function unreadNoticeCount(): int
+    /** The badge on the Play link: games waiting for the logged-in user's move (A44); 0 for visitors. */
+    public function myMoveCount(): int
     {
         $user = $this->authentication()->currentUser();
 
-        return $user === null ? 0 : $this->play()->noticeRepository()->countUnread($user->id);
+        return $user === null ? 0 : $this->play()->gameRepository()->countWaitingFor($user->id);
+    }
+
+    /** The badge on the Messages link: unread messages (C-04); 0 for visitors or with messages off. */
+    public function unreadMessageCount(): int
+    {
+        $user = $this->authentication()->currentUser();
+        if ($user === null || !$this->switches()->isOn(FeatureSwitches::DIRECT_MESSAGES)) {
+            return 0;
+        }
+
+        return $this->messageRepository()->countUnread($user->id);
+    }
+
+    // --- Notifications (N-03, N-04) ---
+
+    public function pushSubscriptions(): PushSubscriptionRepository
+    {
+        return new PushSubscriptionRepository($this->database());
+    }
+
+    public function notificationChoices(): NotificationChoices
+    {
+        return new NotificationChoices(
+            $this->preferenceRepository(),
+            $this->pushSubscriptions(),
+            $this->switches()->isOn(FeatureSwitches::PUSH_NOTIFICATIONS),
+        );
+    }
+
+    // --- Community (C-01 to C-10, G-12) ---
+
+    public function wordFilter(): WordFilter
+    {
+        return WordFilter::fromSettings($this->settings());
+    }
+
+    public function profiles(): ProfileRepository
+    {
+        return new ProfileRepository($this->database());
+    }
+
+    public function avatars(): Avatars
+    {
+        return new Avatars($this->profiles(), $this->appRoot . '/storage/uploads/avatars');
+    }
+
+    public function buddies(): BuddyRepository
+    {
+        return new BuddyRepository($this->database());
+    }
+
+    public function messageRepository(): MessageRepository
+    {
+        return new MessageRepository($this->database());
+    }
+
+    public function messages(): Messages
+    {
+        return new Messages(
+            $this->messageRepository(),
+            $this->users(),
+            $this->play()->noticeRepository(),
+            $this->play()->classRules(),
+            $this->wordFilter(),
+        );
+    }
+
+    public function gameChat(): GameChat
+    {
+        return new GameChat(new GameChatRepository($this->database()), $this->settings(), $this->wordFilter());
+    }
+
+    public function content(): ContentRepository
+    {
+        return new ContentRepository($this->database());
+    }
+
+    public function newsletters(): NewsletterRepository
+    {
+        return new NewsletterRepository($this->database());
+    }
+
+    // --- School mode (SCH-02 to SCH-06) ---
+
+    public function school(): SchoolRepository
+    {
+        return new SchoolRepository($this->database());
+    }
+
+    public function classes(): Classes
+    {
+        return new Classes($this->school(), $this->users(), $this->tokens(), $this->wordFilter());
+    }
+
+    // --- Own data, API tokens and the archive (ID-10, ID-11, A42) ---
+
+    public function apiTokens(): ApiTokenRepository
+    {
+        return new ApiTokenRepository($this->database());
+    }
+
+    public function ownData(): OwnData
+    {
+        return new OwnData(
+            new OwnDataRepository($this->database()),
+            $this->users(),
+            $this->play()->gameRepository(),
+            $this->play()->games(),
+            $this->avatars(),
+        );
+    }
+
+    public function archive(): Archive
+    {
+        return new Archive(new ArchiveRepository($this->database()), $this->settings(), $this->appRoot . '/storage/archives');
     }
 
     // --- Mail ---
@@ -294,7 +435,27 @@ final class Services
             $this->settings()->getString('site.name', 'phpChess'),
             $this->authentication()->currentUser(),
             $this->currentPreferences(),
-            $this->unreadNoticeCount(),
+            $this->myMoveCount(),
+            $this->unreadMessageCount(),
+            $this->serverMessage(),
+            [
+                'messages' => $this->switches()->isOn(FeatureSwitches::DIRECT_MESSAGES),
+                'school' => $this->switches()->isOn(FeatureSwitches::SCHOOL_MODE),
+                'players' => $this->switches()->isOn(FeatureSwitches::PLAYER_LIST_VISIBILITY),
+                'push' => $this->switches()->isOn(FeatureSwitches::PUSH_NOTIFICATIONS),
+            ],
         );
+    }
+
+    /**
+     * The newest published server message (C-07), shown on every page; null when there is none.
+     *
+     * @return array{id: int, title: string, body: string}|null
+     */
+    public function serverMessage(): ?array
+    {
+        $newest = $this->content()->listKind(ContentRepository::SERVER_MESSAGE, true, 1)[0] ?? null;
+
+        return $newest === null ? null : ['id' => $newest['id'], 'title' => $newest['title'], 'body' => $newest['body']];
     }
 }

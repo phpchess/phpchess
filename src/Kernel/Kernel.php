@@ -14,6 +14,17 @@ use PhpChess\Infra\Database;
 use PhpChess\Infra\Identity\LoginAttemptRepository;
 use PhpChess\Infra\Identity\TokenRepository;
 use PhpChess\Domain\Notify\MoveEmails;
+use PhpChess\Domain\Notify\NotificationChoices;
+use PhpChess\Domain\Notify\PushNotifications;
+use PhpChess\Domain\System\Archive;
+use PhpChess\Infra\Content\NewsletterRepository;
+use PhpChess\Infra\Jobs\NewsletterJob;
+use PhpChess\Infra\Jobs\PerformanceCheckJob;
+use PhpChess\Infra\Jobs\PushJob;
+use PhpChess\Infra\Notify\PushSender;
+use PhpChess\Infra\Notify\PushSubscriptionRepository;
+use PhpChess\Infra\Notify\WebPushSender;
+use PhpChess\Infra\System\ArchiveRepository;
 use PhpChess\Domain\System\FeatureSwitches;
 use PhpChess\Infra\Identity\PreferenceRepository;
 use PhpChess\Infra\Identity\UserRepository;
@@ -65,6 +76,7 @@ final class Kernel
      * @param (Closure(string): ?string)|null  $fetchUrl         for the installer self-test; tests fake it; null = real HTTP
      * @param int|null                         $now              the time to use; tests fix it
      * @param Mailer|null                      $mailer           tests pass one that keeps the emails; null = the settings' choice
+     * @param PushSender|null                  $pushSender       tests pass one that only records; null = real Web Push
      */
     public function __construct(
         private readonly string $appRoot,
@@ -72,6 +84,7 @@ final class Kernel
         ?Closure $fetchUrl = null,
         private readonly ?int $now = null,
         private readonly ?Mailer $mailer = null,
+        private readonly ?PushSender $pushSender = null,
     ) {
         $this->connectDatabase = $connectDatabase ?? Database::connect(...);
         $this->fetchUrl = $fetchUrl;
@@ -168,7 +181,9 @@ final class Kernel
         }
 
         // 5. Every change needs this session's CSRF token (K7).
-        if ($route->method === 'POST' && !$csrf->isValidRequest($request)) {
+        //    An app with an API token (ID-10) sends no cookies, so it needs none.
+        $usesApiToken = $services !== null && $request->isApi() && $services->authentication()->usedApiToken();
+        if ($route->method === 'POST' && !$usesApiToken && !$csrf->isValidRequest($request)) {
             return $this->errorResponse($request, 419, 'csrf_failed', 'This form has expired. Please go back, reload the page and try again.');
         }
 
@@ -217,6 +232,14 @@ final class Kernel
 
         if ($route->access === Access::MEMBERS) {
             return null;
+        }
+
+        if ($route->access === Access::TEACHERS) {
+            if ($user->role === User::ROLE_TEACHER || $user->role === User::ROLE_ADMIN) {
+                return null;
+            }
+
+            return $this->errorResponse($request, 403, 'forbidden', 'This page is for teachers only.');
         }
 
         if ($user->role !== User::ROLE_ADMIN) {
@@ -291,7 +314,19 @@ final class Kernel
             $settings,
             $mailer,
             $translator,
+            $this->notificationChoices($database, $settings),
         );
+        $users = new UserRepository($database);
+        $buildPushNotifications = fn (): PushNotifications => new PushNotifications(
+            $play->noticeRepository(),
+            new PushSubscriptionRepository($database),
+            $this->notificationChoices($database, $settings),
+            $play->gameRepository(),
+            $this->pushSender ?? new WebPushSender($settings),
+            $translator,
+            $settings->getString('site.name', 'phpChess'),
+        );
+        $archive = new Archive(new ArchiveRepository($database), $settings, $this->appRoot . '/storage/archives');
 
         return new JobRunner(
             $database,
@@ -306,7 +341,20 @@ final class Kernel
                 ),
                 new GameClockJob($play->games(), $play->gameRepository(), $play->challengeRepository(), $this->now),
                 new MoveEmailJob($moveEmails, new FeatureSwitches($settings), $settings, $this->now),
+                new PushJob($buildPushNotifications, new FeatureSwitches($settings), $settings, $this->now),
+                new NewsletterJob(new NewsletterRepository($database), $mailer, new FeatureSwitches($settings), $settings, $this->now),
+                new PerformanceCheckJob($archive, $users, $mailer, $settings, $this->now),
             ],
+        );
+    }
+
+    /** The members' notification choices, for the email and push jobs (N-04). */
+    private function notificationChoices(Database $database, SettingsRepository $settings): NotificationChoices
+    {
+        return new NotificationChoices(
+            new PreferenceRepository($database),
+            new PushSubscriptionRepository($database),
+            (new FeatureSwitches($settings))->isOn(FeatureSwitches::PUSH_NOTIFICATIONS),
         );
     }
 

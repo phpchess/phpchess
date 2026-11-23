@@ -32,6 +32,7 @@ final class Notices
     public const string CHALLENGE_RECEIVED = 'challenge_received';
     public const string CHALLENGE_ACCEPTED = 'challenge_accepted';
     public const string ABORT_REQUESTED = 'abort_requested';
+    public const string MESSAGE_RECEIVED = 'message_received';
 
     public function __construct(private readonly NoticeRepository $notices)
     {

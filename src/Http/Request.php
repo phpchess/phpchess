@@ -22,6 +22,7 @@ final class Request
      * @param array<string, string> $form       the posted form fields
      * @param array<string, string> $headers    request headers, names in lower case
      * @param array<string, string> $cookies    the cookies sent
+     * @param array<string, UploadedFile> $files  uploaded files, by form field name
      */
     public function __construct(
         public readonly string $method,
@@ -34,6 +35,7 @@ final class Request
         public readonly string $clientIp = '127.0.0.1',
         public readonly bool $isHttps = false,
         public readonly string $host = 'localhost',
+        public readonly array $files = [],
     ) {
     }
 
@@ -76,7 +78,33 @@ final class Request
             clientIp: self::stringValue($server['REMOTE_ADDR'] ?? '127.0.0.1'),
             isHttps: $isHttps,
             host: self::stringValue($server['HTTP_HOST'] ?? 'localhost'),
+            files: self::uploadedFiles($_FILES),
         );
+    }
+
+    /**
+     * The uploaded files from $_FILES, one per form field (only single files,
+     * not "name[]" lists, which phpChess does not use).
+     *
+     * @param array<mixed> $globalFiles
+     * @return array<string, UploadedFile>
+     */
+    private static function uploadedFiles(array $globalFiles): array
+    {
+        $files = [];
+        foreach ($globalFiles as $fieldName => $file) {
+            if (!is_string($fieldName) || !is_array($file) || !is_string($file['tmp_name'] ?? null)) {
+                continue;
+            }
+            $files[$fieldName] = new UploadedFile(
+                $file['tmp_name'],
+                is_int($file['size'] ?? null) ? $file['size'] : 0,
+                is_int($file['error'] ?? null) ? $file['error'] : UPLOAD_ERR_NO_FILE,
+                true,
+            );
+        }
+
+        return $files;
     }
 
     /**
@@ -114,6 +142,12 @@ final class Request
     public function formValue(string $name, string $default = ''): string
     {
         return $this->form[$name] ?? $default;
+    }
+
+    /** One uploaded file, or null when none was sent in that field. */
+    public function file(string $name): ?UploadedFile
+    {
+        return $this->files[$name] ?? null;
     }
 
     /** One header (name in any case), or the default when it is missing. */

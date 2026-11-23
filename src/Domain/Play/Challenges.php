@@ -62,6 +62,7 @@ final class Challenges
         if ($opponentId === $challengerId) {
             throw new PlayRefused('play.not_against_yourself');
         }
+        $this->games->checkClassRule($challengerId, $opponentId);
         $challengeId = $this->challenges->create(
             Challenge::KIND_DIRECT,
             $challengerId,

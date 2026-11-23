@@ -94,6 +94,15 @@ final class NoticeRepository extends Repository
         );
     }
 
+    /** Marks a user's notices of one kind as read (they opened their messages, say). */
+    public function markKindRead(int $userId, string $kind, int $now): void
+    {
+        $this->database->run(
+            'UPDATE ' . $this->table('notices') . ' SET read_at = ? WHERE user_id = ? AND kind = ? AND read_at IS NULL',
+            [self::dateTime($now), $userId, $kind],
+        );
+    }
+
     public function markAllRead(int $userId, int $now): void
     {
         $this->database->run(
@@ -163,6 +172,69 @@ final class NoticeRepository extends Repository
             'UPDATE ' . $this->table('notices') . ' SET emailed_at = ? WHERE user_id = ? AND emailed_at IS NULL',
             [self::dateTime($now), $userId],
         );
+    }
+
+    // --- The push queue (N-03) ---
+
+    /**
+     * Unread notices not yet pushed, made after $notBefore (older ones are
+     * stale news and are left to email), oldest first.
+     *
+     * @return list<array{id: int, user_id: int, kind: string, game_id: int|null, from_username: string}>
+     */
+    public function waitingForPush(int $notBefore, int $limit = 100): array
+    {
+        $rows = $this->database->fetchAll(
+            'SELECT n.id, n.user_id, n.kind, n.game_id, u.username AS from_username'
+            . ' FROM ' . $this->table('notices') . ' n LEFT JOIN ' . $this->table('users') . ' u ON u.id = n.from_user_id'
+            . ' WHERE n.pushed_at IS NULL AND n.read_at IS NULL AND n.created_at >= ? ORDER BY n.id LIMIT ' . max(1, $limit),
+            [self::dateTime($notBefore)],
+        );
+
+        return array_map(fn (array $row): array => [
+            'id' => self::intOf($row['id']),
+            'user_id' => self::intOf($row['user_id']),
+            'kind' => self::textOf($row['kind']),
+            'game_id' => self::intOrNull($row['game_id']),
+            'from_username' => self::textOf($row['from_username'] ?? ''),
+        ], $rows);
+    }
+
+    public function markPushed(int $noticeId, int $now): void
+    {
+        $this->database->run('UPDATE ' . $this->table('notices') . ' SET pushed_at = ? WHERE id = ?', [self::dateTime($now), $noticeId]);
+    }
+
+    // --- For admins (A44: notices are kept for searches, not shown to players) ---
+
+    /**
+     * The newest notices, optionally of one member.
+     *
+     * @return list<array{id: int, username: string, kind: string, game_id: int|null, from_username: string, created_at: string, read_at: string, emailed_at: string, pushed_at: string}>
+     */
+    public function searchForAdmin(?int $userId, int $limit = 200): array
+    {
+        $rows = $this->database->fetchAll(
+            'SELECT n.id, n.kind, n.game_id, n.created_at, n.read_at, n.emailed_at, n.pushed_at, owner.username, sender.username AS from_username'
+            . ' FROM ' . $this->table('notices') . ' n'
+            . ' JOIN ' . $this->table('users') . ' owner ON owner.id = n.user_id'
+            . ' LEFT JOIN ' . $this->table('users') . ' sender ON sender.id = n.from_user_id'
+            . ($userId === null ? '' : ' WHERE n.user_id = ?')
+            . ' ORDER BY n.id DESC LIMIT ' . max(1, $limit),
+            $userId === null ? [] : [$userId],
+        );
+
+        return array_map(fn (array $row): array => [
+            'id' => self::intOf($row['id']),
+            'username' => self::textOf($row['username']),
+            'kind' => self::textOf($row['kind']),
+            'game_id' => self::intOrNull($row['game_id']),
+            'from_username' => self::textOf($row['from_username'] ?? ''),
+            'created_at' => self::textOf($row['created_at']),
+            'read_at' => self::textOf($row['read_at']),
+            'emailed_at' => self::textOf($row['emailed_at']),
+            'pushed_at' => self::textOf($row['pushed_at']),
+        ], $rows);
     }
 
     /** The time of the user's last email of notices, for the daily digest; null when never. */

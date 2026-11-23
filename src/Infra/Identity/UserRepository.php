@@ -39,8 +39,8 @@ final class UserRepository extends Repository
         return $this->database->lastInsertId();
     }
 
-    /** Creates an account with the given role and state; returns its id. */
-    public function create(string $username, string $email, string $passwordHash, string $role, string $state): int
+    /** Creates an account with the given role and state; returns its id. A null email is an account without one (students, SCH-03). */
+    public function create(string $username, ?string $email, string $passwordHash, string $role, string $state): int
     {
         $this->database->run(
             'INSERT INTO ' . $this->table('users')
@@ -251,6 +251,35 @@ final class UserRepository extends Repository
         }
 
         return $names;
+    }
+
+    /**
+     * Who's online (C-10): active members seen since a time, by name.
+     *
+     * @return list<array{id: int, username: string, last_seen_at: int|null}>
+     */
+    public function seenSince(int $since, int $limit = 200): array
+    {
+        $rows = $this->database->fetchAll(
+            'SELECT id, username, last_seen_at FROM ' . $this->table('users')
+            . " WHERE state = 'active' AND last_seen_at >= ? ORDER BY username LIMIT " . max(1, $limit),
+            [gmdate('Y-m-d H:i:s', $since)],
+        );
+
+        return array_map(fn (array $row): array => [
+            'id' => self::intOf($row['id']),
+            'username' => self::textOf($row['username']),
+            'last_seen_at' => self::timestampOrNull($row['last_seen_at']),
+        ], $rows);
+    }
+
+    /** Finds an account by its exact user name (profiles, messages). */
+    public function findByUsername(string $username): ?User
+    {
+        return $this->toUser($this->database->fetchRow(
+            'SELECT ' . self::COLUMNS . ' FROM ' . $this->table('users') . ' WHERE username = ?',
+            [$username],
+        ));
     }
 
     /**

@@ -72,6 +72,49 @@ final class PreferenceRepository extends Repository
     }
 
     /**
+     * The notification choices (N-04): per kind push, email or none; the
+     * quiet hours (whole hours, null when none); the time zone they are in.
+     *
+     * @return array{games: string, challenges: string, messages: string, quiet_from: int|null, quiet_until: int|null, time_zone: string}
+     */
+    public function notificationChoices(int $userId): array
+    {
+        $row = $this->database->fetchRow(
+            'SELECT notify_games, notify_challenges, notify_messages, quiet_from, quiet_until, time_zone FROM '
+            . $this->table('user_preferences') . ' WHERE user_id = ?',
+            [$userId],
+        );
+
+        return [
+            'games' => self::text($row['notify_games'] ?? 'email'),
+            'challenges' => self::text($row['notify_challenges'] ?? 'email'),
+            'messages' => self::text($row['notify_messages'] ?? 'email'),
+            'quiet_from' => is_numeric($row['quiet_from'] ?? null) ? (int) $row['quiet_from'] : null,
+            'quiet_until' => is_numeric($row['quiet_until'] ?? null) ? (int) $row['quiet_until'] : null,
+            'time_zone' => self::text($row['time_zone'] ?? 'UTC'),
+        ];
+    }
+
+    /**
+     * @param array{games: string, challenges: string, messages: string, quiet_from: int|null, quiet_until: int|null, time_zone: string} $choices
+     */
+    public function saveNotificationChoices(int $userId, array $choices): void
+    {
+        $this->ensureRow($userId);
+        $this->database->run(
+            'UPDATE ' . $this->table('user_preferences')
+            . ' SET notify_games = ?, notify_challenges = ?, notify_messages = ?, quiet_from = ?, quiet_until = ?, time_zone = ? WHERE user_id = ?',
+            [$choices['games'], $choices['challenges'], $choices['messages'], $choices['quiet_from'], $choices['quiet_until'], $choices['time_zone'], $userId],
+        );
+    }
+
+    /** Removes a member's preferences (account deletion, ID-11). */
+    public function deleteForUser(int $userId): void
+    {
+        $this->database->run('DELETE FROM ' . $this->table('user_preferences') . ' WHERE user_id = ?', [$userId]);
+    }
+
+    /**
      * The remembered settings of the "Play" button.
      *
      * @return array{days_per_move: int, rated: bool}

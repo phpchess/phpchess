@@ -267,10 +267,41 @@ async function sendMove(uci) {
         applyServerState(answer);
     } catch (error) {
         setSending(false);
+        // No connection (UI-08): the move waits on this device and is sent when the connection returns.
+        if (!navigator.onLine || error instanceof TypeError) {
+            queueMove(uci);
+            return;
+        }
         await refreshFromServer();
         showStatus(page.dataset.textMoveFailed);
     }
 }
+
+// --- Moves made without a connection (UI-08) ---
+
+const pendingMoveKey = 'phpchess-pending-move-' + serverState.id;
+
+/** Keeps the move on this device, with the ply it was made at. */
+function queueMove(uci) {
+    localStorage.setItem(pendingMoveKey, JSON.stringify({uci: uci, ply: serverState.ply}));
+    showStatus(page.dataset.textMoveQueued);
+}
+
+/** Sends a waiting move once online; when the game moved on meanwhile, it is dropped and the board refreshed. */
+async function sendQueuedMove() {
+    const saved = JSON.parse(localStorage.getItem(pendingMoveKey) || 'null');
+    if (saved === null || !navigator.onLine) {
+        return;
+    }
+    localStorage.removeItem(pendingMoveKey);
+    if (saved.ply !== serverState.ply) {
+        await refreshFromServer();
+        return;
+    }
+    await sendMove(saved.uci);
+}
+
+window.addEventListener('online', sendQueuedMove);
 
 // --- Taking in news from the server ---
 
@@ -546,3 +577,5 @@ if (serverState.state === 'running') {
         onNews: applyServerState,
     });
 }
+
+sendQueuedMove();

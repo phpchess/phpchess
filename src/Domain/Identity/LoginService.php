@@ -63,7 +63,7 @@ final class LoginService
             throw new AccountRefused('login.wrong_name_or_password');
         }
 
-        if ($user->state === User::STATE_DISABLED || $user->state === User::STATE_ARCHIVED) {
+        if (in_array($user->state, [User::STATE_DISABLED, User::STATE_ARCHIVED, User::STATE_DELETED], true)) {
             throw new AccountRefused('login.account_blocked');
         }
         if ($user->state === User::STATE_PENDING) {

@@ -9,6 +9,10 @@ use PhpChess\Domain\Play\Challenges;
 use PhpChess\Domain\Play\Games;
 use PhpChess\Domain\Play\Vacations;
 use PhpChess\Domain\Rating\Ratings;
+use PhpChess\Domain\School\ClassRules;
+use PhpChess\Domain\System\FeatureSwitches;
+use PhpChess\Infra\Identity\UserRepository;
+use PhpChess\Infra\School\SchoolRepository;
 use PhpChess\Infra\Database;
 use PhpChess\Infra\Notify\NoticeRepository;
 use PhpChess\Infra\Play\ChallengeRepository;
@@ -73,7 +77,14 @@ final class PlayParts
             $this->ratings(),
             $this->notices(),
             $this->settings,
+            $this->classRules(),
         );
+    }
+
+    /** Who may play and write to whom in school mode (SCH-05). */
+    public function classRules(): ClassRules
+    {
+        return new ClassRules(new SchoolRepository($this->database), new UserRepository($this->database), new FeatureSwitches($this->settings));
     }
 
     public function challenges(): Challenges

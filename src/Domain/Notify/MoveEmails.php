@@ -49,6 +49,7 @@ final class MoveEmails
         private readonly SettingsRepository $settings,
         private readonly Mailer $mailer,
         private readonly Translator $translator,
+        private readonly ?NotificationChoices $choices = null,
     ) {
     }
 
@@ -136,13 +137,20 @@ final class MoveEmails
             return false;
         }
         $claimed = $this->notices->claimForEmail($userId, $now);
-        if ($claimed === []) {
+        // Only the kinds this member wants by email (N-04); the rest go by push or not at all.
+        if ($this->choices !== null) {
+            $claimed = array_values(array_filter(
+                $claimed,
+                fn (array $notice): bool => $this->choices->wantsEmail($userId, $notice['kind']),
+            ));
+        }
+        if ($claimed === [] || $user->email === '') {
             return false;
         }
 
         $lines = [];
         foreach ($claimed as $notice) {
-            $link = $notice['game_id'] !== null ? $siteUrl . '/games/' . $notice['game_id'] : $siteUrl . '/challenges';
+            $link = self::linkFor($notice['kind'], $notice['game_id'], $notice['from_username'], $siteUrl);
             $lines[] = '- ' . $this->translator->text('notice.' . $notice['kind'], ['name' => $notice['from_username']]) . ': ' . $link;
         }
         $siteName = $this->settings->getString('site.name', 'phpChess');
@@ -165,5 +173,18 @@ final class MoveEmails
         }
 
         return true;
+    }
+
+    /** Where a notice leads: its game, the conversation, or the start page (challenges are listed there, A44). */
+    public static function linkFor(string $kind, ?int $gameId, string $fromUsername, string $siteUrl): string
+    {
+        if ($gameId !== null) {
+            return $siteUrl . '/games/' . $gameId;
+        }
+        if ($kind === Notices::MESSAGE_RECEIVED && $fromUsername !== '') {
+            return $siteUrl . '/messages/' . rawurlencode($fromUsername);
+        }
+
+        return $siteUrl . '/';
     }
 }

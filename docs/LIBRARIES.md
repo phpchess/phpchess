@@ -21,7 +21,9 @@ Every library phpChess 6 uses or plans to use, checked against A16 (client side)
 | Library | Purpose | Feature | Version | Licence | Own dependencies | Known vulnerabilities | Status |
 |---|---|---|---|---|---|---|---|
 | PHPMailer | Sending mail over SMTP | N-02, ID-02, ID-06 | v7.2.0 | LGPL-2.1-only | none (PHP extensions only) | none (composer audit when added) | approved (decision 2), added in C1-2 |
-| minishlink/web-push | Sending Web Push notifications | N-03 | v11.0.0 | MIT | 9 packages, including a JWT library and PSR HTTP interfaces | to check when added | approved reluctantly (decision 3), added in C2-2 |
+| minishlink/web-push | Sending Web Push notifications | N-03 | v11.0.0 | MIT | 14 packages, below | none (composer audit, 2026-11-23) | **approved** reluctantly (decision 3), added in C2-2; only called when the switch "push notifications" is on (K9) |
+| nyholm/psr7 | The HTTP request and response objects web-push needs (PSR-7, PSR-17) | N-03 | 1.8.2 | MIT | the PSR interfaces | none (composer audit) | **approved** with web-push (C2-2); our own small curl client (`src/Infra/Notify/CurlHttpClient.php`) sends them, so no Guzzle |
+| web-push's own dependencies | brick/math 1.0.0, php-http/discovery 1.20.0, php-http/httplug 2.4.1, php-http/promise 1.3.1, psr/clock 1.0.0, psr/http-client 1.0.3, psr/http-factory 1.1.0, psr/http-message 2.0, psr/log 3.0.2, spomky-labs/base64url 2.0.4, spomky-labs/pki-framework 1.6.3, symfony/deprecation-contracts 3.8.1, symfony/polyfill-php83 1.43.0, web-token/jwt-library 4.2.8 | N-03 | as listed | all MIT | — | none (composer audit, 2026-11-23); none of them opens a connection of its own (checked: no curl or socket calls) | recorded (decision 3) |
 
 ## Development only (never in a release, K10)
 | Tool | Purpose | Version | Licence | Status |

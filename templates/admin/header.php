@@ -14,6 +14,11 @@ $adminMenu = [
     '/admin/settings' => 'admin.settings.title',
     '/admin/mail' => 'admin.mail.title',
     '/admin/switches' => 'admin.switches.title',
+    '/admin/content' => 'admin.content.title',
+    '/admin/community' => 'admin.community.title',
+    '/admin/newsletter' => 'admin.newsletter.title',
+    '/admin/archive' => 'admin.archive.title',
+    '/admin/notices' => 'admin.notices.title',
     '/admin/audit' => 'admin.audit.title',
 ];
 ?>

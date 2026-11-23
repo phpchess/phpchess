@@ -20,7 +20,7 @@ use PhpChess\Kernel\Services;
  *   POST /api/v1/games/{id}/move       fields ply and move; answers the new state
  *
  * The same JSON shape as the board's polling (GameStateJson). Logged-in
- * members only (API tokens follow in C2-2, API-01). Errors use ApiError.
+ * members, by session or API token (ID-10). Errors use ApiError.
  */
 final class GamesController
 {
@@ -108,7 +108,9 @@ final class GamesController
         if ($game === null || $user === null) {
             return null;
         }
-        $mayWatch = $game->isPlayer($user->id) || $user->isAdmin() || $this->services->switches()->isOn('player_list_visibility');
+        $rules = $this->services->play()->classRules();
+        $isTheirTeacher = $rules->mayLookAfter($user, $game->whiteId) || $rules->mayLookAfter($user, $game->blackId);
+        $mayWatch = $game->isPlayer($user->id) || $isTheirTeacher || $this->services->switches()->isOn('player_list_visibility');
 
         return $mayWatch ? $game : null;
     }

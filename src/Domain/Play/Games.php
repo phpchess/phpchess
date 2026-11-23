@@ -11,6 +11,7 @@ use PhpChess\Domain\Chess\Rules;
 use PhpChess\Domain\Chess\San;
 use PhpChess\Domain\Notify\Notices;
 use PhpChess\Domain\Rating\Ratings;
+use PhpChess\Domain\School\ClassRules;
 use PhpChess\Infra\Database;
 use PhpChess\Infra\Play\GameRepository;
 use PhpChess\Infra\Play\VacationRepository;
@@ -62,6 +63,7 @@ final class Games
         private readonly Ratings $ratings,
         private readonly Notices $notices,
         private readonly SettingsRepository $settings,
+        private readonly ?ClassRules $classRules = null,
     ) {
     }
 
@@ -70,18 +72,28 @@ final class Games
     /**
      * Starts a correspondence game and returns its id. The start position is
      * checked by the Rules module (G-06); throws PlayRefused when it can't be
-     * played (not a legal position, or already over).
+     * played (not a legal position, or already over), or when a student
+     * limited to their class would play someone outside it (SCH-05).
      */
     public function start(int $whiteId, int $blackId, int $daysPerMove, bool $isRated, string $startFen, int $now): int
     {
         if ($whiteId === $blackId) {
             throw new PlayRefused('play.not_against_yourself');
         }
+        $this->checkClassRule($whiteId, $blackId);
         $position = self::checkedStartPosition($startFen);
         $moverId = $position->sideToMove === Position::WHITE ? $whiteId : $blackId;
         $deadline = Clocks::deadline($now, $daysPerMove, $this->vacationDaysOf($moverId, $now));
 
         return $this->games->create($whiteId, $blackId, Game::SPEED_CORRESPONDENCE, $daysPerMove, $isRated, $position->toFen(), $now, $deadline);
+    }
+
+    /** Refuses a game between two users the school's class rule keeps apart (SCH-05). */
+    public function checkClassRule(int $userId, int $otherUserId): void
+    {
+        if ($this->classRules !== null && !$this->classRules->mayContact($userId, $otherUserId)) {
+            throw new PlayRefused('school.outside_class');
+        }
     }
 
     /** Reads a start position (FEN) and refuses one that is broken or where the game would already be over (G-06). */

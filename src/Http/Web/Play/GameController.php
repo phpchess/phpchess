@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace PhpChess\Http\Web\Play;
 
+use PhpChess\Domain\ActionRefused;
 use PhpChess\Domain\Chess\Pgn;
+use PhpChess\Domain\Community\GameChat;
+use PhpChess\Domain\System\FeatureSwitches;
 use PhpChess\Domain\Play\Game;
 use PhpChess\Domain\Play\Games;
 use PhpChess\Domain\Play\PlayRefused;
@@ -107,7 +110,49 @@ final class GameController
             'blackRating' => $ratings->shownRating($game->blackId, $game->speed),
             'boardTheme' => $this->services->currentPreferences()->boardTheme,
             'planningBoardTheme' => $this->services->settings()->getString('play.planning_board_theme', 'blue'),
+            'chat' => $this->chatFor($game),
         ]);
+    }
+
+    /**
+     * The game chat for the page (G-12), or null when the switch "game chat" is off.
+     *
+     * @return array{lines: list<array{id: int, user_id: int, username: string, body: string, created_at: string}>, mode: string, phrases: list<string>, maxLength: int}|null
+     */
+    private function chatFor(Game $game): ?array
+    {
+        if (!$this->services->switches()->isOn(FeatureSwitches::GAME_CHAT)) {
+            return null;
+        }
+        $chat = $this->services->gameChat();
+
+        return [
+            'lines' => $chat->lines($game->id),
+            'mode' => $chat->mode(),
+            'phrases' => GameChat::PHRASES,
+            'maxLength' => GameChat::MAX_LENGTH,
+        ];
+    }
+
+    /**
+     * Adds a chat line (G-12): players only; phrases or free text as the admin chose.
+     *
+     * @param array<string, string> $parts
+     */
+    public function chat(Request $request, array $parts): Response
+    {
+        $user = $this->pages->user();
+        $game = $this->services->play()->gameRepository()->find(PlayPages::idFrom($parts));
+        if ($game === null || !$this->pages->mayWatch($game, $user)) {
+            return $this->pages->notFound($request);
+        }
+        try {
+            $this->services->gameChat()->say($game, $user->id, $request->formValue('text'), $this->services->now);
+        } catch (ActionRefused $refusal) {
+            return $this->services->pages()->redirectWithMessage($request, '/games/' . $game->id, 'error', $this->pages->text($refusal->languageKey, $refusal->values));
+        }
+
+        return Response::redirect($request->basePath . '/games/' . $game->id . '#game-chat-title');
     }
 
     /**

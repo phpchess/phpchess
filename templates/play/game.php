@@ -79,6 +79,7 @@ $showAbortRequest = $canAbort && $abortRule === Games::ABORT_ASK_ADMIN;
      data-text-waiting-black="<?= e($t->text('game.waiting_for_black')) ?>"
      data-text-sending="<?= e($t->text('game.sending_move')) ?>"
      data-text-move-failed="<?= e($t->text('game.move_failed')) ?>"
+     data-text-move-queued="<?= e($t->text('game.move_queued')) ?>"
      data-text-days="<?= e($t->text('game.clock_days')) ?>"
      data-text-planning="<?= e($t->text('game.planning_board')) ?>"
      data-text-replay="<?= e($t->text('game.replay')) ?>"
@@ -311,6 +312,10 @@ $showAbortRequest = $canAbort && $abortRule === Games::ABORT_ASK_ADMIN;
             · <?= e($t->text('challenge.summary', ['days' => $game->daysPerMove])) ?>
         <?php endif; ?>
     </p>
+
+    <?php if ($chat !== null) : ?>
+        <?= $template->render('play/chat', $chat + ['game' => $game, 'viewerId' => $viewerId, 'basePath' => $basePath, 'csrfToken' => $csrfToken, 't' => $t]) ?>
+    <?php endif; ?>
 </div>
 <link rel="stylesheet" href="<?= e($basePath) ?>/assets/vendor/cm-chessboard/assets/chessboard.css">
 <link rel="stylesheet" href="<?= e($basePath) ?>/assets/vendor/cm-chessboard/assets/extensions/markers/markers.css">

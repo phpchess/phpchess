@@ -31,6 +31,10 @@ final class PageRenderer
 {
     private const string FLASH_KEY = 'flash_messages';
 
+    /**
+     * @param array{id: int, title: string, body: string}|null $serverMessage  the admin's server message (C-07)
+     * @param array<string, bool>                              $menuSwitches   which switched features the menu shows
+     */
     public function __construct(
         private readonly Template $template,
         private readonly Translator $translator,
@@ -40,7 +44,10 @@ final class PageRenderer
         private readonly string $siteName,
         private readonly ?User $user,
         private readonly Preferences $preferences,
-        private readonly int $unreadNoticeCount = 0,
+        private readonly int $myMoveCount = 0,
+        private readonly int $unreadMessageCount = 0,
+        private readonly ?array $serverMessage = null,
+        private readonly array $menuSwitches = [],
     ) {
     }
 
@@ -71,7 +78,11 @@ final class PageRenderer
             'language' => $this->translator->language,
             'flashMessages' => $this->takeFlashMessages(),
             'currentPath' => $request->path,
-            'unreadNoticeCount' => $this->unreadNoticeCount,
+            'myMoveCount' => $this->myMoveCount,
+            'unreadMessageCount' => $this->unreadMessageCount,
+            'menuSwitches' => $this->menuSwitches,
+            'serverMessage' => $this->serverMessage,
+            'isWide' => ($variables['isWide'] ?? false) === true,
         ]);
 
         return Response::html($layoutHtml, $status);

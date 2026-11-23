@@ -17,6 +17,8 @@ namespace PhpChess\Kernel;
  *             in the last 30 minutes (re-authentication, ID-08);
  * - ADMINS_BEFORE_CONFIRMATION: the admin role is enough; only for the page
  *             where the password is confirmed.
+ * - TEACHERS: accounts with the teacher or admin role (school pages, SCH-02);
+ *             no password confirmation, a teacher works there all lesson.
  *
  * Services still check whatever protects data ("is this your game"), K14.
  */
@@ -26,4 +28,5 @@ final class Access
     public const string MEMBERS = 'members';
     public const string ADMINS = 'admins';
     public const string ADMINS_BEFORE_CONFIRMATION = 'admins_before_confirmation';
+    public const string TEACHERS = 'teachers';
 }

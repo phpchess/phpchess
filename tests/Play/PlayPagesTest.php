@@ -15,7 +15,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * The play pages through the Kernel, as a browser uses them (G-02 to G-22,
  * N-01, N-02, API-02, ADM-04): challenges, invite links, the board, moves,
- * notices and emails, the API and the admin's games page.
+ * the stored notices and emails, the API and the admin's games page.
  */
 final class PlayPagesTest extends TestCase
 {
@@ -75,9 +75,13 @@ final class PlayPagesTest extends TestCase
         $anna = $this->site->loggedInBrowser('anna');
         $anna->submit('/play', '/challenges', ['kind' => 'direct', 'opponent' => 'ben', 'colour' => 'random', 'days_per_move' => '3']);
 
+        // Players see it on the start page (A44); the notice is stored for push, email and admins.
         $ben = $this->site->loggedInBrowser('ben');
-        self::assertStringContainsString('anna challenges you', $ben->get('/notices')->body);
-        self::assertStringContainsString('class="badge"', $ben->get('/play')->body);
+        $home = $ben->get('/')->body;
+        self::assertStringContainsString('Challenges for you', $home);
+        self::assertStringContainsString('Challenge from anna', $home);
+        $benId = (int) $this->site->users()->findByUsernameOrEmail('ben')?->id;
+        self::assertSame(1, $this->play->noticeRepository()->countUnread($benId));
     }
 
     // --- Invite links (G-21) ---
@@ -131,8 +135,10 @@ final class PlayPagesTest extends TestCase
         self::assertStringContainsString('/games/' . $gameId, $annaHome);
         self::assertStringContainsString('class="mini-board"', $annaHome);
 
+        // Ben waits for Anna: the game is under "My games (opponent to move)", not "Your move" (A44).
         $benHome = $this->site->loggedInBrowser('ben')->get('/')->body;
-        self::assertStringNotContainsString('/games/' . $gameId, $benHome);
+        self::assertStringContainsString('No game is waiting for your move.', $benHome);
+        self::assertStringContainsString('/games/' . $gameId, $benHome);
     }
 
     public function testTheAbortButtonGoesAfterTheFirstMove(): void

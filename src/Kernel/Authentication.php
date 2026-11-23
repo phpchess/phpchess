@@ -8,6 +8,7 @@ use PhpChess\Domain\Identity\LoginService;
 use PhpChess\Domain\Identity\User;
 use PhpChess\Http\Cookie;
 use PhpChess\Http\Request;
+use PhpChess\Infra\Identity\ApiTokenRepository;
 use PhpChess\Infra\Identity\UserRepository;
 
 /**
@@ -32,6 +33,7 @@ final class Authentication
 
     private ?User $currentUser = null;
     private bool $currentUserLoaded = false;
+    private bool $usedApiToken = false;
 
     /** @var list<Cookie> */
     private array $cookiesToSet = [];
@@ -41,6 +43,7 @@ final class Authentication
         private readonly UserRepository $users,
         private readonly LoginService $logins,
         private readonly Request $request,
+        private readonly ?ApiTokenRepository $apiTokens = null,
     ) {
     }
 
@@ -57,8 +60,33 @@ final class Authentication
         return $this->currentUser;
     }
 
+    /**
+     * True when this request logged in with an API token (ID-10) instead of
+     * the session. Such a request carries no cookies a stranger's page could
+     * use, so the Kernel does not ask it for a CSRF token.
+     */
+    public function usedApiToken(): bool
+    {
+        $this->currentUser();
+
+        return $this->usedApiToken;
+    }
+
     private function loadCurrentUser(): ?User
     {
+        // An app on the API sends "Authorization: Bearer <token>" (ID-10).
+        $authorization = $this->request->header('authorization');
+        if ($this->request->isApi() && $this->apiTokens !== null && str_starts_with($authorization, 'Bearer ')) {
+            $userId = $this->apiTokens->userIdFor(trim(substr($authorization, strlen('Bearer '))));
+            $user = $userId === null ? null : $this->users->findById($userId);
+            if ($user === null || !$user->isActive()) {
+                return null;
+            }
+            $this->usedApiToken = true;
+
+            return $user;
+        }
+
         $userId = $this->session->get(self::SESSION_USER_ID);
         if (is_int($userId)) {
             $user = $this->users->findById($userId);
