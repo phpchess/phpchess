@@ -9,6 +9,7 @@
  *   $user (User|null)        the logged-in account
  *   $skin (Skin)             the active skin (logo, layout)
  *   $colourScheme (string)   "auto", "light" or "dark" (the member's choice)
+ *   $boardTheme (string)     the member's board colours (green, brown, blue, grey): mini boards and the board
  *   $flashMessages (list of array{type: string, text: string})
  *   $currentPath (string)    to mark the current menu item
  *   $unreadNoticeCount (int) the badge on the notices link (N-01)
@@ -26,10 +27,11 @@
     <link rel="stylesheet" href="<?= e($basePath) ?>/assets/css/base.css">
     <link rel="stylesheet" href="<?= e($basePath) ?>/assets/css/site.css">
     <link rel="stylesheet" href="<?= e($basePath) ?>/assets/css/play.css">
+    <script type="module" src="<?= e($basePath) ?>/assets/js/busy-buttons.js"></script>
     <?php /* The skin comes last, so its colours replace the fallback values in base.css. */ ?>
     <link rel="stylesheet" href="<?= e($basePath) ?>/skin/theme.css">
 </head>
-<body class="layout-<?= e($skin->layout) ?>">
+<body class="layout-<?= e($skin->layout) ?> board-theme-<?= e($boardTheme) ?>">
 <a class="skip-link" href="#main"><?= e($t->text('layout.skip_to_content')) ?></a>
 
 <header class="site-header">
@@ -45,7 +47,8 @@
             <?php if ($user === null) : ?>
                 <li><a href="<?= e($basePath) ?>/login"<?= $currentPath === '/login' ? ' aria-current="page"' : '' ?>><?= e($t->text('layout.login')) ?></a></li>
             <?php else : ?>
-                <li><a href="<?= e($basePath) ?>/play"<?= str_starts_with($currentPath, '/play') || str_starts_with($currentPath, '/games') ? ' aria-current="page"' : '' ?>><?= e($t->text('layout.play')) ?></a></li>
+                <li><a href="<?= e($basePath) ?>/play"<?= str_starts_with($currentPath, '/play') ? ' aria-current="page"' : '' ?>><?= e($t->text('layout.play')) ?></a></li>
+                <li><a href="<?= e($basePath) ?>/games"<?= str_starts_with($currentPath, '/games') ? ' aria-current="page"' : '' ?>><?= e($t->text('layout.my_games')) ?></a></li>
                 <li><a href="<?= e($basePath) ?>/notices"<?= $currentPath === '/notices' ? ' aria-current="page"' : '' ?>><?= e($t->text('layout.notices')) ?><?php if ($unreadNoticeCount > 0) : ?> <span class="badge" aria-label="<?= e($t->text('layout.unread', ['count' => $unreadNoticeCount])) ?>"><?= e($unreadNoticeCount) ?></span><?php endif; ?></a></li>
                 <li><a href="<?= e($basePath) ?>/account/preferences"<?= str_starts_with($currentPath, '/account') ? ' aria-current="page"' : '' ?>><?= e($user->username) ?></a></li>
                 <?php if ($user->isAdmin()) : ?>

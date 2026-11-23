@@ -52,8 +52,8 @@ final class Games
     public const string ABORT_ASK_ADMIN = 'ask_admin';
     public const array ABORT_RULES = [self::ABORT_ALLOWED, self::ABORT_COUNTS_AS_LOSS, self::ABORT_ASK_ADMIN];
 
-    /** A game can be aborted until each side has made its first move (A33). */
-    public const int ABORT_BEFORE_PLY = 2;
+    /** A game can be aborted only before the first move (A33, changed in review: A39). */
+    public const int ABORT_BEFORE_PLY = 1;
 
     public function __construct(
         private readonly Database $database,

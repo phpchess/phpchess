@@ -3,12 +3,13 @@
  * The play settings (A28, A30, A33, A34, A35, A37).
  *
  * Variables: $maxDaysPerMove, $ratingStart, $openDays, $directDays,
- * $inviteDays, $emailDelayMinutes (int); $abortRule, $defaultEmailMode,
+ * $inviteDays, $emailDelayMinutes (int); $abortRule, $defaultEmailMode, $planningBoardTheme,
  * $adjudicationReasons (string); $fenInDirect (bool);
  * $allowedEmailModes (list of string);
  * $warnings, $currentAdminPath, $basePath, $csrfToken, $t, $template.
  */
 
+use PhpChess\Domain\Identity\Preferences;
 use PhpChess\Domain\Notify\MoveEmails;
 use PhpChess\Domain\Play\Games;
 
@@ -42,6 +43,14 @@ use PhpChess\Domain\Play\Games;
     </fieldset>
 
     <label class="checkbox"><input type="checkbox" name="fen_in_direct" value="yes"<?= $fenInDirect ? ' checked' : '' ?>> <?= e($t->text('admin.play.fen_in_direct')) ?></label>
+
+    <label><?= e($t->text('admin.play.planning_board_theme')) ?>
+        <select name="planning_board_theme">
+            <?php foreach (Preferences::BOARD_THEMES as $theme) : ?>
+                <option value="<?= e($theme) ?>"<?= $theme === $planningBoardTheme ? ' selected' : '' ?>><?= e($t->text('preferences.board.' . $theme)) ?></option>
+            <?php endforeach; ?>
+        </select>
+    </label>
 
     <fieldset>
         <legend><?= e($t->text('admin.play.email_modes')) ?></legend>

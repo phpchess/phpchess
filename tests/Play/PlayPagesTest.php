@@ -123,6 +123,28 @@ final class PlayPagesTest extends TestCase
         self::assertStringContainsString('[White "anna"]', $pgn->body);
     }
 
+    public function testTheStartPageShowsOnlyGamesWaitingForTheViewer(): void
+    {
+        $gameId = $this->startGame();
+
+        $annaHome = $this->site->loggedInBrowser('anna')->get('/')->body;
+        self::assertStringContainsString('/games/' . $gameId, $annaHome);
+        self::assertStringContainsString('class="mini-board"', $annaHome);
+
+        $benHome = $this->site->loggedInBrowser('ben')->get('/')->body;
+        self::assertStringNotContainsString('/games/' . $gameId, $benHome);
+    }
+
+    public function testTheAbortButtonGoesAfterTheFirstMove(): void
+    {
+        $gameId = $this->startGame();
+        $anna = $this->site->loggedInBrowser('anna');
+        self::assertStringContainsString("/games/{$gameId}/abort", $anna->get("/games/{$gameId}")->body);
+
+        $anna->post("/games/{$gameId}/move", ['ply' => '0', 'move' => 'e2e4']);
+        self::assertStringNotContainsString("/games/{$gameId}/abort", $anna->get("/games/{$gameId}")->body);
+    }
+
     public function testTheBoardScriptGetsJsonAnswers(): void
     {
         $gameId = $this->startGame();

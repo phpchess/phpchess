@@ -133,6 +133,42 @@ button,
     font-weight: 600;
     text-decoration: none;
     cursor: pointer;
+    transition: transform 0.05s, filter 0.1s;
+}
+
+/* Pressed: the button sinks in a little and gets darker, so a tap is felt at once. */
+button:active,
+.button:active {
+    transform: translateY(1px) scale(0.98);
+    filter: brightness(0.85);
+}
+
+/* Sent, waiting for the server (busy-buttons.js): faded, a spinner, no second press. */
+button.is-busy,
+.button.is-busy {
+    position: relative;
+    opacity: 0.7;
+    cursor: progress;
+    pointer-events: none;
+    padding-right: 2.6rem;
+}
+button.is-busy::after,
+.button.is-busy::after {
+    content: "";
+    position: absolute;
+    right: 0.9rem;
+    top: 50%;
+    width: 1rem;
+    height: 1rem;
+    margin-top: -0.5rem;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: busy-spin 0.7s linear infinite;
+}
+@keyframes busy-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+    button.is-busy::after, .button.is-busy::after { animation-duration: 2s; }
 }
 
 /* --- Wider screens --- */

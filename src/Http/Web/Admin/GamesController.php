@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PhpChess\Http\Web\Admin;
 
+use PhpChess\Domain\Identity\Preferences;
 use PhpChess\Domain\Notify\MoveEmails;
 use PhpChess\Domain\Play\Clocks;
 use PhpChess\Domain\Play\Game;
@@ -125,6 +126,7 @@ final class GamesController
             'directDays' => $settings->getInt('challenge.direct_days', 14),
             'inviteDays' => $settings->getInt('challenge.invite_days', 7),
             'fenInDirect' => $settings->getBool('play.fen_in_direct', true),
+            'planningBoardTheme' => $settings->getString('play.planning_board_theme', 'blue'),
             'allowedEmailModes' => $this->services->moveEmails()->allowedModes(),
             'defaultEmailMode' => $this->services->moveEmails()->defaultMode(),
             'emailDelayMinutes' => $settings->getInt('mail.move_email_delay_minutes', 60),
@@ -143,6 +145,8 @@ final class GamesController
             $settings->set('challenge.' . $name, max(1, min(365, (int) $request->formValue($name, (string) $default))));
         }
         $settings->set('play.fen_in_direct', $request->formValue('fen_in_direct') === 'yes');
+        $planningTheme = $request->formValue('planning_board_theme');
+        $settings->set('play.planning_board_theme', in_array($planningTheme, Preferences::BOARD_THEMES, true) ? $planningTheme : 'blue');
 
         $allowed = [];
         foreach (MoveEmails::MODES as $mode) {

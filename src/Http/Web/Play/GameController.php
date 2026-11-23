@@ -106,6 +106,7 @@ final class GameController
             'whiteRating' => $ratings->shownRating($game->whiteId, $game->speed),
             'blackRating' => $ratings->shownRating($game->blackId, $game->speed),
             'boardTheme' => $this->services->currentPreferences()->boardTheme,
+            'planningBoardTheme' => $this->services->settings()->getString('play.planning_board_theme', 'blue'),
         ]);
     }
 

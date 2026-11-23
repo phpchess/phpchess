@@ -18,6 +18,9 @@ use PhpChess\Infra\Repository;
  */
 final class GameRepository extends Repository
 {
+    /** The SQL condition "it is this player's turn" (two "?" for the user id). */
+    private const string WAITING_FOR_PLAYER = " AND ((white_id = ? AND current_fen LIKE '% w %') OR (black_id = ? AND current_fen LIKE '% b %'))";
+
     // --- Creating ---
 
     /** Creates a running game and returns its id. */
@@ -63,6 +66,34 @@ final class GameRepository extends Repository
         );
 
         return $this->toGames($rows);
+    }
+
+    /**
+     * The running games where it is this player's turn, the oldest wait first
+     * (the start page, a page of $limit games from $offset).
+     *
+     * Whose turn it is stands in the position: " w " or " b " after the board part of the FEN.
+     *
+     * @return list<Game>
+     */
+    public function listWaitingFor(int $userId, int $limit, int $offset): array
+    {
+        $rows = $this->database->fetchAll(
+            'SELECT * FROM ' . $this->table('games') . ' WHERE state = ?' . self::WAITING_FOR_PLAYER
+            . ' ORDER BY COALESCE(last_move_at, started_at) ASC, id ASC LIMIT ' . max(1, $limit) . ' OFFSET ' . max(0, $offset),
+            [Game::STATE_RUNNING, $userId, $userId],
+        );
+
+        return $this->toGames($rows);
+    }
+
+    /** How many running games wait for this player's move (for the pages of the list above). */
+    public function countWaitingFor(int $userId): int
+    {
+        return self::intOf($this->database->fetchValue(
+            'SELECT COUNT(*) FROM ' . $this->table('games') . ' WHERE state = ?' . self::WAITING_FOR_PLAYER,
+            [Game::STATE_RUNNING, $userId, $userId],
+        ));
     }
 
     /**

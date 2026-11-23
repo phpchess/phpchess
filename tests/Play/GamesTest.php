@@ -125,13 +125,13 @@ final class GamesTest extends TestCase
         $this->play->games()->abort($gameId, $this->whiteId, self::NOW);
     }
 
-    public function testAbortIsRefusedAfterBothSidesMoved(): void
+    public function testAbortIsRefusedAfterTheFirstMove(): void
     {
         $gameId = $this->startGame();
-        $this->playMoves($gameId, ['e2e4', 'e7e5']);
+        $this->playMoves($gameId, ['e2e4']);
 
         $this->expectException(PlayRefused::class);
-        $this->play->games()->abort($gameId, $this->whiteId, self::NOW);
+        $this->play->games()->abort($gameId, $this->blackId, self::NOW);
     }
 
     public function testATimeoutIsWonByTheOpponent(): void

@@ -3,8 +3,8 @@
  * notice badge, the QR code. Mobile first (A18): the board fills the
  * phone's width; on wider screens the move list goes beside it.
  *
- * Board colours come from the member's board choice (ID-13):
- * the frame gets the class board-theme-<name>, which sets two variables
+ * Board colours come from the member's board choice (ID-13): the page
+ * body and the board frame get the class board-theme-<name>, which sets two variables
  * used by both the plain table board (no JavaScript) and cm-chessboard
  * (style class "phpchess").
  */
@@ -14,14 +14,55 @@
 .board-theme-brown { --board-light: #f0d9b5; --board-dark: #b58863; }
 .board-theme-blue  { --board-light: #dee3e6; --board-dark: #8ca2ad; }
 .board-theme-grey  { --board-light: #e8e8e8; --board-dark: #a0a0a0; }
+/* Default colours for pages outside a themed area. */
+body { --board-light: #eeeed2; --board-dark: #769656; }
 
-/* --- The board --- */
+/* --- The game page: a big board, the side panel beside it on wide screens --- */
+
+/* The game page may use the whole width; other pages keep their narrow column. */
+.page:has(> .game-page) { max-width: 78rem; }
+@media (max-width: 47.99rem) {
+    .page:has(> .game-page) { padding: 0.5rem 0.25rem; }
+}
+
+.game-page { display: block; }
+
+.board-column { width: 100%; }
+
+/* The board fills the width on a phone; on a wide screen it is as big as the window's height allows. */
 .board-frame {
     width: 100%;
-    max-width: 36rem;
     margin: 0 auto;
     touch-action: none;   /* dragging a piece must not scroll the page */
+    transition: opacity 0.15s;
 }
+.board-frame.is-busy { opacity: 0.6; cursor: progress; }
+
+@media (min-width: 60rem) {
+    .game-page {
+        display: grid;
+        grid-template-columns: minmax(0, auto) minmax(16rem, 22rem);
+        column-gap: 1.5rem;
+        align-items: start;
+        justify-content: center;
+    }
+    .board-column, .board-frame { width: min(calc(100vh - 12rem), 52rem); }
+}
+
+.player-bar { margin: 0.3rem 0.25rem; }
+
+/* Planning: its own title and colours (the admin's choice), so it can not be taken for the real board. */
+.planning-title {
+    margin: 0 0 0.4rem;
+    padding: 0.3rem 0.6rem;
+    font-size: 1.1rem;
+    border-radius: 0.4rem;
+    background: var(--board-dark);
+    color: #fff;
+    text-align: center;
+}
+.planning-tools { text-align: center; }
+.board-frame.is-planning { outline: 4px solid var(--board-dark); outline-offset: 2px; }
 
 .cm-chessboard.phpchess .board .square.white { fill: var(--board-light); }
 .cm-chessboard.phpchess .board .square.black { fill: var(--board-dark); }
@@ -50,49 +91,78 @@
 .text-board .square-light { background: var(--board-light); }
 .text-board .square-dark { background: var(--board-dark); }
 
-/* --- Around the board --- */
-.game-player { margin: 0.4rem 0; font-weight: 600; }
-.game-status { font-size: 1.1rem; margin: 0.6rem 0 0.2rem; }
-.board-tools button { min-width: 2.75rem; min-height: 2.75rem; }
-.move-form input[name="move"] { max-width: 10rem; }
+/* --- Icons and the icon bars --- */
+.icon-sprite { display: none; }
+.icon { width: 1.5rem; height: 1.5rem; display: block; }
+.icon-text { font-size: 1.4rem; line-height: 1.5rem; font-weight: 700; display: block; min-width: 1.5rem; text-align: center; }
 
+.icon-bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.35rem;
+    margin: 0.5rem 0;
+}
+.icon-bar[hidden] { display: none; }
+.icon-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.9rem;
+    min-height: 2.9rem;
+    margin: 0;
+    padding: 0.5rem;
+    border: 0;
+    border-radius: 0.5rem;
+    background: var(--colour-page-background);
+    color: var(--colour-text);
+    cursor: pointer;
+    list-style: none;   /* for <summary> */
+}
+.icon-button::-webkit-details-marker { display: none; }
+.icon-button:hover { background: var(--colour-border); }
+/* A busy icon button: the spinner takes the icon's place. */
+.icon-button.is-busy { padding-right: 0.5rem; }
+.icon-button.is-busy > * { visibility: hidden; }
+.icon-button.is-busy::after { right: 50%; margin-right: -0.5rem; }
+
+/* --- Beside the board --- */
+.game-status { font-size: 1.1rem; margin: 0.6rem 0 0.2rem; }
+.game-buttons { justify-content: flex-start; align-items: center; }
+.offer-box { padding: 0.5rem 0.75rem; border-radius: 0.5rem; background: var(--colour-warning-background); }
+details.confirm { display: inline-block; }
+details.confirm[open] { display: block; }
+details.confirm summary { cursor: pointer; }
+.button-danger { background: var(--colour-error); color: #fff; }
+
+.move-panel[hidden] { display: none; }
 .move-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.25rem 0.5rem;
-    padding: 0;
+    gap: 0.15rem 0.4rem;
+    padding: 0.5rem;
+    margin: 0.5rem 0;
     list-style: none;
+    max-height: 22rem;
+    overflow-y: auto;
+    background: var(--colour-page-background);
+    border-radius: 0.5rem;
 }
+.move-list:empty { display: none; }
 .move-number { color: var(--colour-muted-text); margin-right: 0.15rem; }
 .move-button {
+    min-height: 0;
+    margin: 0;
     background: none;
     border: 0;
     padding: 0.2rem 0.3rem;
     color: inherit;
     font: inherit;
+    font-weight: 400;
     cursor: pointer;
     border-radius: 0.25rem;
 }
 .move-button[aria-current="step"] { background: var(--colour-accent); color: var(--colour-accent-text); }
-
-.game-buttons { margin-top: 1rem; align-items: center; }
-details.confirm summary { cursor: pointer; display: inline-block; }
-.button-danger { background: var(--colour-error); color: #fff; }
-
-@media (min-width: 60rem) {
-    .game-page {
-        display: grid;
-        grid-template-columns: minmax(0, 36rem) 1fr;
-        column-gap: 2rem;
-    }
-    .game-page > * { grid-column: 2; }
-    .game-page > .game-player-top,
-    .game-page > .board-frame,
-    .game-page > .game-player-bottom { grid-column: 1; }
-    .game-page > .game-player-top { grid-row: 1; }
-    .game-page > .board-frame { grid-row: 2 / span 8; }
-    .game-page > .game-player-bottom { grid-row: 10; }
-}
 
 /* --- Lists --- */
 .button-large { font-size: 1.25rem; padding: 0.8rem 2rem; }
@@ -109,6 +179,16 @@ details.confirm summary { cursor: pointer; display: inline-block; }
     font-size: 0.8em;
     text-align: center;
 }
+
+/* --- Mini boards in game lists (src/Http/MiniBoard.php) --- */
+.mini-board { width: 5.5rem; height: 5.5rem; flex: none; border-radius: 0.25rem; }
+.mini-square-light { fill: var(--board-light); }
+.mini-square-dark { fill: var(--board-dark); }
+.game-card-link { display: flex; gap: 0.75rem; align-items: center; color: inherit; text-decoration: none; }
+.game-card-text { display: flex; flex-direction: column; min-width: 0; }
+.game-card-text .card-title { color: var(--colour-accent); font-weight: 600; }
+.game-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); gap: 0.5rem; }
+.pager { display: flex; gap: 0.75rem; align-items: center; justify-content: center; margin-top: 1rem; }
 
 .data-table { border-collapse: collapse; width: 100%; }
 .data-table th, .data-table td { text-align: left; padding: 0.4rem 0.5rem; border-bottom: 1px solid var(--colour-border); }

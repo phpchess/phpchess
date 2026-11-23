@@ -67,6 +67,7 @@ final class PageRenderer
             'siteName' => $this->siteName,
             'skin' => $this->skin,
             'colourScheme' => $this->preferences->colourScheme,
+            'boardTheme' => $this->preferences->boardTheme,
             'language' => $this->translator->language,
             'flashMessages' => $this->takeFlashMessages(),
             'currentPath' => $request->path,

@@ -2,18 +2,20 @@
  * The game page in the browser (G-04, G-10, A36): the drag-and-drop board,
  * live moves, replay, and the planning board.
  *
- * The page works without this script (templates/play/game.php draws a
- * table board and a move field). This script, loaded as a module, replaces
- * the table with cm-chessboard and adds:
- *   - moves by dragging or by tapping two squares, with the legal targets
- *     marked; a pawn reaching the last rank asks which piece it becomes;
- *   - instant feedback from chess.js, while the server decides (K1): each
- *     move is sent to POST /games/{id}/move, and on a refusal the board
- *     goes back to the server's position;
- *   - live updates: the page asks GET /games/{id}/state?since=N every few
- *     seconds (less often while the tab is hidden), see live-updates.js;
- *   - replay buttons and clickable moves to look back through the game;
- *   - the planning board: try moves for both sides; nothing is sent.
+ * templates/play/game.php draws the page; this script, loaded as a module,
+ * replaces the table board with cm-chessboard and runs the page's three modes:
+ *
+ *   play      The real board. Moves by dragging or by tapping two squares,
+ *             with the legal targets marked; a pawn reaching the last rank
+ *             asks which piece it becomes. chess.js checks the move at once,
+ *             then it is sent to POST /games/{id}/move and the server decides
+ *             (K1); on a refusal the board goes back to the server's position.
+ *             While the move is on its way the board is dimmed and takes no
+ *             input. The opponent's moves come in live (live-updates.js).
+ *   replay    The replay bar steps and plays through the game; tapping a move
+ *             in the list also starts replay at that move.
+ *   planning  A board in other colours with its own title: try moves for both
+ *             sides; nothing is sent. "Close planning board" goes back.
  *
  * Libraries (local, A16): cm-chessboard 8.15.8 and chess.js 1.4.0 in /assets/vendor/.
  */
@@ -32,14 +34,32 @@ const csrfToken = page.dataset.csrfToken;
 const viewerColour = page.dataset.viewerColour;   // 'w', 'b' or '' for a watcher
 let serverState = JSON.parse(page.dataset.state);
 
+// The parts of the page each mode shows or hides.
+const boardFrame = document.getElementById('board');
+const playTools = document.getElementById('play-tools');
+const replayTools = document.getElementById('replay-tools');
+const planningTools = document.getElementById('planning-tools');
+const planningTitle = document.getElementById('planning-title');
+const movePanel = document.getElementById('move-panel');
+
+const MODE_PLAY = 'play';
+const MODE_REPLAY = 'replay';
+const MODE_PLANNING = 'planning';
+
+/** How long one step of replay's "play" takes, normal and fast (milliseconds). */
+const REPLAY_STEP_TIME = 1000;
+const REPLAY_FAST_STEP_TIME = 300;
+
 // Every position of the game as FEN, index = ply (0 = the start).
 const positions = [];
 // Every move as SAN, index = ply - 1.
 const sanMoves = [];
 
-let viewedPly = 0;          // the position shown (replay)
-let isPlanning = false;     // the planning board is on
-let planningGame = null;    // a chess.js game for planning
+let mode = MODE_PLAY;
+let viewedPly = 0;          // the position shown
+let planningGame = null;    // a chess.js game while planning
+let isSending = false;      // a move is on its way to the server
+let replayTimer = null;     // the running replay "play", or null
 let board = null;
 
 // --- Building the board ---
@@ -48,9 +68,8 @@ function setUpBoard() {
     rebuildPositions(serverState.moves);
     viewedPly = serverState.ply;
 
-    const boardElement = document.getElementById('board');
-    boardElement.innerHTML = '';
-    board = new Chessboard(boardElement, {
+    boardFrame.innerHTML = '';
+    board = new Chessboard(boardFrame, {
         position: positions[viewedPly],
         orientation: viewerColour === 'b' ? COLOR.black : COLOR.white,
         assetsUrl: basePath + '/assets/vendor/cm-chessboard/assets/',
@@ -59,9 +78,7 @@ function setUpBoard() {
     });
 
     keepDraggingWithinTheSecurityPolicy(board);
-    document.getElementById('board-tools').hidden = false;
-    hideTypedMoveFormWhileBoardWorks();
-    updateMoveInput();
+    showMode(MODE_PLAY);
 }
 
 /**
@@ -94,12 +111,36 @@ function rebuildPositions(moves) {
     }
 }
 
-/** The typed-move field stays for keyboard play on desktop; on touch screens the board is enough. */
-function hideTypedMoveFormWhileBoardWorks() {
-    const form = document.getElementById('move-form');
-    if (form && window.matchMedia('(pointer: coarse)').matches) {
-        form.hidden = true;
+// --- The three modes ---
+
+/** Shows the parts of the page that belong to a mode and hides the others. */
+function showMode(newMode) {
+    stopReplayTimer();
+    mode = newMode;
+
+    playTools.hidden = mode !== MODE_PLAY;
+    replayTools.hidden = mode !== MODE_REPLAY;
+    planningTools.hidden = mode !== MODE_PLANNING;
+    planningTitle.hidden = mode !== MODE_PLANNING;
+    movePanel.hidden = mode === MODE_PLANNING;
+
+    // The planning board gets the admin's planning colours instead of the member's own.
+    const theme = mode === MODE_PLANNING ? page.dataset.planningBoardTheme : page.dataset.boardTheme;
+    boardFrame.className = 'board-frame board-theme-' + theme + (mode === MODE_PLANNING ? ' is-planning' : '');
+    planningTitle.className = 'planning-title board-theme-' + page.dataset.planningBoardTheme;
+
+    if (mode === MODE_PLANNING) {
+        planningGame = new Chess(positions[viewedPly]);
+    } else {
+        planningGame = null;
     }
+    if (mode === MODE_PLAY) {
+        viewedPly = serverState.ply;
+        showTurnStatus();
+    }
+    board.setPosition(positions[viewedPly], true);
+    drawMoveList();
+    updateMoveInput();
 }
 
 // --- Whose turn: switching move input on and off ---
@@ -113,17 +154,14 @@ function isViewersTurn() {
 function updateMoveInput() {
     board.disableMoveInput();
     board.removeMarkers();
-    if (isPlanning) {
+    if (mode === MODE_PLANNING) {
         board.enableMoveInput(handlePlanningInput);
-        return;
-    }
-    const isShowingCurrentPosition = viewedPly === serverState.ply;
-    if (isViewersTurn() && isShowingCurrentPosition) {
+    } else if (mode === MODE_PLAY && isViewersTurn() && !isSending) {
         board.enableMoveInput(handleRealInput, viewerColour === 'b' ? COLOR.black : COLOR.white);
     }
 }
 
-// --- Moving on the real board ---
+// --- Moving on the board ---
 
 function handleRealInput(event) {
     const game = new Chess(positions[serverState.ply]);
@@ -186,8 +224,19 @@ function askForPromotion(event, game, onLegalMove) {
 
 // --- Sending a move to the server (K2: it decides) ---
 
+/** Dims the board and blocks input while the server works on the move. */
+function setSending(sending) {
+    isSending = sending;
+    boardFrame.classList.toggle('is-busy', sending);
+    boardFrame.setAttribute('aria-busy', sending ? 'true' : 'false');
+    if (sending) {
+        showStatus(page.dataset.textSending);
+    }
+    updateMoveInput();
+}
+
 async function sendMove(uci) {
-    board.disableMoveInput();
+    setSending(true);
     const body = new URLSearchParams({_csrf: csrfToken, ply: String(serverState.ply), move: uci});
     try {
         const response = await fetch(basePath + '/games/' + serverState.id + '/move', {
@@ -197,15 +246,17 @@ async function sendMove(uci) {
             credentials: 'same-origin',
         });
         const answer = await response.json();
+        setSending(false);
         if (!response.ok) {
-            showStatus(answer.error ? answer.error.message : page.dataset.textMoveFailed);
             await refreshFromServer();
+            showStatus(answer.error ? answer.error.message : page.dataset.textMoveFailed);
             return;
         }
         applyServerState(answer);
     } catch (error) {
-        showStatus(page.dataset.textMoveFailed);
+        setSending(false);
         await refreshFromServer();
+        showStatus(page.dataset.textMoveFailed);
     }
 }
 
@@ -222,34 +273,32 @@ function applyServerState(newState) {
     const newMoves = newState.moves.filter((move) => move.ply > hadPly);
     serverState = {...newState, moves: [...knownMoves, ...newMoves]};
 
-    // The buttons (draw, rematch, game over) are drawn by the server: reload for those.
-    if ((wasRunning && serverState.state !== 'running') || offersChanged) {
+    // The game buttons (draw, abort, rematch, game over) are drawn by the server: reload for those.
+    const abortButtonMustGo = hadPly === 0 && serverState.ply > 0;
+    if ((wasRunning && serverState.state !== 'running') || offersChanged || abortButtonMustGo) {
         window.location.reload();
         return;
     }
-    if (newMoves.length > 0 || serverState.ply !== hadPly) {
-        const wasShowingCurrent = viewedPly === hadPly;
+    if (serverState.ply !== hadPly) {
         rebuildPositions(serverState.moves);
-        if (wasShowingCurrent && !isPlanning) {
+        if (mode === MODE_PLAY) {
             viewedPly = serverState.ply;
             board.setPosition(positions[viewedPly], true);
         }
         drawMoveList();
     }
-    showTurnStatus();
+    if (mode === MODE_PLAY) {
+        showTurnStatus();
+    }
     updateMoveInput();
 }
 
 async function refreshFromServer() {
     const response = await fetch(basePath + '/games/' + serverState.id + '/state?since=0', {headers: {'Accept': 'application/json'}, credentials: 'same-origin'});
     if (response.ok) {
-        const freshState = await response.json();
-        serverState = {...freshState};
+        serverState = {...(await response.json())};
         rebuildPositions(serverState.moves);
-        viewedPly = serverState.ply;
-        board.setPosition(positions[viewedPly], false);
-        drawMoveList();
-        updateMoveInput();
+        showMode(MODE_PLAY);
     }
 }
 
@@ -261,8 +310,9 @@ function showStatus(text) {
 
 function showTurnStatus() {
     if (serverState.state !== 'running') {
-        showStatus(page.dataset.textGameOver);
-    } else if (isViewersTurn()) {
+        return;   // the server's "Game over: 1-0, checkmate" stays
+    }
+    if (isViewersTurn()) {
         showStatus(page.dataset.textYourMove);
     } else {
         const moverName = serverState.side_to_move === 'w' ? serverState.white.name : serverState.black.name;
@@ -270,7 +320,7 @@ function showTurnStatus() {
     }
 }
 
-/** Draws the move list again, numbered like a score sheet, the shown move marked. */
+/** Draws the move list again, numbered like a score sheet; in replay the shown move is marked. */
 function drawMoveList() {
     const list = document.getElementById('move-list');
     list.innerHTML = '';
@@ -301,60 +351,92 @@ function drawMoveList() {
         }
         isWhiteMove = !isWhiteMove;
     });
+
+    const current = list.querySelector('[aria-current="step"]');
+    if (current) {
+        current.scrollIntoView({block: 'nearest'});
+    }
 }
 
-// --- Replay, flip and planning (A36) ---
+// --- Replay (A36) ---
 
+/** Shows one position of the game, in replay mode. */
 function showPly(ply) {
-    if (isPlanning) {
-        stopPlanning();
+    if (mode !== MODE_REPLAY) {
+        showMode(MODE_REPLAY);
     }
     viewedPly = Math.max(0, Math.min(ply, serverState.ply));
     board.setPosition(positions[viewedPly], true);
     drawMoveList();
-    updateMoveInput();
 }
 
-function startPlanning() {
-    isPlanning = true;
-    planningGame = new Chess(positions[viewedPly]);
-    document.querySelector('[data-board-action="plan"]').setAttribute('aria-pressed', 'true');
-    showStatus(page.dataset.textPlanning);
-    updateMoveInput();
+/** Steps through the game by itself: direction +1 (play) or -1 (backwards). */
+function startReplayTimer(direction, stepTime) {
+    stopReplayTimer();
+    replayTimer = window.setInterval(() => {
+        const next = viewedPly + direction;
+        if (next < 0 || next > serverState.ply) {
+            stopReplayTimer();
+            return;
+        }
+        showPly(next);
+    }, stepTime);
 }
 
-function stopPlanning() {
-    isPlanning = false;
-    planningGame = null;
-    document.querySelector('[data-board-action="plan"]').setAttribute('aria-pressed', 'false');
-    board.setPosition(positions[viewedPly], true);
-    showTurnStatus();
-    updateMoveInput();
+function stopReplayTimer() {
+    if (replayTimer !== null) {
+        window.clearInterval(replayTimer);
+        replayTimer = null;
+    }
 }
+
+// --- The buttons under the board ---
 
 function handleToolButton(action) {
     switch (action) {
         case 'flip':
             board.setOrientation(board.getOrientation() === COLOR.white ? COLOR.black : COLOR.white, true);
             break;
+        case 'plan':
+            showMode(MODE_PLANNING);
+            break;
+        case 'close-planning':
+        case 'close-replay':
+            showMode(MODE_PLAY);
+            break;
+        case 'replay':
+            showMode(MODE_REPLAY);
+            break;
         case 'first':
+            stopReplayTimer();
             showPly(0);
             break;
+        case 'play-backwards':
+            startReplayTimer(-1, REPLAY_FAST_STEP_TIME);
+            break;
         case 'back':
+            stopReplayTimer();
             showPly(viewedPly - 1);
             break;
+        case 'pause':
+            stopReplayTimer();
+            break;
+        case 'play':
+            if (viewedPly >= serverState.ply) {
+                showPly(0);
+            }
+            startReplayTimer(1, REPLAY_STEP_TIME);
+            break;
         case 'forward':
+            stopReplayTimer();
             showPly(viewedPly + 1);
             break;
-        case 'last':
-            showPly(serverState.ply);
+        case 'fast-forward':
+            startReplayTimer(1, REPLAY_FAST_STEP_TIME);
             break;
-        case 'plan':
-            if (isPlanning) {
-                stopPlanning();
-            } else {
-                startPlanning();
-            }
+        case 'last':
+            stopReplayTimer();
+            showPly(serverState.ply);
             break;
     }
 }
@@ -369,28 +451,29 @@ function uciToMove(uci) {
 // --- Starting ---
 
 setUpBoard();
-drawMoveList();
 
-document.getElementById('board-tools').addEventListener('click', (event) => {
-    const button = event.target.closest('[data-board-action]');
-    if (button) {
-        handleToolButton(button.dataset.boardAction);
+page.addEventListener('click', (event) => {
+    const toolButton = event.target.closest('[data-board-action]');
+    if (toolButton) {
+        handleToolButton(toolButton.dataset.boardAction);
+        return;
     }
-});
-document.getElementById('move-list').addEventListener('click', (event) => {
-    const button = event.target.closest('.move-button');
-    if (button) {
-        showPly(parseInt(button.dataset.ply, 10));
+    const moveButton = event.target.closest('.move-button');
+    if (moveButton) {
+        stopReplayTimer();
+        showPly(parseInt(moveButton.dataset.ply, 10));
     }
 });
 document.addEventListener('keydown', (event) => {
-    if (event.target instanceof HTMLInputElement) {
+    if (event.target instanceof HTMLInputElement || mode === MODE_PLANNING) {
         return;
     }
     if (event.key === 'ArrowLeft') {
-        showPly(viewedPly - 1);
+        handleToolButton('back');
     } else if (event.key === 'ArrowRight') {
-        showPly(viewedPly + 1);
+        handleToolButton('forward');
+    } else if (event.key === 'Escape' && mode === MODE_REPLAY) {
+        showMode(MODE_PLAY);
     }
 });
 
