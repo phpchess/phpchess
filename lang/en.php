@@ -39,6 +39,7 @@ return [
     'account.username_rules' => 'The user name needs 3 to 40 letters, digits, ".", "-" or "_".',
     'account.email_invalid' => 'Please enter a valid email address.',
     'account.password_too_short' => 'The password needs at least {length} characters.',
+    'account.password_too_common' => 'This password is too common. Please choose another one.',
     'account.password_is_username' => 'The password may not be the same as the user name.',
     'account.passwords_differ' => 'The two passwords are not the same.',
     'account.too_many_tries' => 'Too many tries. Please wait an hour and try again.',

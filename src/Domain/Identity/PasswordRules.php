@@ -30,7 +30,7 @@ final class PasswordRules
         }
     }
 
-    /** At least 10 characters, typed the same twice, and not the user name. */
+    /** At least 10 characters, typed the same twice, not the user name and not a common password. */
     public static function checkNewPassword(string $password, string $passwordAgain, string $username): void
     {
         if (mb_strlen($password) < self::MINIMUM_PASSWORD_LENGTH) {
@@ -39,9 +39,31 @@ final class PasswordRules
         if (strcasecmp($password, $username) === 0) {
             throw new AccountRefused('account.password_is_username');
         }
+        if (self::isCommonPassword($password)) {
+            throw new AccountRefused('account.password_too_common');
+        }
         if ($password !== $passwordAgain) {
             throw new AccountRefused('account.passwords_differ');
         }
+    }
+
+    /**
+     * True when the password is on the local list of common passwords
+     * (common-passwords.txt next to this file, ASVS 2.1.7). Case is ignored.
+     */
+    public static function isCommonPassword(string $password): bool
+    {
+        $lines = file(__DIR__ . '/common-passwords.txt', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        if ($lines === false) {
+            return false;
+        }
+        $wanted = mb_strtolower($password);
+        foreach ($lines as $line) {
+            if (!str_starts_with($line, '#') && mb_strtolower(trim($line)) === $wanted) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static function hash(string $password): string
