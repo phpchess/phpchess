@@ -11,6 +11,10 @@
  *
  * Account states are one field, users.state (ID-07): pending, active,
  * disabled, archived. Roles are users.role (ID-08): admin, teacher, student, player.
+ *
+ * Foreign key names are written in braces like table names, so they get the
+ * table prefix too: MySQL wants them unique in the whole database, and two
+ * installs (or the tests) may share one database.
  */
 
 declare(strict_types=1);
@@ -44,7 +48,7 @@ return new Migration(3, 'Identity: accounts', [
             used_at DATETIME(3) NULL,
             UNIQUE KEY user_tokens_hash (token_hash),
             KEY user_tokens_by_user (user_id, token_type),
-            CONSTRAINT user_tokens_user FOREIGN KEY (user_id) REFERENCES {users} (id) ON DELETE CASCADE
+            CONSTRAINT {user_tokens_fk_user} FOREIGN KEY (user_id) REFERENCES {users} (id) ON DELETE CASCADE
         ) {$tableOptions}"),
 
     new MigrationStep('Create login_attempts', "
@@ -67,6 +71,6 @@ return new Migration(3, 'Identity: accounts', [
             piece_set VARCHAR(40) NOT NULL DEFAULT 'standard',
             email_notices TINYINT(1) NOT NULL DEFAULT 1,
             updated_at DATETIME(3) NOT NULL,
-            CONSTRAINT user_preferences_user FOREIGN KEY (user_id) REFERENCES {users} (id) ON DELETE CASCADE
+            CONSTRAINT {user_preferences_fk_user} FOREIGN KEY (user_id) REFERENCES {users} (id) ON DELETE CASCADE
         ) {$tableOptions}"),
 ]);

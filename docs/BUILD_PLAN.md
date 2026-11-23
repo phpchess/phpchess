@@ -19,7 +19,7 @@ The plan is six blocks, split into eleven large chunks.
 | 0 Ground | C0-1 Definition | this plan, the functionality list, the architecture | done (2026-11-22) |
 | | C0-2 Proofs | the library check, the engine proof, the development environment finished | done (2026-11-22) |
 | 1 Foundation | C1-1 Application core and install | kernel, router, database, migrations, installer, release zip, job runner | done (2026-11-22) |
-| | C1-2 Identity, admin and look | accounts, roles, admin, feature switches, skins, Appearance, languages | planned |
+| | C1-2 Identity, admin and look | accounts, roles, admin, feature switches, skins, languages (Appearance editor: backlog B3) | done |
 | 2 Product | C2-1 Correspondence chess | rules, the move and game-end functions, challenges, board, ratings, notifications | planned |
 | | C2-2 Community, school and API | messages, profiles, content, school mode, API v1, PWA, Docker | planned |
 | 3 Live and computer | C3-1 Timed play | clock, lobby, polling transport, limits, measurements | planned |
@@ -79,6 +79,7 @@ Release 6.0 is C0-1 to C4-2, plus a check on a real shared host before release.
   - each feature switch, refused when off;
   - the escaping check.
 - **Done**: an OWASP ASVS level 2 review of Block 1 and a ZAP scan, with no open Critical or High findings.
+- **Result (2026-11-23)**: done. 112 tests, all checks green. ZAP 2.17.0 found no Critical, High or Medium issues; the two Low ones are fixed. ASVS level 2 review in [proofs/security-review-block1.md](proofs/security-review-block1.md); one open point moved to backlog B5 (common-password list). SortableJS vendored for the drag-and-drop base.
 
 ## C2-1 Correspondence chess
 - **Scope**: G-01 to G-11, G-13, G-20 to G-22, N-01, N-02, ID-12, R-01 to R-05, API-02, ADM-04.

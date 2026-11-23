@@ -20,3 +20,9 @@ DirectoryIndex index.php
 <FilesMatch "^\.">
     Require all denied
 </FilesMatch>
+
+# Files served directly get the same "don't guess the file type" rule as the
+# pages (K9; found by the ZAP scan, A27). Only where the host allows headers.
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+</IfModule>

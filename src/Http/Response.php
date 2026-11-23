@@ -104,6 +104,8 @@ final class Response
     public function send(): void
     {
         http_response_code($this->status);
+        // Don't tell strangers which PHP version runs the site (found by the ZAP scan, A27).
+        header_remove('X-Powered-By');
         foreach ($this->headers as $name => $value) {
             header($name . ': ' . $value);
         }

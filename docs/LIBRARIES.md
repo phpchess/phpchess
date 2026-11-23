@@ -12,7 +12,7 @@ Every library phpChess 6 uses or plans to use, checked against A16 (client side)
 |---|---|---|---|---|---|---|---|---|
 | cm-chessboard | The board: drag-and-drop and tap moves, SVG pieces | G-04 | 8.15.8 | MIT | none | none | to confirm (its piece sprite must load from our own path) | candidate |
 | chess.js | Move rules in the browser, for instant feedback only (the server decides, K1) | G-04 | 1.4.0 | BSD-2-Clause | none | none | to confirm | candidate |
-| SortableJS | Drag-and-drop for lists: League divisions, admin ordering | UI-09, T-05 | 1.15.7 | MIT | none | none | to confirm | candidate |
+| SortableJS | Drag-and-drop for lists: League divisions, admin ordering | UI-09, T-05 | 1.15.7 | MIT | none | none | **yes**: no network calls in `Sortable.js` | **approved**; vendored in `public/assets/vendor/sortablejs/` (C1-2), SHA-256 in its `SOURCE.md` |
 | qrcode-generator | QR codes for game invitations | G-21 | 2.0.4 | MIT | none | none | to confirm | candidate |
 | stockfish (Stockfish.js) | Fallback engine, only if GarboChess falls short | AI-01 | 19.0.1 | GPL-3.0 (the engine exception in A16) | none | none | to confirm if used | fallback |
 | GarboChess-JS | Computer opponent engine (first choice, AI-01), scored per move by our wrapper | AI-01 | file of commit 4ff0f9e (2012), SHA-256 recorded in its `SOURCE.md` | BSD-3-Clause | none | none known (dormant since 2012; we read and own the copy) | **yes**: no XMLHttpRequest, fetch, importScripts or WebSocket in the file | **approved for the proof**; vendored in `public/assets/vendor/garbochess/`; see [proofs/engine-proof.md](proofs/engine-proof.md) |

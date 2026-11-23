@@ -36,24 +36,24 @@ Decisions A1–A21 are in [DECISIONS.md](DECISIONS.md).
 ## ID — Identity and accounts
 | Id | Feature | Origin | Chunk | Switch | Status |
 |---|---|---|---|---|---|
-| ID-01 | Registration with a password the user chooses | redesign | C1-2 | public registration | planned |
-| ID-02 | Email verification | new | C1-2 | email requirement | planned |
-| ID-03 | Registration needs admin approval (setting) | 4.4 | C1-2 | — | planned |
-| ID-04 | Login with throttling per account and IP; session id regenerated | redesign | C1-2 | — | planned |
-| ID-05 | Remember-me by a hashed token that rotates | redesign | C1-2 | — | planned |
-| ID-06 | Password reset by a single-use, expiring token | redesign | C1-2 | — | planned |
-| ID-07 | Account states: pending, active, disabled, archived (one field, not separate tables) | redesign | C1-2 | — | planned |
-| ID-08 | Roles: admin, teacher, student, player; admin actions need re-authentication | new | C1-2 | — | planned |
-| ID-09 | Rename keeps the account id | redesign | C1-2 | — | planned |
+| ID-01 | Registration with a password the user chooses | redesign | C1-2 | public registration | done |
+| ID-02 | Email verification | new | C1-2 | email requirement | done |
+| ID-03 | Registration needs admin approval (setting) | 4.4 | C1-2 | — | done |
+| ID-04 | Login with throttling per account and IP; session id regenerated | redesign | C1-2 | — | done |
+| ID-05 | Remember-me by a hashed token that rotates | redesign | C1-2 | — | done |
+| ID-06 | Password reset by a single-use, expiring token | redesign | C1-2 | — | done |
+| ID-07 | Account states: pending, active, disabled, archived (one field, not separate tables) | redesign | C1-2 | — | done |
+| ID-08 | Roles: admin, teacher, student, player; admin actions need re-authentication | new | C1-2 | — | done |
+| ID-09 | Rename keeps the account id | redesign | C1-2 | — | done |
 | ID-10 | API access tokens per device, revocable in settings | redesign | C2-2 | — | planned |
 | ID-11 | The user's own data export and account deletion | new | C2-2 | — | planned |
 | ID-12 | Presence (online / offline), kept separate from account state | 4.4 | C2-1 | player list visibility | planned |
-| ID-13 | User preferences: board, pieces, language, notifications | 4.4 | C1-2 | — | planned |
+| ID-13 | User preferences: board, pieces, language, notifications | 4.4 | C1-2 | — | done (notification choices come with the notifications) |
 
 ## SCH — School mode (A13)
 | Id | Feature | Origin | Chunk | Switch | Status |
 |---|---|---|---|---|---|
-| SCH-01 | Feature switches page: every switch named in this list | new | C1-2 | — | planned |
+| SCH-01 | Feature switches page: every switch named in this list | new | C1-2 | — | done |
 | SCH-02 | Classes (groups) with their members | new | C2-2 | school mode | planned |
 | SCH-03 | Teachers create student accounts in bulk, no email needed | new | C2-2 | school mode | planned |
 | SCH-04 | One-time login codes and password resets by the teacher | new | C2-2 | school mode | planned |
@@ -150,15 +150,15 @@ Decisions A1–A21 are in [DECISIONS.md](DECISIONS.md).
 ## UI — Look and use
 | Id | Feature | Origin | Chunk | Switch | Status |
 |---|---|---|---|---|---|
-| UI-01 | Skins: CSS variables and assets, no code (A5) | redesign | C1-2 | — | planned |
+| UI-01 | Skins: CSS variables and assets, no code (A5) | redesign | C1-2 | — | done |
 | UI-02 | Appearance page: create and edit skins in the admin area: logo, colour schemes, fonts, default board and pieces, layout choices, seasonal fun effects; no code changes (A24) | new | backlog (B3) | — | planned |
-| UI-03 | Mobile-first layout: phone first, then tablet and desktop; touch targets, one-hand use; dark mode (A18) | new | C1-2 | — | planned |
-| UI-04 | Accessibility: contrast, keyboard, screen-reader labels | new | C1-2 | — | planned |
+| UI-03 | Mobile-first layout: phone first, then tablet and desktop; touch targets, one-hand use; dark mode (A18) | new | C1-2 | — | done |
+| UI-04 | Accessibility: contrast, keyboard, screen-reader labels | new | C1-2 | — | done |
 | UI-05 | Installable as an app (PWA): home-screen icon, full-screen, start page, app badge | new | C2-2 | — | planned |
 | UI-08 | Offline viewing of your own games and the last state of running games; moves queue until the connection returns | new | C2-2 | — | planned |
-| UI-09 | Drag-and-drop wherever things are arranged: board, League divisions, admin lists and ordering, avatar upload | new | C1-2 (base), later chunks per use | — | planned |
-| UI-06 | Language files; English first, the 4.4 strings reused as a base | 4.4 | C1-2 | — | planned |
-| UI-07 | Server admin template override (`templates/local/`) | new | C1-2 | — | planned |
+| UI-09 | Drag-and-drop wherever things are arranged: board, League divisions, admin lists and ordering, avatar upload | new | C1-2 (base), later chunks per use | — | base done (SortableJS, `sortable-list.js`); each use in its own chunk |
+| UI-06 | Language files; English first, the 4.4 strings reused as a base | 4.4 | C1-2 | — | done |
+| UI-07 | Server admin template override (`templates/local/`) | new | C1-2 | — | done |
 
 ## API — Client access
 | Id | Feature | Origin | Chunk | Switch | Status |
@@ -171,9 +171,9 @@ Decisions A1–A21 are in [DECISIONS.md](DECISIONS.md).
 ## ADM — Administration
 | Id | Feature | Origin | Chunk | Switch | Status |
 |---|---|---|---|---|---|
-| ADM-01 | Users: list, approve, disable, archive, roles | 4.4 | C1-2 | — | planned |
-| ADM-02 | Settings, mail (SMTP, or a mail log file for development and offline installs), feature switches | 4.4 | C1-2 | — | planned |
-| ADM-03 | Audit log of admin actions | new | C1-2 | — | planned |
+| ADM-01 | Users: list, approve, disable, archive, roles | 4.4 | C1-2 | — | done |
+| ADM-02 | Settings, mail (SMTP, or a mail log file for development and offline installs), feature switches | 4.4 | C1-2 | — | done |
+| ADM-03 | Audit log of admin actions | new | C1-2 | — | done |
 | ADM-04 | Games: list, adjudicate through the game-end function (G-03), admin FEN game setup | 4.4 | C2-1 | — | planned |
 | ADM-05 | Content: news, server messages, tips, FAQ, pages | 4.4 | C2-2 | — | planned |
 | ADM-06 | Tournaments: create, edit, run, correct results through the game-end function | 4.4 | C4-1 | — | planned |

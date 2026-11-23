@@ -33,19 +33,21 @@ How phpChess 6 is put together, and why. Features are listed in [FEATURES.md](FE
 phpchess6/
   public/          the only web-served folder: index.php, cron.php (command line only), assets/ (css, js, img, vendor/ libraries)
   src/             PHP code, namespace PhpChess\ (PSR-4)
-    Kernel/        Kernel, Config, ErrorHandler, SecurityHeaders, Session, Csrf, Router, Routes (the list of every address)
-    Http/          Request, Response, ApiError, Template, e(); controllers (Web\, Api\V1\)
-    Domain/        one folder per module (see §3): services, entities, rules (SystemNSAFESTATECHECK SO FAR)
-    Infra/         Database, Repository base, repositories per module (System\, Identity\, ...), Migration\, Jobs\; later mailer, clock, file storage
+    Kernel/        Kernel, Config, ErrorHandler, SecurityHeaders, Session, Csrf, Router, Route, Access, Authentication,
+                   Services (builds the shared objects on first use), Routes (every address with its access level and switch)
+    Http/          Request, Response, Cookie, ApiError, Template, PageRenderer, e(); controllers (Web\, Web\Admin\, Api\V1\)
+    Domain/        one folder per module (see §3): services, entities, rules (so far System, Identity, Language, Look)
+    Infra/         Database, Repository base, repositories per module (System\, Identity\, ...), Migration\, Jobs\; Mail (log-file mailer for development, SMTP via PHPMailer); later clock, file storage
     Install/       InstallerController, DatabaseFinder, PreflightCheck, ProtectionSelfTest (all deleted after install, A23)
   templates/       plain PHP templates (core); templates/local/ = the server admin's overrides
   migrations/      numbered schema migrations
   lang/            language files per locale
-  skins/           skins: skin.json, theme.css, images (no PHP)
+  skins/           one folder per skin: skin.json and the logo (no PHP, not web-served); theme.css is made from
+                   skin.json and served at /skin/theme.css (docs/SKINS.md)
   config/          config.php written by the installer (never committed)
   storage/         uploads, logs, cache (not web-served)
   tests/           PHPUnit tests, mirrors src/
-  tools/           development tools - never released: composer.phar, the CI checks (check-headers, check-sql K5,
+  tools/           development tools - never released: composer.phar, the CI checks (check-headers, check-sql K5, check-escaping K6,
                    check-external-urls K9), build-release.php (K10) and install-test.php
   docs/            these documents
   .htaccess        root: routes everything to public/ (A17)
@@ -94,7 +96,7 @@ Each contract has an id. A chunk names the contracts it touches, and a test or a
 | K11 | **Migrations touch only their own prefixed tables**, never drop what they didn't create, and record each step. | migration tests on a database that also holds other tables |
 | K12 | **Time is the server's**: UTC, milliseconds; clocks are updated inside K2's transaction; lag compensation is capped. | clock tests |
 | K13 | **Every redirect or refusal ends the request**: the response object is returned, never followed by more code. | framework design; tests for denied access |
-| K14 | **Access is checked in the controller before the service runs** (role, ownership, class limits); services check again whatever protects data (e.g. "is this your game"). | tests: every endpoint as an outsider |
+| K14 | **Access is checked before the service runs**: the role level is declared on each route and enforced by the Kernel; ownership and class limits are checked in the controller; services check again whatever protects data (e.g. "is this your game"). | tests: every endpoint as an outsider |
 | K15 | **Code is readable by a person (A21)**: every file follows §11. Clarity is not traded for speed or brevity; a measured performance problem is solved by a clear design, not a clever line. | review checklist for every chunk; PHPStan max level; CI checks that every PHP file has a header comment |
 
 ## 5. Request flow
@@ -105,7 +107,7 @@ Each contract has an id. A chunk names the contracts it touches, and a test or a
    - sends the security headers (CSP, frame-ancestors, nosniff, Referrer-Policy, HSTS when HTTPS);
    - starts the session (HttpOnly, Secure, SameSite=Lax).
 3. **The router** matches method and path. API routes live under `/api/v1/`. State-changing routes accept POST only and check CSRF or the Bearer token (K7).
-4. **The controller** checks access (K14), calls one service, and returns a response: a template, JSON or a redirect (K13).
+4. **Access (K14)**: every route in Routes.php declares who may open it (everyone, members, admins) and the feature switch it belongs to; the Kernel checks the switch (404 when off, K8), the access level, CSRF and the rate limit before the controller runs. The controller still checks ownership, then calls one service, and returns a response: a template, JSON or a redirect (K13).
 5. **On the way out**: one log line per request with time taken, and the pseudo-cron tick if one is due (§8).
 
 ## 6. Data
