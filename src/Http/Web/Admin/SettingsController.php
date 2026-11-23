@@ -6,6 +6,7 @@ namespace PhpChess\Http\Web\Admin;
 
 use PhpChess\Domain\Look\Skin;
 use PhpChess\Domain\System\FeatureSwitches;
+use PhpChess\Domain\System\ServerSupport;
 use PhpChess\Http\Request;
 use PhpChess\Http\Response;
 use PhpChess\Infra\Mail\Email;
@@ -144,12 +145,18 @@ final class SettingsController
     {
         $switches = $this->services->switches();
         $states = [];
+        $unavailable = [];
         foreach (array_keys(FeatureSwitches::ALL) as $name) {
             $states[$name] = $switches->isOn($name);
+            // A feature the server can't run is shown greyed out, with the reason (ServerSupport).
+            if (!ServerSupport::canRun($name)) {
+                $unavailable[$name] = 'admin.switches.needs.' . ServerSupport::neededBy($name);
+            }
         }
 
         return $this->adminPages->render($request, 'admin/switches', 'admin.switches.title', [
             'states' => $states,
+            'unavailable' => $unavailable,
         ]);
     }
 

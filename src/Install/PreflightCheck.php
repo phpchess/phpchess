@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PhpChess\Install;
 
+use PhpChess\Domain\System\ServerSupport;
 use PhpChess\Infra\Database;
 
 /**
@@ -67,6 +68,24 @@ final class PreflightCheck
                     : 'Optional: give "config" write permission, or upload the config file yourself in step 3.',
             );
         }
+
+        // Optional extras (ServerSupport): without them the feature simply stays off.
+        $hasImages = ServerSupport::has(ServerSupport::IMAGES);
+        $results[] = new CheckResult(
+            'Picture uploads (PHP extension gd)',
+            $hasImages,
+            false,
+            $hasImages ? 'Available.' : 'Missing: members can choose the bundled avatars, but not upload their own pictures.',
+            'Optional. Ask your host to switch on the "gd" extension; phpChess notices it by itself.',
+        );
+        $hasPush = ServerSupport::has(ServerSupport::PUSH);
+        $results[] = new CheckResult(
+            'Push notifications (openssl, curl, mbstring)',
+            $hasPush,
+            false,
+            $hasPush ? 'Available.' : 'Missing: members get email instead of push notifications.',
+            'Optional. Ask your host for the openssl, curl and mbstring extensions; phpChess notices them by itself.',
+        );
 
         $results[] = new CheckResult(
             'HTTPS',

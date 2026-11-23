@@ -483,6 +483,10 @@ return [
     'admin.play.adjudication_reasons' => 'Reasons for deciding a game',
     'admin.play.adjudication_reasons_hint' => 'Short words with underscores, separated by commas, for example player_left, fair_play.',
 
+    // --- C2-2: what the server supports (ServerSupport) ---
+    'admin.switches.needs.images' => 'Not available on this server: picture uploads need PHP\'s GD extension. Ask your host to switch it on; until then the bundled avatars are offered.',
+    'admin.switches.needs.push' => 'Not available on this server: push needs PHP\'s openssl, curl and mbstring extensions. Ask your host; until then members get email.',
+
     // --- C2-2: start page dashboard (A44) and menu ---
     'layout.messages' => 'Messages',
     'layout.players' => 'Players',

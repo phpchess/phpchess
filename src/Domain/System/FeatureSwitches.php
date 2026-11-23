@@ -53,10 +53,13 @@ final class FeatureSwitches
     {
     }
 
-    /** True when the switch is on. An unknown name counts as off. */
+    /**
+     * True when the switch is on. An unknown name counts as off, and so does
+     * a feature this server can't run (ServerSupport: no GD, no push support).
+     */
     public function isOn(string $name): bool
     {
-        if (!isset(self::ALL[$name])) {
+        if (!isset(self::ALL[$name]) || !ServerSupport::canRun($name)) {
             return false;
         }
 
