@@ -6,6 +6,7 @@ namespace PhpChess\Http\Web\Account;
 
 use DateTimeZone;
 use PhpChess\Domain\Notify\NotificationChoices;
+use PhpChess\Domain\Notify\PushServices;
 use PhpChess\Domain\System\FeatureSwitches;
 use PhpChess\Http\Request;
 use PhpChess\Http\Response;
@@ -71,9 +72,9 @@ final class NotificationsController
         $endpoint = $request->formValue('endpoint');
         $publicKey = $request->formValue('p256dh');
         $authSecret = $request->formValue('auth');
-        $isHttpsEndpoint = str_starts_with($endpoint, 'https://') && strlen($endpoint) <= 500;
         $keysLookRight = preg_match('/^[A-Za-z0-9_-]{20,200}={0,2}$/', $publicKey) === 1 && preg_match('/^[A-Za-z0-9_-]{8,100}={0,2}$/', $authSecret) === 1;
-        if (!$isHttpsEndpoint || !$keysLookRight) {
+        // Only addresses at the browser makers' push services (no requests to other machines).
+        if (!PushServices::isAllowed($endpoint) || !$keysLookRight) {
             return Response::json(['ok' => false, 'error' => 'not_a_subscription'], 422);
         }
         $this->services->pushSubscriptions()->save($this->pages->user()->id, $endpoint, $publicKey, $authSecret);

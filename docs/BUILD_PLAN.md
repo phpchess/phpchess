@@ -21,7 +21,7 @@ The plan is six blocks, split into eleven large chunks.
 | 1 Foundation | C1-1 Application core and install | kernel, router, database, migrations, installer, release zip, job runner | done (2026-11-22) |
 | | C1-2 Identity, admin and look | accounts, roles, admin, feature switches, skins, languages (Appearance editor: backlog B3) | done |
 | 2 Product | C2-1 Correspondence chess | rules, the move and game-end functions, challenges, board, ratings, notifications | done (2026-11-23) |
-| | C2-2 Community, school and API | messages, profiles, content, school mode, API v1, PWA, Docker | planned |
+| | C2-2 Community, school and API | messages, profiles, content, school mode, API v1, PWA and Web Push, archive (Docker moved to backlog, A40) | done (2026-11-23); Web Push phone test (A18) pending |
 | 3 Live and computer | C3-1 Timed play | clock, lobby, polling transport, limits, measurements | planned |
 | | C3-2 Computer opponent | engine in the browser, selection layer, characters, calibration | planned |
 | 4 Tournaments | C4-1 Tournament core | model, Round Robin, Swiss, knockout, League with drag-and-drop, tie-breaks | planned |
@@ -100,13 +100,13 @@ Release 6.0 is C0-1 to C4-2, plus a check on a real shared host before release.
 - **Done**: two users play a full correspondence game to each kind of ending, on the local install; ratings and history are correct.
 
 ## C2-2 Community, school and API
-- **Scope**: C-01 to C-10, G-12, N-03, N-04, SCH-02 to SCH-07, ID-10, ID-11, API-01 (complete), UI-05, UI-08, ADM-05, ADM-07, INS-09.
+- **Scope**: C-01 to C-10, G-12, N-03, N-04, SCH-02 to SCH-07, ID-10, ID-11, API-01 (complete), UI-05, UI-08, ADM-05, ADM-07. (INS-09 Docker left the chunk: A40, backlog B16.)
   - **Community**: profiles, avatars and uploads, buddies, messages, the word filter, content and who's online.
-  - **School mode**: classes, bulk student accounts, login codes, class limits, teacher views and retention.
+  - **School mode**: classes, bulk student accounts, login cards (A41), class limits, teacher views. Retention by performance, not age: a daily speed check and an archive file the admin keeps (A42, A43).
+  - **Start page**: the dashboard; notices leave the player's view (A44).
   - **Users' own data**: export and deletion.
   - **Clients**: API v1 with tokens; the PWA with offline viewing; Web Push to iPhone, Android and desktop, with quiet hours.
   - **Decision point (A18)**: Web Push tested on a real iPhone and an Android phone. If it isn't good enough, a native app becomes its own chunk.
-  - **Running it**: the Docker image.
 - **Contracts**: K6, K8, K9, K14.
 - **Tests**:
   - every school switch;
@@ -116,6 +116,7 @@ Release 6.0 is C0-1 to C4-2, plus a check on a real shared host before release.
   - an export contains all of the user's data, and deletion removes it;
   - with the push switch off, the server makes no outgoing connection.
 - **Done**: a school scenario (a teacher, a class of 25 students, messaging off) runs end to end; the security review is repeated.
+- **Status (2026-11-23)**: built and tested (tests/Community, tests/School, tests/Clients, tests/Identity/OwnDataTest, tests/Infra/ArchiveTest; the scenario is SchoolTest::testASchoolScenarioWithAClassOf25AndMessagingOff). Open: the Web Push test on a real iPhone and Android phone (A18).
 
 ## C3-1 Timed play
 - **Scope**: G-14 to G-18, G-23, API-03.

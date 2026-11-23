@@ -188,7 +188,11 @@ final class PlayersController
      */
     public function avatarImage(Request $request, array $parts): Response
     {
-        $path = $this->services->avatars()->uploadPath(MemberPages::idFrom($parts));
+        $isVisitor = $this->services->authentication()->currentUser() === null;
+        if ($isVisitor && !$this->services->switches()->isOn(FeatureSwitches::PUBLIC_PROFILES)) {
+            return Response::text('Not found', 404);
+        }
+        $path =$this->services->avatars()->uploadPath(MemberPages::idFrom($parts));
         $bytes = is_file($path) ? file_get_contents($path) : false;
         if ($bytes === false) {
             return Response::text('Not found', 404);

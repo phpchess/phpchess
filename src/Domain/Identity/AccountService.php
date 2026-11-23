@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PhpChess\Domain\Identity;
 
+use PhpChess\Domain\Community\WordFilter;
 use PhpChess\Domain\Language\Translator;
 use PhpChess\Domain\System\FeatureSwitches;
 use PhpChess\Infra\Identity\TokenRepository;
@@ -56,6 +57,10 @@ final class AccountService
         PasswordRules::checkUsername($username);
         PasswordRules::checkEmail($email);
         PasswordRules::checkNewPassword($password, $passwordAgain, $username);
+        // The admin's word filter (C-05) also keeps such words out of user names.
+        if (WordFilter::fromSettings($this->settings)->blocks($username)) {
+            throw new AccountRefused('account.username_blocked');
+        }
 
         if (!$this->rateLimiter->hit('register:ip:' . $ipAddress, self::REGISTRATIONS_PER_HOUR, 3600, $now)) {
             throw new AccountRefused('account.too_many_tries');

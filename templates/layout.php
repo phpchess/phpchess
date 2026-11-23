@@ -50,7 +50,7 @@ $link = fn (string $path, string $label, bool $isCurrent, int $badge = 0): array
     <link rel="stylesheet" href="<?= e($basePath) ?>/skin/theme.css">
 </head>
 <body class="layout-<?= e($skin->layout) ?> board-theme-<?= e($boardTheme) ?>"
-      data-base-path="<?= e($basePath) ?>" data-my-move-count="<?= e($user === null ? 0 : $myMoveCount) ?>">
+      data-base-path="<?= e($basePath) ?>" data-member="<?= $user === null ? 'no' : 'yes' ?>" data-my-move-count="<?= e($user === null ? 0 : $myMoveCount) ?>">
 <a class="skip-link" href="#main"><?= e($t->text('layout.skip_to_content')) ?></a>
 
 <header class="site-header">

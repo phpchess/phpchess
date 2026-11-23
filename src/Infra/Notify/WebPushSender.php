@@ -8,6 +8,7 @@ use Minishlink\WebPush\Subscription;
 use Minishlink\WebPush\VAPID;
 use Minishlink\WebPush\WebPush;
 use Nyholm\Psr7\Factory\Psr17Factory;
+use PhpChess\Domain\Notify\PushServices;
 use PhpChess\Infra\System\SettingsRepository;
 use RuntimeException;
 use Throwable;
@@ -32,6 +33,10 @@ final class WebPushSender implements PushSender
 
     public function send(array $subscription, string $payloadJson): string
     {
+        // Checked again here: only the browser makers' push services are ever contacted.
+        if (!PushServices::isAllowed($subscription['endpoint'])) {
+            return self::GONE;
+        }
         try {
             $report = $this->webPush()->sendOneNotification(
                 Subscription::create([

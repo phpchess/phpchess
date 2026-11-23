@@ -107,12 +107,15 @@ final class Classes
         return $created;
     }
 
-    /** Adds an existing account to the class by user name (another teacher's student, a player). */
+    /**
+     * Adds an existing account to the class by user name. A teacher adds
+     * students only (a student of another class, say); an admin anyone.
+     */
     public function addExistingMember(User $teacher, int $classId, string $username): void
     {
         $this->classFor($teacher, $classId);
         $member = $this->users->findByUsername(trim($username));
-        if ($member === null) {
+        if ($member === null || !$this->isLookedAfterBy($teacher, $member->id)) {
             throw new ActionRefused('school.unknown_user');
         }
         $this->school->addMember($classId, $member->id);
@@ -186,7 +189,11 @@ final class Classes
 
     // --- Helpers ---
 
-    /** Teachers manage only students (and players), never other teachers or admins. */
+    /**
+     * Teachers manage only students: never players, other teachers or admins,
+     * whose passwords and logins are their own (security review C2-2).
+     * Admins manage everyone.
+     */
     private function isLookedAfterBy(User $teacher, int $userId): bool
     {
         $member = $this->users->findById($userId);
@@ -194,13 +201,24 @@ final class Classes
             return false;
         }
 
-        return $teacher->isAdmin() || in_array($member->role, [User::ROLE_STUDENT, User::ROLE_PLAYER], true);
+        return $teacher->isAdmin() || $member->role === User::ROLE_STUDENT;
     }
 
-    /** A user name from a typed name: allowed characters only, and a number added while it is taken. */
+    /** Letters a user name can't have, and what they become ("Müller" becomes "Mueller"). */
+    private const array LETTER_REPLACEMENTS = [
+        'ä' => 'ae', 'ö' => 'oe', 'ü' => 'ue', 'Ä' => 'Ae', 'Ö' => 'Oe', 'Ü' => 'Ue', 'ß' => 'ss',
+        'á' => 'a', 'à' => 'a', 'â' => 'a', 'å' => 'a', 'é' => 'e', 'è' => 'e', 'ê' => 'e', 'ë' => 'e',
+        'í' => 'i', 'ì' => 'i', 'î' => 'i', 'ï' => 'i', 'ó' => 'o', 'ò' => 'o', 'ô' => 'o', 'ø' => 'o',
+        'ú' => 'u', 'ù' => 'u', 'û' => 'u', 'ç' => 'c', 'ñ' => 'n', 'Á' => 'A', 'É' => 'E', 'Ó' => 'O', 'Ú' => 'U',
+    ];
+
+    /**
+     * A user name from a typed name: special letters spelled out, any other
+     * character becomes ".", and a number is added while the name is taken.
+     */
     private function freeUsername(string $name): string
     {
-        $base = preg_replace('/[^A-Za-z0-9_.-]+/', '.', iconv('UTF-8', 'ASCII//TRANSLIT', $name) ?: $name) ?? '';
+        $base = preg_replace('/[^A-Za-z0-9_.-]+/', '.', strtr($name, self::LETTER_REPLACEMENTS)) ?? '';
         $base = substr(trim($base, '.-_'), 0, 34);
         if (strlen($base) < 3) {
             $base = 'student' . $base;

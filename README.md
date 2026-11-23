@@ -24,8 +24,8 @@ phpChess 6 is built in large chunks, each a working, tested whole. The full list
 | C1-1 Application core and install | Request handling, database and migrations, the installer, the release zip, background jobs | ✅ Done |
 | C1-2 Identity, admin and look | Accounts and roles, admin area, feature switches, mobile-first layout, skins, languages | ✅ Done |
 | C2-1 Chess play | Rules, one-tap start, invites, one game model for every pace, live moves and notices, ratings | ✅ Done |
-| C2-2 Community, school and app | Messages, profiles, school mode (classes, teacher accounts), installable app with push notifications | ⏳ Next |
-| C3-1 Timed play | Clocks with increment, lobby, changing pace mid-game | Planned |
+| C2-2 Community, school and app | Messages, profiles, school mode (classes, teacher accounts), installable app with push notifications | ✅ Done (phone push test pending) |
+| C3-1 Timed play | Clocks with increment, lobby, changing pace mid-game | ⏳ Next |
 | C3-2 Computer opponent | Engine in the browser, beginner-level characters (~600 Elo), calibration | Planned |
 | C4-1 Tournaments | Round Robin, Swiss, knockout, League with drag-and-drop | Planned |
 | C4-2 Special tournaments | Team vs Team, Arena, voting tournaments, class tournaments | Planned |

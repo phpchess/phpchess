@@ -6,6 +6,7 @@ namespace PhpChess\Tests\Support;
 
 use PhpChess\Http\Request;
 use PhpChess\Http\Response;
+use PhpChess\Http\UploadedFile;
 use PhpChess\Kernel\Kernel;
 use PhpChess\Kernel\Session;
 
@@ -75,6 +76,31 @@ final class TestBrowser
         $fields['_csrf'] ??= $this->lastCsrfToken;
 
         return $this->send(new Request('POST', $path, $this->basePath, form: $fields, headers: ['accept' => 'application/json'], cookies: $this->cookies, host: 'example.test'));
+    }
+
+    /**
+     * Sends a form with files, as a browser does with enctype="multipart/form-data".
+     *
+     * @param array<string, string>       $fields
+     * @param array<string, UploadedFile> $files
+     */
+    public function postWithFiles(string $path, array $fields, array $files): Response
+    {
+        $fields['_csrf'] ??= $this->lastCsrfToken;
+
+        return $this->send(new Request('POST', $path, $this->basePath, form: $fields, cookies: $this->cookies, host: 'example.test', files: $files));
+    }
+
+    /**
+     * An app on the API: no cookies, no session, only "Authorization: Bearer <token>" (ID-10).
+     *
+     * @param array<string, string> $fields
+     */
+    public function apiWithToken(string $method, string $path, string $token, array $fields = []): Response
+    {
+        $request = new Request($method, $path, $this->basePath, form: $fields, headers: ['authorization' => 'Bearer ' . $token], host: 'example.test');
+
+        return $this->kernel->handle($request, Session::inMemory());
     }
 
     /**

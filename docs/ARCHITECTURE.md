@@ -107,7 +107,7 @@ Each contract has an id. A chunk names the contracts it touches, and a test or a
    - sends the security headers (CSP, frame-ancestors, nosniff, Referrer-Policy, HSTS when HTTPS);
    - starts the session (HttpOnly, Secure, SameSite=Lax).
 3. **The router** matches method and path. API routes live under `/api/v1/`. State-changing routes accept POST only and check CSRF or the Bearer token (K7).
-4. **Access (K14)**: every route in Routes.php declares who may open it (everyone, members, admins) and the feature switch it belongs to; the Kernel checks the switch (404 when off, K8), the access level, CSRF and the rate limit before the controller runs. The controller still checks ownership, then calls one service, and returns a response: a template, JSON or a redirect (K13).
+4. **Access (K14)**: every route in Routes.php declares who may open it (everyone, members, teachers, admins) and the feature switch it belongs to; the Kernel checks the switch (404 when off, K8), the access level, CSRF and the rate limit before the controller runs. The controller still checks ownership, then calls one service, and returns a response: a template, JSON or a redirect (K13).
 5. **On the way out**: one log line per request with time taken, and the pseudo-cron tick if one is due (§8).
 
 ## 6. Data

@@ -18,7 +18,8 @@ use PHPUnit\Framework\TestCase;
  *
  * Makes a test install folder with an "installed" config, runs every
  * migration on the test database, and creates an admin ("admin" /
- * "admin password 1"). The mailer keeps the emails (RecordingMailer).
+ * "admin password 1"). The mailer keeps the emails (RecordingMailer), the
+ * push sender keeps the pushes (RecordingPushSender).
  * browser() gives a fresh visitor; loggedInBrowser() one that is logged in.
  */
 final class InstalledSite
@@ -29,6 +30,7 @@ final class InstalledSite
     public readonly TestInstallFolder $folder;
     public readonly Database $database;
     public readonly RecordingMailer $mailer;
+    public readonly RecordingPushSender $pushSender;
     public readonly Kernel $kernel;
 
     public function __construct(TestCase $test)
@@ -36,6 +38,7 @@ final class InstalledSite
         $this->database = TestDatabase::connectEmpty($test);
         $this->folder = new TestInstallFolder();
         $this->mailer = new RecordingMailer();
+        $this->pushSender = new RecordingPushSender();
 
         $config = TestDatabase::config($test)->withInstallState(true, '');
         file_put_contents($this->folder->path . '/config/config.php', $config->toFileContents());
@@ -43,7 +46,7 @@ final class InstalledSite
         (new MigrationRunner($this->database, MigrationRunner::loadFolder($this->folder->path . '/migrations')))->runPending();
         (new UserRepository($this->database))->createAdmin(self::ADMIN_NAME, 'admin@example.test', PasswordRules::hash(self::PASSWORD));
 
-        $this->kernel = new Kernel($this->folder->path, mailer: $this->mailer);
+        $this->kernel = new Kernel($this->folder->path, mailer: $this->mailer, pushSender: $this->pushSender);
     }
 
     /** Removes the folder and the test tables. */

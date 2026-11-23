@@ -43,6 +43,7 @@ return [
     'account.password' => 'Password',
     'account.password_again' => 'Retype password',
     'account.username_rules' => 'The user name needs 3 to 40 letters, digits, ".", "-" or "_".',
+    'account.username_blocked' => 'This user name is not allowed here. Please choose another one.',
     'account.email_invalid' => 'Please enter a valid email address.',
     'account.password_too_short' => 'The password needs at least {length} characters.',
     'account.password_too_common' => 'This password is too common. Please choose another one.',
