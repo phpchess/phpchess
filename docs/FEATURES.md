@@ -108,7 +108,7 @@ Decisions A1–A21 are in [DECISIONS.md](DECISIONS.md).
 ## AI — Computer opponent (A14)
 | Id | Feature | Origin | Chunk | Switch | Status |
 |---|---|---|---|---|---|
-| AI-01 | Engine in the player's browser (Web Worker, UCI), swappable; Stockfish.js first | new | C3-2 | — | planned |
+| AI-01 | Engine in the player's browser (Web Worker), swappable; GarboChess, with a how-to for other engines (A47) | new | C3-2 | — | planned |
 | AI-02 | Selection layer: chooses among the engine's candidate moves by score closeness | new | C3-2 | — | planned |
 | AI-03 | Opponent characters with their own habits and strengths | new | C3-2 | — | planned |
 | AI-04 | Fixed search budget in nodes or depth, the same on every device | new | C3-2 | — | planned |
