@@ -6,16 +6,19 @@
  * files that phones run, so what the tests and the calibration measure is what
  * players get (A51). Hosting never needs Node (A1).
  *
+ * How: the files are joined and wrapped in one function, so their global
+ * variables become fast local ones (a Node "vm" sandbox made GarboChess about
+ * 20 times slower). The function returns the names the tests and tools use.
+ *
  * Usage:
  *   import { loadEngine } from "./engine-in-node.mjs";
  *   const engine = loadEngine();          // a fresh, separate engine
- *   engine.decideMove(fen, player, "game-1", 0);
+ *   engine.decideMove(fen, player, "game-1", 0, []);
  */
 
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
-import vm from "node:vm";
 
 const projectFolder = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -27,20 +30,31 @@ const ENGINE_FILES = [
     "public/assets/js/engine/garbochess-engine.js",
 ];
 
+// Functions the tests and tools call.
+const FUNCTIONS = [
+    // GarboChess
+    "ResetGame", "InitializeFromFen", "GetFen", "GenerateValidMoves", "MakeMove", "UnmakeMove",
+    "FormatMove", "GetMoveSAN",
+    // our files
+    "seedFromText", "makeRandom", "randomForMove", "comparableScore", "chooseMove",
+    "setOpeningBook", "chooseBookMove", "openingName",
+    "loadPosition", "depthForPosition", "isCaptureMove", "scoreAllMoves", "listLegalMoves", "decideMove",
+];
+
+// GarboChess variables they read (always the current value).
+const VARIABLES = ["g_board", "g_inCheck", "g_nodeCount"];
+
+// The code read once; each engine runs it again for its own board.
+const engineCode = ENGINE_FILES.map((file) => readFileSync(join(projectFolder, file), "utf8")).join("\n;\n");
+const exportCode = "\nreturn {\n"
+    + FUNCTIONS.map((name) => "    " + name + ": " + name + ",").join("\n") + "\n"
+    + VARIABLES.map((name) => "    get " + name + "() { return " + name + "; },").join("\n") + "\n};\n";
+
 /**
- * Returns a new engine: a separate sandbox holding GarboChess and our files.
- * Each sandbox has its own board, so several can run side by side.
+ * Returns a new engine with its own board, so several can run side by side.
+ * GarboChess expects a worker's "self" and "postMessage"; it gets harmless ones.
  */
 export function loadEngine() {
-    // GarboChess expects a worker's "self" and "postMessage"; give it harmless ones.
-    const sandbox = { postMessage() {}, Date, Math, performance };
-    sandbox.self = sandbox;
-    vm.createContext(sandbox);
-
-    // The files declare their functions with "function" and "var", which
-    // become properties of the sandbox. Their "const" values stay inside, so
-    // the whole set of files is run as one script.
-    const code = ENGINE_FILES.map((file) => readFileSync(join(projectFolder, file), "utf8")).join("\n;\n");
-    vm.runInContext(code, sandbox, { filename: "engine-files.js" });
-    return sandbox;
+    const createEngine = new Function("self", "postMessage", "importScripts", engineCode + exportCode);
+    return createEngine({}, () => {}, () => {});
 }
