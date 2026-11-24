@@ -6,7 +6,9 @@
  * processor core, so many games run at the same time. Each thread has its own
  * engine (its own GarboChess board).
  *
- * Message in:  { white: {name, settings}, black: {name, settings}, gameId }
+ * Message in:  { white: side, black: side, gameId }, where a side is an anchor
+ *              { name, settings } or a computer player { name, engineBlock }
+ *              (its settings for this game come from settingsForGame, A53).
  * Message out: { white, black, gameId, result, reason, moves, milliseconds }
  */
 
@@ -18,9 +20,14 @@ import { readFileSync } from "node:fs";
 const engine = loadEngine();
 engine.setOpeningBook(JSON.parse(readFileSync(new URL("../../public/assets/engine/book/book.json", import.meta.url), "utf8")));
 
+/** The settings one side plays this game with. */
+function settingsOf(side, gameId) {
+    return side.engineBlock ? engine.settingsForGame(side.engineBlock, gameId) : side.settings;
+}
+
 parentPort.on("message", (job) => {
     const startedAt = Date.now();
-    const game = playGame(engine, job.white.settings, job.black.settings, job.gameId);
+    const game = playGame(engine, settingsOf(job.white, job.gameId), settingsOf(job.black, job.gameId), job.gameId);
     parentPort.postMessage({
         white: job.white.name,
         black: job.black.name,

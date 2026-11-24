@@ -36,7 +36,7 @@ const FUNCTIONS = [
     "ResetGame", "InitializeFromFen", "GetFen", "GenerateValidMoves", "MakeMove", "UnmakeMove",
     "FormatMove", "GetMoveSAN",
     // our files
-    "seedFromText", "makeRandom", "randomForMove", "comparableScore", "chooseMove",
+    "seedFromText", "makeRandom", "randomForMove", "comparableScore", "chooseMove", "settingsForGame",
     "setOpeningBook", "chooseBookMove", "openingName",
     "loadPosition", "depthForPosition", "isCaptureMove", "scoreAllMoves", "listLegalMoves", "decideMove",
 ];

@@ -160,3 +160,25 @@ function chooseMove(scoredMoves, settings, random) {
     const last = candidates[candidates.length - 1];
     return { move: last.move, reason: skipFilter ? "filter skipped" : "chosen", candidates: candidates.length };
 }
+
+// --- The settings for one game (A53) ---
+
+/**
+ * Picks a computer player's settings for one game from its "engine" block in
+ * computer-players.json. Most players always use "normal". An Uneven player
+ * plays some games at its "low" and some at its "high" settings: a third of
+ * its games each, chosen from the game id, so every device agrees.
+ */
+function settingsForGame(engineBlock, gameId) {
+    if (!engineBlock.low || !engineBlock.high) {
+        return engineBlock.normal;
+    }
+    const roll = makeRandom(seedFromText("phpchess game " + gameId + " form"))();
+    if (roll < 1 / 3) {
+        return engineBlock.low;
+    }
+    if (roll < 2 / 3) {
+        return engineBlock.high;
+    }
+    return engineBlock.normal;
+}

@@ -7,6 +7,9 @@
  * an ordinary player-settings object, the same kind the characters use, so the
  * calibration plays exactly the code the phones run.
  *
+ * guessElo is only a first guess, used to pick each player's nearest anchors
+ * before the ladder itself has been measured.
+ *
  * Every anchor follows the opening book with full variety for its first 8
  * half-moves; without that, two exact players would repeat the same game.
  */
@@ -16,9 +19,10 @@
 const VARIED_BOOK = { maxPly: 8, variety: 1 };
 
 /** GarboChess at a fixed base depth, playing its best move (margin 0). */
-function fullStrength(depth) {
+function fullStrength(depth, guessElo) {
     return {
         name: "garbo-d" + depth,
+        guessElo: guessElo,
         settings: {
             depth: { baseDepth: depth, exchangeExtra: 1, endgameExtra: 1, endgamePieces: 4, depthCap: depth + 1 },
             marginCentipawns: 0,
@@ -30,9 +34,10 @@ function fullStrength(depth) {
 }
 
 /** GarboChess at a low depth that also plays moves up to "margin" worse than its best. */
-function loose(depth, margin) {
+function loose(depth, margin, guessElo) {
     return {
         name: "garbo-d" + depth + "-m" + margin,
+        guessElo: guessElo,
         settings: {
             depth: { baseDepth: depth, exchangeExtra: 0, endgameExtra: 0, endgamePieces: 0, depthCap: depth },
             marginCentipawns: margin,
@@ -47,10 +52,11 @@ function loose(depth, margin) {
 
 export const ANCHORS = [
     // Elo 0 by definition: any legal move.
-    { name: "random", settings: { randomMover: true } },
+    { name: "random", guessElo: 0, settings: { randomMover: true } },
     // Takes something whenever it can, otherwise any move.
     {
         name: "capture-first",
+        guessElo: 150,
         settings: {
             depth: { baseDepth: 1, depthCap: 1 },
             marginCentipawns: 1000000,
@@ -58,16 +64,16 @@ export const ANCHORS = [
             style: { captureBonus: 100000 },
         },
     },
-    loose(1, 300),
-    loose(1, 100),
-    fullStrength(1),
-    loose(2, 100),
-    fullStrength(2),
-    fullStrength(3),
-    fullStrength(4),
-    fullStrength(5),
-    fullStrength(6),
-    fullStrength(7),
+    loose(1, 300, 350),
+    loose(1, 100, 600),
+    fullStrength(1, 800),
+    loose(2, 100, 900),
+    fullStrength(2, 1100),
+    fullStrength(3, 1300),
+    fullStrength(4, 1500),
+    fullStrength(5, 1700),
+    fullStrength(6, 1900),
+    fullStrength(7, 2100),
 ];
 
 /** The anchor whose Elo is fixed; every other rating is measured from it. */
