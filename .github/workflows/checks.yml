@@ -68,6 +68,9 @@ jobs:
       - name: No outside requests from the browser (K9)
         run: php tools/check-external-urls.php
 
+      - name: Computer player tests (Node, same JavaScript the phones run)
+        run: node --test "tests/js/*.test.mjs"
+
       - name: Tests (PHPUnit, with the database tests)
         run: vendor/bin/phpunit
 
