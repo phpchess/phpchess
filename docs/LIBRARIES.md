@@ -16,6 +16,8 @@ Every library phpChess 6 uses or plans to use, checked against A16 (client side)
 | qrcode-generator | QR codes for game invitations | G-21 | 2.0.4 | MIT | none | none | to confirm | candidate |
 | stockfish (Stockfish.js) | Fallback engine, only if GarboChess falls short | AI-01 | 19.0.1 | GPL-3.0 (the engine exception in A16) | none | none | to confirm if used | fallback |
 | GarboChess-JS | Computer opponent engine (first choice, AI-01), scored per move by our wrapper | AI-01 | file of commit 4ff0f9e (2012), SHA-256 recorded in its `SOURCE.md` | BSD-3-Clause | none | none known (dormant since 2012; we read and own the copy) | **yes**: no XMLHttpRequest, fetch, importScripts or WebSocket in the file | **approved for the proof**; vendored in `public/assets/vendor/garbochess/`; see [proofs/engine-proof.md](proofs/engine-proof.md) |
+| Lichess chess-openings (data) | Opening book and opening names: `public/assets/engine/book/a.tsv`–`e.tsv` (ECO, name, moves) | AI-02 | files as supplied by the user, 2026-11-24 | CC0-1.0 | none | none (data, no code) | **yes**: plain text | **approved** (A52) |
+| Opening traps sample (data) | `traps-sample.tsv`: popular losing opening moves from Lichess games with engine refutation, for low-level and teacher players | AI-03 | supplied by the user, 2026-11-24 (8 rows) | CC0-1.0 (Lichess database) | none | none (data) | **yes**: plain text | **approved** (A52) |
 
 ## Server (Composer, runtime)
 | Library | Purpose | Feature | Version | Licence | Own dependencies | Known vulnerabilities | Status |
@@ -36,4 +38,4 @@ Every library phpChess 6 uses or plans to use, checked against A16 (client side)
 1. **No JavaScript build step**: plain JavaScript modules loaded by the browser; libraries kept as plain files in `public/assets/vendor/<name>/`, each with its licence and a `SOURCE.md` (origin, version, checksum, changes, network check). No Node or npm needed. Vulnerabilities are checked against OSV by version.
 2. **PHPMailer allowed** (LGPL-2.1), as a server-side exception.
 3. **web-push allowed, reluctantly**: every one of its dependencies is recorded here when C2-2 adds it.
-4. **GarboChess is the first engine**, Stockfish.js the fallback (engine proof).
+4. **GarboChess is the engine** (A47); Stockfish only through the how-to, not shipped.
