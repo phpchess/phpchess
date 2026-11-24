@@ -14,6 +14,8 @@
  *
  * Messages in:
  *   { type: "decide", fen, player: {...}, gameId, ply, movesSoFar }   (movesSoFar: null if not from the normal start)
+ *   { type: "decide", fen, engineBlock: {...}, depthCap, gameId, ply, movesSoFar }
+ *       (the game page: a player's engine block from computer-players.json)
  *   { type: "score",  fen, depth }            (every move scored, for tests and the admin page)
  * Messages out:
  *   { type: "decision", fen, move, depth, reason, candidates, nodes, milliseconds }
@@ -54,6 +56,20 @@ function loadBookOnce() {
     }
 }
 
+/**
+ * A computer player's settings for this game: from its engine block in
+ * computer-players.json (Uneven players vary per game, A53), with the admin's
+ * depth cap (A49) applied on top of the player's own.
+ */
+function playerForGame(engineBlock, gameId, depthCap) {
+    const player = JSON.parse(JSON.stringify(settingsForGame(engineBlock, gameId)));
+    if (player.depth && Number.isInteger(depthCap) && depthCap > 0) {
+        player.depth.depthCap = Math.min(player.depth.depthCap || depthCap, depthCap);
+        player.depth.baseDepth = Math.min(player.depth.baseDepth, depthCap);
+    }
+    return player;
+}
+
 // --- Talking to the page ---
 
 self.onmessage = function (event) {
@@ -68,7 +84,9 @@ self.onmessage = function (event) {
         if (request.type === "decide") {
             loadBookOnce();
             const movesSoFar = Array.isArray(request.movesSoFar) ? request.movesSoFar.map(String) : null;
-            const decision = decideMove(String(request.fen), request.player, String(request.gameId), Number(request.ply), movesSoFar);
+            const gameId = String(request.gameId);
+            const player = request.player || playerForGame(request.engineBlock, gameId, request.depthCap);
+            const decision = decideMove(String(request.fen), player, gameId, Number(request.ply), movesSoFar);
             self.postMessage({
                 type: "decision",
                 fen: request.fen,

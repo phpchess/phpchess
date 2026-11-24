@@ -30,6 +30,8 @@ use PhpChess\Http\Web\Admin\SettingsController;
 use PhpChess\Http\Web\Admin\UsersController;
 use PhpChess\Http\Web\HomeController;
 use PhpChess\Http\Web\Play\ChallengeController;
+use PhpChess\Http\Web\Play\ComputerController;
+use PhpChess\Http\Web\Admin\EngineController as AdminEngineController;
 use PhpChess\Http\Web\Play\GameController;
 use PhpChess\Http\Web\Play\PlayPages;
 use PhpChess\Http\Web\Play\RatingController;
@@ -78,6 +80,15 @@ final class Routes
         $challenges = new ChallengeController($services, $playPages);
         $ratings = new RatingController($services, $playPages);
         $vacation = new VacationController($services, $playPages);
+        $computer = new ComputerController($services, $playPages);
+        $adminEngine = new AdminEngineController($services, $adminPages);
+
+        // --- Play the computer (C3-2: AI-03, AI-06, AI-07) ---
+        $router->get('/play/computer', fn (Request $request): Response => $computer->list($request), Access::MEMBERS);
+        $router->post('/play/computer', fn (Request $request): Response => $computer->start($request), Access::MEMBERS);
+        $router->post('/games/{id}/computer-move', fn (Request $request, array $parts): Response => $games->computerMove($request, $parts), Access::MEMBERS);
+        $router->get('/admin/engine', fn (Request $request): Response => $adminEngine->show($request), Access::ADMINS);
+        $router->post('/admin/engine', fn (Request $request): Response => $adminEngine->save($request), Access::ADMINS);
         $playerList = FeatureSwitches::PLAYER_LIST_VISIBILITY;
 
         // --- Pages for everyone ---

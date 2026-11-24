@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace PhpChess\Kernel;
 
+use PhpChess\Domain\Computer\ComputerGames;
+use PhpChess\Domain\Computer\ComputerPlayers;
 use PhpChess\Domain\Notify\Notices;
 use PhpChess\Domain\Play\Challenges;
 use PhpChess\Domain\Play\Games;
@@ -11,6 +13,7 @@ use PhpChess\Domain\Play\Vacations;
 use PhpChess\Domain\Rating\Ratings;
 use PhpChess\Domain\School\ClassRules;
 use PhpChess\Domain\System\FeatureSwitches;
+use PhpChess\Infra\Computer\ComputerAccountRepository;
 use PhpChess\Infra\Identity\UserRepository;
 use PhpChess\Infra\School\SchoolRepository;
 use PhpChess\Infra\Database;
@@ -95,5 +98,11 @@ final class PlayParts
     public function vacations(): Vacations
     {
         return new Vacations(new VacationRepository($this->database), $this->games());
+    }
+
+    /** Games against the computer players (C3-2, AI-06). */
+    public function computerGames(): ComputerGames
+    {
+        return new ComputerGames(new ComputerPlayers(), new ComputerAccountRepository($this->database), $this->gameRepository(), $this->games());
     }
 }

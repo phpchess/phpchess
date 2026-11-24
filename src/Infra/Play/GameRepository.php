@@ -286,6 +286,15 @@ final class GameRepository extends Repository
         $this->database->run('UPDATE ' . $this->table('games') . ' SET rematch_game_id = ?, rematch_offered_by = NULL WHERE id = ?', [$rematchGameId, $gameId]);
     }
 
+    /** True when the user is a computer player's account (C3-2, migration 7). */
+    public function isComputerAccount(int $userId): bool
+    {
+        return $this->database->fetchValue(
+            'SELECT computer_player_id FROM ' . $this->table('users') . ' WHERE id = ?',
+            [$userId],
+        ) !== null;
+    }
+
     public function setDeadline(int $gameId, ?int $moveDeadlineAt): void
     {
         $this->database->run(

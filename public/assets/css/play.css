@@ -256,3 +256,19 @@ details.confirm summary { cursor: pointer; }
 /* --- Invite QR code --- */
 .qr-frame svg { width: 100%; max-width: 18rem; height: auto; }
 .game-page.mode-replay .move-table { margin-top: 0; }
+
+/* --- Play the computer (C3-2, AI-03) ---
+ * Phone: the face sits left of the name and text. Wider screens: two or
+ * three cards per row. */
+.computer-players { grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr)); }
+.computer-player { display: grid; grid-template-columns: 5rem 1fr; column-gap: 0.75rem; align-content: start; }
+.computer-player > * { grid-column: 2; }
+.computer-face { grid-column: 1; grid-row: 1 / span 4; width: 5rem; height: auto; border-radius: 0.5rem; object-fit: cover; }
+.computer-player .card-actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: end; }
+.computer-thinking { font-style: italic; }
+
+/* --- Admin engine page (C3-2, AI-07): facts as label/value pairs; a wide table scrolls sideways on a phone --- */
+.facts { display: grid; grid-template-columns: max-content 1fr; gap: 0.25rem 1rem; }
+.facts dt { font-weight: bold; }
+.facts dd { margin: 0; }
+.table-scroll { overflow-x: auto; }

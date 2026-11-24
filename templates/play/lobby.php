@@ -29,7 +29,7 @@ foreach ($openChallenges as $openChallenge) {
 }
 ?>
 <h1><?= e($t->text('play.title')) ?></h1>
-<p><a href="<?= e($basePath) ?>/rules"><?= e($t->text('rules.link')) ?></a></p>
+<p><a href="<?= e($basePath) ?>/rules"><?= e($t->text('rules.link')) ?></a> · <a href="<?= e($basePath) ?>/play/computer"><?= e($t->text('computer.link')) ?></a></p>
 
 <form method="post" action="<?= e($basePath) ?>/play/quick" class="form play-now">
     <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">

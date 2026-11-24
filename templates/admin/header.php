@@ -11,6 +11,7 @@ $adminMenu = [
     '/admin/users' => 'admin.users.title',
     '/admin/games' => 'admin.games.title',
     '/admin/play' => 'admin.play.title',
+    '/admin/engine' => 'admin.engine.title',
     '/admin/settings' => 'admin.settings.title',
     '/admin/mail' => 'admin.mail.title',
     '/admin/switches' => 'admin.switches.title',

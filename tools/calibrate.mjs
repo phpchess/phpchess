@@ -7,7 +7,8 @@
  *   2. the computer players (src/Domain/Computer/computer-players.json) each
  *      play 60 games, 30 against each of the two anchors nearest their listed Elo.
  * Then it fits Elo ratings with a 95 % range (tools/calibration/elo-fit.mjs)
- * and writes docs/proofs/c3-2-calibration.md. Uses every processor core but
+ * and writes docs/proofs/c3-2-calibration.md and, for the admin engine page,
+ * src/Domain/Computer/calibration-result.json. Uses every processor core but
  * two, so the user starts it, overnight (A14, A51).
  *
  * Results are saved game by game in storage/calibration/results.jsonl, so a
@@ -35,6 +36,7 @@ const projectFolder = join(dirname(fileURLToPath(import.meta.url)), "..");
 const resultsFolder = join(projectFolder, "storage/calibration");
 const resultsFile = join(resultsFolder, "results.jsonl");
 const reportFile = join(projectFolder, "docs/proofs/c3-2-calibration.md");
+const calibrationResultFile = join(projectFolder, "src/Domain/Computer/calibration-result.json");
 
 // --- Command-line options ---
 
@@ -209,6 +211,17 @@ function writeReport(results) {
 
     writeFileSync(reportFile, lines.join("\n"));
     console.log(lines.join("\n"));
+
+    // The same result for the admin's engine page (AI-07): player id => measured Elo and range.
+    const measured = {};
+    for (const side of computerPlayerSides()) {
+        const rating = ratings[side.name];
+        if (rating) {
+            measured[side.name.slice(1).split(" ")[0]] = { elo: rating.elo, low: rating.low, high: rating.high };
+        }
+    }
+    const resultForAdmin = { date: new Date().toISOString().slice(0, 10), games: results.length, players: measured };
+    writeFileSync(calibrationResultFile, JSON.stringify(resultForAdmin, null, 2) + "\n");
 }
 
 // --- Main ---

@@ -119,7 +119,31 @@ final class GameController
             'chat' => $this->chatFor($game),
             'paceChoices' => [...$play->allowedTimeControls(), ...array_map(fn (int $days): string => $days . Game::PACE_DAYS_SUFFIX, [1, 2, 3, 5, 7, 14])],
             'currentPace' => Games::paceOf($game),
+            'computer' => $this->computerFor($game, $user->id),
         ]);
+    }
+
+    /**
+     * The computer side of the game, for the viewer who plays against it
+     * (C3-2): its colour, name and engine settings, and the admin's depth
+     * cap. Null when two people play, or for someone watching.
+     *
+     * @return array{colour: string, name: string, engineJson: string, depthCap: int}|null
+     */
+    private function computerFor(Game $game, int $viewerId): ?array
+    {
+        $computerGames = $this->services->play()->computerGames();
+        $side = $computerGames->computerSideOf($game);
+        if ($side === null || !$game->isPlayer($viewerId) || $game->colourOf($viewerId) === $side['colour']) {
+            return null;
+        }
+
+        return [
+            'colour' => $side['colour'],
+            'name' => $side['player']->name,
+            'engineJson' => json_encode($side['player']->engine, JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR),
+            'depthCap' => $computerGames->depthCap($this->services->settings()),
+        ];
     }
 
     /**
@@ -196,6 +220,32 @@ final class GameController
             $this->services->play()->games()->move(
                 $gameId,
                 $user->id,
+                (int) $request->formValue('ply', '-1'),
+                $request->formValue('move'),
+                $this->services->now,
+                $this->services->nowMs(),
+            );
+        } catch (PlayRefused $refusal) {
+            return $this->answer($request, $gameId, $refusal);
+        }
+
+        return $this->answer($request, $gameId, null);
+    }
+
+    /**
+     * The computer's move, decided by the engine in the member's browser
+     * (C3-2, AI-01). It goes through the same move function as every other
+     * move (K1); only the computer's human opponent may send it.
+     *
+     * @param array<string, string> $parts
+     */
+    public function computerMove(Request $request, array $parts): Response
+    {
+        $gameId = PlayPages::idFrom($parts);
+        try {
+            $this->services->play()->computerGames()->playComputerMove(
+                $gameId,
+                $this->pages->user()->id,
                 (int) $request->formValue('ply', '-1'),
                 $request->formValue('move'),
                 $this->services->now,

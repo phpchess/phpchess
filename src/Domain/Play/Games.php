@@ -474,6 +474,11 @@ final class Games
             $moverId = $game->playerToMoveId();
             $turnStartedAt = $game->lastMoveAt ?? $game->startedAt;
             $deadline = Clocks::deadline($turnStartedAt, $game->daysPerMove, $this->vacationDaysOf($moverId, $turnStartedAt));
+            // A computer player moves when its opponent's page is open (C3-2):
+            // it never loses on time; its deadline simply moves on.
+            if ($deadline <= $now && $this->games->isComputerAccount($moverId)) {
+                $deadline = Clocks::deadline($now, $game->daysPerMove, []);
+            }
             if ($deadline > $now) {
                 $this->games->setDeadline($game->id, $deadline);
 

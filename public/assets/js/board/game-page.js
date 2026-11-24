@@ -426,6 +426,15 @@ function applyServerState(newState) {
     clock.dataset.deadline = serverState.move_deadline_at || '';
     updateClock();
     updateMoveInput();
+    announceState();
+}
+
+/**
+ * Tells other scripts on the page the game's current state (C3-2: the
+ * computer opponent, computer-opponent.js, waits for its turn this way).
+ */
+function announceState() {
+    page.dispatchEvent(new CustomEvent('game-state', {detail: serverState}));
 }
 
 async function refreshFromServer() {
@@ -727,3 +736,8 @@ if (serverState.state === 'running') {
 }
 
 sendQueuedMove();
+
+// The computer opponent (C3-2) sends its move itself and hands the server's
+// answer here, so the board shows it like any other news.
+page.addEventListener('game-news', (event) => applyServerState(event.detail));
+announceState();

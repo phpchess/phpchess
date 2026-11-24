@@ -26,6 +26,8 @@ final class User
     public const string STATE_ARCHIVED = 'archived';
     /** Deleted by the member (ID-11): anonymised, never active again; not offered in admin lists. */
     public const string STATE_DELETED = 'deleted';
+    /** A computer player's account (AI-03, A53): never logs in, never listed; not offered in admin lists. */
+    public const string STATE_COMPUTER = 'computer';
 
     public const array STATES = [self::STATE_PENDING, self::STATE_ACTIVE, self::STATE_DISABLED, self::STATE_ARCHIVED];
 

@@ -37,6 +37,9 @@
  * (array{rating: int, games_played: int, is_newbie: bool, is_provisional: bool}),
  * $boardTheme and $planningBoardTheme (string), $paceChoices (list of "5+3" / "3d"),
  * $currentPace (string), $basePath, $csrfToken, $t, $template.
+ * $computer: when the viewer plays the computer (C3-2), array{colour, name,
+ * engineJson, depthCap}, else null. Then the engine runs in this page
+ * (computer-opponent.js) and there are no draw offers, pace changes or rematches.
  */
 
 use PhpChess\Domain\Chess\Position;
@@ -47,6 +50,7 @@ $viewerColour = $game->colourOf($viewerId);
 $isPlayer = $viewerColour !== null;
 $isViewersTurn = $game->isRunning() && $isPlayer && $game->playerToMoveId() === $viewerId;
 $opponentId = $isPlayer ? $game->opponentOf($viewerId) : 0;
+$computerOpponent = $computer !== null;
 $position = $game->position();
 $showBlackAtBottom = $viewerColour === Position::BLACK;
 $gamePath = $basePath . '/games/' . $game->id;
@@ -102,7 +106,14 @@ $showAbortRequest = $canAbort && $abortRule === Games::ABORT_ASK_ADMIN;
      data-text-white="<?= e($t->text('game.white')) ?>"
      data-text-black="<?= e($t->text('game.black')) ?>"
      data-text-premove="<?= e($t->text('game.premove_set')) ?>"
-     data-text-opponent-gone="<?= e($t->text('game.opponent_disconnected')) ?>">
+     data-text-opponent-gone="<?= e($t->text('game.opponent_disconnected')) ?>"
+     <?php if ($computerOpponent) : ?>
+     data-computer-colour="<?= e($computer['colour']) ?>"
+     data-computer-engine="<?= e($computer['engineJson']) ?>"
+     data-computer-depth-cap="<?= e($computer['depthCap']) ?>"
+     data-text-computer-thinking="<?= e($t->text('computer.thinking', ['name' => $computer['name']])) ?>"
+     data-text-computer-failed="<?= e($t->text('computer.engine_failed')) ?>"
+     <?php endif; ?>>
 
     <!-- ===== Above the board: White | clock | Black ===== -->
     <div class="game-header">
@@ -181,7 +192,7 @@ $showAbortRequest = $canAbort && $abortRule === Games::ABORT_ASK_ADMIN;
         </a>
 
         <?php if ($isPlayer && $game->isRunning()) : ?>
-            <?php if ($game->drawOfferedBy === null) : ?>
+            <?php if ($game->drawOfferedBy === null && $computer === null) : ?>
                 <form method="post" action="<?= e($gamePath) ?>/draw/offer" class="inline-form">
                     <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
                     <button type="submit" class="icon-button" title="<?= e($t->text('game.offer_draw')) ?>" aria-label="<?= e($t->text('game.offer_draw')) ?>">
@@ -293,6 +304,8 @@ $showAbortRequest = $canAbort && $abortRule === Games::ABORT_ASK_ADMIN;
                 <span class="muted"><?= e($t->text('game.pace_offered_by_you', ['pace' => $paceText($game->paceOffer)])) ?></span>
                 <button type="submit" class="button-secondary"><?= e($t->text('game.withdraw_pace')) ?></button>
             </form>
+        <?php elseif ($computer !== null) : ?>
+            <p class="muted centred"><?= e($t->text('computer.no_draws')) ?></p>
         <?php else : ?>
             <details class="confirm centred">
                 <summary><?= e($t->text('game.change_pace')) ?></summary>
@@ -327,7 +340,9 @@ $showAbortRequest = $canAbort && $abortRule === Games::ABORT_ASK_ADMIN;
 
     <?php if ($isPlayer && !$game->isRunning()) : ?>
         <div class="button-row centred">
-            <?php if ($game->rematchGameId !== null) : ?>
+            <?php if ($game->rematchGameId === null && $computerOpponent) : ?>
+                <a class="button" href="<?= e($basePath) ?>/play/computer"><?= e($t->text('computer.link')) ?></a>
+            <?php elseif ($game->rematchGameId !== null) : ?>
                 <a class="button" href="<?= e($basePath) ?>/games/<?= e($game->rematchGameId) ?>"><?= e($t->text('game.go_to_rematch')) ?></a>
             <?php elseif ($game->rematchOfferedBy === $viewerId) : ?>
                 <p class="muted"><?= e($t->text('game.rematch_offered_by_you')) ?></p>
@@ -388,3 +403,6 @@ $showAbortRequest = $canAbort && $abortRule === Games::ABORT_ASK_ADMIN;
 <link rel="stylesheet" href="<?= e($basePath) ?>/assets/vendor/cm-chessboard/assets/extensions/markers/markers.css">
 <link rel="stylesheet" href="<?= e($basePath) ?>/assets/vendor/cm-chessboard/assets/extensions/promotion-dialog/promotion-dialog.css">
 <script type="module" src="<?= e($basePath) ?>/assets/js/board/game-page.js"></script>
+<?php if ($computerOpponent) : ?>
+    <script type="module" src="<?= e($basePath) ?>/assets/js/engine/computer-opponent.js"></script>
+<?php endif; ?>
