@@ -1,0 +1,490 @@
+[
+  {
+    "id": 0,
+    "name": "Wood Pusher",
+    "personality": "Random",
+    "elo": 0,
+    "age": null,
+    "bio": "Moves any piece anywhere it may legally go. Every game is a surprise, even to him."
+  },
+  {
+    "id": 1,
+    "name": "Toby Jenkins",
+    "personality": "Conservative",
+    "elo": 300,
+    "age": 12,
+    "bio": "Just learned how the pieces move and refuses to trade anything without asking twice."
+  },
+  {
+    "id": 2,
+    "name": "Camila Morales",
+    "personality": "Aggressive",
+    "elo": 300,
+    "age": 14,
+    "bio": "Brings her Queen out on move two every single game hoping for a quick Scholar's Mate."
+  },
+  {
+    "id": 3,
+    "name": "Gordon Whitaker",
+    "personality": "Balanced",
+    "elo": 300,
+    "age": 74,
+    "bio": "Retired postman enjoying slow Sunday afternoon games while still learning piece values."
+  },
+  {
+    "id": 4,
+    "name": "Kofi Mensah",
+    "personality": "Uneven",
+    "elo": 300,
+    "age": 16,
+    "bio": "Plays brilliant opening moves he saw on TikTok before immediately blundering his rook."
+  },
+  {
+    "id": 5,
+    "name": "Anja Lindqvist",
+    "personality": "Conservative",
+    "elo": 400,
+    "age": 22,
+    "bio": "Pushes every pawn one square at a time to build a cozy wall around her King."
+  },
+  {
+    "id": 6,
+    "name": "Tariq Al-Mansoor",
+    "personality": "Trader",
+    "elo": 400,
+    "age": 19,
+    "bio": "Swaps pieces the moment they meet in the centre, because fewer pieces means fewer things to worry about."
+  },
+  {
+    "id": 7,
+    "name": "Mei-Ling Zhou",
+    "personality": "Balanced",
+    "elo": 400,
+    "age": 31,
+    "bio": "Plays casually on her lunch break and tries to remember basic center control principles."
+  },
+  {
+    "id": 8,
+    "name": "Mateo Silva",
+    "personality": "Uneven",
+    "elo": 400,
+    "age": 13,
+    "bio": "Hyper-focused when ahead in material, but completely loses concentration after one mistake."
+  },
+  {
+    "id": 9,
+    "name": "Brenda Galloway",
+    "personality": "Conservative",
+    "elo": 500,
+    "age": 68,
+    "bio": "Prefers keeping all her pieces safely on the back two ranks for as long as possible."
+  },
+  {
+    "id": 10,
+    "name": "Declan Byrne",
+    "personality": "Aggressive",
+    "elo": 500,
+    "age": 27,
+    "bio": "Never met a pawn sacrifice he didn't like, even when there is zero follow-up attack."
+  },
+  {
+    "id": 11,
+    "name": "Kavita Sharma",
+    "personality": "Balanced",
+    "elo": 500,
+    "age": 29,
+    "bio": "University student practicing basic checkmate patterns and trying to avoid one-move blunders."
+  },
+  {
+    "id": 12,
+    "name": "Henrik Solberg",
+    "personality": "Trader",
+    "elo": 500,
+    "age": 45,
+    "bio": "Counts the pieces after every capture and trades whenever the numbers still look even."
+  },
+  {
+    "id": 13,
+    "name": "Bernard Moreau",
+    "personality": "Trader",
+    "elo": 600,
+    "age": 58,
+    "bio": "Hates open boards and trades off Queens at the earliest opportunity to simplify things."
+  },
+  {
+    "id": 14,
+    "name": "Zuri Ndiaye",
+    "personality": "Aggressive",
+    "elo": 600,
+    "age": 24,
+    "bio": "Launches immediate kingside pawn storms before even developing her bishops."
+  },
+  {
+    "id": 15,
+    "name": "Ronan Gallagher",
+    "personality": "Balanced",
+    "elo": 600,
+    "age": 35,
+    "bio": "Plays solid, straightforward Italian Game setups and relies on basic tactical awareness."
+  },
+  {
+    "id": 16,
+    "name": "Nadia Koury",
+    "personality": "Uneven",
+    "elo": 600,
+    "age": 17,
+    "bio": "Dangerous in chaotic middlegames, yet struggles to convert simple King-and-pawn endgames."
+  },
+  {
+    "id": 17,
+    "name": "Mireille Laurent",
+    "personality": "Conservative",
+    "elo": 700,
+    "age": 79,
+    "bio": "Patient club veteran who waits quietly for opponents to overextend and make mistakes."
+  },
+  {
+    "id": 18,
+    "name": "Devon Brooks",
+    "personality": "Aggressive",
+    "elo": 700,
+    "age": 33,
+    "bio": "Always castles queenside so he can throw every single kingside pawn straight at your King."
+  },
+  {
+    "id": 19,
+    "name": "Kenji Takahashi",
+    "personality": "Balanced",
+    "elo": 700,
+    "age": 41,
+    "bio": "Follows classic opening checklists religiously: control the center, develop, and castle early."
+  },
+  {
+    "id": 20,
+    "name": "Sofia Novak",
+    "personality": "Trader",
+    "elo": 700,
+    "age": 21,
+    "bio": "Trades down quickly once a pawn ahead, though not always into the right endgame."
+  },
+  {
+    "id": 21,
+    "name": "Dennis Hoffman",
+    "personality": "Conservative",
+    "elo": 800,
+    "age": 52,
+    "bio": "High school chemistry teacher who treats chess like a slow, methodical lab experiment."
+  },
+  {
+    "id": 22,
+    "name": "Valeria Ortiz",
+    "personality": "Aggressive",
+    "elo": 800,
+    "age": 26,
+    "bio": "Specializes in tricky Fried Liver attacks and loves putting immediate pressure on f7."
+  },
+  {
+    "id": 23,
+    "name": "Callum Fraser",
+    "personality": "Trader",
+    "elo": 800,
+    "age": 15,
+    "bio": "Junior club regular who simplifies sensibly and rarely hangs pieces for free."
+  },
+  {
+    "id": 24,
+    "name": "Emeka Okafor",
+    "personality": "Uneven",
+    "elo": 800,
+    "age": 28,
+    "bio": "Pulls off dazzling knight sacrifices on good days, but falls for simple back-rank mates."
+  },
+  {
+    "id": 25,
+    "name": "Ingrid Halvorsen",
+    "personality": "Conservative",
+    "elo": 950,
+    "age": 71,
+    "bio": "Loves closed positions and will happily shuffle her rooks for twenty moves without blinking."
+  },
+  {
+    "id": 26,
+    "name": "Javier Mendoza",
+    "personality": "Aggressive",
+    "elo": 950,
+    "age": 23,
+    "bio": "Plays the King's Gambit exclusively and treats every game like an all-out sword fight."
+  },
+  {
+    "id": 27,
+    "name": "Claire Pelletier",
+    "personality": "Balanced",
+    "elo": 950,
+    "age": 38,
+    "bio": "Steady online rapid player focused on clean piece coordination and solid pawn structures."
+  },
+  {
+    "id": 28,
+    "name": "Arjun Nair",
+    "personality": "Trader",
+    "elo": 950,
+    "age": 14,
+    "bio": "Happily trades off attackers to reach quiet endgames where he feels at home."
+  },
+  {
+    "id": 29,
+    "name": "Alistair MacLeod",
+    "personality": "Trader",
+    "elo": 1100,
+    "age": 49,
+    "bio": "Bookshop owner who prefers grinding out tiny structural advantages over flashy combinations."
+  },
+  {
+    "id": 30,
+    "name": "Talia Ben-Ami",
+    "personality": "Aggressive",
+    "elo": 1100,
+    "age": 30,
+    "bio": "Hunts down opposing Kings relentlessly, often sacrificing bishops to tear open pawn shields."
+  },
+  {
+    "id": 31,
+    "name": "Lucas Kowalski",
+    "personality": "Balanced",
+    "elo": 1100,
+    "age": 18,
+    "bio": "Well-rounded high school captain equally comfortable in tactical scraps and quiet endgames."
+  },
+  {
+    "id": 32,
+    "name": "Yasmine Haddad",
+    "personality": "Uneven",
+    "elo": 1100,
+    "age": 34,
+    "bio": "Plays bizarre, offbeat openings that confuse opponents before suddenly finding sharp tactics."
+  },
+  {
+    "id": 33,
+    "name": "Martin Lindholm",
+    "personality": "Conservative",
+    "elo": 1250,
+    "age": 42,
+    "bio": "Accountant who counts every pawn island and refuses to take any uncalculated risks."
+  },
+  {
+    "id": 34,
+    "name": "Andrej Horvat",
+    "personality": "Trader",
+    "elo": 1250,
+    "age": 25,
+    "bio": "Offers exchanges at every turn and likes to steer the game into clear, simple positions."
+  },
+  {
+    "id": 35,
+    "name": "Evelyn Mercer",
+    "personality": "Balanced",
+    "elo": 1250,
+    "age": 64,
+    "bio": "Retired programmer who plays logical, principled chess with few obvious weaknesses."
+  },
+  {
+    "id": 36,
+    "name": "Santiago Reyes",
+    "personality": "Uneven",
+    "elo": 1250,
+    "age": 32,
+    "bio": "Brilliant attacking flair when inspired, though prone to impatient blunders in quiet positions."
+  },
+  {
+    "id": 37,
+    "name": "Dorothy Carmichael",
+    "personality": "Conservative",
+    "elo": 1400,
+    "age": 66,
+    "bio": "Master of the London System who builds an unbreakable pyramid and waits for you to crack."
+  },
+  {
+    "id": 38,
+    "name": "Lorenzo Conti",
+    "personality": "Aggressive",
+    "elo": 1400,
+    "age": 37,
+    "bio": "Plays sharp Sicilian Dragon lines with zero regard for personal safety or endgame structure."
+  },
+  {
+    "id": 39,
+    "name": "Joon-Ho Park",
+    "personality": "Balanced",
+    "elo": 1400,
+    "age": 36,
+    "bio": "Adaptable club player who smoothly transitions from solid openings into active middlegames."
+  },
+  {
+    "id": 40,
+    "name": "Freja Holm",
+    "personality": "Uneven",
+    "elo": 1400,
+    "age": 20,
+    "bio": "Finds astonishingly creative defensive resources right after creating her own terrible problems."
+  },
+  {
+    "id": 41,
+    "name": "Graham Holloway",
+    "personality": "Trader",
+    "elo": 1550,
+    "age": 61,
+    "bio": "Methodical thinker who slowly suffocates your counterplay before winning a clean endgame."
+  },
+  {
+    "id": 42,
+    "name": "Esme Navarro",
+    "personality": "Aggressive",
+    "elo": 1550,
+    "age": 19,
+    "bio": "Swift, ruthless tactician who punishes even the slightest delay in castling with lethal force."
+  },
+  {
+    "id": 43,
+    "name": "Idris Boateng",
+    "personality": "Balanced",
+    "elo": 1550,
+    "age": 39,
+    "bio": "Calculated strategist who balances long-term positional pressure with sharp tactical strikes."
+  },
+  {
+    "id": 44,
+    "name": "Tomasz Zielinski",
+    "personality": "Uneven",
+    "elo": 1550,
+    "age": 44,
+    "bio": "Capable of deep 10-move calculations, yet occasionally bored into carelessness by dry positions."
+  },
+  {
+    "id": 45,
+    "name": "Patricia O'Sullivan",
+    "personality": "Conservative",
+    "elo": 1700,
+    "age": 73,
+    "bio": "Disciplined positional player who punishes premature attacks with rock-solid defense."
+  },
+  {
+    "id": 46,
+    "name": "Rafael Delgado",
+    "personality": "Aggressive",
+    "elo": 1700,
+    "age": 35,
+    "bio": "Dazzling, flamboyant attacker who always chooses the sharpest, most dangerous variation."
+  },
+  {
+    "id": 47,
+    "name": "Samuel Mensah-Bonsu",
+    "personality": "Trader",
+    "elo": 1700,
+    "age": 50,
+    "bio": "Principled tournament regular with deep endgame technique and calm defensive resilience."
+  },
+  {
+    "id": 48,
+    "name": "Viktoras Kazlauskas",
+    "personality": "Uneven",
+    "elo": 1700,
+    "age": 43,
+    "bio": "Genius-level tactical vision held back only by overconfidence and reckless pawn grabs."
+  },
+  {
+    "id": 49,
+    "name": "Raymond Beauchamp",
+    "personality": "Conservative",
+    "elo": 1850,
+    "age": 65,
+    "bio": "Diplomatic strategist who accumulates small space advantages and never allows counterplay."
+  },
+  {
+    "id": 50,
+    "name": "Haruka Sato",
+    "personality": "Aggressive",
+    "elo": 1850,
+    "age": 31,
+    "bio": "Relentless attacking specialist who turns minor initiative into an unstoppable mating net."
+  },
+  {
+    "id": 51,
+    "name": "Ananya Deshmukh",
+    "personality": "Trader",
+    "elo": 1850,
+    "age": 24,
+    "bio": "Deeply prepared theorist who knows mainlines inside out and transitions smoothly to endgames."
+  },
+  {
+    "id": 52,
+    "name": "Nikolai Volkov",
+    "personality": "Uneven",
+    "elo": 1850,
+    "age": 40,
+    "bio": "Escapes completely lost positions through outrageous swindles and chaotic tactical traps."
+  },
+  {
+    "id": 53,
+    "name": "Willem Van Der Berg",
+    "personality": "Conservative",
+    "elo": 2000,
+    "age": 59,
+    "bio": "Cold, clinical positional grinder who dissects weak pawn structures with surgical precision."
+  },
+  {
+    "id": 54,
+    "name": "Astrid Nystrom",
+    "personality": "Aggressive",
+    "elo": 2000,
+    "age": 38,
+    "bio": "Fearless attacking powerhouse who dominates open files and crushes passive defenses."
+  },
+  {
+    "id": 55,
+    "name": "Carlos Castellanos",
+    "personality": "Balanced",
+    "elo": 2000,
+    "age": 29,
+    "bio": "Complete candidate-master level engine persona with harmonious piece play across all phases."
+  },
+  {
+    "id": 56,
+    "name": "Darius Varga",
+    "personality": "Uneven",
+    "elo": 2000,
+    "age": 33,
+    "bio": "Plays razor-sharp, provocative lines full of deep traps, occasionally outsmarting himself."
+  },
+  {
+    "id": 57,
+    "name": "Reginald Pemberton",
+    "personality": "Conservative",
+    "elo": 2000,
+    "age": 77,
+    "bio": "Stubborn fortress builder capable of holding drawn endgames against relentless pressure."
+  },
+  {
+    "id": 58,
+    "name": "Tamara Kovalenko",
+    "personality": "Trader",
+    "elo": 2000,
+    "age": 27,
+    "bio": "Converts the slightest edge by trading into endgames she has studied for years."
+  },
+  {
+    "id": 59,
+    "name": "Miriam Al-Jamil",
+    "personality": "Balanced",
+    "elo": 2000,
+    "age": 36,
+    "bio": "Analytical all-rounder combining deep calculation with classic positional understanding."
+  },
+  {
+    "id": 60,
+    "name": "Ferenc Szabo",
+    "personality": "Uneven",
+    "elo": 2000,
+    "age": 80,
+    "bio": "Unpredictable veteran mixing eccentric opening choices with sudden grandmaster-level endgames."
+  }
+]
