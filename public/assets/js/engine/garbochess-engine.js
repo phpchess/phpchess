@@ -52,8 +52,10 @@ function loadPosition(fen) {
         ResetGame();
         garboChessReady = true;
     }
+    // GarboChess also answers "Checkmate" or "Stalemate"; those positions are
+    // loaded and valid, they just have no legal moves.
     const problem = InitializeFromFen(fen);
-    if (problem.length !== 0) {
+    if (problem.length !== 0 && problem !== "Checkmate" && problem !== "Stalemate") {
         throw new Error("Invalid position: " + problem);
     }
 }
