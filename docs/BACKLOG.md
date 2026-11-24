@@ -32,3 +32,4 @@ feature ids in [FEATURES.md](FEATURES.md)) when it is planned in
 | B24 | **Game review with GarboChess**: review finished games with the engine, a mistake taxonomy and teachable moments. | 2026-11-24 | User, C3-2 Q&A. |
 | B25 | **Computer players challenge users**: AI players send challenges to members. | 2026-11-24 | User, C3-2 Q&A. |
 | B26 | **Teacher realm: motivation for beginners**: material-odds start positions (the stronger side starts without e.g. queen or knight) and a computer that adjusts its level to the player's results. | 2026-11-24 | User, C3-2 Q&A (A22). |
+| B27 | **Coach games (teacher realm)**: separate from the computer players (A53). The player chooses a coach instead of an opponent: openings coach, full strength from a chosen start position (FEN), play coach with mistake taxonomy, endgame coach, and more. Coaches allow take-backs and explain them. Builds on B24 (game review) and B26 (motivation). | 2026-11-24 | User, C3-2 Q&A (A28, A31). |
