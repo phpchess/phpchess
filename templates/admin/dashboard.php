@@ -15,7 +15,7 @@
     <p><?= e($t->text('admin.dashboard.nothing_waiting')) ?></p>
 <?php endif; ?>
 
-<h2><?= e($t->text('admin.setup_token.title')) ?></h2>
+<h2 id="setup-token"><?= e($t->text('admin.setup_token.title')) ?></h2>
 <p><?= e($t->text('admin.setup_token.explain')) ?></p>
 <form method="post" action="<?= e($basePath) ?>/admin/setup-token">
     <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">

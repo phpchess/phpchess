@@ -4,7 +4,10 @@
  *
  * Variables: $warnings (list of string, from UnsafeStateCheck),
  * $currentAdminPath (string), $basePath, $t.
+ * The "updates waiting" warning gets a link to the installer-link button.
  */
+
+use PhpChess\Domain\System\UnsafeStateCheck;
 
 $adminMenu = [
     '/admin' => 'admin.dashboard.title',
@@ -28,7 +31,12 @@ $adminMenu = [
         <h2 id="admin-banner-title"><?= e($t->text('admin.banner.title')) ?></h2>
         <ul>
             <?php foreach ($warnings as $warning) : ?>
-                <li><?= e($warning) ?></li>
+                <li>
+                    <?= e($warning) ?>
+                    <?php if ($warning === UnsafeStateCheck::UPDATES_WAITING) : ?>
+                        <a href="<?= e($basePath) ?>/admin#setup-token"><?= e($t->text('admin.setup_token.go')) ?></a>
+                    <?php endif; ?>
+                </li>
             <?php endforeach; ?>
         </ul>
     </section>

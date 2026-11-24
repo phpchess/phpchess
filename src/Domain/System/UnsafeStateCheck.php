@@ -24,6 +24,12 @@ final class UnsafeStateCheck
 {
     private const int JOBS_SILENT_SECONDS = 86400;
 
+    /**
+     * The warning when database updates wait. The admin banner shows it with
+     * a link to the button that makes the installer link (no expert needed).
+     */
+    public const string UPDATES_WAITING = 'Database updates are waiting. Step 1: create an installer link (button below). Step 2: open that link; the installer runs the updates.';
+
     public function __construct(
         private readonly string $appRoot,
         private readonly SettingsRepository $settings,
@@ -69,7 +75,7 @@ final class UnsafeStateCheck
         }
 
         if ($this->migrations->pendingStepCount() > 0) {
-            $warnings[] = 'Database updates are waiting. Open the installer with a setup token to run them.';
+            $warnings[] = self::UPDATES_WAITING;
         }
 
         return $warnings;

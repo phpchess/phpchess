@@ -154,6 +154,9 @@ return [
     'admin.setup_token.title' => 'Installer link for updates',
     'admin.setup_token.explain' => 'To install an update: upload the new release files, then open the installer with a one-time link. The link works once, for one hour.',
     'admin.setup_token.button' => 'Create an installer link',
+    'admin.setup_token.go' => 'Go to the button',
+    'admin.setup_token.open' => 'Open the installer now',
+    'admin.setup_token.or_copy' => 'Or copy the link below to open it later (it works once, for one hour). Upload new release files first if you have not yet.',
     'admin.setup_token.shown_once' => 'Copy this link now; it is shown only once. Upload the new release files first, then open it.',
 
     // --- Admin: users (ADM-01) ---
