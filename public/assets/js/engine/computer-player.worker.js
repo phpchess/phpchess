@@ -9,11 +9,11 @@
  * always give the same move, on every device.
  *
  * Files loaded, in order:
- *   GarboChess (vendor, BSD-3-Clause, unchanged), then our move chooser and
+ *   GarboChess (vendor, BSD-3-Clause, unchanged), then our move chooser, opening book and
  *   our GarboChess helpers. To use a different engine, see docs/ENGINE_HOWTO.md.
  *
  * Messages in:
- *   { type: "decide", fen, player: {...}, gameId, ply }
+ *   { type: "decide", fen, player: {...}, gameId, ply, movesSoFar }   (movesSoFar: null if not from the normal start)
  *   { type: "score",  fen, depth }            (every move scored, for tests and the admin page)
  * Messages out:
  *   { type: "decision", fen, move, depth, reason, candidates, nodes, milliseconds }
@@ -27,7 +27,32 @@
 
 // GarboChess sets its own onmessage handler when it loads; ours below replaces
 // it, so only this file's protocol is active.
-importScripts("../../vendor/garbochess/garbochess.js", "move-chooser.js", "garbochess-engine.js");
+importScripts(
+    "../../vendor/garbochess/garbochess.js",
+    "move-chooser.js",
+    "opening-book.js",
+    "garbochess-engine.js"
+);
+
+// The opening book (A52), read once from the install itself the first time a
+// move is decided. A missing book only means no book moves.
+let bookLoaded = false;
+function loadBookOnce() {
+    if (bookLoaded) {
+        return;
+    }
+    bookLoaded = true;
+    try {
+        const request = new XMLHttpRequest();
+        request.open("GET", "../../engine/book/book.json", false); // a worker may wait
+        request.send();
+        if (request.status === 200) {
+            setOpeningBook(JSON.parse(request.responseText));
+        }
+    } catch (problem) {
+        setOpeningBook(null);
+    }
+}
 
 // --- Talking to the page ---
 
@@ -41,7 +66,9 @@ self.onmessage = function (event) {
         }
 
         if (request.type === "decide") {
-            const decision = decideMove(String(request.fen), request.player, String(request.gameId), Number(request.ply));
+            loadBookOnce();
+            const movesSoFar = Array.isArray(request.movesSoFar) ? request.movesSoFar.map(String) : null;
+            const decision = decideMove(String(request.fen), request.player, String(request.gameId), Number(request.ply), movesSoFar);
             self.postMessage({
                 type: "decision",
                 fen: request.fen,

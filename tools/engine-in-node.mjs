@@ -23,6 +23,7 @@ const projectFolder = join(dirname(fileURLToPath(import.meta.url)), "..");
 const ENGINE_FILES = [
     "public/assets/vendor/garbochess/garbochess.js",
     "public/assets/js/engine/move-chooser.js",
+    "public/assets/js/engine/opening-book.js",
     "public/assets/js/engine/garbochess-engine.js",
 ];
 

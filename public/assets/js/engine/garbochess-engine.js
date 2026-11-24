@@ -43,8 +43,15 @@ const PIECE_KING = 6;
 
 // --- Setting up a position ---
 
+// GarboChess needs ResetGame() once before its first position.
+let garboChessReady = false;
+
 /** Loads a position into GarboChess, or throws if the FEN is not valid. */
 function loadPosition(fen) {
+    if (!garboChessReady) {
+        ResetGame();
+        garboChessReady = true;
+    }
     const problem = InitializeFromFen(fen);
     if (problem.length !== 0) {
         throw new Error("Invalid position: " + problem);
@@ -99,7 +106,6 @@ function hasExchangeGoingOn(legalMoves) {
  * Depends only on the position, so it is the same on every device.
  */
 function depthForPosition(fen, depthSettings) {
-    startFreshSearch();
     loadPosition(fen);
     const legalMoves = GenerateValidMoves();
 
@@ -263,11 +269,24 @@ function listLegalMoves(fen) {
 /**
  * Decides the computer's move in one position.
  * player: { randomMover, depth: {...}, marginCentipawns, giveawaySkipChance, style }
+ *         book: { maxPly, variety } (see opening-book.js)
  * gameId, ply: seed the random choice (same move on every device).
+ * movesSoFar: the game's moves from the normal start ("e2e4", ...), for the
+ *         opening book; pass null for a game that started from another position.
  * Returns { move, depth, reason, candidates, nodes, scores }.
  */
-function decideMove(fen, player, gameId, ply) {
+function decideMove(fen, player, gameId, ply, movesSoFar) {
     const random = randomForMove(gameId, ply);
+
+    // In the opening, a book move if the player still follows the book.
+    if (Array.isArray(movesSoFar) && !player.randomMover) {
+        const bookMove = chooseBookMove(movesSoFar, player.book, random);
+        const legal = bookMove !== null && listLegalMoves(fen).some((scored) => scored.move === bookMove);
+        if (legal) {
+            return { move: bookMove, depth: 0, reason: "book", candidates: 1, nodes: 0, scores: [] };
+        }
+    }
+
     if (player.randomMover) {
         const choice = chooseMove(listLegalMoves(fen), player, random);
         return { move: choice.move, depth: 0, reason: choice.reason, candidates: choice.candidates, nodes: 0, scores: [] };
