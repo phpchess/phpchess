@@ -3,8 +3,8 @@
  * The top of every admin page: the warning banner (INS-07) and the admin menu.
  *
  * Variables: $warnings (list of string, from UnsafeStateCheck),
- * $currentAdminPath (string), $basePath, $t.
- * The "updates waiting" warning gets a link to the installer-link button.
+ * $currentAdminPath (string), $basePath, $csrfToken, $t.
+ * The "updates waiting" warning gets the "Run updates now" button (A54).
  */
 
 use PhpChess\Domain\System\UnsafeStateCheck;
@@ -34,7 +34,10 @@ $adminMenu = [
                 <li>
                     <?= e($warning) ?>
                     <?php if ($warning === UnsafeStateCheck::UPDATES_WAITING) : ?>
-                        <a href="<?= e($basePath) ?>/admin#setup-token"><?= e($t->text('admin.setup_token.go')) ?></a>
+                        <form method="post" action="<?= e($basePath) ?>/admin/updates" class="inline-form">
+                            <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                            <button type="submit" class="button"><?= e($t->text('admin.updates.run')) ?></button>
+                        </form>
                     <?php endif; ?>
                 </li>
             <?php endforeach; ?>

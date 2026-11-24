@@ -8,13 +8,14 @@ use PhpChess\Domain\Identity\User;
 use PhpChess\Http\Request;
 use PhpChess\Http\Response;
 use PhpChess\Kernel\Services;
+use Throwable;
 
 /**
- * The admin start page, password confirmation and setup token (ID-08, INS-06, INS-07).
+ * The admin start page, password confirmation and database updates (ID-08, INS-07, A54).
  *
  *   GET      /admin                the warnings and the admin menu
  *   GET/POST /admin/confirm        confirm the password before admin work (ID-08)
- *   POST     /admin/setup-token    a one-time link that reopens the installer for an update (INS-06)
+ *   POST     /admin/updates        runs the database updates of a new version (A54)
  */
 final class DashboardController
 {
@@ -65,15 +66,23 @@ final class DashboardController
         return preg_match('#^/admin(/[A-Za-z0-9/_-]*)?$#', $path) === 1 ? $path : '/admin';
     }
 
-    // --- Setup token (INS-06) ---
+    // --- Updates (A54) ---
 
-    public function createSetupToken(Request $request): Response
+    /**
+     * Runs the database updates of a new version: the admin presses "Run
+     * updates now" in the banner. The installer is never reopened for this.
+     */
+    public function runUpdates(Request $request): Response
     {
-        $token = $this->services->setupToken()->createSetupToken($this->services->now);
-        $this->adminPages->audit($request, 'install.setup_token', 'A setup token for the installer was created.');
+        try {
+            $stepsRun = $this->services->migrationRunner()->runPending();
+        } catch (Throwable $problem) {
+            $this->adminPages->audit($request, 'install.updates_failed', 'Database update failed: ' . $problem->getMessage());
 
-        return $this->adminPages->render($request, 'admin/setup_token', 'admin.setup_token.title', [
-            'installerLink' => $request->baseUrl() . '/install?token=' . $token,
-        ]);
+            return $this->adminPages->redirect($request, '/admin', 'error', 'admin.updates.failed');
+        }
+        $this->adminPages->audit($request, 'install.updates', count($stepsRun) . ' database update steps run.');
+
+        return $this->adminPages->redirect($request, '/admin', 'success', 'admin.updates.done');
     }
 }

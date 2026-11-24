@@ -7,7 +7,7 @@
  * $warnings, $currentAdminPath, $basePath, $csrfToken, $t, $template.
  */
 ?>
-<?= $template->render('admin/header', ['warnings' => $warnings, 'currentAdminPath' => $currentAdminPath, 'basePath' => $basePath, 't' => $t]) ?>
+<?= $template->render('admin/header', ['warnings' => $warnings, 'currentAdminPath' => $currentAdminPath, 'basePath' => $basePath, 't' => $t, 'csrfToken' => $csrfToken]) ?>
 
 <h1><?= e($t->text('admin.settings.title')) ?></h1>
 

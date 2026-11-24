@@ -12,7 +12,6 @@ use PhpChess\Infra\Database;
 use PhpChess\Infra\Identity\UserRepository;
 use PhpChess\Infra\Migration\MigrationRunner;
 use PhpChess\Infra\System\SettingsRepository;
-use PhpChess\Domain\System\SetupToken;
 use PhpChess\Kernel\Config;
 use PhpChess\Kernel\Csrf;
 use PhpChess\Kernel\Session;
@@ -49,7 +48,6 @@ final class InstallerController
     private const string PREFLIGHT_PASSED = 'install.preflight_passed';
     private const string PROTECTION_PASSED = 'install.protection_passed';
     private const string ADMIN_DETAILS = 'install.admin';
-    private const string REOPENED = 'install.reopened_with_token';
     private const string DATABASE_DETAILS = 'install.database_details';
 
     /**
@@ -74,19 +72,10 @@ final class InstallerController
     {
         $config = Config::load($this->appRoot);
 
+        // After the install the installer stays closed for good; updates run
+        // from the admin pages ("Run updates now", A54).
         if ($config !== null && $config->installed) {
-            $token = $request->queryValue('token');
-            if ($token !== '' && (new SetupToken($this->appRoot))->useSetupToken($token, $this->now)) {
-                $this->session->renewId();
-                $this->session->set(self::REOPENED, true);
-                $this->session->remove(self::PREFLIGHT_PASSED);
-                $this->session->remove(self::PROTECTION_PASSED);
-
-                return Response::redirect($request->basePath . '/install');
-            }
-            if ($this->session->get(self::REOPENED) !== true) {
-                return $this->page($request, 'install/locked', 'The installer is locked', 0, [], 403);
-            }
+            return $this->page($request, 'install/locked', 'The installer is locked', 0, [], 403);
         }
 
         if ($this->session->get(self::PREFLIGHT_PASSED) !== true) {
@@ -108,7 +97,7 @@ final class InstallerController
         if ($config === null) {
             return $this->databaseForm($request, [], '');
         }
-        if (!$config->installed && !$this->isOwner($config)) {
+        if (!$this->isOwner($config)) {
             return $this->page($request, 'install/not_owner', 'The installation was started elsewhere', 0, [], 403);
         }
 
@@ -121,7 +110,7 @@ final class InstallerController
         $pendingSteps = $runner->pendingStepCount();
         $adminExists = $this->adminExists($database);
 
-        if (!$adminExists && !is_array($this->session->get(self::ADMIN_DETAILS)) && !$config->installed) {
+        if (!$adminExists && !is_array($this->session->get(self::ADMIN_DETAILS))) {
             return $this->page($request, 'install/admin', 'Step 4: Your admin account', 4, ['error' => '', 'username' => '', 'email' => '']);
         }
 
@@ -323,7 +312,7 @@ final class InstallerController
     public function runMigrations(Request $request): Response
     {
         $config = Config::load($this->appRoot);
-        if ($config === null || (!$this->isOwner($config) && $this->session->get(self::REOPENED) !== true)) {
+        if ($config === null || !$this->isOwner($config)) {
             return Response::redirect($request->basePath . '/install');
         }
 
@@ -369,7 +358,7 @@ final class InstallerController
     public function finish(Request $request): Response
     {
         $config = Config::load($this->appRoot);
-        if ($config === null || (!$this->isOwner($config) && $this->session->get(self::REOPENED) !== true)) {
+        if ($config === null || !$this->isOwner($config)) {
             return Response::redirect($request->basePath . '/install');
         }
 
@@ -390,7 +379,6 @@ final class InstallerController
             ]);
         }
 
-        $this->session->remove(self::REOPENED);
         $this->session->remove(self::OWNER_SECRET);
         $this->session->remove(self::PREFLIGHT_PASSED);
         $this->session->remove(self::PROTECTION_PASSED);

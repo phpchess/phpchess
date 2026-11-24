@@ -26,9 +26,9 @@ final class UnsafeStateCheck
 
     /**
      * The warning when database updates wait. The admin banner shows it with
-     * a link to the button that makes the installer link (no expert needed).
+     * the button "Run updates now" (A54, no expert needed).
      */
-    public const string UPDATES_WAITING = 'Database updates are waiting. Step 1: create an installer link (button below). Step 2: open that link; the installer runs the updates.';
+    public const string UPDATES_WAITING = 'A new version is uploaded and its database updates are waiting.';
 
     public function __construct(
         private readonly string $appRoot,

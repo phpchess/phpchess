@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PhpChess\Tests\Identity;
 
 use PhpChess\Domain\Identity\User;
+use PhpChess\Domain\System\UnsafeStateCheck;
 use PhpChess\Infra\System\AuditLogRepository;
 use PhpChess\Tests\Support\InstalledSite;
 use PHPUnit\Framework\TestCase;
@@ -130,13 +131,28 @@ final class AdminActionsTest extends TestCase
         self::assertStringContainsString('not using HTTPS', $page);
     }
 
-    public function testASetupTokenLinkIsShownOnce(): void
+    public function testWaitingUpdatesRunFromTheBannerButton(): void
     {
+        // Make the last step of migration 7 wait again, as after uploading a new version.
+        $database = $this->site->database;
+        $database->run('ALTER TABLE ' . $database->table('users') . ' DROP INDEX users_computer_player');
+        $database->run('DELETE FROM ' . $database->table('schema_migrations') . ' WHERE migration_number = 7 AND step_number = 2');
         $admin = $this->site->loggedInBrowser(InstalledSite::ADMIN_NAME, true);
 
-        $page = $admin->submit('/admin', '/admin/setup-token')->body;
+        $page = $admin->get('/admin')->body;
+        self::assertStringContainsString(UnsafeStateCheck::UPDATES_WAITING, $page);
+        self::assertStringContainsString('/chess/admin/updates', $page);
 
-        self::assertMatchesRegularExpression('#/chess/install\?token=[0-9a-f]{64}#', $page);
-        self::assertFileExists($this->site->folder->path . '/storage/setup-token.json');
+        $answer = $admin->post('/admin/updates');
+        self::assertSame('/chess/admin', $answer->header('Location'));
+        self::assertStringNotContainsString(UnsafeStateCheck::UPDATES_WAITING, $admin->get('/admin')->body);
+    }
+
+    public function testTheInstallerStaysClosedAfterTheInstall(): void
+    {
+        $page = $this->site->browser()->get('/install', ['token' => str_repeat('a', 64)]);
+
+        self::assertSame(403, $page->status);
+        self::assertStringContainsString('Run updates now', $page->body);
     }
 }

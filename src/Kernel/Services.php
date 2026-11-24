@@ -32,7 +32,6 @@ use PhpChess\Domain\Language\Translator;
 use PhpChess\Domain\Notify\MoveEmails;
 use PhpChess\Domain\Look\Skin;
 use PhpChess\Domain\System\FeatureSwitches;
-use PhpChess\Domain\System\SetupToken;
 use PhpChess\Domain\System\UnsafeStateCheck;
 use PhpChess\Http\PageRenderer;
 use PhpChess\Http\Request;
@@ -135,11 +134,6 @@ final class Services
     public function unsafeStateCheck(): UnsafeStateCheck
     {
         return new UnsafeStateCheck($this->appRoot, $this->settings(), new JobRepository($this->database()), $this->migrationRunner());
-    }
-
-    public function setupToken(): SetupToken
-    {
-        return new SetupToken($this->appRoot);
     }
 
     // --- Identity ---

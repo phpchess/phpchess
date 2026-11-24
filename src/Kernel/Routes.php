@@ -164,7 +164,7 @@ final class Routes
         $router->get('/admin/confirm', fn (Request $request): Response => $dashboard->showConfirm($request), Access::ADMINS_BEFORE_CONFIRMATION);
         $router->post('/admin/confirm', fn (Request $request): Response => $dashboard->confirm($request), Access::ADMINS_BEFORE_CONFIRMATION);
         $router->get('/admin', fn (Request $request): Response => $dashboard->dashboard($request), Access::ADMINS);
-        $router->post('/admin/setup-token', fn (Request $request): Response => $dashboard->createSetupToken($request), Access::ADMINS);
+        $router->post('/admin/updates', fn (Request $request): Response => $dashboard->runUpdates($request), Access::ADMINS);
 
         $router->get('/admin/users', fn (Request $request): Response => $users->list($request), Access::ADMINS);
         $router->post('/admin/users/{id}/approve', fn (Request $request, array $parts): Response => $users->approve($request, $parts), Access::ADMINS);

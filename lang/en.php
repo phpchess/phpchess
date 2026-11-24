@@ -140,6 +140,9 @@ return [
 
     // --- Admin: shared ---
     'admin.save' => 'Save',
+    'admin.updates.run' => 'Run updates now',
+    'admin.updates.done' => 'The database updates are done.',
+    'admin.updates.failed' => 'A database update failed; nothing after it was changed. Press Run updates now again in a minute; if it fails again, the audit log has the details.',
     'admin.saved' => 'Saved.',
     'admin.banner.title' => 'Things to fix',
 
@@ -151,13 +154,6 @@ return [
     'admin.confirm.explain' => 'For admin work, please enter your password again. You will not be asked again for 30 minutes while you work.',
     'admin.confirm.button' => 'Confirm',
     'admin.confirm.wrong' => 'The password is wrong.',
-    'admin.setup_token.title' => 'Installer link for updates',
-    'admin.setup_token.explain' => 'To install an update: upload the new release files, then open the installer with a one-time link. The link works once, for one hour.',
-    'admin.setup_token.button' => 'Create an installer link',
-    'admin.setup_token.go' => 'Go to the button',
-    'admin.setup_token.open' => 'Open the installer now',
-    'admin.setup_token.or_copy' => 'Or copy the link below to open it later (it works once, for one hour). Upload new release files first if you have not yet.',
-    'admin.setup_token.shown_once' => 'Copy this link now; it is shown only once. Upload the new release files first, then open it.',
 
     // --- Admin: users (ADM-01) ---
     'admin.users.title' => 'Users',

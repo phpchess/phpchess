@@ -27,7 +27,7 @@ Decisions A1–A21 are in [DECISIONS.md](DECISIONS.md).
 | INS-03 | Pre-flight checks: PHP and extensions, database version and `sql_mode`, writable data folder, `.htaccess` honoured, HTTPS | redesign | C1-1 | — | done (2026-11-22) |
 | INS-04 | Self-test that non-public folders are unreachable; stops with a plain-language fix, and shows an nginx snippet for a VPS | new | C1-1 | — | done (2026-11-22) |
 | INS-05 | Migrations: numbered, resumable, table prefix, never drop what they didn't create; also used for upgrades to later 6.x versions | redesign | C1-1 | — | done (2026-11-22) |
-| INS-06 | Installer locks itself after installing; reopens only with a one-time setup token | redesign | C1-1 | — | done (2026-11-22) |
+| INS-06 | Installer locks itself after installing, for good; updates run from the admin banner ("Run updates now", A54) | redesign | C1-1 | — | done (2026-11-22; changed 2026-11-24, A54) |
 | INS-07 | Unsafe-state banner on every admin page: install folder reachable, config writable, errors displayed, no HTTPS, mail not set up, jobs not running for more than 24 h, migrations pending | redesign | C1-1 | — | done (2026-11-22) |
 | INS-08 | Job runner: real cron when present, otherwise pseudo-cron triggered by page requests, guarded by a database lock | redesign | C1-1 | — | done (2026-11-22) |
 | INS-09 | Docker image (PHP, web server, MariaDB) for school servers | new | backlog (B16) | — | moved to backlog (A40) |
