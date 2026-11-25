@@ -25,7 +25,7 @@ The plan is six blocks, split into eleven large chunks.
 | 3 Live and computer | C3-1 Timed play | clock, lobby, polling transport, limits, measurements | done (2026-11-24, 5+3 games played on the local install) |
 | | C3-2 Computer opponent | engine in the browser, selection layer, characters, calibration | done (2026-11-25, tuned to real players, A55–A58); reviewed and play-tested 2026-11-25 |
 | | F1 Fixes and the strength test | B7, B15, B17, B20, B21, B23, B30 (A59–A65) | done for review (2026-11-25): all checks pass |
-| | F2 UI overhaul | B28, B29, new Play page | planned |
+| | F2 UI overhaul | B28, B29, new Play page (A66–A73) | planned (questions answered 2026-11-25) |
 | 4 Tournaments | C4-1 Tournament core | model, Round Robin, Swiss, knockout, League with drag-and-drop, tie-breaks | planned |
 | | C4-2 Special formats | Team vs Team, Arena, voting, class tournaments | planned |
 | 5 Lichess | C5-1 Lichess | embeds, login with Lichess, API | planned |
@@ -160,6 +160,16 @@ Release 6.0 is C0-1 to C4-2, plus a check on a real shared host before release.
 - **Tests**: puzzle selection and band result; chat refused on finished/computer games; cache name changes with the version; site-wide poll answer; a poll with news but no move leaves the board alone; delay settings.
 - **Done**: as every chunk (tests, PHPStan max, composer audit, header check), each run with the user's go.
 - **Status (2026-11-25)**: built, committed locally. C2-2 review: docs/proofs/f1-c2-2-review.md (teacher takeover fixed; B34, B35 to the backlog). Push for direct challenges already comes from the notices (C2-2). A new pace still reloads the game page once (clocks change). Checks 2026-11-25: PHPUnit 295 tests OK, Node 48 OK, PHPStan max OK, composer audit OK, header/SQL/escaping/URL checks OK; load test: /news 2.5 ms median (docs/proofs/c3-1-load-test.md). Open: the user's review on the local site.
+
+## F2 UI overhaul
+- **Scope**: backlog B28, B29 and a new Play page; decisions A66–A73.
+  - **Look** (A66, A72): one design system, button-centred, full width on every device, portrait phone first; bottom tab bar on phones (A68).
+  - **Icons** (A67): inline SVG from a PHP helper, coloured by the theme.
+  - **Play page** (A69, A70): "New game" pop-up (opponent, time, strength range, colour, all buttons); boxes for open challenges, received challenges, running games, admin messages, statistics later; live refresh through the site-wide poll.
+  - **Admin** (A71): full width, grouped side menu, sticky table headers, switch buttons.
+  - **Login** (A73): empty slot for the optional Lichess button of C5-1.
+- **Tests**: icon helper output and escaping; new-game choices map to the right challenge or computer game; poll answer carries the Play page boxes; every page renders with the new layout; no external URLs (K9).
+- **Done**: as every chunk (tests, PHPStan max, composer audit, header check), each run with the user's go.
 
 ## C4-1 Tournament core
 - **Scope**: T-01 to T-08, ADM-06.
