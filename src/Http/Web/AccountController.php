@@ -178,12 +178,18 @@ final class AccountController
 
     private function loginForm(Request $request, string $nameOrEmail, string $error, bool $showResend, int $status = 200): Response
     {
+        $next = self::safeNextPath($request->queryValue('next', $request->formValue('next')));
+
+        // The admin login (on the way to /admin) offers no "register" link (B7):
+        // admins already have an account, "forgot password" stays.
+        $isAdminLogin = str_starts_with($next, '/admin');
+
         return $this->pages()->render($request, 'account/login', $this->text('login.title'), [
             'nameOrEmail' => $nameOrEmail,
             'error' => $error,
             'showResend' => $showResend,
-            'next' => self::safeNextPath($request->queryValue('next', $request->formValue('next'))),
-            'registrationIsOpen' => $this->services->switches()->isOn('public_registration'),
+            'next' => $next,
+            'registrationIsOpen' => $this->services->switches()->isOn('public_registration') && !$isAdminLogin,
         ], $status);
     }
 
