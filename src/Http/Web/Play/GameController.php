@@ -99,7 +99,6 @@ final class GameController
         $usernames = $this->usernamesFor([$game]);
         $ratings = $this->services->play()->ratings();
         $state = GameStateJson::of($game, $moves, $usernames, $user->id, $this->services->nowMs());
-        $play = $this->services->play()->games();
 
         return $this->services->pages()->render($request, 'play/game', $this->pages->text('game.title', [
             'white' => $usernames[$game->whiteId] ?? '?',
@@ -117,10 +116,57 @@ final class GameController
             'boardTheme' => $this->services->currentPreferences()->boardTheme,
             'planningBoardTheme' => $this->services->settings()->getString('play.planning_board_theme', 'blue'),
             'chat' => $this->chatFor($game),
-            'paceChoices' => [...$play->allowedTimeControls(), ...array_map(fn (int $days): string => $days . Game::PACE_DAYS_SUFFIX, [1, 2, 3, 5, 7, 14])],
+            'paceChoices' => $this->paceChoices(),
             'currentPace' => Games::paceOf($game),
             'computer' => $this->computerFor($game, $user->id),
         ]);
+    }
+
+    /**
+     * The status line, game buttons and offers as HTML (B23): the game page
+     * swaps them when offers change or the game ends, instead of reloading.
+     *
+     * @param array<string, string> $parts
+     */
+    public function parts(Request $request, array $parts): Response
+    {
+        $user = $this->pages->user();
+        $game = $this->services->play()->gameRepository()->find(PlayPages::idFrom($parts));
+        if ($game === null || !$this->pages->mayWatch($game, $user)) {
+            return $this->pages->notFound($request);
+        }
+        $play = $this->services->play()->games();
+        $variables = [
+            'game' => $game,
+            'viewerId' => $user->id,
+            'computer' => $this->computerFor($game, $user->id),
+            'canAbort' => $game->isPlayer($user->id) && Games::canStillAbort($game),
+            'abortRule' => $play->abortRule(),
+            'paceChoices' => $this->paceChoices(),
+            'currentPace' => Games::paceOf($game),
+            'basePath' => $request->basePath,
+            'csrfToken' => $this->services->csrf->token(),
+            't' => $this->services->translator(),
+        ];
+        $template = $this->services->template();
+
+        return Response::json([
+            'status_html' => $template->render('play/game_parts', ['part' => 'status'] + $variables),
+            'buttons_html' => $template->render('play/game_parts', ['part' => 'buttons'] + $variables),
+            'offers_html' => $template->render('play/game_parts', ['part' => 'offers'] + $variables),
+        ])->withHeader('Cache-Control', 'no-store');
+    }
+
+    /**
+     * The paces a player may propose (G-23): the allowed time controls and some days per move.
+     *
+     * @return list<string>
+     */
+    private function paceChoices(): array
+    {
+        $days = array_map(fn (int $days): string => $days . Game::PACE_DAYS_SUFFIX, [1, 2, 3, 5, 7, 14]);
+
+        return [...$this->services->play()->games()->allowedTimeControls(), ...$days];
     }
 
     /**

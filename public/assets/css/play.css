@@ -273,6 +273,9 @@ details.confirm summary { cursor: pointer; }
 .facts dd { margin: 0; }
 .table-scroll { overflow-x: auto; }
 
+/* The game buttons inside the icon bar: their wrapper (swapped by game-page.js, B23) takes no room of its own. */
+.game-buttons { display: contents; }
+
 /* --- Strength test (B15): a square board as big as the screen allows --- */
 .strength-test .board-frame {
     width: min(calc(100vw - 2rem), calc(100dvh - 12rem), 36rem);

@@ -30,6 +30,13 @@
  * the answer arrived, and asks the server at once when it reaches zero
  * (the server decides the flag, K12).
  *
+ * No flicker (B23): news changes only what differs. The page is never
+ * reloaded during a game (except once when the players agree on a new pace);
+ * offers and the game's end swap the server-drawn parts (news-plan.js decides,
+ * GET /games/{id}/parts draws them); markers and the move input change only
+ * when they differ; the board moves only on a new move; clocks change their
+ * text only when the shown time changes.
+ *
  * Libraries (local, A16): cm-chessboard 8.15.8 and chess.js 1.4.0 in /assets/vendor/.
  */
 
@@ -38,6 +45,7 @@ import {Markers, MARKER_TYPE} from '../../vendor/cm-chessboard/src/extensions/ma
 import {PromotionDialog, PROMOTION_DIALOG_RESULT_TYPE} from '../../vendor/cm-chessboard/src/extensions/promotion-dialog/PromotionDialog.js';
 import {Chess} from '../../vendor/chess.js/chess.js';
 import {startTransport} from './transport.js';
+import {planNews, boardShows} from './news-plan.js';
 
 // --- Reading what the server put on the page ---
 
@@ -85,6 +93,10 @@ let clockSnapshot = serverState.clock;
 let clockReceivedAt = performance.now();
 let askedAtZero = false;   // the running clock showed zero and the server was asked
 let opponentIdleSeconds = null;
+
+// What the board shows now, so news changes only what differs (B23).
+let shownInput = null;     // the kind of move input: 'real', 'premove', 'planning' or 'none'
+let shownPremove = '';     // the premove whose squares are marked ('' for none)
 
 /** How long the opponent's board may be silent before "opponent disconnected" shows (A46). */
 const OPPONENT_GONE_SECONDS = 10;
@@ -189,15 +201,34 @@ function mayPremove() {
         && serverState.side_to_move !== viewerColour;
 }
 
+/**
+ * Sets the board's move input for the current mode and turn. It changes
+ * the board only when the kind of input changes (B23): a poll that brings
+ * no new turn leaves the input and the markers alone, so nothing flickers.
+ */
 function updateMoveInput() {
-    board.disableMoveInput();
-    board.removeMarkers();
+    let wanted = 'none';
     if (mode === MODE_PLANNING) {
-        board.enableMoveInput(handlePlanningInput);
+        wanted = 'planning';
     } else if (mode === MODE_PLAY && isViewersTurn() && !isSending) {
-        board.enableMoveInput(handleRealInput, viewerColour === 'b' ? COLOR.black : COLOR.white);
+        wanted = 'real';
     } else if (mode === MODE_PLAY && mayPremove() && !isSending) {
-        board.enableMoveInput(handlePremoveInput, viewerColour === 'b' ? COLOR.black : COLOR.white);
+        wanted = 'premove';
+    }
+
+    if (wanted !== shownInput) {
+        board.disableMoveInput();
+        board.removeMarkers();
+        shownPremove = '';
+        const ownColour = viewerColour === 'b' ? COLOR.black : COLOR.white;
+        if (wanted === 'planning') {
+            board.enableMoveInput(handlePlanningInput);
+        } else if (wanted === 'real') {
+            board.enableMoveInput(handleRealInput, ownColour);
+        } else if (wanted === 'premove') {
+            board.enableMoveInput(handlePremoveInput, ownColour);
+        }
+        shownInput = wanted;
     }
     showPremove();
 }
@@ -253,12 +284,24 @@ async function sendPremove(uci) {
     }
 }
 
-/** Marks the squares of a waiting premove. */
+/**
+ * Marks the squares of a waiting premove. Only a change is drawn (B23):
+ * the old premove's squares are cleared, the new one's marked.
+ */
 function showPremove() {
-    if (mode === MODE_PLAY && serverState.premove) {
-        board.addMarker(MARKER_TYPE.square, serverState.premove.slice(0, 2));
-        board.addMarker(MARKER_TYPE.square, serverState.premove.slice(2, 4));
+    const wanted = mode === MODE_PLAY && serverState.premove ? serverState.premove : '';
+    if (wanted === shownPremove) {
+        return;
     }
+    if (shownPremove !== '') {
+        board.removeMarkers(MARKER_TYPE.square, shownPremove.slice(0, 2));
+        board.removeMarkers(MARKER_TYPE.square, shownPremove.slice(2, 4));
+    }
+    if (wanted !== '') {
+        board.addMarker(MARKER_TYPE.square, wanted.slice(0, 2));
+        board.addMarker(MARKER_TYPE.square, wanted.slice(2, 4));
+    }
+    shownPremove = wanted;
 }
 
 function handlePlanningInput(event) {
@@ -393,32 +436,34 @@ function applyServerState(newState) {
         return;   // a short answer: only the clocks and presence were news
     }
     const hadPly = serverState.ply;
-    const wasRunning = serverState.state === 'running';
-    const offersChanged = newState.draw_offered_by !== serverState.draw_offered_by
-        || newState.rematch_offered_by !== serverState.rematch_offered_by
-        || JSON.stringify(newState.pace_offer) !== JSON.stringify(serverState.pace_offer)
-        || newState.time_control !== serverState.time_control;
+    const plan = planNews(serverState, newState);
 
     const knownMoves = serverState.moves.filter((move) => move.ply <= hadPly);
     const newMoves = newState.moves.filter((move) => move.ply > hadPly);
     serverState = {...newState, moves: [...knownMoves, ...newMoves]};
 
-    // The game buttons (draw, abort, rematch, game over) are drawn by the server: reload for those.
-    const abortButtonMustGo = hadPly === 0 && serverState.ply > 0;
-    if ((wasRunning && serverState.state !== 'running') || offersChanged || abortButtonMustGo) {
-        if (transport) {
-            transport.stop();
-        }
+    if ((plan.gameEnded || plan.reloadPage) && transport) {
+        transport.stop();
+    }
+    if (plan.reloadPage) {
         window.location.reload();
         return;
     }
-    if (serverState.ply !== hadPly) {
+    if (plan.moveBoard) {
         rebuildPositions(serverState.moves);
         if (mode === MODE_PLAY) {
             viewedPly = serverState.ply;
-            board.setPosition(positions[viewedPly], true);
+            // Our own move is already on the board (dragged there): don't play it twice.
+            if (!boardShows(board.getPosition(), positions[viewedPly])) {
+                board.setPosition(positions[viewedPly], true);
+            }
         }
         drawMoveList();
+    }
+    // The game buttons, offers and the end of the game are drawn by the
+    // server: swap just those parts, never reload the page (B23).
+    if (plan.swapParts) {
+        swapGameParts();
     }
     if (mode === MODE_PLAY) {
         showTurnStatus();
@@ -433,6 +478,27 @@ function applyServerState(newState) {
  * Tells other scripts on the page the game's current state (C3-2: the
  * computer opponent, computer-opponent.js, waits for its turn this way).
  */
+/**
+ * Asks the server for the status line, game buttons and offers
+ * (GET /games/{id}/parts, templates/play/game_parts.php) and swaps them in.
+ */
+async function swapGameParts() {
+    try {
+        const response = await fetch(basePath + '/games/' + serverState.id + '/parts', {headers: {'Accept': 'application/json'}, credentials: 'same-origin'});
+        if (!response.ok) {
+            return;
+        }
+        const parts = await response.json();
+        if (serverState.state !== 'running') {
+            document.getElementById('game-status').innerHTML = parts.status_html;
+        }
+        document.getElementById('game-buttons').innerHTML = parts.buttons_html;
+        document.getElementById('game-offers').innerHTML = parts.offers_html;
+    } catch (error) {
+        // No connection: the parts stay as they are until the next news.
+    }
+}
+
 function announceState() {
     page.dispatchEvent(new CustomEvent('game-state', {detail: serverState}));
 }
@@ -450,7 +516,14 @@ async function refreshFromServer() {
 // --- Status line and move list ---
 
 function showStatus(text) {
-    document.getElementById('game-status').textContent = text;
+    setText(document.getElementById('game-status'), text);
+}
+
+/** Changes an element's text only when it is different, so nothing is redrawn for nothing (B23). */
+function setText(element, text) {
+    if (element.textContent !== text) {
+        element.textContent = text;
+    }
 }
 
 function showTurnStatus() {
@@ -571,7 +644,7 @@ function updatePlayerClocks() {
         if (isRunning) {
             left -= passed;
         }
-        playerClocks[colour].textContent = formatClock(left);
+        setText(playerClocks[colour], formatClock(left));
         playerClocks[colour].classList.toggle('is-running', isRunning);
         playerClocks[colour].classList.toggle('is-short', left < 20000);
         // At zero the server decides (K12): ask it now, once.
@@ -588,7 +661,7 @@ function updatePlayerClocks() {
 function updateClock() {
     const deadline = clock.dataset.deadline ? Date.parse(clock.dataset.deadline) : NaN;
     if (serverState.state !== 'running' || Number.isNaN(deadline)) {
-        clock.textContent = '';
+        setText(clock, '');
         return;
     }
     const secondsLeft = Math.max(0, Math.floor((deadline - Date.now()) / 1000));
@@ -597,9 +670,9 @@ function updateClock() {
     const minutes = Math.floor((secondsLeft % 3600) / 60);
     const seconds = secondsLeft % 60;
     if (days >= 1) {
-        clock.textContent = page.dataset.textDays.replace('{days}', String(days)).replace('{hours}', String(hours));
+        setText(clock, page.dataset.textDays.replace('{days}', String(days)).replace('{hours}', String(hours)));
     } else {
-        clock.textContent = [hours, minutes, seconds].map((part) => String(part).padStart(2, '0')).join(':');
+        setText(clock, [hours, minutes, seconds].map((part) => String(part).padStart(2, '0')).join(':'));
     }
     clock.classList.toggle('is-short', days === 0 && hours < 12);
 }

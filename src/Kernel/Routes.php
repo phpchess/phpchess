@@ -146,6 +146,7 @@ final class Routes
         $router->get('/games', fn (Request $request): Response => $games->myGames($request), Access::MEMBERS);
         $router->get('/games/watch', fn (Request $request): Response => $games->watchList($request), Access::MEMBERS, $playerList);
         $router->get('/games/{id}', fn (Request $request, array $parts): Response => $games->show($request, $parts), Access::MEMBERS);
+        $router->get('/games/{id}/parts', fn (Request $request, array $parts): Response => $games->parts($request, $parts), Access::MEMBERS);
         $router->get('/games/{id}/state', fn (Request $request, array $parts): Response => $games->state($request, $parts), Access::MEMBERS);
         $router->get('/games/{id}/pgn', fn (Request $request, array $parts): Response => $games->pgn($request, $parts), Access::MEMBERS);
         $router->post('/games/{id}/move', fn (Request $request, array $parts): Response => $games->move($request, $parts), Access::MEMBERS);
