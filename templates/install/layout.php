@@ -13,6 +13,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= e($title) ?> - phpChess installer</title>
     <link rel="stylesheet" href="<?= e($basePath) ?>/assets/css/base.css">
+    <?php /* The pressed button shows a spinner while the next step works (busy-buttons.js). */ ?>
+    <script type="module" src="<?= e($basePath) ?>/assets/js/busy-buttons.js"></script>
 </head>
 <body>
 <main class="page">
