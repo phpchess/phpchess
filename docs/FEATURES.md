@@ -115,9 +115,9 @@ Decisions A1–A21 are in [DECISIONS.md](DECISIONS.md).
 | AI-05 | Calibration: own ladder, ~600 Elo and below, result published with its confidence range | new | C3-2 | — | done (2026-11-25) |
 | AI-06 | Games against the computer stored, unrated | new | C3-2 | — | done (2026-11-25) |
 | AI-07 | Admin page: active engine, name, version, licence, source link | new | C3-2 | — | done (2026-11-25) |
-| AI-08 | Computer move delay chosen by the member: none, short, normal, long (B30, A65) | new | F1 | — | built (2026-11-25), checks pending |
-| ID-14 | Strength test: 10 adaptive Lichess puzzles (CC0), pop-up at first login, link next to the rating (B15, A59, A60) | new | F1 | — | built (2026-11-25), checks pending |
-| UI-10 | Site-wide news poll: timed-challenge pop-up with Accept/Decline, message badge (B21, A63) | new | F1 | — | built (2026-11-25), checks pending |
+| AI-08 | Computer move delay chosen by the member: none, short, normal, long (B30, A65) | new | F1 | — | done (2026-11-25), review pending |
+| ID-14 | Strength test: 10 adaptive Lichess puzzles (CC0), pop-up at first login, link next to the rating (B15, A59, A60) | new | F1 | — | done (2026-11-25), review pending |
+| UI-10 | Site-wide news poll: timed-challenge pop-up with Accept/Decline, message badge (B21, A63) | new | F1 | — | done (2026-11-25), review pending |
 
 ## T — Tournaments
 | Id | Feature | Origin | Chunk | Switch | Status |

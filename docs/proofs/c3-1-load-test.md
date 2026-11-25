@@ -45,3 +45,9 @@ request and 45 requests per second, about one request runs at any moment, far be
 (a fraction of a core), the admin should lower it to 10–15, or raise the fast poll interval
 (play.poll_fast_ms) to 2 000 ms, which halves the load and adds about 0.5 s to move delivery.
 Correspondence games and watchers poll every 15 s and hardly count.
+
+## F1 addition: the site-wide news poll (B21, 2026-11-25)
+
+Same run (30 games of 10+0, 30 s, local XAMPP, PHP 8.3), each player also asking `GET /news` every 15 s:
+`site_news` n=120, median 2.5 ms, p95 7.3 ms, max 10.2 ms. One online member costs about one 2.5 ms request every 15 s
+(0.07 requests per second), far below a live game's polls. Other numbers unchanged (poll 3.0 ms, move 5.4 ms, delivery median 512 ms).

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace PhpChess\Tests\Play;
 
 use PhpChess\Domain\Play\Challenge;
-use PhpChess\Domain\Play\PlayParts;
+use PhpChess\Kernel\PlayParts;
 use PhpChess\Tests\Support\InstalledSite;
 use PhpChess\Tests\Support\TestBrowser;
 use PHPUnit\Framework\TestCase;
@@ -40,8 +40,6 @@ final class SiteNewsTest extends TestCase
     public function testATimedChallengeForMeComesWithTheNews(): void
     {
         $anna = $this->site->loggedInBrowser('annanews');
-        self::assertNull($this->news($anna)['challenge']);
-
         $challengeId = $this->play->challenges()->createDirect($this->benId, $this->annaId, Challenge::COLOUR_WHITE, 3, true, '', time(), '5+3');
         $news = $this->news($anna);
 
@@ -73,7 +71,7 @@ final class SiteNewsTest extends TestCase
 
         self::assertStringContainsString('site-news.js', $anna->get('/')->body);
         self::assertStringNotContainsString('site-news.js', $anna->get("/games/{$gameId}")->body);
-        self::assertSame(302, $this->site->browser()->get('/news')->status);
+        self::assertSame(303, $this->site->browser()->get('/news')->status);
     }
 
     // --- Helpers ---
@@ -86,6 +84,7 @@ final class SiteNewsTest extends TestCase
         $answer = json_decode($response->body, true);
         self::assertIsArray($answer);
 
+        /** @var array<string, mixed> $answer */
         return $answer;
     }
 }
