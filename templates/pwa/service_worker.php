@@ -19,9 +19,10 @@
  * Only this site's own addresses are cached or fetched (K9).
  * It is served by a route (not as a file under /assets/), so it may look
  * after every page of the install. It finds the install's base path from
- * its own scope, so this template prints no values at all.
+ * its own scope.
  *
- * Variables: none.
+ * Variables: $cacheName (string, from AssetVersion: the version and a
+ * fingerprint of the asset files, only letters, digits, dots and dashes; B20).
  */
 ?>
 'use strict';
@@ -30,7 +31,7 @@
 
 /** The install's address path, such as "/chess" ("" in the web root). */
 const BASE_PATH = new URL(self.registration.scope).pathname.replace(/\/$/, '');
-const VERSION = 'phpchess-c3-1-1';
+const VERSION = '<?= e($cacheName) ?>';
 const PAGE_CACHE = VERSION + '-pages';
 const ASSET_CACHE = VERSION + '-assets';
 const OFFLINE_PAGE = BASE_PATH + '/offline';

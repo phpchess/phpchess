@@ -268,6 +268,11 @@ return [
 
     // --- Preferences: move emails (A34) ---
     'preferences.move_email' => 'Emails about moves and challenges',
+    'preferences.computer_delay' => 'How long computer players wait before moving',
+    'computer_delay.none' => 'Move at once',
+    'computer_delay.short' => 'Short (about 2 seconds)',
+    'computer_delay.normal' => 'Normal (about 5 seconds)',
+    'computer_delay.long' => 'Long (about 10 seconds)',
     'move_email.each_move' => 'After each move, when I am offline',
     'move_email.delay' => 'When I have been away for a while',
     'move_email.digest' => 'Once a day',

@@ -4,6 +4,7 @@
  *
  * Variables: $preferences (Preferences), $languages (list of string),
  * $moveEmailModes (list of string, the admin's choices), $moveEmail (string),
+ * $computerDelay (string, one of Preferences::COMPUTER_DELAYS, B30),
  * $basePath, $csrfToken, $t.
  */
 
@@ -52,6 +53,14 @@ use PhpChess\Domain\Identity\Preferences;
         <select name="move_email">
             <?php foreach ($moveEmailModes as $mode) : ?>
                 <option value="<?= e($mode) ?>"<?= $mode === $moveEmail ? ' selected' : '' ?>><?= e($t->text('move_email.' . $mode)) ?></option>
+            <?php endforeach; ?>
+        </select>
+    </label>
+
+    <label><?= e($t->text('preferences.computer_delay')) ?>
+        <select name="computer_delay">
+            <?php foreach (Preferences::COMPUTER_DELAYS as $delay) : ?>
+                <option value="<?= e($delay) ?>"<?= $delay === $computerDelay ? ' selected' : '' ?>><?= e($t->text('computer_delay.' . $delay)) ?></option>
             <?php endforeach; ?>
         </select>
     </label>

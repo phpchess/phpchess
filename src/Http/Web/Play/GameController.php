@@ -128,7 +128,7 @@ final class GameController
      * (C3-2): its colour, name and engine settings, and the admin's depth
      * cap. Null when two people play, or for someone watching.
      *
-     * @return array{colour: string, name: string, engineJson: string, depthCap: int}|null
+     * @return array{colour: string, name: string, engineJson: string, depthCap: int, delay: string}|null
      */
     private function computerFor(Game $game, int $viewerId): ?array
     {
@@ -143,6 +143,7 @@ final class GameController
             'name' => $side['player']->name,
             'engineJson' => json_encode($side['player']->engine, JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR),
             'depthCap' => $computerGames->depthCap($this->services->settings()),
+            'delay' => $this->services->preferenceRepository()->computerDelay($viewerId),
         ];
     }
 

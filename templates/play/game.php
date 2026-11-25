@@ -111,6 +111,7 @@ $showAbortRequest = $canAbort && $abortRule === Games::ABORT_ASK_ADMIN;
      data-computer-colour="<?= e($computer['colour']) ?>"
      data-computer-engine="<?= e($computer['engineJson']) ?>"
      data-computer-depth-cap="<?= e($computer['depthCap']) ?>"
+     data-computer-delay="<?= e($computer['delay']) ?>"
      data-text-computer-thinking="<?= e($t->text('computer.thinking', ['name' => $computer['name']])) ?>"
      data-text-computer-failed="<?= e($t->text('computer.engine_failed')) ?>"
      <?php endif; ?>>

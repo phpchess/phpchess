@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PhpChess\Http\Web;
 
+use PhpChess\Http\AssetVersion;
 use PhpChess\Http\Request;
 use PhpChess\Http\Response;
 use PhpChess\Kernel\Services;
@@ -53,7 +54,9 @@ final class AppController
 
     public function serviceWorker(Request $request): Response
     {
-        $script = $this->services->template()->render('pwa/service_worker');
+        // The cache name changes with every release and every asset change (B20).
+        $cacheName = AssetVersion::cacheName(dirname(__DIR__, 3) . '/public/assets');
+        $script = $this->services->template()->render('pwa/service_worker', ['cacheName' => $cacheName]);
 
         return new Response(200, $script, [
             'Content-Type' => 'text/javascript; charset=utf-8',

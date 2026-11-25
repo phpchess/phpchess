@@ -14,7 +14,8 @@
  *
  * Page data used: data-state, data-base-path, data-csrf-token,
  * data-computer-colour, data-computer-engine (the player's engine block),
- * data-computer-depth-cap (the admin's cap, A49), data-text-computer-thinking,
+ * data-computer-depth-cap (the admin's cap, A49), data-computer-delay (the
+ * member's choice: none, short, normal, long; B30), data-text-computer-thinking,
  * data-text-computer-failed.
  */
 
@@ -30,9 +31,24 @@ const depthCap = parseInt(page.dataset.computerDepthCap, 10);
 // The normal start position: only games from here use the opening book.
 const START_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
-// The computer "thinks" at least this long, so its move never appears in the
-// same instant as the player's own (it is easier to follow on a phone).
-const MIN_THINKING_MS = 600;
+// How long the computer waits before its move appears (B30, A65), chosen by
+// the member in their preferences: an average and how far it may vary
+// either way, in milliseconds. "normal" is about 5 seconds, 1 to 9 at random,
+// so the computer does not answer unnaturally fast or always alike.
+// Even "none" waits a moment, so the move never appears in the same instant
+// as the player's own (easier to follow on a phone).
+const DELAYS = {
+    none: {average: 600, vary: 0},
+    short: {average: 2000, vary: 1000},
+    normal: {average: 5000, vary: 4000},
+    long: {average: 10000, vary: 5000},
+};
+const delay = DELAYS[page.dataset.computerDelay] || DELAYS.normal;
+
+/** A waiting time for this move: the average, plus or minus up to "vary". */
+function thinkingTime() {
+    return delay.average + (Math.random() * 2 - 1) * delay.vary;
+}
 
 const worker = new Worker(basePath + '/assets/js/engine/computer-player.worker.js');
 
@@ -63,7 +79,8 @@ function takeTurnIfNeeded(state) {
             showStatus(page.dataset.textComputerFailed);
             return;
         }
-        const wait = Math.max(0, MIN_THINKING_MS - (Date.now() - startedAt));
+        // The engine's own time counts towards the wait.
+        const wait = Math.max(0, thinkingTime() - (Date.now() - startedAt));
         window.setTimeout(() => sendComputerMove(state.id, state.ply, answer.move), wait);
     };
     worker.postMessage({

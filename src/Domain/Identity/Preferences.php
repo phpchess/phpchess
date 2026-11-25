@@ -20,6 +20,9 @@ final class Preferences
 
     public const array PIECE_SETS = ['standard'];
 
+    /** How long computer players wait before moving (B30, A65); the times are in computer-opponent.js. */
+    public const array COMPUTER_DELAYS = ['none', 'short', 'normal', 'long'];
+
     public function __construct(
         public readonly string $language = 'en',
         public readonly string $colourScheme = 'auto',

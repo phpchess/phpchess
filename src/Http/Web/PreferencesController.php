@@ -37,6 +37,7 @@ final class PreferencesController
             'languages' => $this->services->translator()->availableLanguages(),
             'moveEmailModes' => $this->services->moveEmails()->allowedModes(),
             'moveEmail' => $this->services->moveEmails()->modeFor($user->id),
+            'computerDelay' => $this->services->preferenceRepository()->computerDelay($user->id),
         ]);
     }
 
@@ -59,6 +60,11 @@ final class PreferencesController
         if (in_array($moveEmail, $this->services->moveEmails()->allowedModes(), true)) {
             $this->services->preferenceRepository()->saveMoveEmail($user->id, $moveEmail);
         }
+
+        $this->services->preferenceRepository()->saveComputerDelay(
+            $user->id,
+            self::oneOf($request->formValue('computer_delay'), Preferences::COMPUTER_DELAYS, 'normal'),
+        );
 
         return $this->services->pages()->redirectWithMessage($request, '/account/preferences', 'success', $this->text('preferences.saved'));
     }
