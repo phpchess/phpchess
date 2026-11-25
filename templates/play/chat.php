@@ -1,7 +1,7 @@
 <?php
 /**
  * Game chat (G-12), below the game: the lines so far, and for the two
- * players a form to add one. In "phrases" mode the form is a row of
+ * players, while the game runs, a form to add one (A61). In "phrases" mode the form is a row of
  * buttons with fixed phrases; in "free" mode a text field.
  * Phrases are stored as "phrase:<name>" and shown in the reader's language.
  *
@@ -29,7 +29,7 @@
         </ol>
     <?php endif; ?>
 
-    <?php if ($game->isPlayer($viewerId)) : ?>
+    <?php if ($game->isPlayer($viewerId) && $game->isRunning()) : ?>
         <form method="post" action="<?= e($basePath) ?>/games/<?= e($game->id) ?>/chat" class="chat-form">
             <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
             <?php if ($mode === 'phrases') : ?>

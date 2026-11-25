@@ -237,6 +237,29 @@ final class CommunityTest extends TestCase
         self::assertStringNotContainsString('Nice opening', $anna->get("/games/{$gameId}")->body);
     }
 
+    public function testAFinishedGamesChatCanBeReadButNotAddedTo(): void
+    {
+        $gameId = $this->play->games()->start($this->userId('anna'), $this->userId('ben'), 3, true, '', time());
+        $anna = $this->site->loggedInBrowser('anna');
+        $anna->post("/games/{$gameId}/chat", ['text' => 'good_luck']);
+        $this->play->games()->resign($gameId, $this->userId('ben'), time());
+
+        $anna->post("/games/{$gameId}/chat", ['text' => 'good_game']);
+        $page = $anna->get("/games/{$gameId}")->body;
+        self::assertStringContainsString('Good luck!', $page);
+        self::assertStringNotContainsString('Good game!', $page);
+        self::assertStringNotContainsString("/games/{$gameId}/chat", $page);
+    }
+
+    public function testAGameAgainstTheComputerHasNoChat(): void
+    {
+        $gameId = $this->play->computerGames()->start($this->userId('anna'), 1, 'w', time());
+        $anna = $this->site->loggedInBrowser('anna');
+
+        self::assertSame(404, $anna->post("/games/{$gameId}/chat", ['text' => 'hello'])->status);
+        self::assertStringNotContainsString('game-chat-title', $anna->get("/games/{$gameId}")->body);
+    }
+
     // --- Content and the newsletter (C-06 to C-09, ADM-05, ADM-07) ---
 
     public function testContentAppearsWhereItBelongs(): void

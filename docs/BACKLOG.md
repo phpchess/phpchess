@@ -39,6 +39,8 @@ feature ids in [FEATURES.md](FEATURES.md)) when it is planned in
 | B31 | **chess.com link for player records**: members can link their chess.com player ID (records, ratings). Outside requests: behind its own switch (K9). | 2026-11-24 | User, C3-2. |
 | B32 | **Check run after the C3-2 tuning**: after the one final adjustment (A56), a short profile run (about 10 games per band, ~15 min) confirms each band is near its people profile. | 2026-11-24 | User, C3-2 (A44 answer: not now). |
 | B33 | **Computer players: balancing the feel** (after the C3-2 play test): the ladder works, but play swings between outstanding moves and severe blunders (a hanging queen); the randomness does not quite feel human. Ideas: tie slips to the position (time trouble, complex positions, many pieces attacked) instead of an even chance per move; cap how much a single slip may lose above ~800; let noise grow with the number of good-looking moves. Measure with tools/human-profile.mjs, together with B32. | 2026-11-25 | User, C3-2 play test. |
+| B34 | **Avatar images and the class limit**: `/avatars/{id}` serves an uploaded avatar to any logged-in member, also for a student in a limited class. Apply the class rules there too. | 2026-11-25 | F1 review of C2-2 (docs/proofs/f1-c2-2-review.md). |
+| B35 | **Classes of a deleted teacher**: they stay with no teacher, and only the admin can manage them. Let the admin hand them to another teacher. | 2026-11-25 | F1 review of C2-2. |
 
 ## Placed: fix chunks before C4-1 (user, 2026-11-25)
 - **F1 Fixes and the strength test**: B7, B15, B17 (plus: no chat in games against the computer), B20, B21, B23, B30.

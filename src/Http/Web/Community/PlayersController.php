@@ -109,7 +109,7 @@ final class PlayersController
     {
         $user = $this->pages->user();
         $buddy = $this->services->users()->findByUsername(MemberPages::nameFrom($parts));
-        if ($buddy === null || $buddy->id === $user->id || !$this->services->play()->classRules()->mayContact($user->id, $buddy->id)) {
+        if ($buddy === null || !$buddy->isActive() || $buddy->id === $user->id || !$this->services->play()->classRules()->mayContact($user->id, $buddy->id)) {
             return $this->pages->notFound($request);
         }
         $this->services->buddies()->add($user->id, $buddy->id);
@@ -194,7 +194,7 @@ final class PlayersController
         if ($isVisitor && !$this->services->switches()->isOn(FeatureSwitches::PUBLIC_PROFILES)) {
             return Response::text('Not found', 404);
         }
-        $path =$this->services->avatars()->uploadPath(MemberPages::idFrom($parts));
+        $path = $this->services->avatars()->uploadPath(MemberPages::idFrom($parts));
         $bytes = is_file($path) ? file_get_contents($path) : false;
         if ($bytes === false) {
             return Response::text('Not found', 404);

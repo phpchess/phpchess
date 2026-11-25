@@ -147,13 +147,14 @@ final class GameController
     }
 
     /**
-     * The game chat for the page (G-12), or null when the switch "game chat" is off.
+     * The game chat for the page (G-12), or null when the switch "game chat"
+     * is off or the game is against the computer (A61).
      *
      * @return array{lines: list<array{id: int, user_id: int, username: string, body: string, created_at: string}>, mode: string, phrases: list<string>, maxLength: int}|null
      */
     private function chatFor(Game $game): ?array
     {
-        if (!$this->services->switches()->isOn(FeatureSwitches::GAME_CHAT)) {
+        if (!$this->services->switches()->isOn(FeatureSwitches::GAME_CHAT) || $this->isComputerGame($game)) {
             return null;
         }
         $chat = $this->services->gameChat();
@@ -166,6 +167,12 @@ final class GameController
         ];
     }
 
+    /** True when one side of the game is a computer player (C3-2). */
+    private function isComputerGame(Game $game): bool
+    {
+        return $this->services->play()->computerGames()->computerSideOf($game) !== null;
+    }
+
     /**
      * Adds a chat line (G-12): players only; phrases or free text as the admin chose.
      *
@@ -175,7 +182,7 @@ final class GameController
     {
         $user = $this->pages->user();
         $game = $this->services->play()->gameRepository()->find(PlayPages::idFrom($parts));
-        if ($game === null || !$this->pages->mayWatch($game, $user)) {
+        if ($game === null || !$this->pages->mayWatch($game, $user) || $this->chatFor($game) === null) {
             return $this->pages->notFound($request);
         }
         try {

@@ -117,6 +117,21 @@ final class SchoolTest extends TestCase
         }
     }
 
+    public function testATeacherCannotPullAnotherTeachersStudentIntoTheirClass(): void
+    {
+        $this->site->createUser('teacher2', User::ROLE_TEACHER);
+        $first = $this->site->loggedInBrowser('teacher1');
+        $firstClass = $this->createClass($first, '6a');
+        $first->post("/school/classes/{$firstClass}/students", ['names' => 'Ida']);
+
+        $second = $this->site->loggedInBrowser('teacher2');
+        $secondClass = $this->createClass($second, '6b');
+        $second->get("/school/classes/{$secondClass}");
+        $second->post("/school/classes/{$secondClass}/members", ['username' => 'Ida']);
+
+        self::assertFalse((new SchoolRepository($this->site->database))->isMember($secondClass, $this->userId('Ida')));
+    }
+
     public function testATeacherCannotOpenAnotherTeachersClass(): void
     {
         $this->site->createUser('teacher2', User::ROLE_TEACHER);

@@ -16,8 +16,9 @@ use PhpChess\Infra\System\SettingsRepository;
  * admin chooses the kind on the community settings page (setting
  * "game_chat.mode"): "phrases" (the default, good for schools) offers only
  * the fixed phrases from the language file, "free" allows any text, which
- * the word filter cleans (C-05). Only the two players write; anyone who may
- * watch the game reads.
+ * the word filter cleans (C-05). Only the two players write, and only while
+ * the game runs (A61); anyone who may watch the game reads. Games against
+ * the computer have no chat at all (GameController, A61).
  */
 final class GameChat
 {
@@ -52,6 +53,10 @@ final class GameChat
     {
         if (!$game->isPlayer($userId)) {
             throw new ActionRefused('chat.players_only');
+        }
+        // A finished game's chat is closed: it can be read, not added to (B17, A61).
+        if (!$game->isRunning()) {
+            throw new ActionRefused('chat.game_over');
         }
         if ($this->mode() === self::MODE_PHRASES) {
             if (!in_array($text, self::PHRASES, true)) {

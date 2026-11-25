@@ -642,6 +642,7 @@ return [
     'chat.write' => 'Say something',
     'chat.send' => 'Send',
     'chat.players_only' => 'Only the two players can write in the chat.',
+    'chat.game_over' => 'The game is over: its chat is closed.',
     'chat.phrases_only' => 'Only the fixed phrases can be used in this chat.',
     'chat.bad_length' => 'A chat line has 1 to {max} characters.',
     'chat.phrase.hello' => 'Hello!',

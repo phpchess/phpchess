@@ -109,13 +109,19 @@ final class Classes
 
     /**
      * Adds an existing account to the class by user name. A teacher adds
-     * students only (a student of another class, say); an admin anyone.
+     * students only, and only one in no class yet or already in one of
+     * their own classes: otherwise a teacher could take over another
+     * teacher's student and set their password (B17 review). An admin adds anyone.
      */
     public function addExistingMember(User $teacher, int $classId, string $username): void
     {
         $this->classFor($teacher, $classId);
         $member = $this->users->findByUsername(trim($username));
         if ($member === null || !$this->isLookedAfterBy($teacher, $member->id)) {
+            throw new ActionRefused('school.unknown_user');
+        }
+        $isFree = $this->school->classNamesOf($member->id) === [];
+        if (!$teacher->isAdmin() && !$isFree && !$this->school->teaches($teacher->id, $member->id)) {
             throw new ActionRefused('school.unknown_user');
         }
         $this->school->addMember($classId, $member->id);
