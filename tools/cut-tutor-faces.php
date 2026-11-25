@@ -29,7 +29,7 @@ $states = [
 ];
 $gridSize = 4;
 $outputSize = 256;
-$jpegQuality = 85;
+$jpegQuality = 40;   // shown at about half size, so artefacts stay hidden; small files for speed
 /** Pixels cut off each side of a cell, so the lines between faces do not show. */
 $inset = 6;
 $outputFolder = __DIR__ . '/../public/assets/faces/computer/tutors';
