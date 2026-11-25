@@ -18,7 +18,7 @@
         <li class="card computer-player">
             <!-- ===== Who the player is ===== -->
             <?php if ($faces[$player->id] !== null) : ?>
-                <img class="computer-face" src="<?= e($faces[$player->id]) ?>" alt="" width="100" height="150" loading="lazy">
+                <img class="computer-face" src="<?= e($faces[$player->id]) ?>" alt="" width="100" height="100" loading="lazy">
             <?php else : ?>
                 <img class="computer-face" src="<?= e($basePath) ?>/assets/avatars/knight.svg" alt="" width="100" height="100" loading="lazy">
             <?php endif; ?>

@@ -1,7 +1,7 @@
 /**
  * Tests for the move chooser with fixed engine outputs (BUILD_PLAN C3-2).
  *
- * Feature AI-02, decision A48. Run with: node --test tests/js/
+ * Feature AI-02, decisions A48, A56 and A57. Run with: node --test tests/js/
  * No search is needed here: the scored moves are written out by hand, so each
  * test shows exactly which moves may and may not be chosen.
  */
@@ -58,6 +58,58 @@ test("a giveaway is never played while the filter is on, even with a huge margin
 test("a player that always skips the filter can play the giveaway", () => {
     const settings = { marginCentipawns: 10000, giveawaySkipChance: 1 };
     assert.equal(movesChosen(fixedScores(), settings, 300).has("d1h5"), true);
+});
+
+// --- Human-like play (A56, A57) ---
+
+/** How often each reason comes up over many move numbers. */
+function reasonsChosen(scores, settings, times) {
+    const counts = {};
+    for (let ply = 0; ply < times; ply++) {
+        const choice = engine.chooseMove(scores, settings, engine.randomForMove("human", ply));
+        counts[choice.reason] = (counts[choice.reason] || 0) + 1;
+    }
+    return counts;
+}
+
+/** A position with a mate, a winning capture, a recapture and quiet moves. */
+function tacticScores() {
+    return [
+        { move: "d1h7", centipawns: 0, mateIn: 1, isCapture: true, givesCheck: true, isGiveaway: false },
+        { move: "f3e5", centipawns: 300, mateIn: null, isCapture: true, givesCheck: false, isGiveaway: false },
+        { move: "g2g3", centipawns: 20, mateIn: null, isCapture: false, givesCheck: false, isGiveaway: false },
+        { move: "a2a3", centipawns: 10, mateIn: null, isCapture: false, givesCheck: false, isGiveaway: false },
+    ];
+}
+
+test("a giveaway is played about as often as its chance says", () => {
+    const counts = reasonsChosen(fixedScores(), { giveawayChance: 0.1 }, 4000);
+    assert.ok(Math.abs(counts.giveaway / 4000 - 0.1) < 0.02, "giveaways " + counts.giveaway);
+});
+
+test("in a blind spot the player misses mates and winning captures, never sees them otherwise", () => {
+    assert.deepEqual([...movesChosen(tacticScores(), { blindSpotChance: 1 }, 100)], ["g2g3"]);
+    assert.deepEqual([...movesChosen(tacticScores(), { blindSpotChance: 0 }, 100)], ["d1h7"]);
+});
+
+test("a recapture is never hidden by a blind spot", () => {
+    const scores = tacticScores().slice(1);
+    scores[0].isRecapture = true;
+    assert.deepEqual([...movesChosen(scores, { blindSpotChance: 1 }, 100)], ["f3e5"]);
+});
+
+test("noise blurs small differences but keeps large ones", () => {
+    const blurred = movesChosen(fixedScores(), { noiseCentipawns: 100 }, 400);
+    assert.ok(blurred.has("d2d4") && blurred.has("e2e4") && blurred.has("g1f3"), "close moves all played");
+    const material = [
+        { move: "e4d5", centipawns: 320, mateIn: null, isCapture: true, givesCheck: false, isGiveaway: false },
+        { move: "a2a3", centipawns: 0, mateIn: null, isCapture: false, givesCheck: false, isGiveaway: false },
+    ];
+    assert.deepEqual([...movesChosen(material, { noiseCentipawns: 100 }, 400)], ["e4d5"]);
+});
+
+test("without the human-like settings the player plays as before", () => {
+    assert.deepEqual(reasonsChosen(tacticScores(), { marginCentipawns: 0 }, 300), { chosen: 300 });
 });
 
 test("the wood pusher plays every legal move sometimes", () => {

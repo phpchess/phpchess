@@ -9,7 +9,7 @@
  * Message in:  { white: side, black: side, gameId }, where a side is an anchor
  *              { name, settings } or a computer player { name, engineBlock }
  *              (its settings for this game come from settingsForGame, A53).
- * Message out: { white, black, gameId, result, reason, moves, milliseconds }
+ * Message out: { white, black, gameId, result, reason, moves, choices, milliseconds }
  */
 
 import { parentPort } from "node:worker_threads";
@@ -35,6 +35,7 @@ parentPort.on("message", (job) => {
         result: game.result,
         reason: game.reason,
         moves: game.moves,
+        choices: game.choices,
         milliseconds: Date.now() - startedAt,
     });
 });

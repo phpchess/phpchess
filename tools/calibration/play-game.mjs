@@ -56,11 +56,13 @@ function sideToMoveState(engine, fen) {
 /**
  * Plays a game. white and black are player settings (see garbochess-engine.js).
  * gameId makes the game's random choices; different ids give different games.
- * Returns { result: "1-0" | "0-1" | "1/2-1/2", reason, moves: ["e2e4", ...] }.
+ * Returns { result: "1-0" | "0-1" | "1/2-1/2", reason, moves: ["e2e4", ...],
+ * choices: [why each move was chosen: "book", "chosen", "mistake", ...] }.
  */
 export function playGame(engine, white, black, gameId) {
     let fen = START;
     const moves = [];
+    const choices = [];
     const seen = new Map([[repetitionKey(fen), 1]]);
     let halfMovesSinceProgress = 0;
 
@@ -69,9 +71,9 @@ export function playGame(engine, white, black, gameId) {
         const state = sideToMoveState(engine, fen);
         if (state.noMoves) {
             if (!state.inCheck) {
-                return { result: "1/2-1/2", reason: "stalemate", moves: moves };
+                return { result: "1/2-1/2", reason: "stalemate", moves: moves, choices: choices };
             }
-            return { result: whiteToMove ? "0-1" : "1-0", reason: "mate", moves: moves };
+            return { result: whiteToMove ? "0-1" : "1-0", reason: "mate", moves: moves, choices: choices };
         }
 
         const player = whiteToMove ? white : black;
@@ -79,19 +81,20 @@ export function playGame(engine, white, black, gameId) {
         const applied = applyMove(engine, fen, decision.move);
         fen = applied.fen;
         moves.push(decision.move);
+        choices.push(decision.reason);
         halfMovesSinceProgress = applied.resetsFiftyMoveCount ? 0 : halfMovesSinceProgress + 1;
 
         const key = repetitionKey(fen);
         seen.set(key, (seen.get(key) || 0) + 1);
         if (seen.get(key) >= 3) {
-            return { result: "1/2-1/2", reason: "repetition", moves: moves };
+            return { result: "1/2-1/2", reason: "repetition", moves: moves, choices: choices };
         }
         if (halfMovesSinceProgress >= 100) {
-            return { result: "1/2-1/2", reason: "50 moves", moves: moves };
+            return { result: "1/2-1/2", reason: "50 moves", moves: moves, choices: choices };
         }
         if (tooLittleMaterial(fen)) {
-            return { result: "1/2-1/2", reason: "material", moves: moves };
+            return { result: "1/2-1/2", reason: "material", moves: moves, choices: choices };
         }
     }
-    return { result: "1/2-1/2", reason: "length limit", moves: moves };
+    return { result: "1/2-1/2", reason: "length limit", moves: moves, choices: choices };
 }

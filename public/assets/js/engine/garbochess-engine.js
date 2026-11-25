@@ -146,6 +146,19 @@ function searchAfterMove(move, depth) {
 }
 
 /**
+ * The value of the position right after the move, without looking at any
+ * reply (GarboChess's evaluation only). Used when the player does not see the
+ * opponent's threats (A58). From the moving side's point of view, in raw
+ * GarboChess units.
+ */
+function valueWithoutReply(move) {
+    MakeMove(move);
+    const value = -Evaluate();
+    UnmakeMove(move);
+    return value;
+}
+
+/**
  * The quick "what happens to the material now" value after the move: only
  * captures are followed (GarboChess's quiescence search). From the moving
  * side's point of view, in raw GarboChess units.
@@ -181,11 +194,14 @@ function quickValueIfPassing(fen) {
 
 /**
  * Scores every legal move of the position at the given depth and marks the
- * captures, checks and giveaways. Returns the moves sorted best first, each as
+ * captures, checks and giveaways. With withoutReplies true, the moves are
+ * scored without looking at the opponent's reply (threat blindness, A58);
+ * giveaways are still marked with the normal check, so moving a piece onto
+ * an attacked square stays a giveaway. Returns the moves sorted best first, each as
  * { move, centipawns, mateIn, isCapture, givesCheck, isGiveaway }
  * (the format move-chooser.js expects).
  */
-function scoreAllMoves(fen, depth) {
+function scoreAllMoves(fen, depth, withoutReplies = false) {
     startFreshSearch();
     loadPosition(fen);
 
@@ -206,7 +222,7 @@ function scoreAllMoves(fen, depth) {
 
     // The real scores, at the player's depth.
     for (const fact of facts) {
-        fact.rawScore = searchAfterMove(fact.move, depth);
+        fact.rawScore = withoutReplies ? valueWithoutReply(fact.move) : searchAfterMove(fact.move, depth);
     }
     facts.sort((first, second) => second.rawScore - first.rawScore);
 
@@ -266,11 +282,27 @@ function listLegalMoves(fen) {
     }));
 }
 
+/**
+ * Marks the captures that take back on the square where the opponent's last
+ * move landed (isRecapture). A blind spot never hides those (A57). Without the
+ * game's moves (a game from a set position) nothing is marked; the opponent's
+ * last move need not have been a capture, which is fine: taking a piece that
+ * just arrived is just as obvious.
+ */
+function markRecaptures(scores, movesSoFar) {
+    const lastMove = Array.isArray(movesSoFar) && movesSoFar.length > 0 ? movesSoFar[movesSoFar.length - 1] : null;
+    const lastSquare = lastMove === null ? null : lastMove.slice(2, 4);
+    for (const scored of scores) {
+        scored.isRecapture = lastSquare !== null && scored.isCapture && scored.move.slice(2, 4) === lastSquare;
+    }
+}
+
 // --- One full decision ---
 
 /**
  * Decides the computer's move in one position.
- * player: { randomMover, depth: {...}, marginCentipawns, giveawaySkipChance, style }
+ * player: { randomMover, depth: {...}, marginCentipawns, giveawaySkipChance,
+ *           giveawayChance, blunderChance, mistakeChance, style }
  *         book: { maxPly, variety } (see opening-book.js)
  * gameId, ply: seed the random choice (same move on every device).
  * movesSoFar: the game's moves from the normal start ("e2e4", ...), for the
@@ -294,8 +326,15 @@ function decideMove(fen, player, gameId, ply, movesSoFar) {
         return { move: choice.move, depth: 0, reason: choice.reason, candidates: choice.candidates, nodes: 0, scores: [] };
     }
 
-    const depth = depthForPosition(fen, player.depth);
-    const scores = scoreAllMoves(fen, depth);
+    // Threat blindness (A58): in some moves the player does not look at what
+    // the opponent can do next. Its own seeded number, so the other random
+    // choices stay the same.
+    const threatRoll = makeRandom(seedFromText("phpchess game " + gameId + " ply " + ply + " threats"))();
+    const blindToThreats = threatRoll < (player.threatBlindChance || 0);
+    const depth = blindToThreats ? 0 : depthForPosition(fen, player.depth);
+    const scores = scoreAllMoves(fen, Math.max(depth, 1), blindToThreats);
+    markRecaptures(scores, movesSoFar);
     const choice = chooseMove(scores, player, random);
-    return { move: choice.move, depth: depth, reason: choice.reason, candidates: choice.candidates, nodes: g_nodeCount, scores: scores };
+    const reason = blindToThreats ? "threats unseen, " + choice.reason : choice.reason;
+    return { move: choice.move, depth: depth, reason: reason, candidates: choice.candidates, nodes: g_nodeCount, scores: scores };
 }

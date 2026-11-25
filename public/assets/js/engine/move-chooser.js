@@ -1,7 +1,7 @@
 /**
  * Move chooser: picks the computer's move from a list of scored moves.
  *
- * Feature AI-02 (FEATURES.md), decisions A48 and A49 (DECISIONS.md).
+ * Feature AI-02 (FEATURES.md), decisions A48, A49, A56 and A57 (DECISIONS.md).
  *
  * This file knows nothing about any engine. It receives every legal move with
  * its score and decides which one the computer plays, using the character's
@@ -92,23 +92,69 @@ function scoreWithStyle(scoredMove, style) {
     return score;
 }
 
+// --- Human-like play (A56, A57) ---
+
+// A tactic must win at least this much more than the best quiet move to be
+// one the player can overlook (a blind spot).
+const BLIND_SPOT_GAIN_CENTIPAWNS = 150;
+
+/**
+ * True when the move is a tactic a weak player may not see (A57): a mate, or
+ * a capture or check that wins clearly more than the best quiet move.
+ * Taking back a piece that was just taken (isRecapture) is never hidden:
+ * people of every rating recapture.
+ */
+function isTactic(scoredMove, bestQuietScore) {
+    if (scoredMove.isRecapture) {
+        return false;
+    }
+    if (scoredMove.mateIn !== null && scoredMove.mateIn !== undefined && scoredMove.mateIn > 0) {
+        return true;
+    }
+    const forcing = scoredMove.isCapture || scoredMove.givesCheck;
+    return forcing && comparableScore(scoredMove) >= bestQuietScore + BLIND_SPOT_GAIN_CENTIPAWNS;
+}
+
+/**
+ * A random amount between -noise and +noise, more often near 0 than near the
+ * ends (the sum of two even draws, a "triangle"). Added to each move's value,
+ * it blurs the player's judgement: small positional differences disappear,
+ * large material differences stay (A57).
+ */
+function blur(noise, random) {
+    return noise * (random() + random() - 1);
+}
+
 // --- Choosing ---
 
 /**
  * Chooses the computer's move.
  *
- * scoredMoves: every legal move, scored (see the top of this file).
- * settings:    { randomMover, marginCentipawns, giveawaySkipChance, style }
+ * scoredMoves: every legal move, scored (see the top of this file); a move may
+ *              also carry isRecapture (it takes back on the square where the
+ *              opponent just captured).
+ * settings:    { randomMover, giveawayChance, blindSpotChance, noiseCentipawns,
+ *                marginCentipawns, giveawaySkipChance, style }
  *   randomMover          true for the wood pusher: any legal move, no checks.
- *   marginCentipawns     how far below the best a move may score and still be
- *                        played; a wide margin makes a weaker player.
+ *   giveawayChance       0 to 1: how often the player gives material away for
+ *                        nothing, as people of its rating do (A56).
+ *   blindSpotChance      0 to 1: how often the player does not see the
+ *                        tactics in the position (mates, winning captures and
+ *                        checks; never a recapture) (A57).
+ *   noiseCentipawns      how blurred the player's judgement is: each move's
+ *                        value moves by up to this much, at random (A57).
+ *   marginCentipawns     how far below the best (blurred) value a move may be
+ *                        and still be played; 0 = always the best as seen.
+ *                        Used by the calibration anchors; players use noise.
  *   giveawaySkipChance   0 to 1: how often the "no sacrifices for nothing"
- *                        filter is skipped (only below 500, A48); 0 = never.
+ *                        filter is skipped; 0 = never (the full-strength
+ *                        calibration anchors use 1: no filter at all).
  *   style                { captureBonus, checkBonus, quietBonus } in centipawns.
  * random:      a function from makeRandom().
  *
  * Returns { move, reason, candidates } so the page and the tests can explain
- * the choice.
+ * the choice. Reasons: "random", "giveaway", "blind spot", "filter skipped",
+ * "chosen".
  */
 function chooseMove(scoredMoves, settings, random) {
     if (scoredMoves.length === 0) {
@@ -121,9 +167,16 @@ function chooseMove(scoredMoves, settings, random) {
         return { move: scoredMoves[index].move, reason: "random", candidates: scoredMoves.length };
     }
 
-    // 1. Leave out moves that give material away for nothing, unless this
-    //    character skips the filter this time. If every move is a giveaway
-    //    (rare), all of them stay in.
+    // 1. Sometimes a sacrifice for nothing, as people of this rating make (A56).
+    const giveaways = scoredMoves.filter((scoredMove) => scoredMove.isGiveaway);
+    if (random() < (settings.giveawayChance || 0) && giveaways.length > 0) {
+        const picked = giveaways[Math.floor(random() * giveaways.length)];
+        return { move: picked.move, reason: "giveaway", candidates: giveaways.length };
+    }
+
+    // 2. Otherwise leave out the moves that give material away for nothing,
+    //    unless this character skips the filter this time. If every move is a
+    //    giveaway (rare), all of them stay in.
     const skipFilter = random() < (settings.giveawaySkipChance || 0);
     let allowed = scoredMoves;
     if (!skipFilter) {
@@ -133,18 +186,38 @@ function chooseMove(scoredMoves, settings, random) {
         }
     }
 
-    // 2. Keep the moves within the margin of the best one, as the character sees them.
-    const style = settings.style || {};
-    const withStyle = allowed.map((scoredMove) => ({
-        move: scoredMove.move,
-        score: scoreWithStyle(scoredMove, style),
-    }));
-    const bestScore = Math.max(...withStyle.map((candidate) => candidate.score));
-    const margin = Math.max(settings.marginCentipawns || 0, 0);
-    const candidates = withStyle.filter((candidate) => candidate.score >= bestScore - margin);
+    // 3. A blind spot (A57): this time the player does not see the tactics.
+    //    If only tactics are left (rare), it sees them after all.
+    let reason = skipFilter ? "filter skipped" : "chosen";
+    if (random() < (settings.blindSpotChance || 0)) {
+        const quietScores = allowed
+            .filter((scoredMove) => !scoredMove.isCapture && !scoredMove.givesCheck)
+            .map(comparableScore);
+        if (quietScores.length > 0) {
+            const bestQuietScore = Math.max(...quietScores);
+            const unseen = allowed.filter((scoredMove) => !isTactic(scoredMove, bestQuietScore));
+            if (unseen.length > 0 && unseen.length < allowed.length) {
+                allowed = unseen;
+                reason = "blind spot";
+            }
+        }
+    }
 
-    // 3. Pick one; better moves get a bigger share. A move at the best score
-    //    gets weight margin + 1, a move right at the edge of the margin gets 1.
+    // 4. The value of each move as this character sees it: the engine's
+    //    score, its taste (style), and its blurred judgement (noise).
+    const style = settings.style || {};
+    const noise = Math.max(settings.noiseCentipawns || 0, 0);
+    const seen = allowed.map((scoredMove) => ({
+        move: scoredMove.move,
+        score: scoreWithStyle(scoredMove, style) + (noise > 0 ? blur(noise, random) : 0),
+    }));
+
+    // 5. Keep the moves within the margin of the best one as seen, and pick
+    //    one; better moves get a bigger share. A move at the best value gets
+    //    weight margin + 1, a move right at the edge of the margin gets 1.
+    const bestScore = Math.max(...seen.map((candidate) => candidate.score));
+    const margin = Math.max(settings.marginCentipawns || 0, 0);
+    const candidates = seen.filter((candidate) => candidate.score >= bestScore - margin);
     let totalWeight = 0;
     for (const candidate of candidates) {
         candidate.weight = margin - (bestScore - candidate.score) + 1;
@@ -154,11 +227,11 @@ function chooseMove(scoredMoves, settings, random) {
     for (const candidate of candidates) {
         ticket -= candidate.weight;
         if (ticket < 0) {
-            return { move: candidate.move, reason: skipFilter ? "filter skipped" : "chosen", candidates: candidates.length };
+            return { move: candidate.move, reason: reason, candidates: candidates.length };
         }
     }
     const last = candidates[candidates.length - 1];
-    return { move: last.move, reason: skipFilter ? "filter skipped" : "chosen", candidates: candidates.length };
+    return { move: last.move, reason: reason, candidates: candidates.length };
 }
 
 // --- The settings for one game (A53) ---

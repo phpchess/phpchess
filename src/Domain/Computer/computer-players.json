@@ -29,8 +29,12 @@
           "endgamePieces": 4,
           "depthCap": 1
         },
-        "marginCentipawns": 250,
-        "giveawaySkipChance": 0.5,
+        "noiseCentipawns": 300,
+        "marginCentipawns": 0,
+        "giveawaySkipChance": 0,
+        "blindSpotChance": 0.5,
+        "threatBlindChance": 0.3,
+        "giveawayChance": 0.12300000000000001,
         "book": {
           "maxPly": 2,
           "variety": 0.3
@@ -59,8 +63,12 @@
           "endgamePieces": 4,
           "depthCap": 1
         },
-        "marginCentipawns": 250,
-        "giveawaySkipChance": 0.5,
+        "noiseCentipawns": 300,
+        "marginCentipawns": 0,
+        "giveawaySkipChance": 0,
+        "blindSpotChance": 0.5,
+        "threatBlindChance": 0.3,
+        "giveawayChance": 0.12300000000000001,
         "book": {
           "maxPly": 2,
           "variety": 0.6
@@ -89,8 +97,12 @@
           "endgamePieces": 4,
           "depthCap": 1
         },
-        "marginCentipawns": 250,
-        "giveawaySkipChance": 0.5,
+        "noiseCentipawns": 300,
+        "marginCentipawns": 0,
+        "giveawaySkipChance": 0,
+        "blindSpotChance": 0.5,
+        "threatBlindChance": 0.3,
+        "giveawayChance": 0.12300000000000001,
         "book": {
           "maxPly": 2,
           "variety": 0.5
@@ -116,8 +128,12 @@
           "endgamePieces": 4,
           "depthCap": 1
         },
-        "marginCentipawns": 250,
-        "giveawaySkipChance": 0.5,
+        "noiseCentipawns": 300,
+        "marginCentipawns": 0,
+        "giveawaySkipChance": 0,
+        "blindSpotChance": 0.5,
+        "threatBlindChance": 0.3,
+        "giveawayChance": 0.12300000000000001,
         "book": {
           "maxPly": 2,
           "variety": 0.7
@@ -132,8 +148,12 @@
           "endgamePieces": 4,
           "depthCap": 1
         },
-        "marginCentipawns": 250,
-        "giveawaySkipChance": 0.5,
+        "noiseCentipawns": 300,
+        "marginCentipawns": 0,
+        "giveawaySkipChance": 0,
+        "blindSpotChance": 0.5,
+        "threatBlindChance": 0.3,
+        "giveawayChance": 0.12300000000000001,
         "book": {
           "maxPly": 2,
           "variety": 0.7
@@ -148,8 +168,12 @@
           "endgamePieces": 4,
           "depthCap": 1
         },
-        "marginCentipawns": 150,
+        "noiseCentipawns": 260,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.4,
+        "threatBlindChance": 0.24,
+        "giveawayChance": 0.11199999999999999,
         "book": {
           "maxPly": 4,
           "variety": 0.7
@@ -175,8 +199,12 @@
           "endgamePieces": 4,
           "depthCap": 1
         },
-        "marginCentipawns": 200,
-        "giveawaySkipChance": 0.25,
+        "noiseCentipawns": 280,
+        "marginCentipawns": 0,
+        "giveawaySkipChance": 0,
+        "blindSpotChance": 0.45,
+        "threatBlindChance": 0.27,
+        "giveawayChance": 0.11599999999999999,
         "book": {
           "maxPly": 4,
           "variety": 0.3
@@ -205,8 +233,12 @@
           "endgamePieces": 4,
           "depthCap": 2
         },
-        "marginCentipawns": 200,
-        "giveawaySkipChance": 0.25,
+        "noiseCentipawns": 280,
+        "marginCentipawns": 0,
+        "giveawaySkipChance": 0,
+        "blindSpotChance": 0.45,
+        "threatBlindChance": 0.27,
+        "giveawayChance": 0.11599999999999999,
         "book": {
           "maxPly": 4,
           "variety": 0.4
@@ -234,8 +266,12 @@
           "endgamePieces": 4,
           "depthCap": 1
         },
-        "marginCentipawns": 200,
-        "giveawaySkipChance": 0.25,
+        "noiseCentipawns": 280,
+        "marginCentipawns": 0,
+        "giveawaySkipChance": 0,
+        "blindSpotChance": 0.45,
+        "threatBlindChance": 0.27,
+        "giveawayChance": 0.11599999999999999,
         "book": {
           "maxPly": 4,
           "variety": 0.5
@@ -261,8 +297,12 @@
           "endgamePieces": 4,
           "depthCap": 1
         },
-        "marginCentipawns": 200,
-        "giveawaySkipChance": 0.25,
+        "noiseCentipawns": 280,
+        "marginCentipawns": 0,
+        "giveawaySkipChance": 0,
+        "blindSpotChance": 0.45,
+        "threatBlindChance": 0.27,
+        "giveawayChance": 0.11599999999999999,
         "book": {
           "maxPly": 4,
           "variety": 0.7
@@ -277,8 +317,12 @@
           "endgamePieces": 4,
           "depthCap": 1
         },
-        "marginCentipawns": 250,
-        "giveawaySkipChance": 0.5,
+        "noiseCentipawns": 300,
+        "marginCentipawns": 0,
+        "giveawaySkipChance": 0,
+        "blindSpotChance": 0.5,
+        "threatBlindChance": 0.3,
+        "giveawayChance": 0.12300000000000001,
         "book": {
           "maxPly": 2,
           "variety": 0.7
@@ -293,8 +337,12 @@
           "endgamePieces": 4,
           "depthCap": 1
         },
-        "marginCentipawns": 100,
+        "noiseCentipawns": 240,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.35,
+        "threatBlindChance": 0.21,
+        "giveawayChance": 0.085,
         "book": {
           "maxPly": 6,
           "variety": 0.7
@@ -320,8 +368,12 @@
           "endgamePieces": 4,
           "depthCap": 1
         },
-        "marginCentipawns": 150,
+        "noiseCentipawns": 260,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.4,
+        "threatBlindChance": 0.24,
+        "giveawayChance": 0.11199999999999999,
         "book": {
           "maxPly": 4,
           "variety": 0.3
@@ -350,8 +402,12 @@
           "endgamePieces": 4,
           "depthCap": 1
         },
-        "marginCentipawns": 150,
+        "noiseCentipawns": 260,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.4,
+        "threatBlindChance": 0.24,
+        "giveawayChance": 0.11199999999999999,
         "book": {
           "maxPly": 4,
           "variety": 0.6
@@ -380,8 +436,12 @@
           "endgamePieces": 4,
           "depthCap": 1
         },
-        "marginCentipawns": 150,
+        "noiseCentipawns": 260,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.4,
+        "threatBlindChance": 0.24,
+        "giveawayChance": 0.11199999999999999,
         "book": {
           "maxPly": 4,
           "variety": 0.5
@@ -407,8 +467,12 @@
           "endgamePieces": 4,
           "depthCap": 2
         },
-        "marginCentipawns": 150,
+        "noiseCentipawns": 260,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.4,
+        "threatBlindChance": 0.24,
+        "giveawayChance": 0.11199999999999999,
         "book": {
           "maxPly": 4,
           "variety": 0.4
@@ -436,8 +500,12 @@
           "endgamePieces": 4,
           "depthCap": 2
         },
-        "marginCentipawns": 100,
+        "noiseCentipawns": 240,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.35,
+        "threatBlindChance": 0.21,
+        "giveawayChance": 0.085,
         "book": {
           "maxPly": 6,
           "variety": 0.4
@@ -465,8 +533,12 @@
           "endgamePieces": 4,
           "depthCap": 1
         },
-        "marginCentipawns": 100,
+        "noiseCentipawns": 240,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.35,
+        "threatBlindChance": 0.21,
+        "giveawayChance": 0.085,
         "book": {
           "maxPly": 6,
           "variety": 0.6
@@ -495,8 +567,12 @@
           "endgamePieces": 4,
           "depthCap": 1
         },
-        "marginCentipawns": 100,
+        "noiseCentipawns": 240,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.35,
+        "threatBlindChance": 0.21,
+        "giveawayChance": 0.085,
         "book": {
           "maxPly": 6,
           "variety": 0.5
@@ -522,8 +598,12 @@
           "endgamePieces": 4,
           "depthCap": 1
         },
-        "marginCentipawns": 100,
+        "noiseCentipawns": 240,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.35,
+        "threatBlindChance": 0.21,
+        "giveawayChance": 0.085,
         "book": {
           "maxPly": 6,
           "variety": 0.7
@@ -538,8 +618,12 @@
           "endgamePieces": 4,
           "depthCap": 1
         },
-        "marginCentipawns": 250,
-        "giveawaySkipChance": 0.5,
+        "noiseCentipawns": 300,
+        "marginCentipawns": 0,
+        "giveawaySkipChance": 0,
+        "blindSpotChance": 0.5,
+        "threatBlindChance": 0.3,
+        "giveawayChance": 0.12300000000000001,
         "book": {
           "maxPly": 2,
           "variety": 0.7
@@ -548,14 +632,18 @@
       },
       "high": {
         "depth": {
-          "baseDepth": 2,
+          "baseDepth": 1,
           "exchangeExtra": 1,
           "endgameExtra": 1,
           "endgamePieces": 4,
-          "depthCap": 4
+          "depthCap": 3
         },
-        "marginCentipawns": 80,
+        "noiseCentipawns": 280,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.25,
+        "threatBlindChance": 0.2,
+        "giveawayChance": 0.05,
         "book": {
           "maxPly": 8,
           "variety": 0.7
@@ -575,14 +663,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 2,
+          "baseDepth": 1,
           "exchangeExtra": 1,
           "endgameExtra": 0,
           "endgamePieces": 4,
-          "depthCap": 3
+          "depthCap": 2
         },
-        "marginCentipawns": 120,
+        "noiseCentipawns": 310,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.3,
+        "threatBlindChance": 0.23,
+        "giveawayChance": 0.075,
         "book": {
           "maxPly": 6,
           "variety": 0.3
@@ -605,14 +697,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 2,
+          "baseDepth": 1,
           "exchangeExtra": 1,
           "endgameExtra": 0,
           "endgamePieces": 4,
-          "depthCap": 3
+          "depthCap": 2
         },
-        "marginCentipawns": 120,
+        "noiseCentipawns": 310,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.3,
+        "threatBlindChance": 0.23,
+        "giveawayChance": 0.075,
         "book": {
           "maxPly": 6,
           "variety": 0.6
@@ -635,14 +731,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 2,
+          "baseDepth": 1,
           "exchangeExtra": 1,
           "endgameExtra": 0,
           "endgamePieces": 4,
-          "depthCap": 3
+          "depthCap": 2
         },
-        "marginCentipawns": 120,
+        "noiseCentipawns": 310,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.3,
+        "threatBlindChance": 0.23,
+        "giveawayChance": 0.075,
         "book": {
           "maxPly": 6,
           "variety": 0.5
@@ -662,14 +762,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 2,
+          "baseDepth": 1,
           "exchangeExtra": 1,
           "endgameExtra": 1,
           "endgamePieces": 4,
-          "depthCap": 4
+          "depthCap": 3
         },
-        "marginCentipawns": 120,
+        "noiseCentipawns": 310,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.3,
+        "threatBlindChance": 0.23,
+        "giveawayChance": 0.075,
         "book": {
           "maxPly": 6,
           "variety": 0.4
@@ -691,14 +795,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 2,
+          "baseDepth": 1,
           "exchangeExtra": 1,
           "endgameExtra": 1,
           "endgamePieces": 4,
-          "depthCap": 4
+          "depthCap": 3
         },
-        "marginCentipawns": 80,
+        "noiseCentipawns": 280,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.25,
+        "threatBlindChance": 0.2,
+        "giveawayChance": 0.05,
         "book": {
           "maxPly": 8,
           "variety": 0.3
@@ -721,14 +829,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 2,
+          "baseDepth": 1,
           "exchangeExtra": 1,
           "endgameExtra": 1,
           "endgamePieces": 4,
-          "depthCap": 4
+          "depthCap": 3
         },
-        "marginCentipawns": 80,
+        "noiseCentipawns": 280,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.25,
+        "threatBlindChance": 0.2,
+        "giveawayChance": 0.05,
         "book": {
           "maxPly": 8,
           "variety": 0.6
@@ -751,14 +863,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 2,
+          "baseDepth": 1,
           "exchangeExtra": 1,
           "endgameExtra": 2,
           "endgamePieces": 4,
-          "depthCap": 5
+          "depthCap": 4
         },
-        "marginCentipawns": 80,
+        "noiseCentipawns": 280,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.25,
+        "threatBlindChance": 0.2,
+        "giveawayChance": 0.05,
         "book": {
           "maxPly": 8,
           "variety": 0.4
@@ -780,14 +896,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 2,
+          "baseDepth": 1,
           "exchangeExtra": 1,
           "endgameExtra": 1,
           "endgamePieces": 4,
-          "depthCap": 4
+          "depthCap": 3
         },
-        "marginCentipawns": 80,
+        "noiseCentipawns": 280,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.25,
+        "threatBlindChance": 0.2,
+        "giveawayChance": 0.05,
         "book": {
           "maxPly": 8,
           "variety": 0.7
@@ -802,8 +922,12 @@
           "endgamePieces": 4,
           "depthCap": 1
         },
-        "marginCentipawns": 150,
+        "noiseCentipawns": 260,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.4,
+        "threatBlindChance": 0.24,
+        "giveawayChance": 0.11199999999999999,
         "book": {
           "maxPly": 4,
           "variety": 0.7
@@ -812,14 +936,18 @@
       },
       "high": {
         "depth": {
-          "baseDepth": 2,
+          "baseDepth": 1,
           "exchangeExtra": 1,
           "endgameExtra": 1,
           "endgamePieces": 4,
-          "depthCap": 4
+          "depthCap": 3
         },
-        "marginCentipawns": 50,
+        "noiseCentipawns": 250,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.2,
+        "threatBlindChance": 0.16,
+        "giveawayChance": 0.026000000000000002,
         "book": {
           "maxPly": 8,
           "variety": 0.7
@@ -839,14 +967,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 2,
+          "baseDepth": 1,
           "exchangeExtra": 1,
           "endgameExtra": 1,
           "endgamePieces": 4,
-          "depthCap": 4
+          "depthCap": 3
         },
-        "marginCentipawns": 50,
+        "noiseCentipawns": 250,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.2,
+        "threatBlindChance": 0.16,
+        "giveawayChance": 0.026000000000000002,
         "book": {
           "maxPly": 8,
           "variety": 0.3
@@ -869,14 +1001,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 2,
+          "baseDepth": 1,
           "exchangeExtra": 1,
           "endgameExtra": 1,
           "endgamePieces": 4,
-          "depthCap": 4
+          "depthCap": 3
         },
-        "marginCentipawns": 50,
+        "noiseCentipawns": 250,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.2,
+        "threatBlindChance": 0.16,
+        "giveawayChance": 0.026000000000000002,
         "book": {
           "maxPly": 8,
           "variety": 0.6
@@ -899,14 +1035,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 2,
+          "baseDepth": 1,
           "exchangeExtra": 1,
           "endgameExtra": 1,
           "endgamePieces": 4,
-          "depthCap": 4
+          "depthCap": 3
         },
-        "marginCentipawns": 50,
+        "noiseCentipawns": 250,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.2,
+        "threatBlindChance": 0.16,
+        "giveawayChance": 0.026000000000000002,
         "book": {
           "maxPly": 8,
           "variety": 0.5
@@ -926,14 +1066,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 2,
+          "baseDepth": 1,
           "exchangeExtra": 1,
           "endgameExtra": 2,
           "endgamePieces": 4,
-          "depthCap": 5
+          "depthCap": 4
         },
-        "marginCentipawns": 50,
+        "noiseCentipawns": 250,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.2,
+        "threatBlindChance": 0.16,
+        "giveawayChance": 0.026000000000000002,
         "book": {
           "maxPly": 8,
           "variety": 0.4
@@ -955,14 +1099,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 3,
+          "baseDepth": 2,
           "exchangeExtra": 1,
           "endgameExtra": 2,
           "endgamePieces": 4,
-          "depthCap": 6
+          "depthCap": 5
         },
-        "marginCentipawns": 60,
+        "noiseCentipawns": 225,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.15,
+        "threatBlindChance": 0.13,
+        "giveawayChance": 0.023,
         "book": {
           "maxPly": 10,
           "variety": 0.4
@@ -984,14 +1132,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 3,
+          "baseDepth": 2,
           "exchangeExtra": 1,
           "endgameExtra": 1,
           "endgamePieces": 4,
-          "depthCap": 5
+          "depthCap": 4
         },
-        "marginCentipawns": 60,
+        "noiseCentipawns": 225,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.15,
+        "threatBlindChance": 0.13,
+        "giveawayChance": 0.023,
         "book": {
           "maxPly": 10,
           "variety": 0.6
@@ -1014,14 +1166,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 3,
+          "baseDepth": 2,
           "exchangeExtra": 1,
           "endgameExtra": 1,
           "endgamePieces": 4,
-          "depthCap": 5
+          "depthCap": 4
         },
-        "marginCentipawns": 60,
+        "noiseCentipawns": 225,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.15,
+        "threatBlindChance": 0.13,
+        "giveawayChance": 0.023,
         "book": {
           "maxPly": 10,
           "variety": 0.5
@@ -1041,14 +1197,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 3,
+          "baseDepth": 2,
           "exchangeExtra": 1,
           "endgameExtra": 1,
           "endgamePieces": 4,
-          "depthCap": 5
+          "depthCap": 4
         },
-        "marginCentipawns": 60,
+        "noiseCentipawns": 225,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.15,
+        "threatBlindChance": 0.13,
+        "giveawayChance": 0.023,
         "book": {
           "maxPly": 10,
           "variety": 0.7
@@ -1057,14 +1217,18 @@
       },
       "low": {
         "depth": {
-          "baseDepth": 2,
+          "baseDepth": 1,
           "exchangeExtra": 1,
           "endgameExtra": 1,
           "endgamePieces": 4,
-          "depthCap": 4
+          "depthCap": 3
         },
-        "marginCentipawns": 80,
+        "noiseCentipawns": 280,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.25,
+        "threatBlindChance": 0.2,
+        "giveawayChance": 0.05,
         "book": {
           "maxPly": 8,
           "variety": 0.7
@@ -1073,14 +1237,18 @@
       },
       "high": {
         "depth": {
-          "baseDepth": 3,
+          "baseDepth": 2,
           "exchangeExtra": 1,
           "endgameExtra": 1,
           "endgamePieces": 4,
-          "depthCap": 5
+          "depthCap": 4
         },
-        "marginCentipawns": 35,
+        "noiseCentipawns": 195,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.1,
+        "threatBlindChance": 0.21,
+        "giveawayChance": 0.006,
         "book": {
           "maxPly": 10,
           "variety": 0.7
@@ -1100,14 +1268,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 3,
+          "baseDepth": 2,
           "exchangeExtra": 1,
           "endgameExtra": 1,
           "endgamePieces": 4,
-          "depthCap": 5
+          "depthCap": 4
         },
-        "marginCentipawns": 35,
+        "noiseCentipawns": 195,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.1,
+        "threatBlindChance": 0.21,
+        "giveawayChance": 0.006,
         "book": {
           "maxPly": 10,
           "variety": 0.3
@@ -1130,14 +1302,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 3,
+          "baseDepth": 2,
           "exchangeExtra": 1,
           "endgameExtra": 2,
           "endgamePieces": 4,
-          "depthCap": 6
+          "depthCap": 5
         },
-        "marginCentipawns": 35,
+        "noiseCentipawns": 195,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.1,
+        "threatBlindChance": 0.21,
+        "giveawayChance": 0.006,
         "book": {
           "maxPly": 10,
           "variety": 0.4
@@ -1159,14 +1335,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 3,
+          "baseDepth": 2,
           "exchangeExtra": 1,
           "endgameExtra": 1,
           "endgamePieces": 4,
-          "depthCap": 5
+          "depthCap": 4
         },
-        "marginCentipawns": 35,
+        "noiseCentipawns": 195,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.1,
+        "threatBlindChance": 0.21,
+        "giveawayChance": 0.006,
         "book": {
           "maxPly": 10,
           "variety": 0.5
@@ -1186,14 +1366,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 3,
+          "baseDepth": 2,
           "exchangeExtra": 1,
           "endgameExtra": 1,
           "endgamePieces": 4,
-          "depthCap": 5
+          "depthCap": 4
         },
-        "marginCentipawns": 35,
+        "noiseCentipawns": 195,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.1,
+        "threatBlindChance": 0.21,
+        "giveawayChance": 0.006,
         "book": {
           "maxPly": 10,
           "variety": 0.7
@@ -1202,14 +1386,18 @@
       },
       "low": {
         "depth": {
-          "baseDepth": 2,
+          "baseDepth": 1,
           "exchangeExtra": 1,
           "endgameExtra": 1,
           "endgamePieces": 4,
-          "depthCap": 4
+          "depthCap": 3
         },
-        "marginCentipawns": 50,
+        "noiseCentipawns": 250,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.2,
+        "threatBlindChance": 0.16,
+        "giveawayChance": 0.026000000000000002,
         "book": {
           "maxPly": 8,
           "variety": 0.7
@@ -1218,14 +1406,18 @@
       },
       "high": {
         "depth": {
-          "baseDepth": 4,
+          "baseDepth": 2,
           "exchangeExtra": 1,
           "endgameExtra": 2,
           "endgamePieces": 4,
-          "depthCap": 7
+          "depthCap": 5
         },
-        "marginCentipawns": 40,
+        "noiseCentipawns": 170,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.07,
+        "threatBlindChance": 0.16,
+        "giveawayChance": 0.009000000000000001,
         "book": {
           "maxPly": 12,
           "variety": 0.7
@@ -1245,14 +1437,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 4,
+          "baseDepth": 2,
           "exchangeExtra": 1,
           "endgameExtra": 2,
           "endgamePieces": 4,
-          "depthCap": 7
+          "depthCap": 5
         },
-        "marginCentipawns": 40,
+        "noiseCentipawns": 170,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.07,
+        "threatBlindChance": 0.16,
+        "giveawayChance": 0.009000000000000001,
         "book": {
           "maxPly": 12,
           "variety": 0.3
@@ -1275,14 +1471,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 4,
+          "baseDepth": 2,
           "exchangeExtra": 1,
           "endgameExtra": 2,
           "endgamePieces": 4,
-          "depthCap": 7
+          "depthCap": 5
         },
-        "marginCentipawns": 40,
+        "noiseCentipawns": 170,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.07,
+        "threatBlindChance": 0.16,
+        "giveawayChance": 0.009000000000000001,
         "book": {
           "maxPly": 12,
           "variety": 0.6
@@ -1305,14 +1505,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 4,
+          "baseDepth": 2,
           "exchangeExtra": 1,
           "endgameExtra": 2,
           "endgamePieces": 4,
-          "depthCap": 7
+          "depthCap": 5
         },
-        "marginCentipawns": 40,
+        "noiseCentipawns": 170,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.07,
+        "threatBlindChance": 0.16,
+        "giveawayChance": 0.009000000000000001,
         "book": {
           "maxPly": 12,
           "variety": 0.5
@@ -1332,14 +1536,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 4,
+          "baseDepth": 2,
           "exchangeExtra": 1,
           "endgameExtra": 2,
           "endgamePieces": 4,
-          "depthCap": 7
+          "depthCap": 5
         },
-        "marginCentipawns": 40,
+        "noiseCentipawns": 170,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.07,
+        "threatBlindChance": 0.16,
+        "giveawayChance": 0.009000000000000001,
         "book": {
           "maxPly": 12,
           "variety": 0.7
@@ -1348,14 +1556,18 @@
       },
       "low": {
         "depth": {
-          "baseDepth": 3,
+          "baseDepth": 2,
           "exchangeExtra": 1,
           "endgameExtra": 1,
           "endgamePieces": 4,
-          "depthCap": 5
+          "depthCap": 4
         },
-        "marginCentipawns": 60,
+        "noiseCentipawns": 225,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.15,
+        "threatBlindChance": 0.13,
+        "giveawayChance": 0.023,
         "book": {
           "maxPly": 10,
           "variety": 0.7
@@ -1364,14 +1576,18 @@
       },
       "high": {
         "depth": {
-          "baseDepth": 4,
+          "baseDepth": 3,
           "exchangeExtra": 1,
           "endgameExtra": 2,
           "endgamePieces": 4,
-          "depthCap": 7
+          "depthCap": 5
         },
-        "marginCentipawns": 25,
+        "noiseCentipawns": 140,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.05,
+        "threatBlindChance": 0.13,
+        "giveawayChance": 0.005,
         "book": {
           "maxPly": 12,
           "variety": 0.7
@@ -1391,14 +1607,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 4,
+          "baseDepth": 3,
           "exchangeExtra": 1,
           "endgameExtra": 3,
           "endgamePieces": 4,
-          "depthCap": 8
+          "depthCap": 5
         },
-        "marginCentipawns": 25,
+        "noiseCentipawns": 140,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.05,
+        "threatBlindChance": 0.13,
+        "giveawayChance": 0.005,
         "book": {
           "maxPly": 12,
           "variety": 0.4
@@ -1420,14 +1640,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 4,
+          "baseDepth": 3,
           "exchangeExtra": 1,
           "endgameExtra": 2,
           "endgamePieces": 4,
-          "depthCap": 7
+          "depthCap": 5
         },
-        "marginCentipawns": 25,
+        "noiseCentipawns": 140,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.05,
+        "threatBlindChance": 0.13,
+        "giveawayChance": 0.005,
         "book": {
           "maxPly": 12,
           "variety": 0.6
@@ -1450,14 +1674,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 4,
+          "baseDepth": 3,
           "exchangeExtra": 1,
           "endgameExtra": 2,
           "endgamePieces": 4,
-          "depthCap": 7
+          "depthCap": 5
         },
-        "marginCentipawns": 25,
+        "noiseCentipawns": 140,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.05,
+        "threatBlindChance": 0.13,
+        "giveawayChance": 0.005,
         "book": {
           "maxPly": 12,
           "variety": 0.5
@@ -1477,14 +1705,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 4,
+          "baseDepth": 3,
           "exchangeExtra": 1,
           "endgameExtra": 2,
           "endgamePieces": 4,
-          "depthCap": 7
+          "depthCap": 5
         },
-        "marginCentipawns": 25,
+        "noiseCentipawns": 140,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.05,
+        "threatBlindChance": 0.13,
+        "giveawayChance": 0.005,
         "book": {
           "maxPly": 12,
           "variety": 0.7
@@ -1493,14 +1725,18 @@
       },
       "low": {
         "depth": {
-          "baseDepth": 3,
+          "baseDepth": 2,
           "exchangeExtra": 1,
           "endgameExtra": 1,
           "endgamePieces": 4,
-          "depthCap": 5
+          "depthCap": 4
         },
-        "marginCentipawns": 35,
+        "noiseCentipawns": 195,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.1,
+        "threatBlindChance": 0.21,
+        "giveawayChance": 0.006,
         "book": {
           "maxPly": 10,
           "variety": 0.7
@@ -1509,14 +1745,18 @@
       },
       "high": {
         "depth": {
-          "baseDepth": 5,
+          "baseDepth": 3,
           "exchangeExtra": 1,
           "endgameExtra": 2,
           "endgamePieces": 4,
-          "depthCap": 8
+          "depthCap": 5
         },
-        "marginCentipawns": 30,
+        "noiseCentipawns": 120,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.03,
+        "threatBlindChance": 0.1,
+        "giveawayChance": 0.001,
         "book": {
           "maxPly": 14,
           "variety": 0.7
@@ -1536,14 +1776,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 5,
+          "baseDepth": 3,
           "exchangeExtra": 1,
           "endgameExtra": 2,
           "endgamePieces": 4,
-          "depthCap": 8
+          "depthCap": 5
         },
-        "marginCentipawns": 30,
+        "noiseCentipawns": 120,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.03,
+        "threatBlindChance": 0.1,
+        "giveawayChance": 0.001,
         "book": {
           "maxPly": 14,
           "variety": 0.3
@@ -1566,14 +1810,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 5,
+          "baseDepth": 3,
           "exchangeExtra": 1,
           "endgameExtra": 2,
           "endgamePieces": 4,
-          "depthCap": 8
+          "depthCap": 5
         },
-        "marginCentipawns": 30,
+        "noiseCentipawns": 120,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.03,
+        "threatBlindChance": 0.1,
+        "giveawayChance": 0.001,
         "book": {
           "maxPly": 14,
           "variety": 0.6
@@ -1596,14 +1844,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 5,
+          "baseDepth": 3,
           "exchangeExtra": 1,
           "endgameExtra": 3,
           "endgamePieces": 4,
-          "depthCap": 9
+          "depthCap": 5
         },
-        "marginCentipawns": 30,
+        "noiseCentipawns": 120,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.03,
+        "threatBlindChance": 0.1,
+        "giveawayChance": 0.001,
         "book": {
           "maxPly": 14,
           "variety": 0.4
@@ -1625,14 +1877,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 5,
+          "baseDepth": 3,
           "exchangeExtra": 1,
           "endgameExtra": 2,
           "endgamePieces": 4,
-          "depthCap": 8
+          "depthCap": 5
         },
-        "marginCentipawns": 30,
+        "noiseCentipawns": 120,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.03,
+        "threatBlindChance": 0.1,
+        "giveawayChance": 0.001,
         "book": {
           "maxPly": 14,
           "variety": 0.7
@@ -1641,14 +1897,18 @@
       },
       "low": {
         "depth": {
-          "baseDepth": 4,
+          "baseDepth": 2,
           "exchangeExtra": 1,
           "endgameExtra": 2,
           "endgamePieces": 4,
-          "depthCap": 7
+          "depthCap": 5
         },
-        "marginCentipawns": 40,
+        "noiseCentipawns": 170,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.07,
+        "threatBlindChance": 0.16,
+        "giveawayChance": 0.009000000000000001,
         "book": {
           "maxPly": 12,
           "variety": 0.7
@@ -1657,14 +1917,18 @@
       },
       "high": {
         "depth": {
-          "baseDepth": 5,
+          "baseDepth": 3,
           "exchangeExtra": 1,
           "endgameExtra": 2,
           "endgamePieces": 4,
-          "depthCap": 8
+          "depthCap": 5
         },
-        "marginCentipawns": 15,
+        "noiseCentipawns": 100,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.02,
+        "threatBlindChance": 0.08,
+        "giveawayChance": 0.004,
         "book": {
           "maxPly": 14,
           "variety": 0.7
@@ -1684,14 +1948,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 5,
+          "baseDepth": 3,
           "exchangeExtra": 1,
           "endgameExtra": 2,
           "endgamePieces": 4,
-          "depthCap": 8
+          "depthCap": 5
         },
-        "marginCentipawns": 15,
+        "noiseCentipawns": 100,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.02,
+        "threatBlindChance": 0.08,
+        "giveawayChance": 0.004,
         "book": {
           "maxPly": 14,
           "variety": 0.3
@@ -1714,14 +1982,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 5,
+          "baseDepth": 3,
           "exchangeExtra": 1,
           "endgameExtra": 2,
           "endgamePieces": 4,
-          "depthCap": 8
+          "depthCap": 5
         },
-        "marginCentipawns": 15,
+        "noiseCentipawns": 100,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.02,
+        "threatBlindChance": 0.08,
+        "giveawayChance": 0.004,
         "book": {
           "maxPly": 14,
           "variety": 0.6
@@ -1744,14 +2016,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 5,
+          "baseDepth": 3,
           "exchangeExtra": 1,
           "endgameExtra": 3,
           "endgamePieces": 4,
-          "depthCap": 9
+          "depthCap": 5
         },
-        "marginCentipawns": 15,
+        "noiseCentipawns": 100,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.02,
+        "threatBlindChance": 0.08,
+        "giveawayChance": 0.004,
         "book": {
           "maxPly": 14,
           "variety": 0.4
@@ -1773,14 +2049,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 5,
+          "baseDepth": 3,
           "exchangeExtra": 1,
           "endgameExtra": 2,
           "endgamePieces": 4,
-          "depthCap": 8
+          "depthCap": 5
         },
-        "marginCentipawns": 15,
+        "noiseCentipawns": 100,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.02,
+        "threatBlindChance": 0.08,
+        "giveawayChance": 0.004,
         "book": {
           "maxPly": 14,
           "variety": 0.7
@@ -1789,14 +2069,18 @@
       },
       "low": {
         "depth": {
-          "baseDepth": 4,
+          "baseDepth": 3,
           "exchangeExtra": 1,
           "endgameExtra": 2,
           "endgamePieces": 4,
-          "depthCap": 7
+          "depthCap": 5
         },
-        "marginCentipawns": 25,
+        "noiseCentipawns": 140,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.05,
+        "threatBlindChance": 0.13,
+        "giveawayChance": 0.005,
         "book": {
           "maxPly": 12,
           "variety": 0.7
@@ -1805,14 +2089,18 @@
       },
       "high": {
         "depth": {
-          "baseDepth": 6,
+          "baseDepth": 3,
           "exchangeExtra": 1,
           "endgameExtra": 2,
           "endgamePieces": 4,
-          "depthCap": 9
+          "depthCap": 5
         },
-        "marginCentipawns": 10,
+        "noiseCentipawns": 85,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.01,
+        "threatBlindChance": 0.065,
+        "giveawayChance": 0.003,
         "book": {
           "maxPly": 16,
           "variety": 0.7
@@ -1832,14 +2120,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 6,
+          "baseDepth": 3,
           "exchangeExtra": 1,
           "endgameExtra": 2,
           "endgamePieces": 4,
-          "depthCap": 9
+          "depthCap": 5
         },
-        "marginCentipawns": 10,
+        "noiseCentipawns": 85,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.01,
+        "threatBlindChance": 0.065,
+        "giveawayChance": 0.003,
         "book": {
           "maxPly": 16,
           "variety": 0.3
@@ -1862,14 +2154,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 6,
+          "baseDepth": 3,
           "exchangeExtra": 1,
           "endgameExtra": 2,
           "endgamePieces": 4,
-          "depthCap": 9
+          "depthCap": 5
         },
-        "marginCentipawns": 10,
+        "noiseCentipawns": 85,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.01,
+        "threatBlindChance": 0.065,
+        "giveawayChance": 0.003,
         "book": {
           "maxPly": 16,
           "variety": 0.6
@@ -1892,14 +2188,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 6,
+          "baseDepth": 3,
           "exchangeExtra": 1,
           "endgameExtra": 2,
           "endgamePieces": 4,
-          "depthCap": 9
+          "depthCap": 5
         },
-        "marginCentipawns": 10,
+        "noiseCentipawns": 85,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.01,
+        "threatBlindChance": 0.065,
+        "giveawayChance": 0.003,
         "book": {
           "maxPly": 16,
           "variety": 0.5
@@ -1919,14 +2219,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 6,
+          "baseDepth": 3,
           "exchangeExtra": 1,
           "endgameExtra": 2,
           "endgamePieces": 4,
-          "depthCap": 9
+          "depthCap": 5
         },
-        "marginCentipawns": 10,
+        "noiseCentipawns": 85,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.01,
+        "threatBlindChance": 0.065,
+        "giveawayChance": 0.003,
         "book": {
           "maxPly": 16,
           "variety": 0.7
@@ -1935,14 +2239,18 @@
       },
       "low": {
         "depth": {
-          "baseDepth": 5,
+          "baseDepth": 3,
           "exchangeExtra": 1,
           "endgameExtra": 2,
           "endgamePieces": 4,
-          "depthCap": 8
+          "depthCap": 5
         },
-        "marginCentipawns": 30,
+        "noiseCentipawns": 120,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.03,
+        "threatBlindChance": 0.1,
+        "giveawayChance": 0.001,
         "book": {
           "maxPly": 14,
           "variety": 0.7
@@ -1951,14 +2259,18 @@
       },
       "high": {
         "depth": {
-          "baseDepth": 6,
+          "baseDepth": 3,
           "exchangeExtra": 1,
           "endgameExtra": 2,
           "endgamePieces": 4,
-          "depthCap": 9
+          "depthCap": 5
         },
-        "marginCentipawns": 10,
+        "noiseCentipawns": 85,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.01,
+        "threatBlindChance": 0.065,
+        "giveawayChance": 0.003,
         "book": {
           "maxPly": 16,
           "variety": 0.7
@@ -1978,14 +2290,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 6,
+          "baseDepth": 3,
           "exchangeExtra": 1,
           "endgameExtra": 2,
           "endgamePieces": 4,
-          "depthCap": 9
+          "depthCap": 5
         },
-        "marginCentipawns": 10,
+        "noiseCentipawns": 85,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.01,
+        "threatBlindChance": 0.065,
+        "giveawayChance": 0.003,
         "book": {
           "maxPly": 16,
           "variety": 0.3
@@ -2008,14 +2324,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 6,
+          "baseDepth": 3,
           "exchangeExtra": 1,
           "endgameExtra": 3,
           "endgamePieces": 4,
-          "depthCap": 10
+          "depthCap": 5
         },
-        "marginCentipawns": 10,
+        "noiseCentipawns": 85,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.01,
+        "threatBlindChance": 0.065,
+        "giveawayChance": 0.003,
         "book": {
           "maxPly": 16,
           "variety": 0.4
@@ -2037,14 +2357,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 6,
+          "baseDepth": 3,
           "exchangeExtra": 1,
           "endgameExtra": 2,
           "endgamePieces": 4,
-          "depthCap": 9
+          "depthCap": 5
         },
-        "marginCentipawns": 10,
+        "noiseCentipawns": 85,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.01,
+        "threatBlindChance": 0.065,
+        "giveawayChance": 0.003,
         "book": {
           "maxPly": 16,
           "variety": 0.5
@@ -2064,14 +2388,18 @@
     "engine": {
       "normal": {
         "depth": {
-          "baseDepth": 6,
+          "baseDepth": 3,
           "exchangeExtra": 1,
           "endgameExtra": 2,
           "endgamePieces": 4,
-          "depthCap": 9
+          "depthCap": 5
         },
-        "marginCentipawns": 10,
+        "noiseCentipawns": 85,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.01,
+        "threatBlindChance": 0.065,
+        "giveawayChance": 0.003,
         "book": {
           "maxPly": 16,
           "variety": 0.7
@@ -2080,14 +2408,18 @@
       },
       "low": {
         "depth": {
-          "baseDepth": 5,
+          "baseDepth": 3,
           "exchangeExtra": 1,
           "endgameExtra": 2,
           "endgamePieces": 4,
-          "depthCap": 8
+          "depthCap": 5
         },
-        "marginCentipawns": 30,
+        "noiseCentipawns": 120,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.03,
+        "threatBlindChance": 0.1,
+        "giveawayChance": 0.001,
         "book": {
           "maxPly": 14,
           "variety": 0.7
@@ -2096,14 +2428,18 @@
       },
       "high": {
         "depth": {
-          "baseDepth": 6,
+          "baseDepth": 3,
           "exchangeExtra": 1,
           "endgameExtra": 2,
           "endgamePieces": 4,
-          "depthCap": 9
+          "depthCap": 5
         },
-        "marginCentipawns": 10,
+        "noiseCentipawns": 85,
+        "marginCentipawns": 0,
         "giveawaySkipChance": 0,
+        "blindSpotChance": 0.01,
+        "threatBlindChance": 0.065,
+        "giveawayChance": 0.003,
         "book": {
           "maxPly": 16,
           "variety": 0.7

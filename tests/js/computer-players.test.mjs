@@ -1,7 +1,7 @@
 /**
  * Tests for the computer player list and their engine settings (BUILD_PLAN C3-2).
  *
- * Feature AI-03, decisions A48, A50 and A53. Run with: node --test "tests/js/*.test.mjs"
+ * Feature AI-03, decisions A48, A50, A53 and A56. Run with: node --test "tests/js/*.test.mjs"
  * Checks the file itself and one quick decision per personality; plays no games.
  */
 
@@ -30,13 +30,24 @@ test("the engine settings in the file match the strength table (run tools/build-
     }
 });
 
-test("the sacrifice filter is skipped only below 500 (A48)", () => {
-    for (const player of players.filter((candidate) => candidate.personality !== "Random")) {
-        const skip = player.engine.normal.giveawaySkipChance;
-        if (player.elo >= 500) {
-            assert.equal(skip, 0, player.name);
-        } else {
-            assert.ok(skip > 0, player.name);
+test("every player has blurred judgement and gives material away sometimes; giveaways get rarer as the rating rises (A56, A57)", () => {
+    const ranked = players.filter((candidate) => candidate.personality !== "Random").sort((first, second) => first.elo - second.elo);
+    for (const player of ranked) {
+        const normal = player.engine.normal;
+        assert.equal(normal.giveawaySkipChance, 0, player.name);
+        assert.ok(normal.giveawayChance > 0 && normal.giveawayChance < 0.2, player.name);
+        assert.ok(normal.blindSpotChance >= 0 && normal.blindSpotChance < 1 && normal.noiseCentipawns > 0, player.name);
+    }
+    assert.ok(ranked[0].engine.normal.giveawayChance > ranked[ranked.length - 1].engine.normal.giveawayChance);
+});
+
+test("no player searches deeper than depth 5, extensions included (A55)", () => {
+    for (const player of players) {
+        for (const form of ["normal", "low", "high"]) {
+            const settings = player.engine[form];
+            if (settings && settings.depth) {
+                assert.ok(settings.depth.depthCap <= 5, player.name + " " + form);
+            }
         }
     }
 });
