@@ -23,7 +23,7 @@ The plan is six blocks, split into eleven large chunks.
 | 2 Product | C2-1 Correspondence chess | rules, the move and game-end functions, challenges, board, ratings, notifications | done (2026-11-23) |
 | | C2-2 Community, school and API | messages, profiles, content, school mode, API v1, PWA and Web Push, archive (Docker moved to backlog, A40) | done (2026-11-23); Web Push phone test (A18) pending |
 | 3 Live and computer | C3-1 Timed play | clock, lobby, polling transport, limits, measurements | done (2026-11-24, 5+3 games played on the local install) |
-| | C3-2 Computer opponent | engine in the browser, selection layer, characters, calibration | done (2026-11-25, tuned to real players, A55–A58); review and play test pending |
+| | C3-2 Computer opponent | engine in the browser, selection layer, characters, calibration | done (2026-11-25, tuned to real players, A55–A58); reviewed and play-tested 2026-11-25 |
 | 4 Tournaments | C4-1 Tournament core | model, Round Robin, Swiss, knockout, League with drag-and-drop, tie-breaks | planned |
 | | C4-2 Special formats | Team vs Team, Arena, voting, class tournaments | planned |
 | 5 Lichess | C5-1 Lichess | embeds, login with Lichess, API | planned |
