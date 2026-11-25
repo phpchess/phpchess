@@ -10,6 +10,9 @@
  *   transport.askNow();   ask at once (a clock reached zero, the tab came back)
  *   transport.stop();     no more questions (the game is over)
  *
+ * Optional: hiddenWaitMs, the shortest wait while the tab is hidden
+ * (default 30 s; the site-wide news poll uses 60 s, B21).
+ *
  * This one is short polling (A1, A46): plain fetch requests, no WebSocket,
  * so it works on any shared host. The server says in each answer how long
  * to wait before the next question ("next_poll_ms"): about a second while
@@ -21,7 +24,7 @@
 const DEFAULT_WAIT_MS = 4000;
 const HIDDEN_WAIT_MS = 30000;
 
-export function startTransport({url, onNews}) {
+export function startTransport({url, onNews, hiddenWaitMs = HIDDEN_WAIT_MS}) {
     let timer = null;
     let waitMs = DEFAULT_WAIT_MS;
     let stopped = false;
@@ -53,7 +56,7 @@ export function startTransport({url, onNews}) {
         if (stopped) {
             return;
         }
-        const wait = document.hidden ? Math.max(waitMs, HIDDEN_WAIT_MS) : waitMs;
+        const wait = document.hidden ? Math.max(waitMs, hiddenWaitMs) : waitMs;
         timer = setTimeout(askForNews, wait);
     }
 

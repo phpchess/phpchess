@@ -10,7 +10,10 @@
  *     the opponent's page shows it;
  *   - time lost to polling: how much more a clock lost than the player
  *     really thought (should be zero or below: lag compensation);
- *   - database queries per request, and requests per second for the site.
+ *   - database queries per request, and requests per second for the site;
+ *   - the cost of the site-wide news poll (B21, GET /news): each player also
+ *     asks it at the interval the server gives (default 15 s), as an open
+ *     page elsewhere on the site would.
  *
  * How it works:
  *   The main process installs phpChess into a temporary folder on the test
@@ -150,7 +153,7 @@ function runWorker(int $gameId, string $folder, int $seconds): void
         ];
     }
 
-    $timings = ['poll_unchanged' => [], 'poll_full' => [], 'move' => []];
+    $timings = ['poll_unchanged' => [], 'poll_full' => [], 'move' => [], 'site_news' => []];
     $deliveries = [];
     $timeLost = [];
     $movedAt = [];    // ply => when the mover had the answer (ms)
@@ -189,6 +192,14 @@ function runWorker(int $gameId, string $folder, int $seconds): void
                     }
                 }
                 $player['moveAt'] = null;
+            }
+
+            // --- The site-wide news poll (B21), at its own interval ---
+            if ($nowMs >= ($player['nextNewsAt'] ?? 0)) {
+                $started = microtime(true);
+                $news = json_decode($player['browser']->get('/news')->body, true);
+                $timings['site_news'][] = (microtime(true) - $started) * 1000;
+                $player['nextNewsAt'] = microtime(true) * 1000 + (int) (is_array($news) ? ($news['next_poll_ms'] ?? 15000) : 15000);
             }
 
             // --- Polling, at the interval the server asked for ---
@@ -285,7 +296,7 @@ function percentile(array $values, float $share): float
  */
 function printReport(array $results, int $seconds, int $questions, int $gameCount, string $timeControl): void
 {
-    $all = ['poll_unchanged' => [], 'poll_full' => [], 'move' => []];
+    $all = ['poll_unchanged' => [], 'poll_full' => [], 'move' => [], 'site_news' => []];
     $deliveries = [];
     $timeLost = [];
     foreach ($results as $result) {
@@ -295,7 +306,7 @@ function printReport(array $results, int $seconds, int $questions, int $gameCoun
         $deliveries = [...$deliveries, ...array_map('floatval', (array) ($result['deliveries'] ?? []))];
         $timeLost = [...$timeLost, ...array_map('floatval', (array) ($result['time_lost'] ?? []))];
     }
-    $requests = count($all['poll_unchanged']) + count($all['poll_full']) + count($all['move']);
+    $requests = count($all['poll_unchanged']) + count($all['poll_full']) + count($all['move']) + count($all['site_news']);
 
     printf("\nGames: %d of %s, %d s, PHP %s\n", $gameCount, $timeControl, $seconds, PHP_VERSION);
     printf("Requests: %d (%.1f per second for the site)\n", $requests, $requests / $seconds);

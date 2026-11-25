@@ -105,6 +105,37 @@ $link = fn (string $path, string $label, bool $isCurrent, int $badge = 0): array
     <?= $contentHtml ?>
 </main>
 
+<?php
+// The site-wide news poll (B21): for members, on every page except those
+// that ask the server themselves (the Play page, a game, the strength test).
+$hasOwnPoll = str_starts_with($currentPath, '/play') || str_starts_with($currentPath, '/games/') || str_starts_with($currentPath, '/strength-test');
+?>
+<?php if ($user !== null && !$hasOwnPoll) : ?>
+    <?php /* Filled and shown by site-news.js when a timed challenge arrives. */ ?>
+    <dialog class="pop-up" id="challenge-pop-up"
+            data-text-title="<?= e($t->text('site_news.challenge_title')) ?>"
+            data-text-details="<?= e($t->text('site_news.challenge_text')) ?>"
+            data-text-rated="<?= e($t->text('site_news.rated')) ?>"
+            data-text-unrated="<?= e($t->text('site_news.unrated')) ?>"
+            data-text-colour-white="<?= e($t->text('site_news.colour.white')) ?>"
+            data-text-colour-black="<?= e($t->text('site_news.colour.black')) ?>"
+            data-text-colour-random="<?= e($t->text('site_news.colour.random')) ?>">
+        <h2 id="challenge-pop-up-title"></h2>
+        <p id="challenge-pop-up-details"></p>
+        <div class="button-row">
+            <form method="post" id="challenge-pop-up-accept">
+                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                <button type="submit"><?= e($t->text('site_news.accept')) ?></button>
+            </form>
+            <form method="post" id="challenge-pop-up-decline">
+                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                <button type="submit" class="button-secondary"><?= e($t->text('site_news.decline')) ?></button>
+            </form>
+        </div>
+    </dialog>
+    <script type="module" src="<?= e($basePath) ?>/assets/js/app/site-news.js"></script>
+<?php endif; ?>
+
 <?php if ($showStrengthTestPopUp) : ?>
     <?php /* The strength test pop-up, once after the first login (B15, A60). */ ?>
     <dialog class="pop-up" id="strength-test-pop-up" open>

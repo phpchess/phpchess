@@ -37,6 +37,7 @@ use PhpChess\Http\Web\Play\PlayPages;
 use PhpChess\Http\Web\Play\RatingController;
 use PhpChess\Http\Web\Play\VacationController;
 use PhpChess\Http\Web\PreferencesController;
+use PhpChess\Http\Web\SiteNewsController;
 use PhpChess\Http\Web\StrengthTestController;
 use PhpChess\Http\Web\SkinController;
 use PhpChess\Install\InstallerController;
@@ -70,6 +71,7 @@ final class Routes
         $account = new AccountController($services);
         $preferences = new PreferencesController($services);
         $strengthTest = new StrengthTestController($services);
+        $siteNews = new SiteNewsController($services);
         $skin = new SkinController($services);
         $adminPages = new AdminPages($services);
         $dashboard = new DashboardController($services, $adminPages);
@@ -118,6 +120,9 @@ final class Routes
         $router->post('/account/preferences', fn (Request $request): Response => $preferences->savePreferences($request), Access::MEMBERS);
         $router->get('/account/password', fn (Request $request): Response => $preferences->showPasswordForm($request), Access::MEMBERS);
         $router->post('/account/password', fn (Request $request): Response => $preferences->changePassword($request), Access::MEMBERS);
+
+        // --- The site-wide news poll (B21) ---
+        $router->get('/news', fn (Request $request): Response => $siteNews->news($request), Access::MEMBERS);
 
         // --- The strength test (B15) ---
         $router->get('/strength-test', fn (Request $request): Response => $strengthTest->show($request), Access::MEMBERS);

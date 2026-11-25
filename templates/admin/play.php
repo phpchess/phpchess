@@ -7,7 +7,7 @@
  * $adjudicationReasons (string); $fenInDirect (bool);
  * $allowedEmailModes (list of string);
  * timed play (A46): $minTimeControl (string), $maxLiveGames, $maxLiveGamesPerPlayer,
- * $pollFastMs, $pollOwnMs, $pollSlowMs (int);
+ * $pollFastMs, $pollOwnMs, $pollSlowMs, $sitePollSeconds (int, B21);
  * $warnings, $currentAdminPath, $basePath, $csrfToken, $t, $template.
  */
 
@@ -101,6 +101,9 @@ use PhpChess\Domain\Play\TimeControl;
         </label>
         <label><?= e($t->text('admin.play.poll_slow_ms')) ?>
             <input type="number" name="poll_slow_ms" min="2000" max="120000" step="1000" value="<?= e($pollSlowMs) ?>">
+        </label>
+        <label><?= e($t->text('admin.play.site_poll_seconds')) ?>
+            <input type="number" name="site_poll_seconds" min="5" max="120" step="1" value="<?= e($sitePollSeconds) ?>">
         </label>
         <p class="hint"><?= e($t->text('admin.play.timed_hint')) ?></p>
     </fieldset>

@@ -15,6 +15,7 @@ use PhpChess\Http\GamePoll;
 use PhpChess\Domain\Rating\Ratings;
 use PhpChess\Http\Request;
 use PhpChess\Http\Response;
+use PhpChess\Http\Web\SiteNewsController;
 use PhpChess\Kernel\Services;
 
 /**
@@ -141,6 +142,7 @@ final class GamesController
             'pollFastMs' => $settings->getInt('play.poll_fast_ms', GamePoll::DEFAULT_FAST_MS),
             'pollOwnMs' => $settings->getInt('play.poll_own_ms', GamePoll::DEFAULT_OWN_MOVE_MS),
             'pollSlowMs' => $settings->getInt('play.poll_slow_ms', GamePoll::DEFAULT_SLOW_MS),
+            'sitePollSeconds' => SiteNewsController::pollSeconds($this->services),
         ]);
     }
 
@@ -186,6 +188,8 @@ final class GamesController
         $settings->set('play.poll_fast_ms', max(500, min(10000, (int) $request->formValue('poll_fast_ms', (string) GamePoll::DEFAULT_FAST_MS))));
         $settings->set('play.poll_own_ms', max(500, min(30000, (int) $request->formValue('poll_own_ms', (string) GamePoll::DEFAULT_OWN_MOVE_MS))));
         $settings->set('play.poll_slow_ms', max(2000, min(120000, (int) $request->formValue('poll_slow_ms', (string) GamePoll::DEFAULT_SLOW_MS))));
+        // The site-wide news poll (B21): one question per online member every N seconds.
+        $settings->set('site_poll.seconds', max(SiteNewsController::MIN_POLL_SECONDS, min(SiteNewsController::MAX_POLL_SECONDS, (int) $request->formValue('site_poll_seconds', (string) SiteNewsController::DEFAULT_POLL_SECONDS))));
 
         $this->adminPages->audit($request, 'settings.play', 'Play settings saved.');
 
