@@ -23,7 +23,7 @@ The plan is six blocks, split into eleven large chunks.
 | 2 Product | C2-1 Correspondence chess | rules, the move and game-end functions, challenges, board, ratings, notifications | done (2026-11-23) |
 | | C2-2 Community, school and API | messages, profiles, content, school mode, API v1, PWA and Web Push, archive (Docker moved to backlog, A40) | done (2026-11-23); Web Push phone test (A18) pending |
 | 3 Live and computer | C3-1 Timed play | clock, lobby, polling transport, limits, measurements | done (2026-11-24, 5+3 games played on the local install) |
-| | C3-2 Computer opponent | engine in the browser, selection layer, characters, calibration | planned |
+| | C3-2 Computer opponent | engine in the browser, selection layer, characters, calibration | done (2026-11-25, tuned to real players, A55–A58); review and play test pending |
 | 4 Tournaments | C4-1 Tournament core | model, Round Robin, Swiss, knockout, League with drag-and-drop, tie-breaks | planned |
 | | C4-2 Special formats | Team vs Team, Arena, voting, class tournaments | planned |
 | 5 Lichess | C5-1 Lichess | embeds, login with Lichess, API | planned |
@@ -147,6 +147,7 @@ Release 6.0 is C0-1 to C4-2, plus a check on a real shared host before release.
   - the same move choice on every device at the same budget;
   - the calibration run.
 - **Done**: the calibration result lands in the target band (about 600 and below), its confidence range is published, and no random blunders are seen in the sample games.
+- **Changed during the chunk (2026-11-25)**: the players are tuned against real players of each rating (Lichess profile, A55) instead of an Elo range; results in `docs/proofs/c3-2-human-profile.md`. The "no random blunders" proof is dropped (user): human-like giveaways are now intended (A56), and A57–A58 replace random blunders with noise, blind spots and threat blindness. Check run of the final adjustment: backlog B32.
 
 ## C4-1 Tournament core
 - **Scope**: T-01 to T-08, ADM-06.

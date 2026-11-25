@@ -108,13 +108,13 @@ Decisions A1–A21 are in [DECISIONS.md](DECISIONS.md).
 ## AI — Computer opponent (A14)
 | Id | Feature | Origin | Chunk | Switch | Status |
 |---|---|---|---|---|---|
-| AI-01 | Engine in the player's browser (Web Worker), swappable; GarboChess, with a how-to for other engines (A47) | new | C3-2 | — | planned |
-| AI-02 | Selection layer: chooses among the engine's candidate moves by score closeness | new | C3-2 | — | planned |
-| AI-03 | Opponent characters with their own habits and strengths | new | C3-2 | — | planned |
-| AI-04 | Fixed search budget in nodes or depth, the same on every device | new | C3-2 | — | planned |
-| AI-05 | Calibration: own ladder, ~600 Elo and below, result published with its confidence range | new | C3-2 | — | planned |
-| AI-06 | Games against the computer stored, unrated | new | C3-2 | — | planned |
-| AI-07 | Admin page: active engine, name, version, licence, source link | new | C3-2 | — | planned |
+| AI-01 | Engine in the player's browser (Web Worker), swappable; GarboChess, with a how-to for other engines (A47) | new | C3-2 | — | done (2026-11-25) |
+| AI-02 | Selection layer: chooses among the engine's candidate moves by score closeness | new | C3-2 | — | done (2026-11-25) |
+| AI-03 | Opponent characters with their own habits and strengths | new | C3-2 | — | done (2026-11-25) |
+| AI-04 | Fixed search budget in nodes or depth, the same on every device | new | C3-2 | — | done (2026-11-25) |
+| AI-05 | Calibration: own ladder, ~600 Elo and below, result published with its confidence range | new | C3-2 | — | done (2026-11-25) |
+| AI-06 | Games against the computer stored, unrated | new | C3-2 | — | done (2026-11-25) |
+| AI-07 | Admin page: active engine, name, version, licence, source link | new | C3-2 | — | done (2026-11-25) |
 
 ## T — Tournaments
 | Id | Feature | Origin | Chunk | Switch | Status |
