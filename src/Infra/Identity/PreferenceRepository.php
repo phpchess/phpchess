@@ -141,6 +141,58 @@ final class PreferenceRepository extends Repository
         );
     }
 
+    // --- Strength test (B15, A60) and computer move delay (B30, A65) ---
+
+    /**
+     * The strength test status: the band found (null before any test), when
+     * the last test ended (null: never) and whether the pop-up was shown.
+     *
+     * @return array{band: string|null, tested_at: string|null, offered: bool}
+     */
+    public function strengthTest(int $userId): array
+    {
+        $row = $this->database->fetchRow(
+            'SELECT strength_band, strength_tested_at, strength_test_offered FROM ' . $this->table('user_preferences') . ' WHERE user_id = ?',
+            [$userId],
+        );
+
+        return [
+            'band' => isset($row['strength_band']) ? self::text($row['strength_band']) : null,
+            'tested_at' => isset($row['strength_tested_at']) ? self::text($row['strength_tested_at']) : null,
+            'offered' => (int) self::text($row['strength_test_offered'] ?? 0) === 1,
+        ];
+    }
+
+    /** Remembers that the first-login pop-up was shown, so it shows only once. */
+    public function markStrengthTestOffered(int $userId): void
+    {
+        $this->ensureRow($userId);
+        $this->database->run('UPDATE ' . $this->table('user_preferences') . ' SET strength_test_offered = 1 WHERE user_id = ?', [$userId]);
+    }
+
+    public function saveStrengthTestResult(int $userId, string $band): void
+    {
+        $this->ensureRow($userId);
+        $this->database->run(
+            'UPDATE ' . $this->table('user_preferences') . ' SET strength_band = ?, strength_tested_at = UTC_TIMESTAMP(3), strength_test_offered = 1 WHERE user_id = ?',
+            [$band, $userId],
+        );
+    }
+
+    /** The computer players' move delay the member chose: none, short, normal or long. */
+    public function computerDelay(int $userId): string
+    {
+        $value = self::text($this->database->fetchValue('SELECT computer_delay FROM ' . $this->table('user_preferences') . ' WHERE user_id = ?', [$userId]));
+
+        return $value === '' ? 'normal' : $value;
+    }
+
+    public function saveComputerDelay(int $userId, string $delay): void
+    {
+        $this->ensureRow($userId);
+        $this->database->run('UPDATE ' . $this->table('user_preferences') . ' SET computer_delay = ? WHERE user_id = ?', [$delay, $userId]);
+    }
+
     /** Makes the user's row with the defaults, if there is none yet. */
     private function ensureRow(int $userId): void
     {

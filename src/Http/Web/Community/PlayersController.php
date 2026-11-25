@@ -11,6 +11,7 @@ use PhpChess\Domain\System\FeatureSwitches;
 use PhpChess\Http\Request;
 use PhpChess\Http\Response;
 use PhpChess\Http\Web\MemberPages;
+use PhpChess\Http\Web\StrengthTestController;
 use PhpChess\Kernel\Services;
 
 /**
@@ -93,6 +94,7 @@ final class PlayersController
             'usernames' => $this->usernamesOf($finished),
             'isBuddy' => $viewer !== null && $this->services->buddies()->isBuddy($viewer->id, $player->id),
             'isSelf' => $viewer !== null && $viewer->id === $player->id,
+            'offerStrengthTest' => $viewer !== null && $viewer->id === $player->id && StrengthTestController::shouldOffer($this->services, $player->id),
             'messagesAreOn' => $this->services->switches()->isOn(FeatureSwitches::DIRECT_MESSAGES),
             'lastSeenAt' => $this->services->users()->lastSeenAt($player->id),
         ]);

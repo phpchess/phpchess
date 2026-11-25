@@ -4,7 +4,7 @@
  * seen, recent games, and buttons to message them or keep them as a buddy.
  *
  * Variables: $player (User), $profile (array{avatar, about}), $rating (array{rating, games_played, wins, draws, losses}|null),
- * $finishedGames (list of Game), $usernames (array of id => name), $isBuddy, $isSelf, $messagesAreOn (bool),
+ * $finishedGames (list of Game), $usernames (array of id => name), $isBuddy, $isSelf, $messagesAreOn, $offerStrengthTest (bool: the strength test link, B15),
  * $lastSeenAt (int|null), $user (User|null), $basePath, $csrfToken, $t, $template.
  */
 ?>
@@ -14,6 +14,9 @@
         <h1><?= e($player->username) ?></h1>
         <?php if ($rating !== null) : ?>
             <p><?= e($t->text('profile.rating', ['rating' => $rating['rating'], 'games' => $rating['games_played']])) ?></p>
+        <?php endif; ?>
+        <?php if ($offerStrengthTest) : ?>
+            <a class="button button-secondary" href="<?= e($basePath) ?>/strength-test"><?= e($t->text('strength_test.find_strength')) ?></a>
         <?php endif; ?>
         <?php if ($lastSeenAt !== null) : ?>
             <p class="muted"><?= e($t->text('profile.last_seen', ['date' => gmdate('Y-m-d', $lastSeenAt)])) ?></p>

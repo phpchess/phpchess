@@ -248,6 +248,24 @@ return [
     'register.strength.strong_club' => 'Strong club player',
     'register.strength.expert' => 'Expert',
 
+    // Strength test (B15)
+    'strength_test.title' => 'Find your strength',
+    'strength_test.find_strength' => 'Find your strength',
+    'strength_test.intro' => '10 short puzzles. Find the best move for the side to move. There is no clock. The result sets your first rating.',
+    'strength_test.start' => 'Start the test',
+    'strength_test.later' => 'Later',
+    'strength_test.pop_up_title' => 'How strong do you play?',
+    'strength_test.pop_up_text' => '10 short puzzles find your level, so your first opponents fit you. It takes about 5 minutes.',
+    'strength_test.number' => 'Puzzle {number} of {total}',
+    'strength_test.your_move' => 'your move',
+    'strength_test.solved' => 'solved',
+    'strength_test.missed' => 'missed: the right move is marked',
+    'strength_test.result' => 'You solved {solved} of 10. Your strength: {band} (about {rating}). It is your first rating at every speed you have not played yet.',
+    'strength_test.last_result' => 'Your last test: {band}.',
+    'strength_test.next_date' => 'You can take the test again from {date}.',
+    'strength_test.too_soon' => 'You can take the test once every 30 days.',
+    'strength_test.lost' => 'The test was interrupted. Please start it again.',
+
     // --- Preferences: move emails (A34) ---
     'preferences.move_email' => 'Emails about moves and challenges',
     'move_email.each_move' => 'After each move, when I am offline',

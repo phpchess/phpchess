@@ -272,3 +272,9 @@ details.confirm summary { cursor: pointer; }
 .facts dt { font-weight: bold; }
 .facts dd { margin: 0; }
 .table-scroll { overflow-x: auto; }
+
+/* --- Strength test (B15): a square board as big as the screen allows --- */
+.strength-test .board-frame {
+    width: min(calc(100vw - 2rem), calc(100dvh - 12rem), 36rem);
+    margin: 0 auto;
+}

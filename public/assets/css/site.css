@@ -125,6 +125,21 @@ fieldset { border: 1px solid var(--colour-border); border-radius: 0.5rem; paddin
 .admin-menu { margin-bottom: 1rem; border-bottom: 1px solid var(--colour-border); }
 .copyable { user-select: all; white-space: pre-wrap; word-break: break-all; }
 
+/* --- Pop-up (the strength test after the first login, B15) --- */
+dialog.pop-up {
+    position: fixed;
+    inset: auto 1rem 1rem 1rem;
+    max-width: 30rem;
+    margin: 0 auto;
+    padding: 1rem;
+    border: 1px solid var(--colour-border);
+    border-radius: 0.75rem;
+    background: var(--colour-surface);
+    color: var(--colour-text);
+    box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.25);
+    z-index: 20;
+}
+
 /* --- Wider screens --- */
 @media (min-width: 48rem) {
     .form-row { grid-template-columns: 2fr 1fr auto; align-items: end; }

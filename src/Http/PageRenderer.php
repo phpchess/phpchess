@@ -31,6 +31,9 @@ final class PageRenderer
 {
     private const string FLASH_KEY = 'flash_messages';
 
+    /** Set to true at the first login when the strength test should pop up (B15). */
+    public const string STRENGTH_TEST_POP_UP_KEY = 'strength_test.pop_up';
+
     /**
      * @param array{id: int, title: string, body: string}|null $serverMessage  the admin's server message (C-07)
      * @param array<string, bool>                              $menuSwitches   which switched features the menu shows
@@ -83,6 +86,7 @@ final class PageRenderer
             'menuSwitches' => $this->menuSwitches,
             'serverMessage' => $this->serverMessage,
             'isWide' => ($variables['isWide'] ?? false) === true,
+            'showStrengthTestPopUp' => $this->takeStrengthTestPopUp(),
         ]);
 
         return Response::html($layoutHtml, $status);
@@ -103,6 +107,18 @@ final class PageRenderer
         $messages = is_array($messages) ? $messages : [];
         $messages[] = ['type' => $type === 'error' ? 'error' : 'success', 'text' => $message];
         $this->session->set(self::FLASH_KEY, $messages);
+    }
+
+    /**
+     * True once, on the first page after the first login, when the strength
+     * test should pop up (B15, A60; set by AccountController::logIn()).
+     */
+    private function takeStrengthTestPopUp(): bool
+    {
+        $show = $this->session->get(self::STRENGTH_TEST_POP_UP_KEY) === true;
+        $this->session->remove(self::STRENGTH_TEST_POP_UP_KEY);
+
+        return $show;
     }
 
     /**

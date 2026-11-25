@@ -4,6 +4,7 @@
  * drawn here as SVG (no chart library, no script).
  *
  * Variables: $player (User), $speed (string),
+ * $offerStrengthTest (bool: the strength test link next to the rating, B15),
  * $shown (array{rating: int, games_played: int, is_newbie: bool, is_provisional: bool}),
  * $statistics (array{rating, games_played, wins, draws, losses}|null),
  * $history (list of array{game_id: int, rating_before: int, rating_after: int, created_at: string}),
@@ -32,6 +33,9 @@ if ($history !== []) {
         <?= e($t->text('rating.newbie')) ?>
     <?php else : ?>
         <strong><?= e($shown['rating']) ?><?= $shown['is_provisional'] ? '?' : '' ?></strong>
+    <?php endif; ?>
+    <?php if ($offerStrengthTest) : ?>
+        <a class="button button-secondary" href="<?= e($basePath) ?>/strength-test"><?= e($t->text('strength_test.find_strength')) ?></a>
     <?php endif; ?>
 </p>
 <?php if ($statistics !== null) : ?>

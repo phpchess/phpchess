@@ -8,6 +8,7 @@ use PhpChess\Domain\Play\Game;
 use PhpChess\Domain\Rating\EloCalculator;
 use PhpChess\Http\Request;
 use PhpChess\Http\Response;
+use PhpChess\Http\Web\StrengthTestController;
 use PhpChess\Kernel\Services;
 
 /**
@@ -53,6 +54,8 @@ final class RatingController
             'shown' => $this->services->play()->ratings()->shownRating($player->id, $speed),
             'statistics' => $repository->find($player->id, $speed),
             'history' => $repository->history($player->id, $speed),
+            'offerStrengthTest' => $this->services->authentication()->currentUser()?->id === $player->id
+                && StrengthTestController::shouldOffer($this->services, $player->id),
         ]);
     }
 }

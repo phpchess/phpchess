@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PhpChess\Domain\Rating;
 
 use PhpChess\Domain\Play\Game;
+use PhpChess\Domain\Play\TimeControl;
 use PhpChess\Infra\Rating\RatingRepository;
 use PhpChess\Infra\System\SettingsRepository;
 
@@ -99,6 +100,19 @@ final class Ratings
         $startRating = $bandValue > 0 ? $bandValue : $this->startValue();
         foreach ($speeds as $speed) {
             $this->ratings->createIfMissing($userId, $speed, $startRating);
+        }
+    }
+
+    /**
+     * Uses the strength test's band (B15) as the start rating at every speed
+     * where the player has not played yet; played speeds keep their rating.
+     */
+    public function setStartFromTest(int $userId, string $band): void
+    {
+        $bandValue = self::STRENGTH_BANDS[$band] ?? 0;
+        $startRating = $bandValue > 0 ? $bandValue : $this->startValue();
+        foreach ([Game::SPEED_CORRESPONDENCE, TimeControl::SPEED_RAPID, TimeControl::SPEED_BLITZ] as $speed) {
+            $this->ratings->replaceStartRating($userId, $speed, $startRating);
         }
     }
 

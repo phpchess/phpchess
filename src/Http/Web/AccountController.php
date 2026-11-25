@@ -6,11 +6,13 @@ namespace PhpChess\Http\Web;
 
 use PhpChess\Domain\Identity\AccountRefused;
 use PhpChess\Domain\Identity\User;
+use PhpChess\Domain\Play\Game;
 use PhpChess\Http\PageRenderer;
 use PhpChess\Http\Request;
 use PhpChess\Http\Response;
 use PhpChess\Infra\Mail\MailFailed;
 use PhpChess\Kernel\Services;
+use PDOException;
 
 /**
  * The account pages for visitors: register, verify email, log in and out, reset a password
@@ -165,6 +167,7 @@ final class AccountController
         }
 
         $this->services->authentication()->logIn($user, $request->formValue('remember_me') === 'yes');
+        $this->offerStrengthTestOnce($user->id);
 
         return Response::redirect($request->basePath . self::safeNextPath($request->formValue('next')));
     }
@@ -174,6 +177,28 @@ final class AccountController
         $this->services->authentication()->logOut();
 
         return $this->pages()->redirectWithMessage($request, '/', 'success', $this->text('logout.done'));
+    }
+
+    /**
+     * The strength test pops up once, after the first login of a player whose
+     * strength is not known yet: never tested and still a newbie (B15, A60).
+     */
+    private function offerStrengthTestOnce(int $userId): void
+    {
+        $preferences = $this->services->preferenceRepository();
+        try {
+            $status = $preferences->strengthTest($userId);
+        } catch (PDOException) {
+            // Database update 8 has not run yet (A54: login must keep working): no pop-up.
+            return;
+        }
+        if ($status['offered'] || $status['tested_at'] !== null) {
+            return;
+        }
+        $preferences->markStrengthTestOffered($userId);
+        if ($this->services->play()->ratings()->shownRating($userId, Game::SPEED_CORRESPONDENCE)['is_newbie']) {
+            $this->services->session->set(PageRenderer::STRENGTH_TEST_POP_UP_KEY, true);
+        }
     }
 
     private function loginForm(Request $request, string $nameOrEmail, string $error, bool $showResend, int $status = 200): Response

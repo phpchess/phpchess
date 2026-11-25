@@ -63,6 +63,16 @@ final class RatingRepository extends Repository
         );
     }
 
+    /** Sets the start rating again, but only while no game was played at this speed (strength test, B15). */
+    public function replaceStartRating(int $userId, string $speed, int $startRating): void
+    {
+        $this->createIfMissing($userId, $speed, $startRating);
+        $this->database->run(
+            'UPDATE ' . $this->table('ratings') . ' SET rating = ? WHERE user_id = ? AND speed = ? AND games_played = 0',
+            [$startRating, $userId, $speed],
+        );
+    }
+
     // --- History (R-03) ---
 
     /** Adds one history row. Returns false when this game was already rated for the user (K4). */

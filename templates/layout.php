@@ -17,6 +17,7 @@
  *   $menuSwitches (array)    which switched features to show: messages, school, players, push
  *   $serverMessage (array{id, title, body}|null) the admin's server message (C-07)
  *   $isWide (bool)           a wider page (the dashboard, A44)
+ *   $showStrengthTestPopUp (bool) the strength test pop-up after the first login (B15)
  *   $t (Translator)
  *
  * The page links the app manifest and registers the service worker
@@ -103,6 +104,19 @@ $link = fn (string $path, string $label, bool $isCurrent, int $badge = 0): array
 
     <?= $contentHtml ?>
 </main>
+
+<?php if ($showStrengthTestPopUp) : ?>
+    <?php /* The strength test pop-up, once after the first login (B15, A60). */ ?>
+    <dialog class="pop-up" id="strength-test-pop-up" open>
+        <h2><?= e($t->text('strength_test.pop_up_title')) ?></h2>
+        <p><?= e($t->text('strength_test.pop_up_text')) ?></p>
+        <?php /* A form with method="dialog" closes the pop-up without any script. */ ?>
+        <form method="dialog" class="button-row">
+            <a class="button" href="<?= e($basePath) ?>/strength-test"><?= e($t->text('strength_test.start')) ?></a>
+            <button type="submit" class="button-secondary"><?= e($t->text('strength_test.later')) ?></button>
+        </form>
+    </dialog>
+<?php endif; ?>
 
 <footer class="site-footer">
     <p>

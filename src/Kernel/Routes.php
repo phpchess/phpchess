@@ -37,6 +37,7 @@ use PhpChess\Http\Web\Play\PlayPages;
 use PhpChess\Http\Web\Play\RatingController;
 use PhpChess\Http\Web\Play\VacationController;
 use PhpChess\Http\Web\PreferencesController;
+use PhpChess\Http\Web\StrengthTestController;
 use PhpChess\Http\Web\SkinController;
 use PhpChess\Install\InstallerController;
 
@@ -68,6 +69,7 @@ final class Routes
         $home = new HomeController($services);
         $account = new AccountController($services);
         $preferences = new PreferencesController($services);
+        $strengthTest = new StrengthTestController($services);
         $skin = new SkinController($services);
         $adminPages = new AdminPages($services);
         $dashboard = new DashboardController($services, $adminPages);
@@ -116,6 +118,11 @@ final class Routes
         $router->post('/account/preferences', fn (Request $request): Response => $preferences->savePreferences($request), Access::MEMBERS);
         $router->get('/account/password', fn (Request $request): Response => $preferences->showPasswordForm($request), Access::MEMBERS);
         $router->post('/account/password', fn (Request $request): Response => $preferences->changePassword($request), Access::MEMBERS);
+
+        // --- The strength test (B15) ---
+        $router->get('/strength-test', fn (Request $request): Response => $strengthTest->show($request), Access::MEMBERS);
+        $router->post('/strength-test/start', fn (Request $request): Response => $strengthTest->start($request), Access::MEMBERS);
+        $router->post('/strength-test/answer', fn (Request $request): Response => $strengthTest->answer($request), Access::MEMBERS);
 
         // --- Play: challenges, the Play button and invites (G-05, G-20, G-21) ---
         $router->get('/play', fn (Request $request): Response => $challenges->lobby($request), Access::MEMBERS);
