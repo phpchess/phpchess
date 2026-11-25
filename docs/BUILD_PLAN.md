@@ -24,6 +24,8 @@ The plan is six blocks, split into eleven large chunks.
 | | C2-2 Community, school and API | messages, profiles, content, school mode, API v1, PWA and Web Push, archive (Docker moved to backlog, A40) | done (2026-11-23); Web Push phone test (A18) pending |
 | 3 Live and computer | C3-1 Timed play | clock, lobby, polling transport, limits, measurements | done (2026-11-24, 5+3 games played on the local install) |
 | | C3-2 Computer opponent | engine in the browser, selection layer, characters, calibration | done (2026-11-25, tuned to real players, A55–A58); reviewed and play-tested 2026-11-25 |
+| | F1 Fixes and the strength test | B7, B15, B17, B20, B21, B23, B30 (A59–A65) | in progress |
+| | F2 UI overhaul | B28, B29, new Play page | planned |
 | 4 Tournaments | C4-1 Tournament core | model, Round Robin, Swiss, knockout, League with drag-and-drop, tie-breaks | planned |
 | | C4-2 Special formats | Team vs Team, Arena, voting, class tournaments | planned |
 | 5 Lichess | C5-1 Lichess | embeds, login with Lichess, API | planned |
@@ -148,6 +150,15 @@ Release 6.0 is C0-1 to C4-2, plus a check on a real shared host before release.
   - the calibration run.
 - **Done**: the calibration result lands in the target band (about 600 and below), its confidence range is published, and no random blunders are seen in the sample games.
 - **Changed during the chunk (2026-11-25)**: the players are tuned against real players of each rating (Lichess profile, A55) instead of an Elo range; results in `docs/proofs/c3-2-human-profile.md`. The "no random blunders" proof is dropped (user): human-like giveaways are now intended (A56), and A57–A58 replace random blunders with noise, blind spots and threat blindness. Check run of the final adjustment: backlog B32.
+
+## F1 Fixes and the strength test
+- **Scope**: backlog B7, B15, B17 (plus no chat in games against the computer), B20, B21, B23, B30; decisions A59–A65.
+  - **B15 strength test** (A59, A60): 10 adaptive Lichess puzzles (CC0), pop-up on first login, offered next to the rating until the strength is known.
+  - **B17**: review of C2-2; chat closed on finished and computer games, no colour reset after posting (A61).
+  - **B7** admin login without "register"; **B20** service worker cache name from the release (A62).
+  - **B21** site-wide poll with challenge pop-up (A63); **B23** no flicker in live games (A64); **B30** computer move delay (A65).
+- **Tests**: puzzle selection and band result; chat refused on finished/computer games; cache name changes with the version; site-wide poll answer; a poll with news but no move leaves the board alone; delay settings.
+- **Done**: as every chunk (tests, PHPStan max, composer audit, header check), each run with the user's go.
 
 ## C4-1 Tournament core
 - **Scope**: T-01 to T-08, ADM-06.
