@@ -24,7 +24,7 @@ A self-hosted chess server (PHP 8.3+, MariaDB/MySQL, plain shared hosting). Comp
 
 ## Tools
 - PHP: `C:\Users\chriz\CBPROJS\htdocs\xampp\php\php.exe`; Composer: `tools/composer.phar`.
-- Local site: http://pc6.localhost (basic-auth login), serves `public/` only. Databases (A22): `phpchess` (site) and `phpchess_support` (tests); user `pc60`, credentials in `xampp\passwords_pc60.txt`. Tests read the database from `PHPCHESS_TEST_DB_*` environment variables (`tests/Support/TestDatabase.php`).
+- Three copies only (2026-11-25): this folder is development only and is **not served** (no install here; the installer would delete src/Install). Test deploy: http://127.0.0.1/pc6sub/phpchess/ (folder htdocs/pc6sub/phpchess, outside git), updated from the release zip keeping its config/config.php, storage/ and closed installer. Git: GitHub. Databases (A22): `phpchess` (deploy) and `phpchess_support` (tests); user `pc60`, credentials in `xampp\passwords_pc60.txt`. Tests read the database from `PHPCHESS_TEST_DB_*` environment variables (`tests/Support/TestDatabase.php`).
 - Checks: `php tools/check-headers.php`, `php tools/check-sql.php` (K5), `php tools/check-escaping.php` (K6), `php tools/check-external-urls.php` (K9); release zip: `php tools/build-release.php --composer="<php> tools/composer.phar"`.
 
 ## Status
