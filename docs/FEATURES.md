@@ -189,9 +189,9 @@ Decisions A1–A21 are in [DECISIONS.md](DECISIONS.md).
 ## L — Lichess (A9)
 | Id | Feature | Origin | Chunk | Switch | Status |
 |---|---|---|---|---|---|
-| L-01 | Lichess learning content: bundled puzzles (no switch) and Lichess TV on our own board, no iframes (A75, A76) | new | C5-1 | external content (TV only) | done (2026-11-26), review pending |
+| L-01 | Lichess learning content: bundled puzzles (no switch) and Lichess TV on our own board, no iframes (A75, A76) | new | C5-1 | external content (TV only) | done (2026-11-26), reviewed |
 | L-02 | Login with Lichess / account link (OAuth with PKCE) | new | C5-1 | external content | dropped (A77) |
-| L-03 | Study games: PGN uploads and Lichess imports through the content scanner, study themes, links to lichess.org (A78, A81, A88) | new | C5-1 | external content (Lichess imports only) | done (2026-11-26), review pending |
+| L-03 | Study games: PGN uploads and Lichess imports through the content scanner, study themes, links to lichess.org (A78, A81, A88) | new | C5-1 | external content (Lichess imports only) | done (2026-11-26), reviewed |
 
 ## Dropped by decision
 | 4.4 feature | Decision |
