@@ -191,7 +191,7 @@ Release 6.0 is C0-1 to C4-2, plus a check on a real shared host before release.
   - Pages: `/tournaments` (list, page with five views, PGN), `/tournaments/{id}/manage` (the organiser's desk), `/tournaments/{id}/league` (editor), `/admin/tournaments`.
   - Games::end() tells TournamentResults (K3); Games::correctResult() for corrections; Games::startForTournament() for guests (A109).
   - Tests: `tests/Tournament/` (pairing tables, Dutch, tie-breaks, whole tournaments on the database).
-  - Swiss checked against bbpPairings reference cases (tests/Tournament/fixtures/bbp): Dutch 2025 C5 and C9 match; a 60-player round-15 case does not (needs the full Dutch quality rules), shown as incomplete.
+  - Swiss: full FIDE Dutch 2026 (A112: completion by maximum matching, C5–C21, floats, topscorers); checked against bbpPairings reference cases: Dutch 2025 C5 and C9 exact, a 60-player final round 26 of 30 boards (the rest hinges on C8's exact measure), shown as incomplete.
 
 ## C4-2 Special formats
 - **Scope**: T-09 to T-13.

@@ -364,9 +364,10 @@ final class TournamentRounds
                 $boards[] = ['division' => 0, 'board' => 0, 'white' => $player->userId, 'black' => null, 'match' => 0, 'bye' => Pairing::OUTCOME_ABSENCE_BYE];
                 continue;
             }
-            $present[] = self::swissPlayer($player, $pairings);
+            $present[] = self::swissPlayer($player, $pairings, $number);
         }
-        $result = (new DutchPairing())->pair($present);
+        $roundCount = max(1, $tournament->roundsPlanned);
+        $result = (new DutchPairing())->pair($present, $roundCount, $number === $roundCount);
         if ($result === null) {
             return null;
         }
@@ -391,7 +392,7 @@ final class TournamentRounds
      *
      * @param list<Pairing> $pairings
      */
-    public static function swissPlayer(TournamentPlayer $player, array $pairings): SwissPlayer
+    public static function swissPlayer(TournamentPlayer $player, array $pairings, int $roundToPair = 0): SwissPlayer
     {
         $halves = 0;
         $colours = [];
@@ -408,19 +409,69 @@ final class TournamentRounds
             if ($pairing->counts()) {
                 $halves += $pairing->halvesOf($player->userId);
             }
-            if ($pairing->wasPlayed()) {
-                $colours[] = $pairing->colourOf($player->userId);
-            }
+            // Only games really played count as met: after a forfeit the two may meet again (FIDE C.04.1).
             $opponentId = $pairing->opponentOf($player->userId);
-            if ($opponentId !== null) {
+            if ($pairing->wasPlayed() && $opponentId !== null) {
+                $colours[] = $pairing->colourOf($player->userId);
                 $opponents[] = $opponentId;
             }
-            if ($pairing->outcome === Pairing::OUTCOME_BYE) {
+            // C2: after a bye, or a win's worth of points without playing, no second bye.
+            if ($pairing->counts() && !$pairing->wasPlayed() && $pairing->halvesOf($player->userId) === 2) {
                 $hadBye = true;
             }
         }
 
-        return new SwissPlayer($player->userId, $player->seed, $halves, $colours, $opponents, $hadBye, $unplayed);
+        return new SwissPlayer(
+            $player->userId,
+            $player->seed,
+            $halves,
+            $colours,
+            $opponents,
+            $hadBye,
+            $unplayed,
+            self::floatIn($player->userId, $roundToPair - 1, $pairings),
+            self::floatIn($player->userId, $roundToPair - 2, $pairings),
+        );
+    }
+
+    /**
+     * A player's float in one round (FIDE 1.4): "down" after playing a
+     * lower-scored opponent or scoring without playing, "up" after playing
+     * a higher-scored one, "" otherwise. Scores are those before that round.
+     *
+     * @param list<Pairing> $pairings
+     */
+    private static function floatIn(int $userId, int $round, array $pairings): string
+    {
+        if ($round < 1) {
+            return '';
+        }
+        $board = null;
+        $scoreBefore = [];
+        foreach ($pairings as $pairing) {
+            if ($pairing->round < $round && $pairing->counts()) {
+                $scoreBefore[$pairing->whiteId] = ($scoreBefore[$pairing->whiteId] ?? 0) + $pairing->whiteHalves;
+                if ($pairing->blackId !== null) {
+                    $scoreBefore[$pairing->blackId] = ($scoreBefore[$pairing->blackId] ?? 0) + $pairing->blackHalves;
+                }
+            }
+            if ($pairing->round === $round && $pairing->involves($userId) && $pairing->counts()) {
+                $board = $pairing;
+            }
+        }
+        if ($board === null) {
+            return '';
+        }
+        if (!$board->wasPlayed()) {
+            return $board->halvesOf($userId) > 0 ? SwissPlayer::FLOAT_DOWN : '';
+        }
+        $own = $scoreBefore[$userId] ?? 0;
+        $opponent = $scoreBefore[(int) $board->opponentOf($userId)] ?? 0;
+        if ($own === $opponent) {
+            return '';
+        }
+
+        return $own > $opponent ? SwissPlayer::FLOAT_DOWN : SwissPlayer::FLOAT_UP;
     }
 
     /**
