@@ -14,18 +14,11 @@
 
 use PhpChess\Domain\Play\Challenge;
 
-// The text that says how fast and in what way a challenge is played.
-$challengeDetails = function (Challenge $challenge) use ($t): string {
-    $pace = $challenge->timeControl !== null
-        ? $t->text('play.pace_timed', ['control' => $challenge->timeControl])
-        : $t->text('challenge.summary', ['days' => $challenge->daysPerMove]);
-    $details = [$pace, $t->text($challenge->isRated ? 'play.rated' : 'game.unrated'), $t->text('challenge.colour.' . $challenge->colour)];
-    if ($challenge->startFen !== null) {
-        $details[] = $t->text('challenge.custom_position');
-    }
-
-    return implode(' · ', $details);
-};
+// The variables of one challenge tile (play/challenge_tile, A84).
+$tileVariables = fn (Challenge $challenge): array => [
+    'challenge' => $challenge, 'viewerId' => $viewerId, 'usernames' => $usernames,
+    'basePath' => $basePath, 'csrfToken' => $csrfToken, 't' => $t,
+];
 ?>
 <div class="box-grid play-boxes" id="play-boxes" data-version="<?= e($boxesVersion) ?>">
 
@@ -35,9 +28,9 @@ $challengeDetails = function (Challenge $challenge) use ($t): string {
         <?php if ($myGames === []) : ?>
             <p class="muted"><?= e($t->text('play.no_games')) ?></p>
         <?php else : ?>
-            <ul class="card-list">
+            <ul class="tile-grid">
                 <?php foreach ($myGames as $game) : ?>
-                    <?= $template->render('play/game_card', ['game' => $game, 'usernames' => $usernames, 'viewerId' => $viewerId, 'basePath' => $basePath, 't' => $t]) ?>
+                    <?= $template->render('play/game_tile', ['game' => $game, 'usernames' => $usernames, 'viewerId' => $viewerId, 'basePath' => $basePath, 't' => $t]) ?>
                 <?php endforeach; ?>
             </ul>
         <?php endif; ?>
@@ -52,22 +45,9 @@ $challengeDetails = function (Challenge $challenge) use ($t): string {
         <?php if ($receivedChallenges === []) : ?>
             <p class="muted"><?= e($t->text('play.no_received_challenges')) ?></p>
         <?php else : ?>
-            <ul class="card-list">
+            <ul class="tile-grid">
                 <?php foreach ($receivedChallenges as $challenge) : ?>
-                    <li class="card">
-                        <p class="card-title"><?= e($t->text('challenge.from', ['name' => $usernames[$challenge->challengerId] ?? '?'])) ?></p>
-                        <p class="muted"><?= e($challengeDetails($challenge)) ?></p>
-                        <div class="card-actions">
-                            <form method="post" action="<?= e($basePath) ?>/challenges/<?= e($challenge->id) ?>/accept" class="inline-form">
-                                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-                                <button type="submit"><?= e($t->text('challenge.accept')) ?></button>
-                            </form>
-                            <form method="post" action="<?= e($basePath) ?>/challenges/<?= e($challenge->id) ?>/decline" class="inline-form">
-                                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-                                <button type="submit" class="button-secondary"><?= e($t->text('challenge.decline')) ?></button>
-                            </form>
-                        </div>
-                    </li>
+                    <?= $template->render('play/challenge_tile', $tileVariables($challenge)) ?>
                 <?php endforeach; ?>
             </ul>
         <?php endif; ?>
@@ -79,30 +59,9 @@ $challengeDetails = function (Challenge $challenge) use ($t): string {
         <?php if ($myChallenges === [] && $openChallenges === []) : ?>
             <p class="muted"><?= e($t->text('play.no_challenges')) ?></p>
         <?php else : ?>
-            <ul class="card-list">
-                <?php foreach ($myChallenges as $challenge) : ?>
-                    <li class="card card-mine">
-                        <p class="card-title"><?= e($t->text('challenge.yours.' . $challenge->kind, ['name' => $usernames[$challenge->opponentId ?? 0] ?? ''])) ?></p>
-                        <p class="muted"><?= e($challengeDetails($challenge)) ?></p>
-                        <div class="card-actions">
-                            <form method="post" action="<?= e($basePath) ?>/challenges/<?= e($challenge->id) ?>/cancel" class="inline-form">
-                                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-                                <button type="submit" class="button-secondary"><?= e($t->text('challenge.cancel')) ?></button>
-                            </form>
-                        </div>
-                    </li>
-                <?php endforeach; ?>
-                <?php foreach ($openChallenges as $challenge) : ?>
-                    <li class="card">
-                        <p class="card-title"><?= e($t->text('challenge.from', ['name' => $usernames[$challenge->challengerId] ?? '?'])) ?></p>
-                        <p class="muted"><?= e($challengeDetails($challenge)) ?></p>
-                        <div class="card-actions">
-                            <form method="post" action="<?= e($basePath) ?>/challenges/<?= e($challenge->id) ?>/accept" class="inline-form">
-                                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-                                <button type="submit"><?= e($t->text('challenge.accept')) ?></button>
-                            </form>
-                        </div>
-                    </li>
+            <ul class="tile-grid">
+                <?php foreach ([...$myChallenges, ...$openChallenges] as $challenge) : ?>
+                    <?= $template->render('play/challenge_tile', $tileVariables($challenge)) ?>
                 <?php endforeach; ?>
             </ul>
         <?php endif; ?>

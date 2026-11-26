@@ -30,6 +30,7 @@ $drawings = [
     'login' => '<path d="M10 4H5v16h5"/><path d="M14 8l4 4-4 4M18 12H8"/>',
     'back' => '<path d="M15 5l-7 7 7 7"/>',
     'close' => '<path d="M6 6l12 12M18 6L6 18"/>',
+    'check' => '<path d="M4 12.5l5 5L20 6.5"/>',
     // Kinds of game
     'computer' => '<rect x="3" y="4" width="18" height="12" rx="1"/><path d="M8 20h8M12 16v4"/><path d="M9 9h.01M15 9h.01M9 12.5c1.8 1 4.2 1 6 0"/>',
     'human' => '<circle cx="8" cy="7" r="3"/><circle cx="16" cy="7" r="3"/><path d="M2 20c0-3.3 2.7-6 6-6s6 2.7 6 6M14 14.2c.6-.1 1.3-.2 2-.2 3.3 0 6 2.7 6 6"/>',

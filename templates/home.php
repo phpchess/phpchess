@@ -84,16 +84,9 @@ $resultText = function ($game) use ($t): string {
             <?php if ($challengesForMe !== []) : ?>
                 <section aria-labelledby="for-me-title">
                     <h2 id="for-me-title"><?= e($t->text('home.challenges_for_me')) ?></h2>
-                    <ul class="text-list">
+                    <ul class="tile-grid">
                         <?php foreach ($challengesForMe as $challenge) : ?>
-                            <li>
-                                <span><?= e($t->text('challenge.from', ['name' => $usernames[$challenge->challengerId] ?? '?'])) ?>
-                                    · <?= e($t->text('challenge.summary', ['days' => $challenge->daysPerMove])) ?></span>
-                                <form method="post" action="<?= e($basePath) ?>/challenges/<?= e($challenge->id) ?>/accept" class="inline-form">
-                                    <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-                                    <button type="submit" class="button button-small"><?= e($t->text('challenge.accept')) ?></button>
-                                </form>
-                            </li>
+                            <?= $template->render('play/challenge_tile', ['challenge' => $challenge, 'viewerId' => $user->id, 'usernames' => $usernames, 'basePath' => $basePath, 'csrfToken' => $csrfToken, 't' => $t]) ?>
                         <?php endforeach; ?>
                     </ul>
                 </section>
@@ -104,23 +97,9 @@ $resultText = function ($game) use ($t): string {
                 <?php if ($openChallenges === []) : ?>
                     <p class="muted"><?= e($t->text('home.no_open_challenges')) ?></p>
                 <?php else : ?>
-                    <ul class="text-list">
+                    <ul class="tile-grid">
                         <?php foreach ($openChallenges as $challenge) : ?>
-                            <li>
-                                <span>
-                                    <?= e($usernames[$challenge->challengerId] ?? '?') ?>
-                                    · <?= e($t->text('challenge.summary', ['days' => $challenge->daysPerMove])) ?>
-                                    · <?= e($t->text($challenge->isRated ? 'play.rated' : 'game.unrated')) ?>
-                                </span>
-                                <?php if ($challenge->challengerId === $user->id) : ?>
-                                    <span class="muted"><?= e($t->text('challenge.yours.open')) ?></span>
-                                <?php else : ?>
-                                    <form method="post" action="<?= e($basePath) ?>/challenges/<?= e($challenge->id) ?>/accept" class="inline-form">
-                                        <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-                                        <button type="submit" class="button button-small"><?= e($t->text('challenge.accept')) ?></button>
-                                    </form>
-                                <?php endif; ?>
-                            </li>
+                            <?= $template->render('play/challenge_tile', ['challenge' => $challenge, 'viewerId' => $user->id, 'usernames' => $usernames, 'basePath' => $basePath, 'csrfToken' => $csrfToken, 't' => $t]) ?>
                         <?php endforeach; ?>
                     </ul>
                 <?php endif; ?>

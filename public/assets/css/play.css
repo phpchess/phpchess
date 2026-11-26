@@ -321,3 +321,49 @@ details.confirm summary { cursor: pointer; }
 .play-tile { justify-content: center; }
 .play-tile .icon { width: 4rem; height: 4rem; }
 .play-tile-secondary { background: var(--colour-surface); color: var(--colour-accent); }
+
+/* ===== Game and challenge tiles (A84: icons over text) ===== */
+/* Tiles side by side, as many as fit; each about 7.5rem wide. */
+.tile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr));
+    gap: var(--space-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-2);
+    border: 1px solid var(--colour-border);
+    border-radius: var(--radius);
+    text-align: center;
+}
+
+.tile-mine, .tile-your-move { border: 2px solid var(--colour-accent); }
+
+.tile-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-1);
+    width: 100%;
+    color: inherit;
+    text-decoration: none;
+}
+
+.micro-board { display: block; flex: none; border-radius: 2px; }
+.micro-piece-white { fill: #ffffff; stroke: #000000; stroke-width: 0.6; }
+.micro-piece-black { fill: #111111; }
+
+.tile-name { font-weight: 600; max-width: 100%; overflow-wrap: anywhere; }
+.tile-icons { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-2); color: var(--colour-muted-text); font-size: 0.875rem; }
+.tile-icon { display: inline-flex; align-items: center; gap: 0.2rem; }
+.tile-icon-strong { color: var(--colour-accent); }
+.tile-actions { display: flex; gap: var(--space-2); }
+.tile-actions form { margin: 0; }
+.tile-actions button { margin: 0; }

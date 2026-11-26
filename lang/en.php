@@ -294,6 +294,11 @@ return [
     'play.no_challenges' => 'No challenges waiting.',
     // --- The Play page and the new game pop-up (F2, A69, A70, A83) ---
     'play.received_challenges' => 'Challenges for you',
+    'tile.name_vs' => '{name} vs',
+    'tile.vs_name' => 'vs {name}',
+    'tile.you_play.white' => 'You play White',
+    'tile.you_play.black' => 'You play Black',
+    'tile.you_play.random' => 'Colours decided at random',
     'play.no_received_challenges' => 'Nobody has challenged you.',
     'play.open_challenges' => 'Open challenges',
     'play.admin_news' => 'News',

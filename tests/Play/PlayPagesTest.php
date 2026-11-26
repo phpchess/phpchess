@@ -79,7 +79,9 @@ final class PlayPagesTest extends TestCase
         $ben = $this->site->loggedInBrowser('ben');
         $home = $ben->get('/')->body;
         self::assertStringContainsString('Challenges for you', $home);
-        self::assertStringContainsString('Challenge from anna', $home);
+        // A tile (A84): a micro board, the name, icons; random colours, so just the name.
+        self::assertStringContainsString('<span class="tile-name">anna</span>', $home);
+        self::assertStringContainsString('class="micro-board"', $home);
         $benId = (int) $this->site->users()->findByUsernameOrEmail('ben')?->id;
         self::assertSame(1, $this->play->noticeRepository()->countUnread($benId));
     }
