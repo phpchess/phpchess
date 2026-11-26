@@ -28,7 +28,7 @@ The plan is six blocks, split into eleven large chunks.
 | | F2 UI overhaul | B28, B29, new Play page (A66–A73, A82–A86) | done (2026-11-26), reviewed by the user |
 | 4 Tournaments | C4-1 Tournament core | model, Round Robin, Swiss, knockout, League with drag-and-drop, tie-breaks | planned |
 | | C4-2 Special formats | Team vs Team, Arena, voting, class tournaments | planned |
-| 5 Lichess | C5-1 Lichess | embeds, login with Lichess, API | planned |
+| 5 Lichess | C5-1 Lichess | puzzles, study games, Lichess TV, content scanner (A74–A88; login dropped, A77) | done for review (2026-11-26): all checks pass |
 
 Release 6.0 is C0-1 to C4-2, plus a check on a real shared host before release.
 
@@ -206,5 +206,16 @@ Release 6.0 is C0-1 to C4-2, plus a check on a real shared host before release.
 - **Contracts**: K9, which is opened only by the "external content" switch; K8.
 - **Tests**:
   - with the switch off, there are no outside requests at all;
-  - the OAuth flow, including state and PKCE checks.
-- **Done**: works with the switch on, is silent with it off, and the OAuth flow passes security review.
+  - the OAuth flow, including state and PKCE checks (dropped with L-02, A77);
+  - the content scanner keeps poisoned PGN out (A81).
+- **Done**: works with the switch on, is silent with it off, and the scanner passes security review.
+- **Result (2026-11-26)**: built and checked; review pending. Login with Lichess was dropped (A77), no iframes (A75).
+  - **Learn** in the main menu (`/learn`): puzzles, study themes, my own Lichess games, Lichess TV.
+  - **Puzzles** (L-01): 3,334 bundled Lichess puzzles (CC0, `src/Domain/Puzzles/puzzle-set.csv`, built by `tools/build-puzzle-set.php`), 16 motifs × 5 levels, on our own board; no switch, works offline.
+  - **Study games** (L-03): admins make themes and fill them from PGN uploads (offline) or Lichess (one game, or a player's newest up to 50); players import one game at a time into a private list (A88). Replay on our own board.
+  - **Lichess TV** (L-01): our server asks lichess.org at most every 10 s per channel; the browser asks only our server (CSP stays `'self'`).
+  - **Content scanner** (A81): `ContentScanner` + strict `PgnReader`; rejected games go to the audit log.
+  - **Safety of the door**: `LichessClient` refuses unless the switch is on; https://lichess.org only, no redirects, one request at a time, 60 s rest after 429, 1 MB reply cap. The switch can only be turned on after "Test connection" passed (A80); it needs curl (ServerSupport).
+  - Migration 10 (`study_themes`, `study_games`).
+  - Tests: `tests/Lichess/` (ContentScanner, LichessClient with a fake transport, PuzzleSet, Learn pages).
+  - **Not verified**: real requests to lichess.org (TV, game import, player import) were never sent; the first real check is the admin's "Test connection" on the test site.

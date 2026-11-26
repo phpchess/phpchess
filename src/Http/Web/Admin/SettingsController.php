@@ -153,6 +153,11 @@ final class SettingsController
                 $unavailable[$name] = 'admin.switches.needs.' . ServerSupport::neededBy($name);
             }
         }
+        // "External content" can only be turned on after the Lichess connection test passed (A80).
+        if (!isset($unavailable[FeatureSwitches::EXTERNAL_CONTENT]) && !$states[FeatureSwitches::EXTERNAL_CONTENT]
+            && !$this->services->lichess()->hasPassedSelfTest()) {
+            $unavailable[FeatureSwitches::EXTERNAL_CONTENT] = 'admin.switches.needs.lichess_test';
+        }
 
         return $this->adminPages->render($request, 'admin/switches', 'admin.switches.title', [
             'states' => $states,
@@ -166,6 +171,10 @@ final class SettingsController
         $changes = [];
         foreach (array_keys(FeatureSwitches::ALL) as $name) {
             $isOn = $request->formValue('switch_' . $name) === 'on';
+            // "External content" stays off until the Lichess connection test passed (A80).
+            if ($name === FeatureSwitches::EXTERNAL_CONTENT && $isOn && !$this->services->lichess()->hasPassedSelfTest()) {
+                $isOn = false;
+            }
             if ($switches->isOn($name) !== $isOn) {
                 $changes[] = $name . ($isOn ? ' on' : ' off');
             }

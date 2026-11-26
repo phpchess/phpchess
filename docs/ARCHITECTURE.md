@@ -70,7 +70,7 @@ Each module is a folder under `src/Domain/`. It owns its tables and is used by o
 | Community | profiles, buddies, messages, filter, content | `friendships`, `messages`, `word_filter`, `news`, `pages`, `server_messages`, `tips`, `media` |
 | Notifications | presence-aware delivery: live, in-app, push, email; quiet hours | `notifications`, `email_outbox`, `push_subscriptions` |
 | System | settings, feature switches, jobs, audit, migrations | `settings`, `jobs`, `audit_log`, `schema_migrations`, `rate_limits` |
-| Lichess | OAuth link, embeds, API calls | `user_external_accounts` |
+| Lichess | the one door to lichess.org (`Infra/Lichess/LichessClient`), the content scanner, study themes and games, TV (C5-1); puzzles live in `Domain/Puzzles` (bundled file, no table) | `study_themes`, `study_games` |
 
 **Who calls whom:**
 - **Games** calls Rules and, when a game ends, Ratings and Notifications.

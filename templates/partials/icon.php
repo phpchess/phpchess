@@ -47,6 +47,17 @@ $drawings = [
     'rules' => '<path d="M13 2.5l8.5 8.5-3 3L10 5.5z"/><path d="M12.5 10.5L4 19"/><path d="M3 21.5h10"/>', // a gavel: head, handle, block
     'link' => '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
     'stats' => '<path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 6-6"/>',
+    // Learning (C5-1)
+    'learn' => '<path d="M4 4h6a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H4z"/><path d="M20 4h-6a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h6z"/>', // an open book
+    'puzzle' => '<path d="M5 8h3a2 2 0 1 1 4 0h3v3a2 2 0 1 1 0 4v4H5v-4a2 2 0 1 0 0-4z"/>', // a puzzle piece
+    'tv' => '<rect x="3" y="6" width="18" height="13" rx="1"/><path d="M8 2l4 4 4-4"/>',
+    'upload' => '<path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v4h16v-4"/>',
+    'next' => '<path d="M9 5l7 7-7 7"/>',
+    'previous' => '<path d="M15 5l-7 7 7 7"/>',
+    'first' => '<path d="M17 5l-7 7 7 7M7 5v14"/>',
+    'last' => '<path d="M7 5l7 7-7 7M17 5v14"/>',
+    'remove' => '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
+    'hint' => '<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9V16h7v-2.1A6 6 0 0 0 12 3z"/>',
 ];
 
 $shapes = $drawings[$icon] ?? '<circle cx="12" cy="12" r="8"/>';

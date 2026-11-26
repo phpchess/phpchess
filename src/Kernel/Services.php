@@ -14,6 +14,11 @@ use PhpChess\Domain\Identity\OwnData;
 use PhpChess\Domain\Notify\NotificationChoices;
 use PhpChess\Domain\School\Classes;
 use PhpChess\Domain\System\Archive;
+use PhpChess\Domain\Lichess\ContentScanner;
+use PhpChess\Domain\Lichess\StudyImport;
+use PhpChess\Domain\Puzzles\PuzzleSet;
+use PhpChess\Infra\Lichess\LichessClient;
+use PhpChess\Infra\Lichess\StudyRepository;
 use PhpChess\Infra\Community\BuddyRepository;
 use PhpChess\Infra\Community\GameChatRepository;
 use PhpChess\Infra\Community\MessageRepository;
@@ -350,6 +355,40 @@ final class Services
     public function archive(): Archive
     {
         return new Archive(new ArchiveRepository($this->database()), $this->settings(), $this->appRoot . '/storage/archives');
+    }
+
+    // --- Lichess, study games and puzzles (C5-1: L-01, L-03) ---
+
+    /** The one door to lichess.org; it refuses while "external content" is off (K9). */
+    public function lichess(): LichessClient
+    {
+        $lockFolder = $this->appRoot . '/storage/logs';
+        if (!is_dir($lockFolder)) {
+            mkdir($lockFolder, 0775, true);
+        }
+
+        return new LichessClient($this->switches(), $this->settings(), $lockFolder . '/lichess.lock', $this->now);
+    }
+
+    public function studies(): StudyRepository
+    {
+        return new StudyRepository($this->database());
+    }
+
+    public function studyImport(): StudyImport
+    {
+        return new StudyImport(
+            $this->lichess(),
+            new ContentScanner($this->wordFilter()),
+            $this->studies(),
+            $this->auditLog(),
+            $this->request->clientIp,
+        );
+    }
+
+    public function puzzleSet(): PuzzleSet
+    {
+        return new PuzzleSet();
     }
 
     // --- Mail ---

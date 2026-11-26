@@ -367,3 +367,32 @@ details.confirm summary { cursor: pointer; }
 .tile-actions { display: flex; gap: var(--space-2); }
 .tile-actions form { margin: 0; }
 .tile-actions button { margin: 0; }
+
+/* ===== Learn: study games, puzzles, Lichess TV (C5-1) ===== */
+
+/* The moves of a study game: a row of small buttons that wraps, like a score sheet. */
+.study-game-moves {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+    margin: var(--space-3) 0;
+    padding-left: 0;
+    list-style: none;
+}
+.study-game-move {
+    min-height: 2.25rem;
+    padding: 0 var(--space-2);
+    border: 1px solid var(--colour-border);
+    border-radius: var(--radius);
+    background: var(--colour-surface);
+    color: var(--colour-text);
+    font-size: var(--text-small);
+}
+.study-game-move.is-current { background: var(--colour-accent); color: var(--colour-accent-text); border-color: var(--colour-accent); }
+.study-game-buttons { justify-content: center; }
+.study-game-pgn { white-space: pre-wrap; overflow-wrap: anywhere; font-size: var(--text-small); }
+
+/* The puzzle and TV boards: as wide as the phone, never wider than a laptop needs. */
+#puzzle-board, #lichess-tv-board, #study-game-board { max-width: 36rem; }
+.puzzle-trainer .choice-group, .lichess-tv .choice-group { margin-bottom: var(--space-3); }
+.lichess-tv-players { font-weight: 700; min-height: 1.5em; }

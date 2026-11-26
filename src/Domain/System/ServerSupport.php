@@ -15,6 +15,9 @@ namespace PhpChess\Domain\System;
  *   push    openssl (with the P-256 curve), curl and mbstring, for Web
  *           Push (N-03). Without them, "push notifications" stays off;
  *           members still get email.
+ *   outside curl, for the Lichess module's requests to lichess.org
+ *           (C5-1). Without it, "external content" stays off; the
+ *           bundled puzzles and uploaded study games still work.
  *
  * FeatureSwitches asks this class, so a feature the server can't support
  * is off everywhere: menus, pages and the API (K8). The installer's
@@ -26,11 +29,13 @@ final class ServerSupport
 {
     public const string IMAGES = 'images';
     public const string PUSH = 'push';
+    public const string OUTSIDE = 'outside';
 
     /** Which feature switch needs which support. */
     public const array NEEDED_BY_SWITCH = [
         FeatureSwitches::FILE_UPLOADS => self::IMAGES,
         FeatureSwitches::PUSH_NOTIFICATIONS => self::PUSH,
+        FeatureSwitches::EXTERNAL_CONTENT => self::OUTSIDE,
     ];
 
     /** @var list<string> supports a test pretends are missing */
@@ -46,6 +51,7 @@ final class ServerSupport
         return match ($support) {
             self::IMAGES => function_exists('imagecreatefromstring') && function_exists('imagepng') && function_exists('getimagesizefromstring'),
             self::PUSH => self::hasPushSupport(),
+            self::OUTSIDE => function_exists('curl_init'),
             default => false,
         };
     }

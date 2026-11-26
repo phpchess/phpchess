@@ -19,6 +19,7 @@ Every library phpChess 6 uses or plans to use, checked against A16 (client side)
 | Lichess chess-openings (data) | Opening book and opening names: `public/assets/engine/book/a.tsv`–`e.tsv` (ECO, name, moves) | AI-02 | files as supplied by the user, 2026-11-24 | CC0-1.0 | none | none (data, no code) | **yes**: plain text | **approved** (A52) |
 | Opening traps sample (data) | `traps-sample.tsv`: popular losing opening moves from Lichess games with engine refutation, for low-level and teacher players | AI-03 | supplied by the user, 2026-11-24 (8 rows) | CC0-1.0 (Lichess database) | none | none (data) | **yes**: plain text | **approved** (A52) |
 | Lichess puzzle database (data) | Strength test (B15): 68 puzzles, 4 per rating band 600–2200, in `src/Domain/Strength/strength-puzzles.csv`, picked by `tools/pick-puzzles.php` from https://database.lichess.org/ (`lichess_db_puzzle.csv.zst`, downloaded 2026-11-25; full file kept outside the repo) | B15 | 2026-11-25 download | CC0-1.0 | none | none (data) | **yes**: plain text | **approved** (A59) |
+| Lichess puzzle database (data), puzzle set | Puzzle trainer (L-01): 3,334 puzzles, 521 KB, in `src/Domain/Puzzles/puzzle-set.csv`, picked by `tools/build-puzzle-set.php` from the same download (popularity ≥80, ≥1,000 plays, 25 motifs × 10 rating bands) | L-01 | 2026-11-25 download | CC0-1.0 | none | none (data) | **yes**: plain text | **approved** (A76, A80) |
 
 ## Server (Composer, runtime)
 | Library | Purpose | Feature | Version | Licence | Own dependencies | Known vulnerabilities | Status |

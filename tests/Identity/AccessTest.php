@@ -44,11 +44,7 @@ final class AccessTest extends TestCase
     public function testVisitorsAreSentToTheLoginPageFromEveryMembersAndAdminPage(): void
     {
         $browser = $this->site->browser();
-        // Every switch on, so no route hides behind its switch's 404 (K8).
-        $switches = new FeatureSwitches($this->site->settings());
-        foreach (array_keys(FeatureSwitches::ALL) as $switchName) {
-            $switches->set($switchName, true);
-        }
+        $this->switchEverythingOn();
 
         foreach ($this->routesWith([Access::MEMBERS, Access::TEACHERS, Access::ADMINS, Access::ADMINS_BEFORE_CONFIRMATION]) as $route) {
             $response = $this->open($browser, $route);
@@ -64,6 +60,7 @@ final class AccessTest extends TestCase
 
     public function testPlayersAndTeachersAreRefusedEveryAdminPage(): void
     {
+        $this->switchEverythingOn();
         foreach ([User::ROLE_PLAYER, User::ROLE_TEACHER, User::ROLE_STUDENT] as $role) {
             $this->site->createUser('someone-' . $role, $role);
             $browser = $this->site->loggedInBrowser('someone-' . $role);
@@ -76,6 +73,7 @@ final class AccessTest extends TestCase
 
     public function testAnAdminMustConfirmThePasswordFirst(): void
     {
+        $this->switchEverythingOn();
         $browser = $this->site->loggedInBrowser(InstalledSite::ADMIN_NAME);
 
         foreach ($this->routesWith([Access::ADMINS]) as $route) {
@@ -175,5 +173,14 @@ final class AccessTest extends TestCase
         Routes::addApplication($router, $services);
 
         return $router->allRoutes();
+    }
+
+    /** Every switch on, so no route hides behind its switch's 404 (K8). */
+    private function switchEverythingOn(): void
+    {
+        $switches = new FeatureSwitches($this->site->settings());
+        foreach (array_keys(FeatureSwitches::ALL) as $switchName) {
+            $switches->set($switchName, true);
+        }
     }
 }

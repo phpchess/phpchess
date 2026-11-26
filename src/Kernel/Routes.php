@@ -39,6 +39,9 @@ use PhpChess\Http\Web\Play\VacationController;
 use PhpChess\Http\Web\PreferencesController;
 use PhpChess\Http\Web\SiteNewsController;
 use PhpChess\Http\Web\StrengthTestController;
+use PhpChess\Http\Web\LearnController;
+use PhpChess\Http\Web\PuzzlesController;
+use PhpChess\Http\Web\Admin\LichessController as AdminLichessController;
 use PhpChess\Http\Web\SkinController;
 use PhpChess\Install\InstallerController;
 
@@ -128,6 +131,32 @@ final class Routes
         $router->get('/strength-test', fn (Request $request): Response => $strengthTest->show($request), Access::MEMBERS);
         $router->post('/strength-test/start', fn (Request $request): Response => $strengthTest->start($request), Access::MEMBERS);
         $router->post('/strength-test/answer', fn (Request $request): Response => $strengthTest->answer($request), Access::MEMBERS);
+
+        // --- Learn: puzzles, study games, Lichess TV (C5-1: L-01, L-03; A74-A88) ---
+        // The bundled puzzles and the study themes are local: no switch.
+        // Everything that asks lichess.org needs "external content" (K8, K9).
+        $puzzles = new PuzzlesController($services);
+        $learn = new LearnController($services, new MemberPages($services));
+        $lichessSwitch = FeatureSwitches::EXTERNAL_CONTENT;
+        $router->get('/learn', fn (Request $request): Response => $learn->hub($request), Access::MEMBERS);
+        $router->get('/learn/puzzles', fn (Request $request): Response => $puzzles->show($request), Access::MEMBERS);
+        $router->post('/learn/puzzles/next', fn (Request $request): Response => $puzzles->next($request), Access::MEMBERS);
+        $router->get('/learn/themes/{id}', fn (Request $request, array $parts): Response => $learn->theme($request, $parts), Access::MEMBERS);
+        $router->get('/learn/games/{id}', fn (Request $request, array $parts): Response => $learn->game($request, $parts), Access::MEMBERS);
+        $router->post('/learn/games/{id}/remove', fn (Request $request, array $parts): Response => $learn->removeOwnGame($request, $parts), Access::MEMBERS);
+        $router->post('/learn/import', fn (Request $request): Response => $learn->import($request), Access::MEMBERS, $lichessSwitch);
+        $router->get('/learn/tv', fn (Request $request): Response => $learn->tv($request), Access::MEMBERS, $lichessSwitch);
+        $router->get('/learn/tv/now', fn (Request $request): Response => $learn->tvNow($request), Access::MEMBERS, $lichessSwitch);
+
+        // --- Admin: Lichess connection, study themes and imports (C5-1: A80, A81, A87) ---
+        $adminLichess = new AdminLichessController($services, $adminPages);
+        $router->get('/admin/lichess', fn (Request $request): Response => $adminLichess->show($request), Access::ADMINS);
+        $router->post('/admin/lichess/test', fn (Request $request): Response => $adminLichess->test($request), Access::ADMINS);
+        $router->post('/admin/lichess/themes', fn (Request $request): Response => $adminLichess->createTheme($request), Access::ADMINS);
+        $router->post('/admin/lichess/themes/{id}/remove', fn (Request $request, array $parts): Response => $adminLichess->removeTheme($request, $parts), Access::ADMINS);
+        $router->post('/admin/lichess/upload', fn (Request $request): Response => $adminLichess->upload($request), Access::ADMINS);
+        $router->post('/admin/lichess/import-game', fn (Request $request): Response => $adminLichess->importGame($request), Access::ADMINS, $lichessSwitch);
+        $router->post('/admin/lichess/import-player', fn (Request $request): Response => $adminLichess->importPlayer($request), Access::ADMINS, $lichessSwitch);
 
         // --- Play: challenges, the Play button and invites (G-05, G-20, G-21) ---
         $router->get('/play', fn (Request $request): Response => $challenges->lobby($request), Access::MEMBERS);
