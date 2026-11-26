@@ -49,6 +49,9 @@ feature ids in [FEATURES.md](FEATURES.md)) when it is planned in
 | B41 | **Puzzle on the main page**: a small puzzle on the start page to keep players coming back (bundled puzzles, works offline). | 2026-11-26 | User, C5-1 review. |
 | B42 | **Puzzle skill ladder**: players earn points for solved puzzles and climb a ladder through thousands of puzzles. Scales: each bundled puzzle has a Lichess rating, so each player gets a puzzle rating (Glicko-2 like games) and is served puzzles near it; points weighted by puzzle rating; one row per attempt or per player keeps the database small. | 2026-11-26 | User, C5-1 review. |
 | B43 | **Side panel login too wide**: the login form in the side panel is wider than the panel; make it fit the panel width (A18, mobile first). | 2026-11-26 | User, C5-1 review. |
+| B44 | **Move table for PGN replays**: the game viewer shows the moves as a table (move number, White, Black; the current move marked, a click jumps there), not a plain list. | 2026-11-26 | User, C5-1 review. |
+| B45 | **Proper replay controls**: buttons for start, back many, back one, play/pause, forward one, forward many and end (\|<<, <<, <, =, >, >>, >>\|); > plays forward and < plays backwards automatically; large touch targets (A18). | 2026-11-26 | User, C5-1 review. |
+| B46 | **Screen layout**: nothing left-aligned in a centred area; pages use the available space automatically (board and panels grow to fit the screen, A18). | 2026-11-26 | User, C5-1 review. |
 
 ## Placed: fix chunks before C4-1 (user, 2026-11-25)
 - **F1 Fixes and the strength test** (done 2026-11-25, user review pending): B7, B15, B17 (plus: no chat in games against the computer), B20, B21, B23, B30.
