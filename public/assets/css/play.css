@@ -321,3 +321,4 @@ details.confirm summary { cursor: pointer; }
     .play-tiles { grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); }
     .play-tile { flex-direction: column; justify-content: center; text-align: center; min-height: 9rem; }
 }
+.play-tile .icon { width: 2.75rem; height: 2.75rem; }
