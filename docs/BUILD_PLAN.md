@@ -191,7 +191,7 @@ Release 6.0 is C0-1 to C4-2, plus a check on a real shared host before release.
   - Pages: `/tournaments` (list, page with five views, PGN), `/tournaments/{id}/manage` (the organiser's desk), `/tournaments/{id}/league` (editor), `/admin/tournaments`.
   - Games::end() tells TournamentResults (K3); Games::correctResult() for corrections; Games::startForTournament() for guests (A109).
   - Tests: `tests/Tournament/` (pairing tables, Dutch, tie-breaks, whole tournaments on the database).
-  - Open: the Swiss check against JaVaFo/bbpPairings TRF files needs those files downloaded (A99, asked the user).
+  - Swiss checked against bbpPairings reference cases (tests/Tournament/fixtures/bbp): Dutch 2025 C5 and C9 match; a 60-player round-15 case does not (needs the full Dutch quality rules), shown as incomplete.
 
 ## C4-2 Special formats
 - **Scope**: T-09 to T-13.
