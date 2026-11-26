@@ -13,6 +13,7 @@
  */
 
 import {Chessboard} from '../../vendor/cm-chessboard/src/Chessboard.js';
+import {FEN} from '../../vendor/cm-chessboard/src/model/Position.js';
 
 // --- Reading what the server put on the page ---
 
@@ -25,7 +26,7 @@ const statusLine = document.getElementById('lichess-tv-status');
 const POLL_SECONDS = 5;
 
 const board = new Chessboard(document.getElementById('lichess-tv-board'), {
-    position: 'start',
+    position: FEN.start, // cm-chessboard has no 'start' word: it would stop the script
     assetsUrl: basePath + '/assets/vendor/cm-chessboard/assets/',
     style: {cssClass: 'phpchess', showCoordinates: false, animationDuration: 300},
 });
