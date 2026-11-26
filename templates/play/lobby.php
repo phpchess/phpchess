@@ -16,6 +16,7 @@
  *
  * Variables: everything play/boxes needs, plus
  *   $adminNews (list of array{title: string, body: string, created_at: string}),
+ *   $chosenPlayer (ComputerPlayer|null: picked on /play/computer, already chosen in the pop-up),
  *   $openPopUp (string: "", "computer", "live" or "correspondence"),
  *   $playDefaults (array{days_per_move: int, rated: bool}),
  *   $timeControls (list of "5+3" texts), $correspondenceDays (list of int),
@@ -106,9 +107,9 @@ if ($timeControls === []) {
                     <?= $template->render('partials/icon', ['icon' => 'human', 'size' => 32]) ?><?= e($t->text('new_game.opponent.human')) ?></label>
             </fieldset>
 
-            <!-- Step 2 (person only): how long -->
+            <!-- Step 2: how long (for the computer too, A85) -->
             <?php if ($timeControls !== []) : ?>
-                <fieldset class="choice-group for-human">
+                <fieldset class="choice-group">
                     <legend><?= $template->render('partials/icon', ['icon' => 'live']) ?><?= e($t->text('new_game.live')) ?></legend>
                     <?php foreach ($timeControls as $control) : ?>
                         <label class="choice"><input type="radio" name="pace" value="live:<?= e($control) ?>"<?= $defaultPace === 'live:' . $control ? ' checked' : '' ?>>
@@ -116,7 +117,7 @@ if ($timeControls === []) {
                     <?php endforeach; ?>
                 </fieldset>
             <?php endif; ?>
-            <fieldset class="choice-group for-human">
+            <fieldset class="choice-group">
                 <legend><?= $template->render('partials/icon', ['icon' => 'correspondence']) ?><?= e($t->text('new_game.correspondence')) ?></legend>
                 <?php foreach ($correspondenceDays as $days) : ?>
                     <label class="choice"><input type="radio" name="pace" value="days:<?= e($days) ?>"<?= $defaultPace === 'days:' . $days ? ' checked' : '' ?>>
@@ -127,7 +128,11 @@ if ($timeControls === []) {
             <!-- Step 3: what strength -->
             <fieldset class="choice-group for-computer">
                 <legend><?= $template->render('partials/icon', ['icon' => 'strength']) ?><?= e($t->text('new_game.strength')) ?></legend>
-                <?php $isFirst = true; ?>
+                <?php if ($chosenPlayer !== null) : ?>
+                    <label class="choice"><input type="radio" name="band" value="player:<?= e($chosenPlayer->id) ?>" checked>
+                        <?= e($chosenPlayer->name) ?><small><?= e($t->text('computer.rating', ['elo' => $chosenPlayer->elo])) ?></small></label>
+                <?php endif; ?>
+                <?php $isFirst = $chosenPlayer === null; ?>
                 <?php foreach ($computerBands as $band => [$lowest, $highest]) : ?>
                     <label class="choice"><input type="radio" name="band" value="<?= e($band) ?>"<?= $isFirst ? ' checked' : '' ?>>
                         <?= e($t->text('new_game.band.' . $band)) ?><small><?= e($highest >= 3000 ? $t->text('new_game.rating_from', ['low' => $lowest]) : $t->text('new_game.rating_between', ['low' => $lowest, 'high' => $highest])) ?></small></label>

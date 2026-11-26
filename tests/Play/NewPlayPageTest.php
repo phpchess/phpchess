@@ -70,6 +70,39 @@ final class NewPlayPageTest extends TestCase
         self::assertFalse($game->isRated);
     }
 
+    public function testAPickedComputerPlayerComesBackChosenInThePopUp(): void
+    {
+        $anna = $this->site->loggedInBrowser('anna');
+        $list = $anna->get('/play/computer')->body;
+        $popUp = $anna->get('/play', ['new' => 'computer', 'player' => '13'])->body;
+
+        self::assertStringContainsString('/chess/play?new=computer&amp;player=13', $list);
+        self::assertStringContainsString('name="band" value="player:13" checked', $popUp);
+    }
+
+    public function testAChosenComputerPlayerGetsTheChosenPace(): void
+    {
+        $anna = $this->site->loggedInBrowser('anna');
+        $anna->submit('/play', '/play/start', ['opponent' => 'computer', 'band' => 'player:13', 'pace' => 'days:7', 'colour' => 'white']);
+
+        $game = $this->play->gameRepository()->listForPlayer($this->annaId, Game::STATE_RUNNING)[0];
+        self::assertSame(7, $game->daysPerMove);
+        self::assertSame(13, $this->play->computerGames()->playerOf($game->blackId)?->id);
+    }
+
+    public function testAComputerGameCanHaveAClock(): void
+    {
+        $controls = $this->play->games()->allowedTimeControls();
+        if ($controls === []) {
+            self::markTestSkipped('No time control allowed on this test site.');
+        }
+        $anna = $this->site->loggedInBrowser('anna');
+        $anna->submit('/play', '/play/start', ['opponent' => 'computer', 'band' => 'beginner', 'pace' => 'live:' . $controls[0], 'colour' => 'black']);
+
+        $game = $this->play->gameRepository()->listForPlayer($this->annaId, Game::STATE_RUNNING)[0];
+        self::assertSame($controls[0], $game->timeControl);
+    }
+
     public function testAnUnknownBandIsRefused(): void
     {
         $anna = $this->site->loggedInBrowser('anna');

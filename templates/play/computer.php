@@ -3,6 +3,8 @@
  * Play the computer (AI-03, AI-06, decision A53): every computer player as a
  * card with face, name, rating, personality and bio, and a button to start an
  * unrated game against it. One column on a phone (A18).
+ * "Choose" goes back to the new game pop-up with the player chosen, so the
+ * pace and colour are picked there (F2 review, A85).
  *
  * Variables: $players (list of ComputerPlayer, weakest first),
  * $faces (array of player id => face URL, or null when the player has no face yet),
@@ -35,19 +37,10 @@
                 <p class="hint"><?= e($t->text('computer.slow_on_phones')) ?></p>
             <?php endif; ?>
 
-            <!-- ===== Starting a game ===== -->
-            <form method="post" action="<?= e($basePath) ?>/play/computer" class="card-actions inline-form">
-                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-                <input type="hidden" name="player" value="<?= e($player->id) ?>">
-                <label><?= e($t->text('computer.colour')) ?>
-                    <select name="colour">
-                        <?php foreach (['random', 'w', 'b'] as $colour) : ?>
-                            <option value="<?= e($colour) ?>"><?= e($t->text('computer.colour.' . $colour)) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </label>
-                <button type="submit" class="button"><?= e($t->text('computer.play', ['name' => $player->name])) ?></button>
-            </form>
+            <!-- ===== Choosing: back to the new game pop-up, this player already chosen (A85) ===== -->
+            <div class="card-actions">
+                <a class="button" href="<?= e($basePath) ?>/play?new=computer&amp;player=<?= e($player->id) ?>"><?= e($t->text('computer.choose', ['name' => $player->name])) ?></a>
+            </div>
         </li>
     <?php endforeach; ?>
 </ul>

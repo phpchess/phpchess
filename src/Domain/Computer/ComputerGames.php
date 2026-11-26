@@ -96,8 +96,9 @@ final class ComputerGames
     /**
      * Starts a game against a computer player of the band, picked at random,
      * and returns the game's id. Refused for an unknown or empty band.
+     * The pace is chosen as for start().
      */
-    public function startInBand(int $memberId, string $band, string $colour, int $now): int
+    public function startInBand(int $memberId, string $band, string $colour, int $now, int $daysPerMove = self::DAYS_PER_MOVE, string $timeControl = '', ?int $nowMs = null): int
     {
         $players = $this->playersInBand($band);
         if ($players === []) {
@@ -105,7 +106,13 @@ final class ComputerGames
         }
         $player = $players[random_int(0, count($players) - 1)];
 
-        return $this->start($memberId, $player->id, $colour, $now);
+        return $this->start($memberId, $player->id, $colour, $now, $daysPerMove, $timeControl, $nowMs);
+    }
+
+    /** One computer player by its id, or null. */
+    public function findPlayer(int $computerPlayerId): ?ComputerPlayer
+    {
+        return $this->players->find($computerPlayerId);
     }
 
     /** The highest search depth any computer player may use on this site (A49). */
@@ -194,9 +201,21 @@ final class ComputerGames
     /**
      * Starts an unrated game between a member and a computer player and
      * returns its id. $colour is "w", "b" or "random" (decided by the time).
+     *
+     * The pace is chosen like for a game between people (F2 review, A85):
+     * days per move, or a time control ("5+3", empty for none), checked
+     * against the admin's list and the live game limits.
      */
-    public function start(int $memberId, int $computerPlayerId, string $colour, int $now): int
+    public function start(int $memberId, int $computerPlayerId, string $colour, int $now, int $daysPerMove = self::DAYS_PER_MOVE, string $timeControl = '', ?int $nowMs = null): int
     {
+        $control = null;
+        if (trim($timeControl) !== '') {
+            $control = $this->games->checkedTimeControl($timeControl)->text();
+            $this->games->checkLiveLimits([$memberId]);
+        }
+        if ($daysPerMove < 1) {
+            $daysPerMove = self::DAYS_PER_MOVE;
+        }
         $player = $this->players->find($computerPlayerId);
         if ($player === null) {
             throw new PlayRefused('computer.player_not_found');
@@ -208,7 +227,7 @@ final class ComputerGames
         $whiteId = $colour === Position::WHITE ? $memberId : $computerId;
         $blackId = $colour === Position::WHITE ? $computerId : $memberId;
 
-        return $this->games->start($whiteId, $blackId, self::DAYS_PER_MOVE, false, Position::START_FEN, $now);
+        return $this->games->start($whiteId, $blackId, $daysPerMove, false, Position::START_FEN, $now, $control, $nowMs);
     }
 
     // --- The computer's move (K1) ---

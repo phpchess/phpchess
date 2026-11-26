@@ -76,6 +76,8 @@ final class ChallengeController
             'boxesVersion' => self::boxesVersion($boxData),
             'adminNews' => $this->services->content()->listKind(ContentRepository::NEWS, true, 3),
             'openPopUp' => $request->queryValue('new'),
+            // A computer player picked on /play/computer: back here, already chosen (A85).
+            'chosenPlayer' => $play->computerGames()->findPlayer((int) $request->queryValue('player', '0')),
             'playDefaults' => $this->services->preferenceRepository()->playDefaults($user->id),
             'timeControls' => $play->games()->allowedTimeControls(),
             'correspondenceDays' => $this->correspondenceDayChoices(),
@@ -223,9 +225,9 @@ final class ChallengeController
     // --- Starting a game from the new game pop-up (F2, A70, A83) ---
 
     /**
-     * The pop-up's one form: against the computer (a strength band) or a
-     * person (a pace, rated or not, a rating range), and a colour.
-     * Every value comes from a button, none is typed.
+     * The pop-up's one form: against the computer (a strength band or one
+     * chosen player) or a person (rated or not, a rating range); for both a
+     * pace and a colour (A70, A85). Every value comes from a button, none is typed.
      */
     public function startNewGame(Request $request): Response
     {
@@ -234,23 +236,29 @@ final class ChallengeController
         $play = $this->services->play();
         $colour = $request->formValue('colour', Challenge::COLOUR_RANDOM);
 
+        // ===== The pace, for both kinds: "live:5+3" or "days:3" =====
+        [$paceKind, $paceValue] = array_pad(explode(':', $request->formValue('pace', 'days:3'), 2), 2, '');
+        $timeControl = $paceKind === 'live' ? $paceValue : '';
+        $daysPerMove = $paceKind === 'days' ? (int) $paceValue : 3;
+
         try {
-            // ===== Against the computer =====
+            // ===== Against the computer: "band" is a band name or "player:13" =====
             if ($request->formValue('opponent') === 'computer') {
                 $computerColour = match ($colour) {
                     Challenge::COLOUR_WHITE => Position::WHITE,
                     Challenge::COLOUR_BLACK => Position::BLACK,
                     default => 'random',
                 };
-                $gameId = $play->computerGames()->startInBand($user->id, $request->formValue('band'), $computerColour, $now);
+                $band = $request->formValue('band');
+                $computerGames = $play->computerGames();
+                $gameId = str_starts_with($band, 'player:')
+                    ? $computerGames->start($user->id, (int) substr($band, strlen('player:')), $computerColour, $now, $daysPerMove, $timeControl, $this->services->nowMs())
+                    : $computerGames->startInBand($user->id, $band, $computerColour, $now, $daysPerMove, $timeControl, $this->services->nowMs());
 
                 return Response::redirect($request->basePath . '/games/' . $gameId);
             }
 
-            // ===== Against a person: the pace is "live:5+3" or "days:3" =====
-            [$paceKind, $paceValue] = array_pad(explode(':', $request->formValue('pace', 'days:3'), 2), 2, '');
-            $timeControl = $paceKind === 'live' ? $paceValue : '';
-            $daysPerMove = $paceKind === 'days' ? (int) $paceValue : 3;
+            // ===== Against a person =====
             $isRated = $request->formValue('rated') === 'yes';
             $skipIds = $this->challengesOutsideRange($user->id, (int) $request->formValue('rating_range', '0'), $timeControl);
 
