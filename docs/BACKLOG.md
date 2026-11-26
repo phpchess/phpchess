@@ -63,6 +63,9 @@ feature ids in [FEATURES.md](FEATURES.md)) when it is planned in
 | B55 | **Lesson audiences**: 1:1, 1:n (invited) and 1:all. | 2026-11-26 | User, C5-1 review. |
 | B56 | **Event subscriptions**: players subscribe to events and download them to Google, iPhone, Windows and Android calendars (iCalendar file/feed, made locally). | 2026-11-26 | User, C5-1 review. |
 | B57 | **Chat while watching live games**: logged-in users watching the same live game (Lichess TV, broadcasts, our own games and lessons) can chat; an admin setting switches live game chat off. Same word filter, reporting and minor protection as the other chats. | 2026-11-26 | User, C5-1 review. |
+| B58 | **Broadcast our tournaments to Lichess** (Lichess broadcast API, behind the "external content" switch, K9). | 2026-11-26 | User, C4-1 questions. |
+| B59 | **Guest groups from another phpChess server, live**: trust by exchanged key pair, signed move requests, behind a switch (K9, A16). | 2026-11-26 | User, C4-1 (A109). |
+| B60 | **Guest groups via encrypted file** for servers that cannot reach each other: signed, encrypted invitation and result files, correspondence only. | 2026-11-26 | User, C4-1 (A109). |
 
 ## Grouped: game replay overhaul (user, 2026-11-26)
 - One piece of work: B44 move table, B45 replay controls, B47 last move highlight and B48 live games like replays, for every board that replays a game (study games, own games, broadcasts, Lichess TV). Built in C5-1 (user, 2026-11-26).
