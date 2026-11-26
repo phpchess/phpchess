@@ -403,11 +403,11 @@ dialog.pop-up-large::backdrop { background: rgba(0, 0, 0, 0.5); }
     .site-nav a[aria-current="page"] { background: var(--colour-accent); color: var(--colour-accent-text); }
     .nav-badge { position: static; margin-left: auto; }
 
-    /* Admin pages: the side bar shows only its icons, the admin menu sits beside the page (A71). */
-    .is-admin-page .site-frame { grid-template-columns: 4.5rem minmax(0, 1fr); }
-    .is-admin-page .site-nav a { justify-content: center; padding: var(--space-2); }
-    .is-admin-page .site-nav .nav-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-    .is-admin-page .nav-badge { position: absolute; top: 0; right: 0; }
+    /*
+     * Admin pages: the main menu keeps its names (bare icons were not
+     * recognised as buttons), the admin menu sits beside the page (A71).
+     */
+    .is-admin-page .site-frame { grid-template-columns: 10rem minmax(0, 1fr); }
     .page-admin { display: grid; grid-template-columns: 13rem minmax(0, 1fr); column-gap: var(--space-6); align-content: start; }
     .page-admin > * { grid-column: 2; }
     .page-admin > .admin-menu { grid-column: 1; grid-row: 1 / span 200; align-self: start; position: sticky; top: 4.5rem; }
