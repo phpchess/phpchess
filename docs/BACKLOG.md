@@ -53,7 +53,7 @@ feature ids in [FEATURES.md](FEATURES.md)) when it is planned in
 | B45 | **Proper replay controls**: buttons for start, back many, back one, play/pause, forward one, forward many and end (\|<<, <<, <, =, >, >>, >>\|); > plays forward and < plays backwards automatically; large touch targets (A18). | 2026-11-26 | User, C5-1 review. |
 | B46 | **Screen layout**: nothing left-aligned in a centred area; pages use the available space automatically (board and panels grow to fit the screen, A18). | 2026-11-26 | User, C5-1 review. |
 | B47 | **Last move highlight**: the squares of the last move are marked on every board (games, replays, puzzles, TV). | 2026-11-26 | User, C5-1 review. |
-| B48 | **Live games like replays**: Lichess TV gets the move table (B44) and the replay controls (B45), and returns to the live position on request. | 2026-11-26 | User, C5-1 review. |
+| B48 | **Live games like replays**: Lichess TV gets the move table (B44, the whole game: our server already reads the full PGN) and the replay controls (B45), and returns to the live position on request. Smooth play: moves that arrive in one update are played one after another, spread over the time until the next update (e.g. 4 moves in 10 s = one every 2.5 s), so it looks live. | 2026-11-26 | User, C5-1 review. |
 
 ## Placed: fix chunks before C4-1 (user, 2026-11-25)
 - **F1 Fixes and the strength test** (done 2026-11-25, user review pending): B7, B15, B17 (plus: no chat in games against the computer), B20, B21, B23, B30.
