@@ -13,7 +13,8 @@
  * the table scrolls, never the page.
  *
  * Variables: $replayId (string, the element's id), $boardTheme (string),
- * $isLive (bool: Lichess TV), $basePath, $t, $template.
+ * $isLive (bool: Lichess TV), $showComments (bool: the comment panel under the
+ * move table; Lichess TV games have no comments), $basePath, $t, $template.
  */
 $controls = [
     'first' => 'replay.first',
@@ -29,7 +30,6 @@ $controls = [
 <div class="replay-layout">
     <div class="replay-board">
         <div class="board-frame board-theme-<?= e($boardTheme) ?>" data-replay-board></div>
-        <p class="replay-comment" data-replay-comment aria-live="polite"></p>
         <p class="replay-controls" role="group" aria-label="<?= e($t->text('replay.controls')) ?>">
             <?php foreach ($controls as $control => $labelKey) : ?>
                 <button type="button" class="icon-button" data-replay="<?= e($control) ?>" aria-label="<?= e($t->text($labelKey)) ?>" title="<?= e($t->text($labelKey)) ?>">
@@ -39,7 +39,8 @@ $controls = [
         </p>
     </div>
 
-    <?php // ===== The move table: number, White, Black (B44) ===== ?>
+    <?php // ===== Beside the board: the move table (B44) and the comments ===== ?>
+    <div class="replay-side">
     <div class="replay-table-box">
         <table class="replay-table">
             <caption class="visually-hidden"><?= e($t->text('study.moves')) ?></caption>
@@ -48,6 +49,14 @@ $controls = [
             </thead>
             <tbody data-replay-moves></tbody>
         </table>
+    </div>
+    <?php if ($showComments) : ?>
+        <?php // The PGN's comment on the move on the board (plain text, checked by the content scanner). ?>
+        <section class="replay-comments" aria-label="<?= e($t->text('replay.comment')) ?>">
+            <h2 class="replay-comments-title"><?= e($t->text('replay.comment')) ?></h2>
+            <p data-replay-comment aria-live="polite"></p>
+        </section>
+    <?php endif; ?>
     </div>
 </div>
 </div>

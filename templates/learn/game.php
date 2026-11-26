@@ -24,7 +24,7 @@ $backPath ??= $theme === null ? '/learn' : '/learn/themes/' . $theme['id'];
 <p class="muted"><?= e(implode(' · ', array_filter([$game['opening'], $game['event'], $game['played_on']], static fn (string $part): bool => $part !== '' && !str_contains($part, '?')))) ?></p>
 
 <div class="study-game" id="study-game" data-positions="<?= e((string) json_encode($positions)) ?>">
-    <?= $template->render('partials/replay', ['replayId' => 'study-game-replay', 'boardTheme' => $boardTheme, 'isLive' => false, 'basePath' => $basePath, 't' => $t]) ?>
+    <?= $template->render('partials/replay', ['replayId' => 'study-game-replay', 'boardTheme' => $boardTheme, 'isLive' => false, 'showComments' => true, 'basePath' => $basePath, 't' => $t]) ?>
 </div>
 
 <?php if ($isOwn) : ?>
@@ -66,5 +66,5 @@ $backPath ??= $theme === null ? '/learn' : '/learn/themes/' . $theme['id'];
 
 <link rel="stylesheet" href="<?= e($basePath) ?>/assets/vendor/cm-chessboard/assets/chessboard.css">
 <link rel="stylesheet" href="<?= e($basePath) ?>/assets/vendor/cm-chessboard/assets/extensions/markers/markers.css">
-<?php // ?v=3: a new address, so browsers drop the old copy they kept. ?>
-<script type="module" src="<?= e($basePath) ?>/assets/js/learn/study-game.js?v=3"></script>
+<?php // ?v=4: a new address, so browsers drop the old copy they kept. ?>
+<script type="module" src="<?= e($basePath) ?>/assets/js/learn/study-game.js?v=4"></script>

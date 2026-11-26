@@ -1046,6 +1046,7 @@ return [
     'study.no_theme' => 'Choose a study theme first.',
     'study.moves' => 'Moves',
     'replay.controls' => 'Replay',
+    'replay.comment' => 'Comment',
     'replay.first' => 'Start of the game',
     'replay.back' => 'Back one move',
     'replay.play_back' => 'Play backwards',

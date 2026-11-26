@@ -33,7 +33,7 @@
 
     <p id="lichess-tv-players" class="lichess-tv-players" aria-live="polite"></p>
     <p id="lichess-tv-status" class="muted" role="status"></p>
-    <?= $template->render('partials/replay', ['replayId' => 'lichess-tv-replay', 'boardTheme' => $boardTheme, 'isLive' => true, 'basePath' => $basePath, 't' => $t]) ?>
+    <?= $template->render('partials/replay', ['replayId' => 'lichess-tv-replay', 'boardTheme' => $boardTheme, 'isLive' => true, 'showComments' => false, 'basePath' => $basePath, 't' => $t]) ?>
 
     <?php // After "No" in the box: the next game is one button away. ?>
     <p class="button-row centred"><button type="button" class="button" id="lichess-tv-next" hidden><?= e($t->text('tv.next_game')) ?></button></p>

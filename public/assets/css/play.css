@@ -393,6 +393,7 @@ details.confirm summary { cursor: pointer; }
 }
 .replay-board { width: var(--replay-board-size); }
 .replay-table-box { max-height: 8.5rem; }
+.replay-side { display: flex; flex-direction: column; gap: var(--space-2); }
 
 /* From about 600 px wide: the moves beside the board, as tall as the board. */
 @container (min-width: 37.5rem) {
@@ -402,7 +403,9 @@ details.confirm summary { cursor: pointer; }
         grid-template-columns: var(--replay-board-size) var(--replay-table-width);
         align-items: start;
     }
-    .replay-table-box { max-height: none; height: var(--replay-board-size); }
+    /* The side column is as tall as the board: the table takes what the comments leave. */
+    .replay-side { height: var(--replay-board-size); }
+    .replay-table-box { max-height: none; flex: 1 1 auto; min-height: 6rem; }
 }
 
 /* The seven controls in one row under the board, centred, still big enough for a finger (A18). */
@@ -414,7 +417,19 @@ details.confirm summary { cursor: pointer; }
     margin: var(--space-1) 0 0;
 }
 .replay-controls .icon-button { min-width: 2.5rem; min-height: 2.5rem; padding: 0; }
-.replay-comment { min-height: 1.25em; margin: var(--space-1) 0 0; font-style: italic; text-align: center; font-size: var(--text-small); }
+/* The comments: a fixed box under the move table that scrolls by itself, so a long comment never moves the board. */
+.replay-comments {
+    flex: 0 0 auto;
+    height: 7.5rem;
+    overflow-y: auto;
+    padding: var(--space-1) var(--space-2);
+    border: 1px solid var(--colour-border);
+    border-radius: var(--radius);
+    background: var(--colour-surface);
+    font-size: var(--text-small);
+}
+.replay-comments-title { margin: 0 0 2px; font-size: var(--text-small); color: var(--colour-muted-text); font-weight: normal; }
+.replay-comments p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 
 /* The move table: compact, and it scrolls by itself. */
 .replay-table-box {

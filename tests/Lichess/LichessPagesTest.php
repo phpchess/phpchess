@@ -98,6 +98,9 @@ final class LichessPagesTest extends TestCase
             self::assertStringContainsString('data-replay="' . $control . '"', $page);
         }
         self::assertStringContainsString('data-replay-moves', $page);
+        // The PGN's comments get their own panel beside the board; TV games have none.
+        self::assertStringContainsString('replay-comments', $page);
+        self::assertStringNotContainsString('replay-comments', $this->site->loggedInBrowser('anna')->get('/learn/tv')->body);
         // Each move brings its two squares, for the last-move marks (B47): 1. e4 is e2 to e4.
         self::assertStringContainsString('&quot;san&quot;:&quot;e4&quot;,&quot;from&quot;:&quot;e2&quot;,&quot;to&quot;:&quot;e4&quot;', $page);
     }
