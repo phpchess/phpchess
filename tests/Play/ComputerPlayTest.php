@@ -92,7 +92,7 @@ final class ComputerPlayTest extends TestCase
         self::assertSame(0, $tooEarly);
         self::assertSame(1, $played);
         self::assertSame(1, $game?->ply);
-        self::assertSame('b', $game?->sideToMove());
+        self::assertSame('b', $game->sideToMove());
         self::assertNull($computer->heldReplyAt($gameId));
     }
 
@@ -124,7 +124,7 @@ final class ComputerPlayTest extends TestCase
         self::assertTrue($this->play->games()->endIfOverdue($gameId, $muchLater, $muchLater * 1000));
         $game = $this->play->gameRepository()->find($gameId);
         self::assertSame(Game::RESULT_WHITE_WON, $game?->result, 'the computer wins');
-        self::assertSame('left_board', $game?->endReason);
+        self::assertSame('left_board', $game->endReason);
     }
 
     public function testTheComputersMoveIsRefusedOnTheHumansTurn(): void
