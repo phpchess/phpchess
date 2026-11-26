@@ -12,7 +12,9 @@ namespace PhpChess\Domain\Tournament;
  * - colours:       the colour of every game really played, oldest first ("w" or "b");
  *                  byes and forfeits are left out, as FIDE C.04.3 says;
  * - opponents:     everyone this player has met (played or forfeited), never paired again;
- * - hadPairingBye: a player gets the pairing-bye at most once.
+ * - hadPairingBye: a player gets the pairing-bye at most once;
+ * - unplayedRounds: rounds without a game (byes, absences, forfeits); the
+ *                  bye goes to the player with the fewest (FIDE 2025, C.9).
  *
  * Built by TournamentRounds from the pairings; read by DutchPairing.
  */
@@ -35,6 +37,7 @@ final class SwissPlayer
         public readonly array $colours,
         public readonly array $opponents,
         public readonly bool $hadPairingBye,
+        public readonly int $unplayedRounds = 0,
     ) {
     }
 

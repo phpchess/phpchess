@@ -397,9 +397,13 @@ final class TournamentRounds
         $colours = [];
         $opponents = [];
         $hadBye = false;
+        $unplayed = 0;
         foreach ($pairings as $pairing) {
             if (!$pairing->involves($player->userId)) {
                 continue;
+            }
+            if ($pairing->counts() && !$pairing->wasPlayed()) {
+                $unplayed++;
             }
             if ($pairing->counts()) {
                 $halves += $pairing->halvesOf($player->userId);
@@ -416,7 +420,7 @@ final class TournamentRounds
             }
         }
 
-        return new SwissPlayer($player->userId, $player->seed, $halves, $colours, $opponents, $hadBye);
+        return new SwissPlayer($player->userId, $player->seed, $halves, $colours, $opponents, $hadBye, $unplayed);
     }
 
     /**

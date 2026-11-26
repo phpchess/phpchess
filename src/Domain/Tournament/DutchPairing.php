@@ -14,8 +14,9 @@ namespace PhpChess\Domain\Tournament;
  * The rules, in the order this class applies them:
  *
  * 1. **Ranking**: players are ordered by score, then by pairing number.
- * 2. **Bye** (C.04.1 c, C.04.3 C.2): with an odd number, the lowest-ranked
- *    player who has not had a bye yet gets it, provided the others can then
+ * 2. **Bye** (C.04.1 c, C.04.3 C.2, C.9 of 2025): with an odd number, the
+ *    lowest-ranked player who has not had a bye yet gets it, among those
+ *    with the fewest rounds without a game, provided the others can then
  *    be paired.
  * 3. **Score brackets** (B.1): players with the same score form a bracket,
  *    from the top. Players who could not be paired in the bracket above
@@ -78,17 +79,20 @@ final class DutchPairing
             return $pairs === null ? null : ['boards' => $this->withColours($pairs), 'byeId' => null];
         }
 
-        // --- An odd number: try the bye from the bottom up ---
-        for ($index = count($ranked) - 1; $index >= 0; $index--) {
-            $candidate = $ranked[$index];
-            if ($candidate->hadPairingBye) {
-                continue;
-            }
-            $rest = $ranked;
-            array_splice($rest, $index, 1);
-            $pairs = $this->pairField($rest);
-            if ($pairs !== null) {
-                return ['boards' => $this->withColours($pairs), 'byeId' => $candidate->id];
+        // --- An odd number: try the bye from the bottom up, fewest unplayed rounds first ---
+        $mostUnplayed = max(array_map(fn (SwissPlayer $player): int => $player->unplayedRounds, $ranked));
+        for ($unplayed = 0; $unplayed <= $mostUnplayed; $unplayed++) {
+            for ($index = count($ranked) - 1; $index >= 0; $index--) {
+                $candidate = $ranked[$index];
+                if ($candidate->hadPairingBye || $candidate->unplayedRounds !== $unplayed) {
+                    continue;
+                }
+                $rest = $ranked;
+                array_splice($rest, $index, 1);
+                $pairs = $this->pairField($rest);
+                if ($pairs !== null) {
+                    return ['boards' => $this->withColours($pairs), 'byeId' => $candidate->id];
+                }
             }
         }
 
