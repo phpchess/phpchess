@@ -83,8 +83,7 @@ final class DutchPairingTest extends TestCase
 
     public function testAPlayerWhoHadTheByeDoesNotGetItAgain(): void
     {
-        $players = self::freshPlayers(5);
-        $players[4] = new SwissPlayer(5, 5, 2, [], [], true);
+        $players = [...array_slice(self::freshPlayers(5), 0, 4), new SwissPlayer(5, 5, 2, [], [], true)];
 
         $result = (new DutchPairing())->pair($players);
 
@@ -122,54 +121,53 @@ final class DutchPairingTest extends TestCase
     #[DataProvider('fields')]
     public function testAWholeSwissKeepsTheAbsoluteRules(int $count, int $rounds): void
     {
-        // State per player id: halves, colours, opponents, bye.
-        $state = [];
-        for ($id = 1; $id <= $count; $id++) {
-            $state[$id] = ['halves' => 0, 'colours' => [], 'opponents' => [], 'bye' => false];
-        }
+        // What each player has so far, by player id.
+        $halves = array_fill(1, $count, 0);
+        $colours = array_fill(1, $count, []);
+        $opponents = array_fill(1, $count, []);
+        $hadBye = array_fill(1, $count, false);
         $pairing = new DutchPairing();
 
         for ($round = 1; $round <= $rounds; $round++) {
             $players = [];
-            foreach ($state as $id => $player) {
-                $players[] = new SwissPlayer($id, $id, $player['halves'], $player['colours'], $player['opponents'], $player['bye']);
+            for ($id = 1; $id <= $count; $id++) {
+                $players[] = new SwissPlayer($id, $id, $halves[$id], $colours[$id], $opponents[$id], $hadBye[$id]);
             }
             $result = $pairing->pair($players);
             $this->assertNotNull($result, "round {$round} could be paired");
 
             $seen = [];
             foreach ($result['boards'] as [$white, $black]) {
-                $this->assertNotContains($black, $state[$white]['opponents'], "no rematch in round {$round}");
+                $this->assertNotContains($black, $opponents[$white], "no rematch in round {$round}");
                 $seen[] = $white;
                 $seen[] = $black;
-                $state[$white]['colours'][] = 'w';
-                $state[$black]['colours'][] = 'b';
-                $state[$white]['opponents'][] = $black;
-                $state[$black]['opponents'][] = $white;
-                // A fixed, repeatable result: the higher pairing number wins, every fifth board is drawn.
+                $colours[$white][] = 'w';
+                $colours[$black][] = 'b';
+                $opponents[$white][] = $black;
+                $opponents[$black][] = $white;
+                // A fixed, repeatable result: the lower id wins, some boards are drawn.
                 if (($white + $black + $round) % 5 === 0) {
-                    $state[$white]['halves'] += 1;
-                    $state[$black]['halves'] += 1;
+                    $halves[$white] += 1;
+                    $halves[$black] += 1;
                 } else {
-                    $state[min($white, $black)]['halves'] += 2;
+                    $halves[min($white, $black)] += 2;
                 }
             }
             if ($result['byeId'] !== null) {
-                $this->assertFalse($state[$result['byeId']]['bye'], 'the bye at most once');
-                $state[$result['byeId']]['bye'] = true;
-                $state[$result['byeId']]['halves'] += 2;
+                $this->assertFalse($hadBye[$result['byeId']], 'the bye at most once');
+                $hadBye[$result['byeId']] = true;
+                $halves[$result['byeId']] += 2;
                 $seen[] = $result['byeId'];
             }
             sort($seen);
             $this->assertSame(range(1, $count), $seen, "everyone is paired once in round {$round}");
         }
 
-        foreach ($state as $id => $player) {
-            $colours = $player['colours'];
-            $difference = count(array_filter($colours, fn (string $colour): bool => $colour === 'w')) * 2 - count($colours);
+        foreach ($colours as $id => $playerColours) {
+            $difference = count(array_filter($playerColours, fn (string $colour): bool => $colour === 'w')) * 2 - count($playerColours);
             $this->assertLessThanOrEqual(2, abs($difference), "player {$id}: colour difference at most 2");
-            for ($i = 2; $i < count($colours); $i++) {
-                $this->assertFalse($colours[$i] === $colours[$i - 1] && $colours[$i] === $colours[$i - 2], "player {$id}: never three of a colour in a row");
+            for ($i = 2; $i < count($playerColours); $i++) {
+                $this->assertFalse($playerColours[$i] === $playerColours[$i - 1] && $playerColours[$i] === $playerColours[$i - 2], "player {$id}: never three of a colour in a row");
             }
         }
     }

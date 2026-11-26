@@ -128,9 +128,17 @@ final class TournamentsController
             return $this->pages->notFound($request);
         }
         $games = $this->services->play()->gameRepository();
-        $view = (new TournamentView($this->services))->of($tournament, 0);
+        $pairings = $this->services->tournaments()->repository()->pairings($tournament->id);
+        $playerIds = [];
+        foreach ($pairings as $pairing) {
+            $playerIds[] = $pairing->whiteId;
+            if ($pairing->blackId !== null) {
+                $playerIds[] = $pairing->blackId;
+            }
+        }
+        $names = $this->services->users()->usernamesOf(array_values(array_unique($playerIds)));
         $texts = [];
-        foreach ($this->services->tournaments()->repository()->pairings($tournament->id) as $pairing) {
+        foreach ($pairings as $pairing) {
             if ($pairing->gameId === null || !$pairing->counts()) {
                 continue;
             }
@@ -144,8 +152,8 @@ final class TournamentsController
                 'Site' => $request->baseUrl() . '/tournaments/' . $tournament->id,
                 'Date' => gmdate('Y.m.d', $game->startedAt),
                 'Round' => $pairing->round . '.' . $pairing->board . ($pairing->gameNumber > 1 ? '.' . $pairing->gameNumber : ''),
-                'White' => $view['names'][$game->whiteId] ?? '?',
-                'Black' => $view['names'][$game->blackId] ?? '?',
+                'White' => $names[$game->whiteId] ?? '?',
+                'Black' => $names[$game->blackId] ?? '?',
                 'Result' => $game->pgnResult(),
             ], $game->startFen, $sanMoves);
         }

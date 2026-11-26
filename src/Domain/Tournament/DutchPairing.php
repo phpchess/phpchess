@@ -252,7 +252,7 @@ final class DutchPairing
             $newLower = $lower;
             $newUpper[$exchange['upperIndex']] = $lower[$exchange['lowerIndex']];
             $newLower[$exchange['lowerIndex']] = $upper[$exchange['upperIndex']];
-            $variants[] = [self::ranked($newUpper), self::ranked($newLower)];
+            $variants[] = [self::ranked(array_values($newUpper)), self::ranked(array_values($newLower))];
         }
 
         return $variants;

@@ -126,8 +126,15 @@ final class TournamentView
             $table[$pairing->whiteId][$pairing->blackId][] = self::scoreFor($pairing, $pairing->whiteId);
             $table[$pairing->blackId][$pairing->whiteId][] = self::scoreFor($pairing, $pairing->blackId);
         }
+        // The same table again, with every cell as a plain list of scores.
+        $crosstable = [];
+        foreach ($players as $row) {
+            foreach ($players as $column) {
+                $crosstable[$row->userId][$column->userId] = array_values($table[$row->userId][$column->userId]);
+            }
+        }
 
-        return $table;
+        return $crosstable;
     }
 
     /** One score from a player's point of view: "1", "½", "0", or "+" / "-" for a forfeit. */

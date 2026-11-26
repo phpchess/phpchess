@@ -28,4 +28,4 @@ A self-hosted chess server (PHP 8.3+, MariaDB/MySQL, plain shared hosting). Comp
 - Checks: `php tools/check-headers.php`, `php tools/check-sql.php` (K5), `php tools/check-escaping.php` (K6), `php tools/check-external-urls.php` (K9); release zip: `php tools/build-release.php --composer="<php> tools/composer.phar"`.
 
 ## Status
-C0-1 to C3-2, F1 and F2 done (F2 on 2026-11-26, reviewed); C5-1 done (2026-11-26, reviewed); pending: C2-2's real-phone Web Push test (A18). C4-1 built 2026-11-26 (A97–A110, migration 12), waiting for tests/checks and review. Next: **C4-2 Special formats**. Load test: `php tools/load-test.php` (docs/proofs/c3-1-load-test.md). Local test install: `htdocs/pc6sub/phpchess` (database `phpchess`, prefix `phpc_`).
+C0-1 to C3-2, F1 and F2 done (F2 on 2026-11-26, reviewed); C5-1 done (2026-11-26, reviewed); pending: C2-2's real-phone Web Push test (A18). C4-1 built 2026-11-26 (A97–A110, migration 12), all checks pass, waiting for review. Next: **C4-2 Special formats**. Load test: `php tools/load-test.php` (docs/proofs/c3-1-load-test.md). Local test install: `htdocs/pc6sub/phpchess` (database `phpchess`, prefix `phpc_`).

@@ -135,7 +135,7 @@ final class TournamentManageController
             'data' => $data,
             'disputes' => $disputes,
             'disputeNames' => $this->services->users()->usernamesOf($raisedBy),
-            'organiserNames' => $this->services->users()->usernamesOf([...$data['organiserIds'], $tournament->createdBy]),
+            'organiserNames' => $this->services->users()->usernamesOf([...$repository->organiserIds($tournament->id), $tournament->createdBy]),
             'computerPlayers' => $tournament->allowsComputers ? $this->services->play()->computerGames()->allPlayers() : [],
             'timeControls' => $this->services->play()->games()->allowedTimeControls(),
             'maximumDays' => $this->services->play()->games()->maximumDays(),

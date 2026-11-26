@@ -103,9 +103,9 @@ $formatIcons = [
                 <?= e($t->text('tournament.forfeit_short.' . $rule)) ?></label>
         <?php endforeach; ?>
     </fieldset>
-    <label class="checkbox"><input type="checkbox" name="is_rated" value="yes"<?= ((bool) $value('is_rated', true)) ?>> <?= e($t->text('play.rated')) ? ' checked' : '' ?></label>
-    <label class="checkbox"><input type="checkbox" name="confirm_pairings" value="yes"<?= ((bool) $value('confirm_pairings', false)) ?>> <?= e($t->text('tournament.field.confirm_pairings')) ? ' checked' : '' ?></label>
-    <label class="checkbox"><input type="checkbox" name="allow_computers" value="yes"<?= ((bool) $value('allow_computers', false)) ?>> <?= e($t->text('tournament.field.allow_computers')) ? ' checked' : '' ?></label>
+    <label class="checkbox"><input type="checkbox" name="is_rated" value="yes"<?= ((bool) $value('is_rated', true)) ? ' checked' : '' ?>> <?= e($t->text('play.rated')) ?></label>
+    <label class="checkbox"><input type="checkbox" name="confirm_pairings" value="yes"<?= ((bool) $value('confirm_pairings', false)) ? ' checked' : '' ?>> <?= e($t->text('tournament.field.confirm_pairings')) ?></label>
+    <label class="checkbox"><input type="checkbox" name="allow_computers" value="yes"<?= ((bool) $value('allow_computers', false)) ? ' checked' : '' ?>> <?= e($t->text('tournament.field.allow_computers')) ?></label>
     <label><?= e($t->text('tournament.field.max_players')) ?>
         <input type="number" name="max_players" min="0" max="200" value="<?= e((string) $value('max_players', 0)) ?>">
     </label>
@@ -126,7 +126,7 @@ $formatIcons = [
     <?php endforeach; ?>
 
     <h3><?= e($t->text('tournament.format.round_robin')) ?> · <?= e($t->text('tournament.format.league')) ?></h3>
-    <label class="checkbox"><input type="checkbox" name="double_round" value="yes"<?= ((bool) $value('double_round', false)) ?>> <?= e($t->text('tournament.field.double_round')) ? ' checked' : '' ?></label>
+    <label class="checkbox"><input type="checkbox" name="double_round" value="yes"<?= ((bool) $value('double_round', false)) ? ' checked' : '' ?>> <?= e($t->text('tournament.field.double_round')) ?></label>
     <?php foreach (['divisions' => 1, 'promote_count' => 2, 'relegate_count' => 2] as $field => $default) : ?>
         <label><?= e($t->text('tournament.field.' . $field)) ?>
             <input type="number" name="<?= e($field) ?>" min="<?= $field === 'divisions' ? '1' : '0' ?>" max="20" value="<?= e((string) $value($field, $default)) ?>">
@@ -141,7 +141,7 @@ $formatIcons = [
         </select>
     </label>
     <p class="hint"><?= e($t->text('tournament.field.knockout_games_hint')) ?></p>
-    <label class="checkbox"><input type="checkbox" name="third_place" value="yes"<?= ((bool) $value('third_place', false)) ?>> <?= e($t->text('tournament.field.third_place')) ? ' checked' : '' ?></label>
+    <label class="checkbox"><input type="checkbox" name="third_place" value="yes"<?= ((bool) $value('third_place', false)) ? ' checked' : '' ?>> <?= e($t->text('tournament.field.third_place')) ?></label>
 
     <h3><?= e($t->text('tournament.field.tie_breaks')) ?></h3>
     <label><?= e($t->text('tournament.field.tie_breaks')) ?>

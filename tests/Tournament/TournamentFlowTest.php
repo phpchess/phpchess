@@ -468,6 +468,8 @@ final class TournamentFlowTest extends TestCase
 
     private function ratingRowsOf(int $gameId): int
     {
-        return (int) $this->site->database->fetchValue('SELECT COUNT(*) FROM ' . $this->site->database->table('rating_history') . ' WHERE game_id = ?', [$gameId]);
+        $count = $this->site->database->fetchValue('SELECT COUNT(*) FROM ' . $this->site->database->table('rating_history') . ' WHERE game_id = ?', [$gameId]);
+
+        return is_numeric($count) ? (int) $count : 0;
     }
 }
