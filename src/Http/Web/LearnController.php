@@ -17,6 +17,7 @@ use PhpChess\Domain\Lichess\LichessContent;
 use PhpChess\Domain\Lichess\StudyImport;
 use PhpChess\Domain\Lichess\StudyTopics;
 use PhpChess\Domain\System\FeatureSwitches;
+use PhpChess\Infra\Lichess\LichessCache;
 use PhpChess\Http\Request;
 use PhpChess\Http\Response;
 use PhpChess\Kernel\Services;
@@ -192,10 +193,15 @@ final class LearnController
     }
 
     /**
-     * The game now on one TV channel: {channel, gameId, white, black, fen}.
+     * The game now on one TV channel: {channel, gameId, white, black, fen,
+     * lastMove, result, positions}.
      * Many viewers share one answer: Lichess is asked at most once every
      * TV_CACHE_SECONDS. The game's PGN passes the content scanner like
      * every other game (A81); a game it rejects is not shown.
+     *
+     * With ?game=<id>: that one game instead, in the same shape. The page
+     * asks for it once when the channel moved on, to show how the game it
+     * was watching ended (its last moves and result).
      */
     public function tvNow(Request $request): Response
     {
@@ -203,6 +209,10 @@ final class LearnController
         $channel = $request->queryValue('channel', 'best');
         if (!in_array($channel, self::TV_CHANNELS, true)) {
             $channel = 'best';
+        }
+        $finishedId = $request->queryValue('game', '');
+        if ($finishedId !== '') {
+            return $this->tvFinishedGame($channel, $finishedId);
         }
 
         // --- The shared answer, while it is fresh ---
@@ -225,29 +235,63 @@ final class LearnController
             if (StudyImport::gameIdFrom($gameId) === null) {
                 throw new ActionRefused('lichess.unavailable');
             }
-            $scan = (new ContentScanner($this->services->wordFilter()))->scan($lichess->gamePgn($gameId));
+            $answer = $this->tvAnswer($channel, $gameId, $lichess->gamePgn($gameId));
         } catch (ActionRefused $refusal) {
             return Response::json(['error' => $this->pages->text($refusal->languageKey)], 503);
         }
-        if (count($scan->accepted) !== 1) {
-            return Response::json(['error' => $this->pages->text('lichess.unavailable')], 503);
+        $settings->set($cacheName, (string) json_encode($answer + ['at' => $this->services->now]));
+
+        return Response::json($answer);
+    }
+
+    /**
+     * One TV game that the channel has moved on from, to show how it ended.
+     * Shared by all viewers for TV_CACHE_SECONDS, in the file cache.
+     */
+    private function tvFinishedGame(string $channel, string $gameId): Response
+    {
+        if (preg_match('/^[A-Za-z0-9]{8}$/', $gameId) !== 1) {
+            return Response::json(['error' => $this->pages->text('lichess.unavailable')], 404);
+        }
+        try {
+            $lichess = $this->services->lichess();
+            $cache = new LichessCache($this->services->appRoot . '/storage/cache/lichess', $this->services->now);
+            $pgn = $cache->remember('tv-game-' . $gameId, self::TV_CACHE_SECONDS, fn (): string => $lichess->gamePgn($gameId));
+            $answer = $this->tvAnswer($channel, $gameId, $pgn);
+        } catch (ActionRefused $refusal) {
+            return Response::json(['error' => $this->pages->text($refusal->languageKey)], 503);
         }
 
+        return Response::json($answer);
+    }
+
+    /**
+     * A TV game as the page wants it, after the content scanner (A81).
+     *
+     * @return array<string, mixed>
+     * @throws ActionRefused when the scanner rejects the game
+     */
+    private function tvAnswer(string $channel, string $gameId, string $pgn): array
+    {
+        $scan = (new ContentScanner($this->services->wordFilter()))->scan($pgn);
+        if (count($scan->accepted) !== 1) {
+            throw new ActionRefused('lichess.unavailable');
+        }
         $game = $scan->accepted[0];
         $positions = self::positionsOf($game);
-        $answer = [
+
+        return [
             'channel' => $channel,
             'gameId' => $gameId,
             'white' => $game->tag('White') . ($game->tag('WhiteElo') !== '' ? ' (' . $game->tag('WhiteElo') . ')' : ''),
             'black' => $game->tag('Black') . ($game->tag('BlackElo') !== '' ? ' (' . $game->tag('BlackElo') . ')' : ''),
             'fen' => $positions[count($positions) - 1]['fen'],
             'lastMove' => $positions[count($positions) - 1]['san'],
+            // "1-0", "0-1", "1/2-1/2", or "*" while the game goes on.
+            'result' => $game->result,
             // Every position from the start, for the move table and smooth play (B48).
             'positions' => $positions,
         ];
-        $settings->set($cacheName, (string) json_encode($answer + ['at' => $this->services->now]));
-
-        return Response::json($answer);
     }
 
     // --- Helpers ---

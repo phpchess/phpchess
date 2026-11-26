@@ -125,6 +125,29 @@ final class LichessPagesTest extends TestCase
         self::assertStringContainsString('Back to the live game', $this->site->loggedInBrowser('anna')->get('/learn/tv')->body);
     }
 
+    public function testAFinishedTvGameCanBeAskedForByItsId(): void
+    {
+        // The channel moved on; the page asks once for the game it was watching.
+        $this->site->lichessReplies['/game/export/abcdEFGH'] = "[White \"Anna\"]
+[Black \"Ben\"]
+[Result \"0-1\"]
+
+1. f3 e5 2. g4 Qh4# 0-1
+";
+        $anna = $this->site->loggedInBrowser('anna');
+
+        $answer = $anna->get('/learn/tv/now', ['channel' => 'blitz', 'game' => 'abcdEFGH']);
+        $json = json_decode($answer->body, true);
+
+        self::assertSame(200, $answer->status);
+        self::assertIsArray($json);
+        self::assertSame('0-1', $json['result'] ?? null);
+        self::assertSame('abcdEFGH', $json['gameId'] ?? null);
+        // Only a Lichess game id is asked for; anything else is refused before Lichess is asked.
+        self::assertSame(404, $anna->get('/learn/tv/now', ['channel' => 'blitz', 'game' => '../x'])->status);
+        self::assertStringContainsString('Next game?', $anna->get('/learn/tv')->body);
+    }
+
     public function testTheDailyPuzzleStartsOneMoveEarlierInOurTrainer(): void
     {
         // The game's moves, and the puzzle's position after the last of them.

@@ -442,6 +442,23 @@ details.confirm summary { cursor: pointer; }
 /* A move with a comment gets a line under it; the comment shows below the board. */
 .replay-move.has-comment { text-decoration: underline dotted; }
 
+/* The box over the board when a Lichess TV game ends (tv.php). */
+.tv-ended {
+    position: fixed;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 50;
+    width: min(20rem, calc(100vw - 2rem));
+    padding: var(--space-3);
+    border: 1px solid var(--colour-border);
+    border-radius: var(--radius);
+    background: var(--colour-surface);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+    text-align: center;
+}
+.tv-ended[hidden] { display: none; }
+
 .study-game-pgn { white-space: pre-wrap; overflow-wrap: anywhere; font-size: var(--text-small); }
 
 /* The puzzle and TV boards: as wide as the phone, never wider than a laptop needs. */
