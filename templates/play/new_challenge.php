@@ -15,7 +15,7 @@ use PhpChess\Domain\Play\Challenge;
 $defaultDays = min($playDefaults['days_per_move'], $maximumDays);
 ?>
 <div class="button-row">
-    <a class="button button-secondary" href="<?= e($basePath) ?>/play"><?= $template->render('partials/icon', ['name' => 'back']) ?><?= e($t->text('play.title')) ?></a>
+    <a class="button button-secondary" href="<?= e($basePath) ?>/play"><?= $template->render('partials/icon', ['icon' => 'back']) ?><?= e($t->text('play.title')) ?></a>
 </div>
 <h1><?= e($t->text('challenge.new')) ?></h1>
 

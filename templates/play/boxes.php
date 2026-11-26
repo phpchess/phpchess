@@ -31,7 +31,7 @@ $challengeDetails = function (Challenge $challenge) use ($t): string {
 
     <!-- ===== My running games ===== -->
     <section class="box" aria-labelledby="box-games-title">
-        <h2 id="box-games-title"><?= $template->render('partials/icon', ['name' => 'games']) ?><?= e($t->text('play.my_games')) ?></h2>
+        <h2 id="box-games-title"><?= $template->render('partials/icon', ['icon' => 'games']) ?><?= e($t->text('play.my_games')) ?></h2>
         <?php if ($myGames === []) : ?>
             <p class="muted"><?= e($t->text('play.no_games')) ?></p>
         <?php else : ?>
@@ -48,7 +48,7 @@ $challengeDetails = function (Challenge $challenge) use ($t): string {
 
     <!-- ===== Challenges sent to me ===== -->
     <section class="box" aria-labelledby="box-received-title">
-        <h2 id="box-received-title"><?= $template->render('partials/icon', ['name' => 'messages']) ?><?= e($t->text('play.received_challenges')) ?></h2>
+        <h2 id="box-received-title"><?= $template->render('partials/icon', ['icon' => 'messages']) ?><?= e($t->text('play.received_challenges')) ?></h2>
         <?php if ($receivedChallenges === []) : ?>
             <p class="muted"><?= e($t->text('play.no_received_challenges')) ?></p>
         <?php else : ?>
@@ -75,7 +75,7 @@ $challengeDetails = function (Challenge $challenge) use ($t): string {
 
     <!-- ===== Open challenges: mine (take back) and other players' (accept) ===== -->
     <section class="box" aria-labelledby="box-open-title">
-        <h2 id="box-open-title"><?= $template->render('partials/icon', ['name' => 'human']) ?><?= e($t->text('play.open_challenges')) ?></h2>
+        <h2 id="box-open-title"><?= $template->render('partials/icon', ['icon' => 'human']) ?><?= e($t->text('play.open_challenges')) ?></h2>
         <?php if ($myChallenges === [] && $openChallenges === []) : ?>
             <p class="muted"><?= e($t->text('play.no_challenges')) ?></p>
         <?php else : ?>

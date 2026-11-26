@@ -75,7 +75,7 @@ final class SchoolTest extends TestCase
         $teacher->get("/school/classes/{$classId}");
         $cards = $teacher->post("/school/classes/{$classId}/cards")->body;
         self::assertSame(3, substr_count($cards, 'class="login-card"'));
-        self::assertSame(3, substr_count($cards, '<svg'));
+        self::assertSame(3, substr_count($cards, 'class="qr-code"'));
         $card = Values::firstMatch('#/chess/c/([0-9a-f]{64})#', $cards);
 
         // The card logs in once; the second time it no longer works.

@@ -2,7 +2,7 @@
 /**
  * One icon, drawn by code as inline SVG (F2, decision A67).
  *
- * Use:  <?= $template->render('partials/icon', ['name' => 'computer']) ?>
+ * Use:  <?= $template->render('partials/icon', ['icon' => 'computer']) ?>
  *
  * Every icon is a simple line drawing on a 24 x 24 grid. It uses
  * "currentColor", so it takes the colour of the text or button around it:
@@ -13,7 +13,7 @@
  * SVG shapes. An unknown name draws an empty circle, so a typo is visible
  * but never breaks the page.
  *
- * Variables: $name (string), $size (int, optional: width and height in pixels, default 24).
+ * Variables: $icon (string, the icon's name; not "$name", which Template::render() uses itself), $size (int, optional: width and height in pixels, default 24).
  */
 
 // ===== The drawings: name => SVG shapes (fixed text, never from the user) =====
@@ -48,9 +48,9 @@ $drawings = [
     'stats' => '<path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 6-6"/>',
 ];
 
-$shapes = $drawings[$name] ?? '<circle cx="12" cy="12" r="8"/>';
+$shapes = $drawings[$icon] ?? '<circle cx="12" cy="12" r="8"/>';
 $pixels = $size ?? 24;
-$svgHtml = '<svg class="icon icon-' . htmlspecialchars($name, ENT_QUOTES) . '" width="' . (int) $pixels . '" height="' . (int) $pixels
+$svgHtml = '<svg class="icon icon-' . htmlspecialchars($icon, ENT_QUOTES) . '" width="' . (int) $pixels . '" height="' . (int) $pixels
     . '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"'
     . ' aria-hidden="true" focusable="false">' . $shapes . '</svg>';
 ?>

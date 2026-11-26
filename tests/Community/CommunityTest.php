@@ -179,7 +179,7 @@ final class CommunityTest extends TestCase
         $anna->submit('/messages/ben', '/messages/ben', ['body' => 'Darn, good game!']);
 
         $ben = $this->site->loggedInBrowser('ben');
-        self::assertMatchesRegularExpression('/Messages <span class="badge"[^>]*>1</', $ben->get('/')->body);
+        self::assertMatchesRegularExpression('#<span class="nav-label">Messages</span>\s*<span class="nav-badge"[^>]*>1<#', $ben->get('/')->body);
         $conversation = $ben->get('/messages/anna')->body;
         self::assertStringContainsString('****, good game!', $conversation);
         self::assertStringNotContainsString('Darn', $conversation);

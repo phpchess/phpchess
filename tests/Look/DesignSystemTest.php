@@ -22,7 +22,7 @@ final class DesignSystemTest extends TestCase
 
     public function testAnIconIsInlineSvgInTheTextColour(): void
     {
-        $html = (new Template(self::ROOT . '/templates'))->render('partials/icon', ['name' => 'computer']);
+        $html = (new Template(self::ROOT . '/templates'))->render('partials/icon', ['icon' => 'computer']);
 
         self::assertStringContainsString('<svg class="icon icon-computer"', $html);
         self::assertStringContainsString('stroke="currentColor"', $html);
@@ -32,7 +32,7 @@ final class DesignSystemTest extends TestCase
 
     public function testAnUnknownIconIsAnEmptyCircleAndItsNameIsEscaped(): void
     {
-        $html = (new Template(self::ROOT . '/templates'))->render('partials/icon', ['name' => '"><script>', 'size' => 40]);
+        $html = (new Template(self::ROOT . '/templates'))->render('partials/icon', ['icon' => '"><script>', 'size' => 40]);
 
         self::assertStringContainsString('<circle cx="12" cy="12" r="8"/>', $html);
         self::assertStringNotContainsString('<script>', $html);

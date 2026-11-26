@@ -10,7 +10,7 @@
 ?>
 <li>
     <a href="<?= e($href) ?>"<?= $isCurrent ? ' aria-current="page"' : '' ?>>
-        <?= $template->render('partials/icon', ['name' => $icon]) ?>
+        <?= $template->render('partials/icon', ['icon' => $icon]) ?>
         <span class="nav-label"><?= e($label) ?></span>
         <?php if ($badge > 0) : ?>
             <span class="nav-badge" aria-label="<?= e($t->text('layout.waiting', ['count' => $badge])) ?>"><?= e($badge) ?></span>

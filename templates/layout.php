@@ -70,17 +70,17 @@ $bodyClasses = 'layout-' . $skin->layout . ' board-theme-' . $boardTheme
     <?php /* ===== A few icon buttons on the right: school, admin, log out (or log in) ===== */ ?>
     <div class="header-actions">
         <?php if ($user === null) : ?>
-            <a class="button" href="<?= e($basePath) ?>/login"><?= $template->render('partials/icon', ['name' => 'login']) ?><?= e($t->text('layout.login')) ?></a>
+            <a class="button" href="<?= e($basePath) ?>/login"><?= $template->render('partials/icon', ['icon' => 'login']) ?><?= e($t->text('layout.login')) ?></a>
         <?php else : ?>
             <?php if ($isOn('school') && in_array($user->role, ['teacher', 'admin'], true)) : ?>
-                <a class="button button-secondary icon-button" href="<?= e($basePath) ?>/school" title="<?= e($t->text('layout.school')) ?>" aria-label="<?= e($t->text('layout.school')) ?>"<?= str_starts_with($currentPath, '/school') ? ' aria-current="page"' : '' ?>><?= $template->render('partials/icon', ['name' => 'school']) ?></a>
+                <a class="button button-secondary icon-button" href="<?= e($basePath) ?>/school" title="<?= e($t->text('layout.school')) ?>" aria-label="<?= e($t->text('layout.school')) ?>"<?= str_starts_with($currentPath, '/school') ? ' aria-current="page"' : '' ?>><?= $template->render('partials/icon', ['icon' => 'school']) ?></a>
             <?php endif; ?>
             <?php if ($user->isAdmin()) : ?>
-                <a class="button button-secondary icon-button" href="<?= e($basePath) ?>/admin" title="<?= e($t->text('layout.admin')) ?>" aria-label="<?= e($t->text('layout.admin')) ?>"<?= $isAdminPage ? ' aria-current="page"' : '' ?>><?= $template->render('partials/icon', ['name' => 'admin']) ?></a>
+                <a class="button button-secondary icon-button" href="<?= e($basePath) ?>/admin" title="<?= e($t->text('layout.admin')) ?>" aria-label="<?= e($t->text('layout.admin')) ?>"<?= $isAdminPage ? ' aria-current="page"' : '' ?>><?= $template->render('partials/icon', ['icon' => 'admin']) ?></a>
             <?php endif; ?>
             <form method="post" action="<?= e($basePath) ?>/logout">
                 <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-                <button type="submit" class="button-secondary icon-button" title="<?= e($t->text('layout.logout')) ?>" aria-label="<?= e($t->text('layout.logout')) ?>"><?= $template->render('partials/icon', ['name' => 'logout']) ?></button>
+                <button type="submit" class="button-secondary icon-button" title="<?= e($t->text('layout.logout')) ?>" aria-label="<?= e($t->text('layout.logout')) ?>"><?= $template->render('partials/icon', ['icon' => 'logout']) ?></button>
             </form>
         <?php endif; ?>
     </div>

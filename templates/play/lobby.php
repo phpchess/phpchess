@@ -46,7 +46,7 @@ if ($timeControls === []) {
 <div class="play-tiles">
     <?php foreach ($tiles as $kind => $tile) : ?>
         <a class="play-tile" href="<?= e($basePath) ?>/play?new=<?= e($kind) ?>" data-new-game="<?= e($kind) ?>">
-            <?= $template->render('partials/icon', ['name' => $tile['icon'], 'size' => 40]) ?>
+            <?= $template->render('partials/icon', ['icon' => $tile['icon'], 'size' => 40]) ?>
             <span class="play-tile-text">
                 <span class="play-tile-title"><?= e($t->text($tile['title'])) ?></span>
                 <span class="play-tile-hint"><?= e($t->text($tile['hint'])) ?></span>
@@ -55,9 +55,9 @@ if ($timeControls === []) {
     <?php endforeach; ?>
 </div>
 <div class="button-row play-more">
-    <a class="button button-secondary" href="<?= e($basePath) ?>/play/challenge"><?= $template->render('partials/icon', ['name' => 'more']) ?><?= e($t->text('new_game.more_choices')) ?></a>
-    <a class="button button-secondary" href="<?= e($basePath) ?>/play/computer"><?= $template->render('partials/icon', ['name' => 'computer']) ?><?= e($t->text('new_game.pick_computer')) ?></a>
-    <a class="button button-secondary" href="<?= e($basePath) ?>/rules"><?= $template->render('partials/icon', ['name' => 'rules']) ?><?= e($t->text('rules.link')) ?></a>
+    <a class="button button-secondary" href="<?= e($basePath) ?>/play/challenge"><?= $template->render('partials/icon', ['icon' => 'more']) ?><?= e($t->text('new_game.more_choices')) ?></a>
+    <a class="button button-secondary" href="<?= e($basePath) ?>/play/computer"><?= $template->render('partials/icon', ['icon' => 'computer']) ?><?= e($t->text('new_game.pick_computer')) ?></a>
+    <a class="button button-secondary" href="<?= e($basePath) ?>/rules"><?= $template->render('partials/icon', ['icon' => 'rules']) ?><?= e($t->text('rules.link')) ?></a>
 </div>
 
 <!-- ===== 2. The live boxes ===== -->
@@ -70,7 +70,7 @@ if ($timeControls === []) {
 <!-- ===== 3. News from the admins (and, later, statistics) ===== -->
 <?php if ($adminNews !== []) : ?>
     <section class="box play-news" aria-labelledby="box-news-title">
-        <h2 id="box-news-title"><?= $template->render('partials/icon', ['name' => 'news']) ?><?= e($t->text('play.admin_news')) ?></h2>
+        <h2 id="box-news-title"><?= $template->render('partials/icon', ['icon' => 'news']) ?><?= e($t->text('play.admin_news')) ?></h2>
         <ul class="card-list">
             <?php foreach ($adminNews as $item) : ?>
                 <li class="card">
@@ -93,7 +93,7 @@ if ($timeControls === []) {
 
         <div class="pop-up-head">
             <h2 id="new-game-title"><?= e($t->text('new_game.title')) ?></h2>
-            <a class="button button-secondary icon-button" href="<?= e($basePath) ?>/play" data-close-pop-up aria-label="<?= e($t->text('new_game.close')) ?>" title="<?= e($t->text('new_game.close')) ?>"><?= $template->render('partials/icon', ['name' => 'close']) ?></a>
+            <a class="button button-secondary icon-button" href="<?= e($basePath) ?>/play" data-close-pop-up aria-label="<?= e($t->text('new_game.close')) ?>" title="<?= e($t->text('new_game.close')) ?>"><?= $template->render('partials/icon', ['icon' => 'close']) ?></a>
         </div>
 
         <div class="pop-up-body">
@@ -101,15 +101,15 @@ if ($timeControls === []) {
             <fieldset class="choice-group choice-group-large">
                 <legend><?= e($t->text('new_game.opponent')) ?></legend>
                 <label class="choice"><input type="radio" name="opponent" value="computer"<?= $startsWithPerson ? '' : ' checked' ?>>
-                    <?= $template->render('partials/icon', ['name' => 'computer', 'size' => 32]) ?><?= e($t->text('new_game.opponent.computer')) ?></label>
+                    <?= $template->render('partials/icon', ['icon' => 'computer', 'size' => 32]) ?><?= e($t->text('new_game.opponent.computer')) ?></label>
                 <label class="choice"><input type="radio" name="opponent" value="human"<?= $startsWithPerson ? ' checked' : '' ?>>
-                    <?= $template->render('partials/icon', ['name' => 'human', 'size' => 32]) ?><?= e($t->text('new_game.opponent.human')) ?></label>
+                    <?= $template->render('partials/icon', ['icon' => 'human', 'size' => 32]) ?><?= e($t->text('new_game.opponent.human')) ?></label>
             </fieldset>
 
             <!-- Step 2 (person only): how long -->
             <?php if ($timeControls !== []) : ?>
                 <fieldset class="choice-group for-human">
-                    <legend><?= $template->render('partials/icon', ['name' => 'live']) ?><?= e($t->text('new_game.live')) ?></legend>
+                    <legend><?= $template->render('partials/icon', ['icon' => 'live']) ?><?= e($t->text('new_game.live')) ?></legend>
                     <?php foreach ($timeControls as $control) : ?>
                         <label class="choice"><input type="radio" name="pace" value="live:<?= e($control) ?>"<?= $defaultPace === 'live:' . $control ? ' checked' : '' ?>>
                             <?= e($control) ?><small><?= e($t->text('new_game.minutes_seconds')) ?></small></label>
@@ -117,7 +117,7 @@ if ($timeControls === []) {
                 </fieldset>
             <?php endif; ?>
             <fieldset class="choice-group for-human">
-                <legend><?= $template->render('partials/icon', ['name' => 'correspondence']) ?><?= e($t->text('new_game.correspondence')) ?></legend>
+                <legend><?= $template->render('partials/icon', ['icon' => 'correspondence']) ?><?= e($t->text('new_game.correspondence')) ?></legend>
                 <?php foreach ($correspondenceDays as $days) : ?>
                     <label class="choice"><input type="radio" name="pace" value="days:<?= e($days) ?>"<?= $defaultPace === 'days:' . $days ? ' checked' : '' ?>>
                         <?= e($t->text('new_game.days', ['days' => $days])) ?><small><?= e($t->text('new_game.per_move')) ?></small></label>
@@ -126,7 +126,7 @@ if ($timeControls === []) {
 
             <!-- Step 3: what strength -->
             <fieldset class="choice-group for-computer">
-                <legend><?= $template->render('partials/icon', ['name' => 'strength']) ?><?= e($t->text('new_game.strength')) ?></legend>
+                <legend><?= $template->render('partials/icon', ['icon' => 'strength']) ?><?= e($t->text('new_game.strength')) ?></legend>
                 <?php $isFirst = true; ?>
                 <?php foreach ($computerBands as $band => [$lowest, $highest]) : ?>
                     <label class="choice"><input type="radio" name="band" value="<?= e($band) ?>"<?= $isFirst ? ' checked' : '' ?>>
@@ -135,7 +135,7 @@ if ($timeControls === []) {
                 <?php endforeach; ?>
             </fieldset>
             <fieldset class="choice-group for-human">
-                <legend><?= $template->render('partials/icon', ['name' => 'strength']) ?><?= e($t->text('new_game.opponent_strength')) ?></legend>
+                <legend><?= $template->render('partials/icon', ['icon' => 'strength']) ?><?= e($t->text('new_game.opponent_strength')) ?></legend>
                 <?php foreach ($ratingRanges as $range) : ?>
                     <label class="choice"><input type="radio" name="rating_range" value="<?= e($range) ?>"<?= $range === 0 ? ' checked' : '' ?>>
                         <?= e($range === 0 ? $t->text('new_game.range_any') : $t->text('new_game.range', ['points' => $range])) ?></label>
@@ -144,16 +144,16 @@ if ($timeControls === []) {
 
             <!-- Step 4: what colour -->
             <fieldset class="choice-group">
-                <legend><?= $template->render('partials/icon', ['name' => 'colour']) ?><?= e($t->text('new_game.colour')) ?></legend>
+                <legend><?= $template->render('partials/icon', ['icon' => 'colour']) ?><?= e($t->text('new_game.colour')) ?></legend>
                 <?php foreach (['white', 'random', 'black'] as $colour) : ?>
                     <label class="choice"><input type="radio" name="colour" value="<?= e($colour) ?>"<?= $colour === 'random' ? ' checked' : '' ?>>
-                        <?= $template->render('partials/icon', ['name' => $colour, 'size' => 28]) ?><?= e($t->text('new_game.colour.' . $colour)) ?></label>
+                        <?= $template->render('partials/icon', ['icon' => $colour, 'size' => 28]) ?><?= e($t->text('new_game.colour.' . $colour)) ?></label>
                 <?php endforeach; ?>
             </fieldset>
 
             <!-- Step 5 (person only): rated or not -->
             <fieldset class="choice-group for-human">
-                <legend><?= $template->render('partials/icon', ['name' => 'rated']) ?><?= e($t->text('new_game.rated')) ?></legend>
+                <legend><?= $template->render('partials/icon', ['icon' => 'rated']) ?><?= e($t->text('new_game.rated')) ?></legend>
                 <label class="choice"><input type="radio" name="rated" value="yes"<?= $playDefaults['rated'] ? ' checked' : '' ?>> <?= e($t->text('play.rated')) ?></label>
                 <label class="choice"><input type="radio" name="rated" value="no"<?= $playDefaults['rated'] ? '' : ' checked' ?>> <?= e($t->text('game.unrated')) ?></label>
             </fieldset>
@@ -161,7 +161,7 @@ if ($timeControls === []) {
         </div>
 
         <div class="pop-up-foot">
-            <button type="submit"><?= $template->render('partials/icon', ['name' => 'play']) ?><?= e($t->text('new_game.start')) ?></button>
+            <button type="submit"><?= $template->render('partials/icon', ['icon' => 'play']) ?><?= e($t->text('new_game.start')) ?></button>
         </div>
     </form>
 </dialog>
