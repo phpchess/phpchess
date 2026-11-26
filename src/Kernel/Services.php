@@ -383,6 +383,7 @@ final class Services
             $this->studies(),
             $this->auditLog(),
             $this->request->clientIp,
+            StudyImport::maxOwnGamesIn($this->settings()),
         );
     }
 

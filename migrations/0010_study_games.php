@@ -54,6 +54,7 @@ return new Migration(10, 'Study themes and games from Lichess or uploads', [
         . ' source VARCHAR(10) NOT NULL,'
         . ' source_id VARCHAR(12) NOT NULL,'
         . ' imported_by INT UNSIGNED NOT NULL,'
+        . ' is_kept TINYINT(1) NOT NULL DEFAULT 0,'
         . ' created_at DATETIME(3) NOT NULL,'
         . ' KEY study_games_theme (theme_id),'
         . ' KEY study_games_owner (owner_id)'

@@ -6,8 +6,10 @@ namespace PhpChess\Tests\Lichess;
 
 use PhpChess\Domain\Community\WordFilter;
 use PhpChess\Domain\Lichess\ContentScanner;
+use PhpChess\Domain\Lichess\StudyImport;
 use PhpChess\Domain\System\FeatureSwitches;
 use PhpChess\Http\UploadedFile;
+use PhpChess\Infra\Jobs\StudyGamesCleanupJob;
 use PhpChess\Infra\Lichess\LichessClient;
 use PhpChess\Infra\Lichess\StudyRepository;
 use PhpChess\Infra\System\AuditLogRepository;
@@ -176,6 +178,112 @@ final class LearnPagesTest extends TestCase
         $ben->get('/learn');
         $ben->post('/learn/games/' . $gameId . '/remove');
         self::assertNotNull($studies->findGame($gameId));
+    }
+
+    // --- Paste in and copy out (B37) ---
+
+    public function testPlayersMayPasteOnlyWhenTheAdminAllowsIt(): void
+    {
+        $pgn = "[White \"Anna\"]\n[Result \"*\"]\n\n1. e4 {My first move.} e5 *\n";
+        $anna = $this->site->loggedInBrowser('anna');
+        $anna->get('/learn');
+        self::assertSame(404, $anna->post('/learn/paste', ['pgn' => $pgn])->status);
+
+        $this->site->settings()->set(StudyImport::PASTE_SETTING, true);
+        self::assertStringContainsString('/learn/paste', $anna->get('/learn')->body);
+        $anna->post('/learn/paste', ['pgn' => $pgn]);
+
+        $own = (new StudyRepository($this->site->database))->ownGames($this->annaId);
+        self::assertCount(1, $own);
+        $page = $anna->get('/learn/games/' . $own[0]['id'])->body;
+        self::assertStringContainsString('My first move.', $page);
+        self::assertStringContainsString('study-game-copy', $page);
+    }
+
+    public function testAPastedGameWithCodeIsKeptOut(): void
+    {
+        $this->site->settings()->set(StudyImport::PASTE_SETTING, true);
+        $anna = $this->site->loggedInBrowser('anna');
+        $anna->get('/learn');
+        $anna->post('/learn/paste', ['pgn' => "[Result \"*\"]\n\n1. e4 {<?php system('x'); ?>} e5 *\n"]);
+        $anna->post('/learn/paste', ['pgn' => "<script>alert(1)</script>"]);
+        $anna->post('/learn/paste', ['pgn' => "[Result \"*\"]\n\n1. e4 *\n\n[Result \"*\"]\n\n1. d4 *\n"]);
+
+        self::assertSame([], (new StudyRepository($this->site->database))->ownGames($this->annaId));
+    }
+
+    public function testTheAdminSetsThePlayersLimits(): void
+    {
+        $admin = $this->site->loggedInBrowser(InstalledSite::ADMIN_NAME, true);
+        $admin->get('/admin/lichess');
+        $admin->post('/admin/lichess/settings', ['max_own_games' => '1', 'imports_per_hour' => '5', 'paste_for_players' => 'on']);
+        self::assertSame(1, StudyImport::maxOwnGamesIn($this->site->settings()));
+        self::assertSame(5, StudyImport::importsPerHourIn($this->site->settings()));
+
+        $anna = $this->site->loggedInBrowser('anna');
+        $anna->get('/learn');
+        $anna->post('/learn/paste', ['pgn' => "[Result \"*\"]\n\n1. e4 *\n"]);
+        $anna->post('/learn/paste', ['pgn' => "[Result \"*\"]\n\n1. d4 *\n"]);
+        self::assertCount(1, (new StudyRepository($this->site->database))->ownGames($this->annaId));
+    }
+
+    public function testAnAdminPasteGoesIntoATheme(): void
+    {
+        $themeId = (new StudyRepository($this->site->database))->createTheme('Pasted', 1);
+        $admin = $this->site->loggedInBrowser(InstalledSite::ADMIN_NAME, true);
+        $admin->get('/admin/lichess');
+        $admin->post('/admin/lichess/paste', ['theme_id' => (string) $themeId, 'pgn' => "[Result \"*\"]\n\n1. e4 *\n\n[Result \"*\"]\n\n1. d4 *\n"]);
+
+        self::assertCount(2, (new StudyRepository($this->site->database))->gamesOfTheme($themeId));
+    }
+
+    // --- Own games: removed after some days unless kept (B37, A92) ---
+
+    public function testOldOwnGamesAreRemovedUnlessKept(): void
+    {
+        $studies = new StudyRepository($this->site->database);
+        $game = (new ContentScanner(new WordFilter([])))->scan("[Result \"*\"]\n\n1. e4 *\n")->accepted[0];
+        $keptId = $studies->addGame($game, null, $this->annaId, 'paste', '', $this->annaId);
+        $goneId = $studies->addGame($game, null, $this->annaId, 'paste', '', $this->annaId);
+        $themeId = $studies->createTheme('Stays', 1);
+        $themeGameId = $studies->addGame($game, $themeId, null, 'upload', '', 1);
+
+        // Anna keeps one through the page.
+        $anna = $this->site->loggedInBrowser('anna');
+        self::assertStringContainsString('is removed on', $anna->get('/learn/games/' . $keptId)->body);
+        $anna->post('/learn/games/' . $keptId . '/keep');
+        self::assertStringContainsString('stays until you remove it', $anna->get('/learn/games/' . $keptId)->body);
+
+        // 31 days later the daily job runs.
+        $job = new StudyGamesCleanupJob($studies, $this->site->settings(), time() + 31 * 86400);
+        self::assertSame('1 old own study games removed', $job->run());
+        self::assertNotNull($studies->findGame($keptId));
+        self::assertNull($studies->findGame($goneId));
+        self::assertNotNull($studies->findGame($themeGameId));
+    }
+
+    public function testZeroDaysKeepsOwnGamesForEver(): void
+    {
+        $this->site->settings()->set(StudyImport::DAYS_SETTING, 0);
+        $studies = new StudyRepository($this->site->database);
+        $game = (new ContentScanner(new WordFilter([])))->scan("[Result \"*\"]\n\n1. e4 *\n")->accepted[0];
+        $gameId = $studies->addGame($game, null, $this->annaId, 'paste', '', $this->annaId);
+
+        (new StudyGamesCleanupJob($studies, $this->site->settings(), time() + 400 * 86400))->run();
+
+        self::assertNotNull($studies->findGame($gameId));
+    }
+
+    public function testOnlyTheOwnerMayKeepOrRemove(): void
+    {
+        $studies = new StudyRepository($this->site->database);
+        $game = (new ContentScanner(new WordFilter([])))->scan("[Result \"*\"]\n\n1. e4 *\n")->accepted[0];
+        $gameId = $studies->addGame($game, null, $this->annaId, 'paste', '', $this->annaId);
+
+        $ben = $this->site->loggedInBrowser('ben');
+        $ben->get('/learn');
+        self::assertSame(404, $ben->post('/learn/games/' . $gameId . '/keep')->status);
+        self::assertFalse($studies->findGame($gameId)['is_kept'] ?? true);
     }
 
     public function testVisitorsAreSentToTheLogin(): void

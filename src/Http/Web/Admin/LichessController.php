@@ -6,6 +6,7 @@ namespace PhpChess\Http\Web\Admin;
 
 use PhpChess\Domain\ActionRefused;
 use PhpChess\Domain\Lichess\ContentScanner;
+use PhpChess\Domain\Lichess\StudyImport;
 use PhpChess\Domain\System\FeatureSwitches;
 use PhpChess\Http\Request;
 use PhpChess\Http\Response;
@@ -22,6 +23,8 @@ use PhpChess\Kernel\Services;
  *   POST /admin/lichess/themes             create a study theme
  *   POST /admin/lichess/themes/{id}/remove remove a theme and its games
  *   POST /admin/lichess/upload             upload a PGN file into a theme (works offline)
+ *   POST /admin/lichess/paste              paste PGN text into a theme (works offline, B37)
+ *   POST /admin/lichess/settings           players' limits and the paste switch (B37)
  *   POST /admin/lichess/import-game        one Lichess game into a theme ("external content")
  *   POST /admin/lichess/import-player      a Lichess player's newest games, up to 50 ("external content")
  *
@@ -46,6 +49,11 @@ final class LichessController
             'testPassedAt' => $settings->getInt(LichessClient::TEST_PASSED_AT_SETTING),
             'testResult' => $settings->getString(LichessClient::TEST_RESULT_SETTING),
             'maxGames' => ContentScanner::MAX_GAMES,
+            'maxBytes' => ContentScanner::MAX_BYTES,
+            'maxOwnGames' => StudyImport::maxOwnGamesIn($settings),
+            'importsPerHour' => StudyImport::importsPerHourIn($settings),
+            'pasteIsOpen' => StudyImport::pasteIsOpenIn($settings),
+            'ownGameDays' => StudyImport::ownGameDaysIn($settings),
             // A plain link that opens in a new tab: our server makes no request (A87).
             'lichessDatabaseLink' => 'https://database.lichess.org/',
         ]);
@@ -92,6 +100,33 @@ final class LichessController
         }
 
         return $this->runImport($request, 'upload', fn (int $themeId, int $adminId): array => $this->services->studyImport()->importUpload($file->contents(), $themeId, $adminId));
+    }
+
+    /** PGN text pasted into the page, scanned like an upload (B37). */
+    public function paste(Request $request): Response
+    {
+        $pgnText = $request->formValue('pgn');
+        if (trim($pgnText) === '') {
+            return $this->pages->redirect($request, '/admin/lichess', 'error', 'admin.lichess.no_file');
+        }
+        if (strlen($pgnText) > ContentScanner::MAX_BYTES) {
+            return $this->pages->redirect($request, '/admin/lichess', 'error', 'admin.lichess.too_large');
+        }
+
+        return $this->runImport($request, 'paste', fn (int $themeId, int $adminId): array => $this->services->studyImport()->importUpload($pgnText, $themeId, $adminId));
+    }
+
+    /** Players' limits and whether every player may paste PGN (B37). */
+    public function saveSettings(Request $request): Response
+    {
+        $settings = $this->services->settings();
+        $settings->set(StudyImport::MAX_OWN_SETTING, max(1, min(500, (int) $request->formValue('max_own_games', (string) StudyImport::MAX_OWN_GAMES))));
+        $settings->set(StudyImport::PER_HOUR_SETTING, max(1, min(100, (int) $request->formValue('imports_per_hour', (string) StudyImport::IMPORTS_PER_HOUR))));
+        $settings->set(StudyImport::PASTE_SETTING, $request->formValue('paste_for_players') === 'on');
+        $settings->set(StudyImport::DAYS_SETTING, max(0, min(3650, (int) $request->formValue('own_game_days', (string) StudyImport::OWN_GAME_DAYS))));
+        $this->pages->audit($request, 'study.settings', 'players\' study limits and paste switch saved');
+
+        return $this->pages->redirect($request, '/admin/lichess', 'success', 'admin.lichess.settings_saved');
     }
 
     public function importGame(Request $request): Response

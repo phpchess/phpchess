@@ -152,7 +152,12 @@ final class PlayersController
         if (mb_strlen($about) > self::ABOUT_MAX_LENGTH) {
             return $this->pages->refused($request, '/account/profile', new ActionRefused('profile.about_too_long', ['max' => self::ABOUT_MAX_LENGTH]));
         }
-        $this->services->profiles()->saveAbout($user->id, $this->services->wordFilter()->clean($about));
+        try {
+            $about = $this->services->wordFilter()->forPost($about);
+        } catch (ActionRefused $refusal) {
+            return $this->pages->refused($request, '/account/profile', $refusal);
+        }
+        $this->services->profiles()->saveAbout($user->id, $about);
 
         return $this->pages->done($request, '/account/profile', 'profile.saved');
     }

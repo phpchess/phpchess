@@ -29,6 +29,8 @@ use PhpChess\Domain\System\FeatureSwitches;
 use PhpChess\Infra\Identity\PreferenceRepository;
 use PhpChess\Infra\Identity\UserRepository;
 use PhpChess\Infra\Jobs\CleanupJob;
+use PhpChess\Infra\Jobs\StudyGamesCleanupJob;
+use PhpChess\Infra\Lichess\StudyRepository;
 use PhpChess\Infra\Jobs\ComputerMoveJob;
 use PhpChess\Infra\Jobs\GameClockJob;
 use PhpChess\Infra\Jobs\MoveEmailJob;
@@ -347,6 +349,7 @@ final class Kernel
                 new PushJob($buildPushNotifications, new FeatureSwitches($settings), $settings, $this->now),
                 new NewsletterJob(new NewsletterRepository($database), $mailer, new FeatureSwitches($settings), $settings, $this->now),
                 new PerformanceCheckJob($archive, $users, $mailer, $settings, $this->now),
+                new StudyGamesCleanupJob(new StudyRepository($database), $settings, $this->now),
             ],
         );
     }

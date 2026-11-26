@@ -1,0 +1,974 @@
+# Starter word list for phpChess (B36, A91). Made by tools/build-word-list.php.
+# The admin can change it on the community settings page.
+#
+# Made from dsojevic/profanity-list, MIT licence, Copyright (c) 2021 David Sojevic,
+# and coffee-and-fun/google-profanity-words, MIT licence,
+# Copyright (c) Robert James Gabriel / Coffee & Fun LLC.
+# Permission is hereby granted, free of charge, to any person obtaining a copy of
+# this software and associated documentation files (the "Software"), to deal in the
+# Software without restriction, including without limitation the rights to use, copy,
+# modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+# and to permit persons to whom the Software is furnished to do so, subject to the
+# following conditions: The above copyright notice and this permission notice shall
+# be included in all copies or substantial portions of the Software.
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+# PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+# CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
+# OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+1m1j|1man1jar|1 man 1 jar|one man one jar|one jar one man
+2g1c|2girls1cup|2 girls 1 cup|two girls one cup|one cup two girls
+4r5e
+5h1t
+5hit
+a55
+acrotomophilia|acrotomophile
+alabama hot pocket
+alabama tuna melt
+alaskan pipeline
+algophilia|algophile
+anal
+anal assassin
+anal astronaut
+anilingus
+apeshit|ape-shit|ape shit
+apotemnophilia|apotemnophile
+ar5e
+arrse
+arse
+arseho*le|ass*ho*le
+ass bandit|arse bandit
+ass-fucker
+ass-hat
+ass-pirate
+assbag
+assbandit
+assbanger
+assbite
+assclown
+asscock
+asscracker
+asses
+assface
+assfucker
+assfukka
+assgoblin
+asshat
+asshead
+assholes
+asshopper
+assjacker
+asslick
+asslicker
+assmonkey
+assmunch
+assmuncher
+asspirate
+assshole
+asssucker
+asswad
+asswhole
+asswipe
+autoerotic|auto erotic
+b00bs
+b17ch
+b1tch
+ba*sta*rd
+babeland
+baby batter|baby gravy|baby juice|ball batter|ball gravy
+ball gag|ball-gag|ballgag
+ball kicking|ball-kicking
+ball licking|ball-licking
+ball sack
+ball sucking|ball-sucking
+ballbag
+ballcuzi
+ballsack
+bampot
+bangbros|bang bros
+bangbus|bang bus
+bareback
+barely legal
+barenaked
+bastardo
+bastinado
+batty boy|battyboy|batty boi|battyboi
+bbw
+bdsm
+bean flicker|bean-flicker|beanflicker
+bean queen
+beaner|beaners
+beastial
+beastiality|beestiality|bestiality
+beastility
+beaver cleaver
+beaver lips
+bell*end
+bellesa
+bestial
+bi*tch|bi*tches
+biatch
+bicon
+big black
+big boobs|big breasts|big knockers|big tits
+bimbos
+birdlock
+bitcher
+bitchers
+bitchin
+bitching
+black cock|big cock|huge cock|giant cock|massive cock|throbbing cock
+blonde action
+blonde on blonde action
+blow your load
+blowjobs
+blowjob|blow-job|blow job
+blue waffle|bluewaffle
+blumpkin
+boiolas
+bollock
+bollok
+bollox
+bondage
+bone smuggler|bone-smuggler|bonesmuggler
+boner|raging boner|throbbing boner
+boobie
+boobs
+booobs
+boooobs
+booooobs
+booooooobs
+booty buffer|booty-buffer
+booty call
+boston george
+brown piper|brown-piper|brownpiper
+brown shower|brown showers
+brownie king|brownie queen
+brunette action
+buceta
+buddhahead|buddha head|buddha-head
+bufter|bufty
+bukkake
+bulldyke
+bullet vibe|bullet vibrator
+bullshit|bull-shit|bull shit
+bum chum|bum-chum|bumchum
+bum driller|bum-driller|bumdriller
+bung hole
+bunghole
+bunny fucker
+busty
+butt boy|butt-boy|buttboy|bum boy|bum-boy|bumboy
+butt pilot|bum pilot
+butt pirate|butt-pirate|bum pirate|bum-pirate
+butt rider|buttrider|bum rider|bumrider
+butt robber|butt-robber|buttrobber|bum robber|bum-robber|bumrobber
+butt rustler|bum rustler
+buttcheeks
+butthole
+butthole engineer|bumhole engineer
+buttmunch
+buttplug
+c0ck
+c0cksucker
+camel jockey|cameljockey|camel jockies|cameljockies
+camel toe
+camgirl
+camslut
+camwhore
+canadian porch swing
+carpet muncher|carpetmuncher
+cawk
+cheese-eating surrender monkey|cheese eating surrender monkey
+chi chi man|chi-chi man
+chicken queen
+chinaman|china man|chinamen|china men
+chinc
+ching-chong|ching chong
+chink|chinks|chinky
+choad
+chocolate rosebud|chocolate rosebuds
+chode
+cholerophilia|cholerophile
+cialis
+cipa
+circlejerk|circle-jerk
+cishet
+cissy|cissie
+cl1t
+claustrophilia|claustrophile
+cleveland accordion
+cleveland hot waffle
+cleveland steamer
+cli*tori*s
+clit
+clitface
+clits
+clover clamps|clover clamp
+clu*nge
+clusterfuck|cluster-fuck|cluster fuck
+cnut
+cock
+cock-sucker
+cockbite
+cockburger
+cockface
+cockhead
+cockjockey
+cockknoker
+cockmaster
+cockmongler
+cockmongruel
+cockmonkey
+cockmunch
+cockmuncher
+cocknose
+cocknugget
+cockpipe cosmonaut
+cocks
+cockshit
+cocksmith
+cocksmoker
+cockstruction worker
+cocksuck
+cocksucked
+cocksucker
+cocksucking
+cocksucks
+cocksuka
+cocksukka
+coimetrophilia|coimetrophile
+cok
+cokmuncher
+coksucka
+collaring|collared
+coochie
+coochy
+coon|coons
+cooter
+coprophilia|coprophile|coprolagnia
+cornhole
+crafty butcher
+creampie|cream-pie
+cu*n*t|ku*nt|cunts|kunts
+cum
+cumbubble
+cumdumpster
+cumguzzler
+cumjockey
+cumming
+cums
+cumshot|cumshots|cum shot|cum shots
+cumslut
+cumtart
+cunilingus
+cunillingus
+cunnie
+cunnilingus
+cuntboy|cunt-boy|cunt boy
+cuntface
+cunthole
+cuntlick
+cuntlicker
+cuntlicking
+cuntrag
+curry muncher|curry-muncher|currymuncher
+cyalis
+cyberfuc
+cyberfuck
+cyberfucked
+cyberfucker
+cyberfuckers
+cyberfucking
+d1ck
+dammit
+darkie|darkies|darky|darkey
+date rape|daterape
+ddlg
+deep throat|deep-throat|deepthroat
+dendrophilia|dendrophile
+di*ck
+dickbag
+dickbeater
+dickface
+dickgirl|dick-girl|dick girl
+dickhead
+dickhole
+dickjuice
+dickmilk
+dickmonger
+dickslap
+dicksucker
+dickwad
+dickweasel
+dickweed
+dickwod
+dildo|dildos
+dipsea
+dipshit
+dirsa
+dirty pillows
+dirty sanchez
+dishabiliophilia|dishabiliophile
+dlck
+dog-fucker
+doggie style|doggie-style|doggiestyle|doggy style|doggy-style|doggystyle|dog style
+doggin
+dogging
+dogshit|dog-shit|dog shit
+dolcett
+dominatrix|domme|dommes
+donkey punch
+donkeyribber
+donut muncher
+donut puncher
+doochbag
+dookie
+doosh
+double dong
+double penetration|dp action
+douche
+douchebag
+dry hump
+duche
+dumbshit
+dumshit
+dune coon|dune-coon|doon coon|dooncoon
+dutch rudder
+dvda
+dyke
+dystychiphilia|dystychiphile
+eat my ass
+ecchi
+edgeplay|edge play
+ejaculates
+ejaculate|ejaculation|ejaculating|ejaculated
+ejaculatings
+ejakulate
+electro-play|electroplay
+emetophilia|emetophile
+enby
+erotic
+erotism
+eskimo trebuchet
+eunuch
+eyetie|eye-tie
+f u c k
+f u c k e r
+f4nny
+fa*g
+fa*gg*o*t|fagot
+fag bomb|fag-bomb|fagbomb
+fagbag
+fagg
+fagging
+faggit
+faggitt
+faggs
+fagots
+fags
+fagtard
+fanny
+fannyflaps
+fannyfucker
+fanyy
+farted
+farting
+farty
+fatass
+fcuk
+fcuker
+fcuking
+fecal
+feck
+fecker
+felatio
+felch|felching
+fellate
+fellatio|fellating
+feltch
+female squirting
+femdom
+figging
+fingerbang|finger bang|fingerbanging
+fingerfuck
+fingerfucked
+fingerfucker
+fingerfuckers
+fingerfucking
+fingerfucks
+fingering|fingered
+finocchio|finochio|finoccio
+fistfuck
+fistfucked
+fistfucker
+fistfuckers
+fistfucking
+fistfuckings
+fistfucks
+fisting|fisted
+fook
+fooker
+foot fetish
+footjob|foot-job|foot job
+french rudder
+frogeater|frog-eater|frog eater
+frolicme|frolic me
+frotting|frottage
+fu*c*k|fucks|fu*c*ken|fu*c*ker|fu*ckers|fu*c*kin|fu*c*king
+fuck buttons
+fucka
+fucked
+fuckhead|fuckheads
+fuckings
+fuckingshitmotherfucker
+fuckme
+fucktard|fucktards
+fuckwad|fuckwads
+fuckwit|fuckwits|fuckwhit|fuck-wit
+fudge packer|fudge-packer|fudgepacker
+fuk
+fuker
+fukker
+fukkin
+fuks
+fukwhit
+fukwit
+futanari
+fux
+fux0r
+g-spot
+gangbanged
+gangbangs
+gangbang|gang bang
+gay sex
+gayass
+gaybob
+gaydo
+gaylord
+gaysex
+gaysian
+gaytard
+gaywad
+genitorture
+gerontophilia|gerontophile
+gin jockey|gin jocky
+girl on
+girl on top
+girls gone wild
+goatse|goatcx
+god-dam
+gokkun|go-kun
+golden shower|golden showers|yellow shower|yellow showers
+golliwog|gollywog
+goo girl
+gooch
+goodpoop
+gook|gooks|gook-eye|gooky|gookie
+goregasm
+greaseball
+grey queen|gray queen
+grope
+group sex
+guro
+gym bunny|gymbunny
+hajj*i|hadji
+hand job|hand-job|handjob
+hard core
+hardcoresex
+heeb
+hentai
+hermie
+heshe
+hickory switch
+hippophilia|hippophile
+hoar
+hoare
+hoer
+homoerotic
+honkey|honky|honkeys|honkies
+hore
+horniest
+horny
+horseshit|horse-shit|horse shit
+hot carl
+hot chick
+hot richard
+hotsex
+how to kill
+how to murder
+huge fat
+humping
+hymie|heimie
+impact play|impact-play
+incest
+intercourse
+jack off|jack-off
+jackass
+jackoff
+jail bait|jailbait
+jelly donut
+jerk off|jerk-off
+jerkmate|jerk mate
+jig*aboo*|jig*gerboo*
+jiggaboo
+jism
+jiz
+jizm
+jizz
+juggs
+jungle bunny|junglebunny
+kawk
+kennebunkport surprise
+kentucky klondike
+kentucky tractor puller
+ki*ke
+kinbaku
+kinkster
+kinky
+kitty puncher|kitty-puncher|kittypuncher
+kiunt
+knobbing
+knobead
+knobed
+knobend
+knobhead
+knobjocky
+knobjokey
+kock
+kondum
+kondums
+kooch
+kootch
+kum
+kumer
+kumming
+kums
+kunilingus
+kyke
+kynophilia|kynophile
+l3itch
+labia
+lady boy|lady-boy|ladyboy
+leather restraint
+leather straight jacket
+lemon party|lemonparty
+leningrad steamer
+lesbo
+lezzie|lezzies
+light in the fedora
+light in the loafers
+light in the pants
+limp wristed|limp-wristed
+literotica
+lmfao
+lovemaking
+lusting
+m0f0
+m0fo
+m45terbate
+ma*stu*rbate|ma*stu*rb8|masturbation|masturbating|masterbate|masterb8
+ma5terb8
+ma5terbate
+make me come
+male squirting|male-squirting
+masochist
+master-bate
+masterbat3
+masterbation
+masterbations
+mdlb
+meat masseuse
+meatspin|meat spin
+menage a trois|menage-a-trois|menages a trois|menages-a-trois
+menophilia|menophile
+mexican pancake
+milf
+milwaukee blizzard
+minge
+missionary position
+mississippi birdbath
+mo-fo
+mof0
+mofo
+mothafuck
+mothafucka
+mothafuckas
+mothafuckaz
+mothafucked
+mothafucker
+mothafuckers
+mothafuckin
+mothafucking
+mothafuckings
+mothafucks
+mother fucker
+motherfuck
+motherfucked
+motherfucker
+motherfuckers
+motherfuckin
+motherfucking
+motherfuckings
+motherfuckka
+motherfucks
+mr. hands|mr hands|mrhands
+muff diver|muff-diver|muffdiver
+muffdiving|muff diving|muffdiver|muff diver
+muscle mary
+muthafecker
+muthafuckker
+mutherfucker
+mvtube
+n1gga
+n1gger
+nambla
+nawashi
+nazi
+necrophilia|necrophile
+neonazi|neo-nazi|neo nazi
+ni*gg*a|ni*gg*s|nignog|nig nog
+ni*gg*e*r
+nigerian hurricane
+nigg3r
+nigg4h
+niggah
+niggas
+niggaz
+niggers
+niglet
+nipple clamps|nipple clamp
+nob
+nob jokey
+nobhead
+nobjocky
+nobjokey
+nsfw images
+nudity
+numbnuts
+nutsack
+nutten
+nymphomania|nymphomaniac|nympho|nimphomania|nimphomaniac|nimpho
+octopussy
+oklahomo
+omorashi
+one guy one jar
+onlyfans|only fans
+orgasim
+orgasims
+orgasm|orgasms|orgasmic
+orgy
+p0rn
+paedophilia|pedophilia|paedophile|pedophile
+painslut|pain slut
+paki
+panamanian petting zoo
+panooch
+panties
+panty
+parthenophilia|parthenophile
+pecker
+peckerhead
+pedobear|paedobear|pedo bear|paedo bear
+pegging
+penisfucker
+peterpuffer|peter-puffer|peter puffer
+petrol sniffer|petrol-sniffer|petrolsniffer
+phagophilia|phagophile
+phone sex
+phonesex
+phuck
+phuk
+phuked
+phuking
+phukked
+phukking
+phuks
+phuq
+pi*ss* off
+pi*ss*ed off
+piece of shit|pieces of shit
+pigfucker
+pikey|pikeys
+pimpis
+pises
+pisin
+pising
+pisof
+piss
+piss pig|pisspig
+piss pig|pisspig
+pissed
+pisser
+pissers
+pisses
+pissflap
+pissflaps
+pissin
+pissing
+pissoff
+pleasure chest
+pnigerophilia|pnigophilia|pnigerophile|pnigophile
+poinephilia|poinephile
+pole smoker
+polesmoker
+ponyboy|pony-boy|pony boy
+ponygirl|pony-girl|pony girl
+ponyplay|pony-play
+poof
+poonani
+poonany
+poon|poontang
+poop chute|poopchute
+pornhub|porn hub
+pornography|pornographic|porno|pornos|porn
+potato queen
+prick
+pricks
+prince albert piercing
+proctophilia|proctophile
+pron
+pthc
+pu*na*ni|punany
+pu*ss*y
+pube
+punanny
+pusies
+pusse
+pussi
+pussies
+pussy puncher|pussy-puncher|pussypuncher
+pussylicking
+pussys
+pusy
+puto
+queef|queaf
+queerbait
+queerhole
+quim
+ramen yarmulke
+rape
+raping|rapist
+renob
+retard|retarded
+reverse cowgirl
+rhabdophilia|rhabdophile
+rhypophilia|rhypophile
+rice queen
+rimjaw
+rimjob|rimming
+ring raider|ringraider
+rosy palm
+rosy palm and her 5 sisters
+rusty trombone
+s hit
+sadism
+sadist
+sand ni*gg*e*r|sand-ni*gg*e*r|sandni*gg*e*r
+scat
+scatophilia|scatophile
+schlong|shlong
+scissoring
+screwing
+scroat
+scrote
+scrotum
+seplophilia|seplophile
+sex
+sexo
+sexy
+sh*i*t
+sh1t
+shag
+shagger
+shaggin
+shagging
+shaved pussy|shaved beaver
+sheepshagger|sheep shagger
+shemale|she-male|she male
+shi*tt*y
+shibari
+shit-ass
+shit-bag
+shit-bagger
+shit-brain
+shit-breath
+shit-cunt
+shit-dick
+shit-eating
+shit-face
+shit-faced
+shit-fit
+shit-head
+shit-heel
+shit-hole
+shit-house
+shit-load
+shit-pot
+shit-spitter
+shit-stain
+shitass
+shitbag
+shitbagger
+shitblimp
+shitbrain
+shitbreath
+shitcunt
+shitdick
+shite
+shiteating
+shited
+shitey
+shitface
+shitfaced
+shitfit
+shitfuck
+shitfull
+shithead|shit head
+shitheel
+shithole
+shithouse
+shiting
+shitings
+shitload
+shitpot
+shits
+shitspitter
+shitstain
+shitted
+shitter
+shitters
+shittiest
+shitting
+shittings
+shity
+shiz
+shiznit
+shota
+shrimping
+skank
+skeet
+skittles harvest|skittle harvest
+slanteye|slant-eye|slant eye
+slut
+slutbag
+sluts
+smeg
+smegma
+smut
+snowballing
+sodomize|sodomise|sodomist|sodomy
+son-of-a-bitch
+spac
+spastic
+spearchucker
+spicy gringo
+spic|spics|spick|spicks
+splooge|splooge moose|spooge
+spread legs
+spunk
+strap on|strap-on
+strap-on|strapon
+strappado
+strip club
+style doggy
+suicide girls
+sultry women
+swamp guinea|swamp-guinea
+swastika|svastika|suastika
+swinger
+switch hitter
+t-girl|tgirl
+t1tt1e5
+t1tties
+tainted love
+taphephilia|taphephile
+tard
+taste my
+tea bagging|tea-bagging|tea bagged|tea-bagged
+teets
+teez
+testical
+testicle
+thanatophilia|thanatophile
+threesome
+throating
+thumbzilla
+thundercunt
+tied up
+tight white
+timber ni*gg*e*r|timber-ni*gg*e*r|timberni*gg*e*r
+titfuck
+tits
+titt
+titt*y|titt*ies
+tittie5
+tittiefucker
+tittyfuck
+tittywank
+titwank
+tongue in a
+tosser
+towelhead|towel-head|towel head
+tranny|trannie
+transbian
+traumatophilia|traumatophile
+tribbing|tribadism
+tubgirl|tub girl
+turd
+tushy
+tw4t
+twa*t
+twathead
+twatlips
+twatty
+twink
+twinkie
+twunt
+twunter
+undressing
+upskirt
+urethra play
+urophilia|urophile
+v14gra
+v1gra
+va-j-j
+vag
+viagra
+vibrator
+violet wand
+vjayjay
+vorarephilia|vorarephile
+voyeur
+voyeurweb
+vulva
+w00se
+wa*nk
+wa*nker
+wagon burner|wagon-burner
+wanky
+wax play|wax-play
+wet dream
+wetback|wet-back|wet back
+whitepower|white-power|white power
+who*re
+whoar
+wigger|whigger|wigga
+wiitwd
+wolfbagging
+worldsex
+wrapping men
+wrinkled starfish
+xhamster
+xnxx
+xrated
+xtube
+xvideos
+xxx
+xyrophilia|xyrophile
+yaoi
+yiffy
+zipperhead|zipper-head|zipper head
+zippocat|zippo-cat|zippo cat
+zoophilia|zoophile

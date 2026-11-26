@@ -61,7 +61,7 @@ final class Messages
             throw new ActionRefused('messages.too_many');
         }
 
-        $messageId = $this->messages->add($fromUserId, $toUserId, $this->wordFilter->clean($text), $now);
+        $messageId = $this->messages->add($fromUserId, $toUserId, $this->wordFilter->forPost($text), $now);
         $this->notices->add($toUserId, Notices::MESSAGE_RECEIVED, null, null, $fromUserId, $now);
 
         return $messageId;

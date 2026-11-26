@@ -27,7 +27,9 @@ use PhpChess\Kernel\Services;
  *   GET  /learn/themes/{id}        the games of one study theme
  *   GET  /learn/games/{id}         one study game on a board, move by move
  *   POST /learn/import             a player imports one Lichess game ("external content")
+ *   POST /learn/paste              a player pastes one game as PGN (when the admin allows it, B37)
  *   POST /learn/games/{id}/remove  a player removes one of their own imports
+ *   POST /learn/games/{id}/keep    a player keeps one of their own games, or stops keeping it (B37)
  *   GET  /learn/tv                 Lichess TV on our own board ("external content")
  *   GET  /learn/tv/now             the TV game now: {channel, gameId, pgn} ("external content")
  *
@@ -59,7 +61,10 @@ final class LearnController
             'themes' => $this->services->studies()->themes(),
             'ownGames' => $this->services->studies()->ownGames($user->id),
             'lichessIsOn' => $this->services->switches()->isOn(FeatureSwitches::EXTERNAL_CONTENT),
-            'maxOwnGames' => StudyImport::MAX_OWN_GAMES,
+            'pasteIsOpen' => $this->mayPaste($user->isAdmin()),
+            'maxOwnGames' => StudyImport::maxOwnGamesIn($this->services->settings()),
+            'maxBytes' => ContentScanner::MAX_BYTES,
+            'ownGameDays' => StudyImport::ownGameDaysIn($this->services->settings()),
         ]);
     }
 
@@ -99,11 +104,17 @@ final class LearnController
             return $this->pages->notFound($request);
         }
 
+        // A move the board can't follow is reported, not skipped quietly (B39).
+        $positions = self::positionsOf($readGame);
+
         return $this->services->pages()->render($request, 'learn/game', $game['white'] . ' – ' . $game['black'], [
             'game' => $game,
-            'positions' => self::positionsOf($readGame),
+            'positions' => $positions,
+            'isComplete' => count($positions) === count($readGame->sanMoves) + 1,
             'lichessLink' => $game['source_id'] !== '' ? 'https://lichess.org/' . $game['source_id'] : '',
             'theme' => $game['theme_id'] === null ? null : $this->services->studies()->findTheme($game['theme_id']),
+            'isOwn' => $game['owner_id'] === $user->id,
+            'ownGameDays' => StudyImport::ownGameDaysIn($this->services->settings()),
             'boardTheme' => $this->services->preferenceRepository()->findForUser($user->id)->boardTheme,
         ]);
     }
@@ -111,17 +122,24 @@ final class LearnController
     public function import(Request $request): Response
     {
         $user = $this->pages->user();
-        $limited = !$this->services->rateLimiter()->hit('study-import:' . $user->id, 10, 3600, $this->services->now);
-        if ($limited) {
-            return $this->services->pages()->redirectWithMessage($request, '/learn', 'error', $this->pages->text('lichess.busy'));
+        $link = $request->formValue('link');
+
+        return $this->importOwnGame($request, $user->id, fn (): int => $this->services->studyImport()->importOneGame($link, null, $user->id));
+    }
+
+    /** A player pastes one game as PGN text (B37); a 404 while the admin hasn't allowed it. */
+    public function paste(Request $request): Response
+    {
+        $user = $this->pages->user();
+        if (!$this->mayPaste($user->isAdmin())) {
+            return $this->pages->notFound($request);
         }
-        try {
-            $gameId = $this->services->studyImport()->importOneGame($request->formValue('link'), null, $user->id);
-        } catch (ActionRefused $refusal) {
-            return $this->services->pages()->redirectWithMessage($request, '/learn', 'error', $this->pages->text($refusal->languageKey));
+        $pgnText = $request->formValue('pgn');
+        if (strlen($pgnText) > ContentScanner::MAX_BYTES) {
+            return $this->services->pages()->redirectWithMessage($request, '/learn', 'error', $this->pages->text('study.rejected'));
         }
 
-        return $this->services->pages()->redirectWithMessage($request, '/learn/games/' . $gameId, 'success', $this->pages->text('study.imported'));
+        return $this->importOwnGame($request, $user->id, fn (): int => $this->services->studyImport()->importPastedGame($pgnText, $user->id));
     }
 
     /** @param array<string, string> $parts */
@@ -135,6 +153,19 @@ final class LearnController
         $this->services->studies()->removeGame($game['id']);
 
         return $this->services->pages()->redirectWithMessage($request, '/learn', 'success', $this->pages->text('study.removed'));
+    }
+
+    /** @param array<string, string> $parts */
+    public function keepOwnGame(Request $request, array $parts): Response
+    {
+        $user = $this->pages->user();
+        $game = $this->services->studies()->findGame(MemberPages::idFrom($parts));
+        if ($game === null || $game['owner_id'] !== $user->id) {
+            return $this->pages->notFound($request);
+        }
+        $this->services->studies()->setKept($game['id'], !$game['is_kept']);
+
+        return $this->services->pages()->redirectWithMessage($request, '/learn/games/' . $game['id'], 'success', $this->pages->text($game['is_kept'] ? 'study.not_kept' : 'study.kept'));
     }
 
     // --- Lichess TV ---
@@ -207,23 +238,57 @@ final class LearnController
 
     // --- Helpers ---
 
+    /** Admins may always paste; players only while the admin allows it (B37). */
+    private function mayPaste(bool $isAdmin): bool
+    {
+        return $isAdmin || StudyImport::pasteIsOpenIn($this->services->settings());
+    }
+
+    /**
+     * Runs one import into a player's own list, within the admin's hourly
+     * limit, and shows the game or says why not.
+     *
+     * @param \Closure(): int $import  gives the stored game's id
+     */
+    private function importOwnGame(Request $request, int $userId, \Closure $import): Response
+    {
+        $perHour = StudyImport::importsPerHourIn($this->services->settings());
+        if (!$this->services->rateLimiter()->hit('study-import:' . $userId, $perHour, 3600, $this->services->now)) {
+            return $this->services->pages()->redirectWithMessage($request, '/learn', 'error', $this->pages->text('lichess.busy'));
+        }
+        try {
+            $gameId = $import();
+        } catch (ActionRefused $refusal) {
+            return $this->services->pages()->redirectWithMessage($request, '/learn', 'error', $this->pages->text($refusal->languageKey));
+        }
+
+        return $this->services->pages()->redirectWithMessage($request, '/learn/games/' . $gameId, 'success', $this->pages->text('study.imported'));
+    }
+
     /**
      * The start position and the position after each move, with the move
-     * that led there, for the game viewer (learn/game, study-game.js).
+     * that led there and its comment (B38), for the game viewer
+     * (learn/game, study-game.js). It stops at a move it can't play; the
+     * caller compares the count with the game's moves (B39).
      *
-     * @return list<array{fen: string, san: string}>
+     * @return list<array{fen: string, san: string, comment: string}>
      */
     public static function positionsOf(ReadGame $game): array
     {
         $position = Position::fromFen($game->startFen);
-        $positions = [['fen' => $position->toFen(), 'san' => '']];
-        foreach ($game->sanMoves as $san) {
+        $positions = [['fen' => $position->toFen(), 'san' => '', 'comment' => $game->comments[0] ?? '']];
+        foreach ($game->sanMoves as $index => $san) {
+            $played = false;
             foreach (MoveGenerator::legalMoves($position) as $move) {
                 if (San::of($position, $move) === $san) {
                     $position = $position->play($move);
-                    $positions[] = ['fen' => $position->toFen(), 'san' => $san];
+                    $positions[] = ['fen' => $position->toFen(), 'san' => $san, 'comment' => $game->comments[$index + 1] ?? ''];
+                    $played = true;
                     break;
                 }
+            }
+            if (!$played) {
+                break;
             }
         }
 

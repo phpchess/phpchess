@@ -6,12 +6,13 @@
  * From top to bottom:
  * 1. big tiles: Puzzles, and Lichess TV while "external content" is on;
  * 2. the study themes the admins made (games to replay move by move);
- * 3. my own Lichess games: import one by its link (only while "external
- *    content" is on); only I see them (A88).
+ * 3. my own games: import one by its Lichess link (only while "external
+ *    content" is on), or paste one as PGN (when the admin allows it, B37);
+ *    only I see them (A88).
  *
  * Variables: $themes (list of array{id: int, title: string, games: int}),
  * $ownGames (list of array{id, white, black, event, played_on, result, opening}),
- * $lichessIsOn (bool), $maxOwnGames (int), $basePath, $csrfToken, $t, $template.
+ * $lichessIsOn (bool), $pasteIsOpen (bool), $maxOwnGames (int), $maxBytes (int), $ownGameDays (int), $basePath, $csrfToken, $t, $template.
  */
 ?>
 <h1><?= e($t->text('learn.title')) ?></h1>
@@ -63,10 +64,24 @@
             </p>
         </form>
     <?php endif; ?>
+    <?php if ($pasteIsOpen) : ?>
+        <details>
+            <summary><?= e($t->text('study.paste_title')) ?></summary>
+            <form method="post" action="<?= e($basePath) ?>/learn/paste" class="form">
+                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                <label>
+                    <?= e($t->text('study.paste_label')) ?>
+                    <textarea name="pgn" rows="8" required maxlength="<?= e($maxBytes) ?>" spellcheck="false" autocapitalize="off"></textarea>
+                    <span class="hint"><?= e($t->text('study.paste_hint', ['max' => $maxOwnGames])) ?></span>
+                </label>
+                <p class="button-row"><button type="submit" class="button"><?= e($t->text('study.paste')) ?></button></p>
+            </form>
+        </details>
+    <?php endif; ?>
     <?php if ($ownGames === []) : ?>
         <p class="muted"><?= e($t->text('study.no_own_games')) ?></p>
     <?php else : ?>
-        <?= $template->render('learn/game_list', ['games' => $ownGames, 'basePath' => $basePath, 't' => $t]) ?>
+        <?= $template->render('learn/game_list', ['games' => $ownGames, 'ownGameDays' => $ownGameDays, 'basePath' => $basePath, 't' => $t]) ?>
     <?php endif; ?>
 </section>
 

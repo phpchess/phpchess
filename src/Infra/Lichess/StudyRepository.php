@@ -13,6 +13,10 @@ use PhpChess\Infra\Repository;
  * Tables study_themes and study_games (migration 10). Every game stored
  * here has passed the content scanner (A81); this class never stores a
  * PGN text it was not given as a scanned ReadGame.
+ *
+ * A player's own game is removed some days after its import (B37, A92),
+ * unless the player keeps it (is_kept). Theme games are never removed
+ * by time.
  */
 final class StudyRepository extends Repository
 {
@@ -95,14 +99,14 @@ final class StudyRepository extends Repository
     /**
      * The games of a theme, or a player's own imports.
      *
-     * @return list<array{id: int, white: string, black: string, event: string, played_on: string, result: string, opening: string}>
+     * @return list<array{id: int, white: string, black: string, event: string, played_on: string, result: string, opening: string, is_kept: bool, created_at: int}>
      */
     public function gamesOfTheme(int $themeId): array
     {
         return $this->listOf('theme_id = ?', $themeId);
     }
 
-    /** @return list<array{id: int, white: string, black: string, event: string, played_on: string, result: string, opening: string}> */
+    /** @return list<array{id: int, white: string, black: string, event: string, played_on: string, result: string, opening: string, is_kept: bool, created_at: int}> */
     public function ownGames(int $ownerId): array
     {
         return $this->listOf('owner_id = ?', $ownerId);
@@ -118,12 +122,13 @@ final class StudyRepository extends Repository
      * One game with its PGN.
      *
      * @return array{id: int, theme_id: int|null, owner_id: int|null, white: string, black: string, event: string,
-     *               played_on: string, result: string, opening: string, pgn: string, source: string, source_id: string}|null
+     *               played_on: string, result: string, opening: string, pgn: string, source: string, source_id: string,
+     *               is_kept: bool, created_at: int}|null
      */
     public function findGame(int $gameId): ?array
     {
         $row = $this->database->fetchRow(
-            'SELECT id, theme_id, owner_id, white, black, event, played_on, result, opening, pgn, source, source_id FROM '
+            'SELECT id, theme_id, owner_id, white, black, event, played_on, result, opening, pgn, source, source_id, is_kept, created_at FROM '
             . $this->table('study_games') . ' WHERE id = ?',
             [$gameId],
         );
@@ -144,6 +149,8 @@ final class StudyRepository extends Repository
             'pgn' => self::textOf($row['pgn']),
             'source' => self::textOf($row['source']),
             'source_id' => self::textOf($row['source_id']),
+            'is_kept' => self::intOf($row['is_kept']) === 1,
+            'created_at' => self::timestampOrNull($row['created_at']) ?? 0,
         ];
     }
 
@@ -152,11 +159,33 @@ final class StudyRepository extends Repository
         $this->database->run('DELETE FROM ' . $this->table('study_games') . ' WHERE id = ?', [$gameId]);
     }
 
-    /** @return list<array{id: int, white: string, black: string, event: string, played_on: string, result: string, opening: string}> */
+    /** Marks one game as kept (never removed by time) or not (B37). */
+    public function setKept(int $gameId, bool $isKept): void
+    {
+        $this->database->run('UPDATE ' . $this->table('study_games') . ' SET is_kept = ? WHERE id = ?', [$isKept ? 1 : 0, $gameId]);
+    }
+
+    /**
+     * Removes players' own games imported before $before (Unix seconds)
+     * that are not kept, at most $limit of them. Theme games stay.
+     *
+     * @return int  how many were removed
+     */
+    public function removeOldOwnGames(int $before, int $limit): int
+    {
+        return $this->database->run(
+            'DELETE FROM ' . $this->table('study_games')
+            . ' WHERE owner_id IS NOT NULL AND is_kept = 0 AND created_at < ?'
+            . ' LIMIT ' . max(1, $limit),
+            [self::dateTime($before)],
+        )->rowCount();
+    }
+
+    /** @return list<array{id: int, white: string, black: string, event: string, played_on: string, result: string, opening: string, is_kept: bool, created_at: int}> */
     private function listOf(string $condition, int $value): array
     {
         $rows = $this->database->fetchAll(
-            'SELECT id, white, black, event, played_on, result, opening FROM ' . $this->table('study_games')
+            'SELECT id, white, black, event, played_on, result, opening, is_kept, created_at FROM ' . $this->table('study_games')
             . ' WHERE ' . $condition . ' ORDER BY played_on, id',
             [$value],
         );
@@ -169,6 +198,8 @@ final class StudyRepository extends Repository
             'played_on' => self::textOf($row['played_on']),
             'result' => self::textOf($row['result']),
             'opening' => self::textOf($row['opening']),
+            'is_kept' => self::intOf($row['is_kept']) === 1,
+            'created_at' => self::timestampOrNull($row['created_at']) ?? 0,
         ], $rows);
     }
 }

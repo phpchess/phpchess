@@ -8,8 +8,8 @@ use PhpChess\Domain\Chess\Pgn;
 
 /**
  * One game as PgnReader read it: its tags, its start position and its
- * moves, already replayed with our rules. Comments, variations and signs
- * are gone (A81).
+ * moves, already replayed with our rules, and the comments of the main
+ * line (B38). Variations and signs are gone (A81).
  */
 final class ReadGame
 {
@@ -18,12 +18,14 @@ final class ReadGame
      * @param string $startFen  the start position (Position::START_FEN for a normal game)
      * @param list<string> $sanMoves  the moves in SAN, all legal
      * @param string $result  "1-0", "0-1", "1/2-1/2" or "*"
+     * @param array<int, string> $comments  half-moves played => comment (0: before the first move)
      */
     public function __construct(
         public readonly array $tags,
         public readonly string $startFen,
         public readonly array $sanMoves,
         public readonly string $result,
+        public readonly array $comments = [],
     ) {
     }
 
@@ -48,10 +50,10 @@ final class ReadGame
             }
         }
 
-        return new self($kept, $this->startFen, $this->sanMoves, $this->result);
+        return new self($kept, $this->startFen, $this->sanMoves, $this->result, $this->comments);
     }
 
-    /** The game written out again as clean PGN: allowed tags and moves only. */
+    /** The game written out again as clean PGN: allowed tags, moves and comments only. */
     public function toPgn(): string
     {
         // SetUp and FEN are written by Pgn::write from the start position.
@@ -59,6 +61,6 @@ final class ReadGame
         unset($tags['SetUp'], $tags['FEN']);
         $tags['Result'] = $this->result;
 
-        return Pgn::write($tags, $this->startFen, $this->sanMoves);
+        return Pgn::write($tags, $this->startFen, $this->sanMoves, $this->comments);
     }
 }

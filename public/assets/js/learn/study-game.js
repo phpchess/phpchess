@@ -3,7 +3,9 @@
  *
  * templates/learn/game.php puts the game on the page as a list of
  * positions (data-positions): the start, then one per move, each with the
- * move that led there. This script shows them on a board you can't move
+ * move that led there and its comment (plain text, checked by the server's
+ * content scanner, and still only ever put in as text, never as HTML).
+ * This script shows them on a board you can't move
  * pieces on, and walks through them with:
  *   - the four buttons: start, back, forward, end;
  *   - the arrow keys left and right;
@@ -23,6 +25,7 @@ const page = document.getElementById('study-game');
 const basePath = page.dataset.basePath;
 const positions = JSON.parse(page.dataset.positions);
 const moveList = document.getElementById('study-game-moves');
+const commentBox = document.getElementById('study-game-comment');
 
 let current = 0; // which position is on the board: 0 is the start
 
@@ -44,17 +47,24 @@ positions.forEach((position, index) => {
     button.type = 'button';
     button.className = 'study-game-move';
     button.textContent = position.san;
+    if (position.comment) {
+        button.classList.add('has-comment');
+    }
     button.addEventListener('click', () => show(index));
     item.appendChild(button);
     moveList.appendChild(item);
     moveButtons[index] = button;
 });
 
+// The comment before the first move, if the game has one.
+commentBox.textContent = positions[0].comment || '';
+
 // --- Walking through the game ---
 
 function show(index) {
     current = Math.max(0, Math.min(positions.length - 1, index));
     board.setPosition(positions[current].fen, true);
+    commentBox.textContent = positions[current].comment || '';
     moveButtons.forEach((button, buttonIndex) => {
         if (button) {
             button.classList.toggle('is-current', buttonIndex === current);
@@ -79,4 +89,14 @@ document.addEventListener('keydown', (event) => {
     } else if (event.key === 'ArrowRight') {
         steps.next();
     }
+});
+
+// --- Copy the PGN out, to take the game to another chess program (B37) ---
+
+const copyButton = document.getElementById('study-game-copy');
+copyButton.addEventListener('click', () => {
+    const pgnText = document.getElementById('study-game-pgn').textContent;
+    navigator.clipboard.writeText(pgnText).then(() => {
+        copyButton.textContent = copyButton.dataset.copied;
+    });
 });

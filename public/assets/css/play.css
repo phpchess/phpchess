@@ -390,6 +390,9 @@ details.confirm summary { cursor: pointer; }
 }
 .study-game-move.is-current { background: var(--colour-accent); color: var(--colour-accent-text); border-color: var(--colour-accent); }
 .study-game-buttons { justify-content: center; }
+/* A move with a comment gets a line under it; the comment shows below the board. */
+.study-game-move.has-comment { text-decoration: underline dotted; }
+.study-game-comment { min-height: 1.5em; margin: var(--space-2) 0; font-style: italic; }
 .study-game-pgn { white-space: pre-wrap; overflow-wrap: anywhere; font-size: var(--text-small); }
 
 /* The puzzle and TV boards: as wide as the phone, never wider than a laptop needs. */

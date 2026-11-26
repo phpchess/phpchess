@@ -144,7 +144,9 @@ final class Routes
         $router->get('/learn/themes/{id}', fn (Request $request, array $parts): Response => $learn->theme($request, $parts), Access::MEMBERS);
         $router->get('/learn/games/{id}', fn (Request $request, array $parts): Response => $learn->game($request, $parts), Access::MEMBERS);
         $router->post('/learn/games/{id}/remove', fn (Request $request, array $parts): Response => $learn->removeOwnGame($request, $parts), Access::MEMBERS);
+        $router->post('/learn/games/{id}/keep', fn (Request $request, array $parts): Response => $learn->keepOwnGame($request, $parts), Access::MEMBERS);
         $router->post('/learn/import', fn (Request $request): Response => $learn->import($request), Access::MEMBERS, $lichessSwitch);
+        $router->post('/learn/paste', fn (Request $request): Response => $learn->paste($request), Access::MEMBERS);
         $router->get('/learn/tv', fn (Request $request): Response => $learn->tv($request), Access::MEMBERS, $lichessSwitch);
         $router->get('/learn/tv/now', fn (Request $request): Response => $learn->tvNow($request), Access::MEMBERS, $lichessSwitch);
 
@@ -155,6 +157,8 @@ final class Routes
         $router->post('/admin/lichess/themes', fn (Request $request): Response => $adminLichess->createTheme($request), Access::ADMINS);
         $router->post('/admin/lichess/themes/{id}/remove', fn (Request $request, array $parts): Response => $adminLichess->removeTheme($request, $parts), Access::ADMINS);
         $router->post('/admin/lichess/upload', fn (Request $request): Response => $adminLichess->upload($request), Access::ADMINS);
+        $router->post('/admin/lichess/paste', fn (Request $request): Response => $adminLichess->paste($request), Access::ADMINS);
+        $router->post('/admin/lichess/settings', fn (Request $request): Response => $adminLichess->saveSettings($request), Access::ADMINS);
         $router->post('/admin/lichess/import-game', fn (Request $request): Response => $adminLichess->importGame($request), Access::ADMINS, $lichessSwitch);
         $router->post('/admin/lichess/import-player', fn (Request $request): Response => $adminLichess->importPlayer($request), Access::ADMINS, $lichessSwitch);
 

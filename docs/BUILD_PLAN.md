@@ -218,4 +218,5 @@ Release 6.0 is C0-1 to C4-2, plus a check on a real shared host before release.
   - **Safety of the door**: `LichessClient` refuses unless the switch is on; https://lichess.org only, no redirects, one request at a time, 60 s rest after 429, 1 MB reply cap. The switch can only be turned on after "Test connection" passed (A80); it needs curl (ServerSupport).
   - Migration 10 (`study_themes`, `study_games`).
   - Tests: `tests/Lichess/` (ContentScanner, LichessClient with a fake transport, PuzzleSet, Learn pages).
+  - **Review round (2026-11-26, A89–A92)**: word filter modes and a starter list (B36), PGN paste in and copy out, players' limits as admin settings (B37), plain-text comments kept (B38), the viewer reports a move it can't follow (B39), own games removed after 30 days unless kept (A92).
   - **Not verified**: real requests to lichess.org (TV, game import, player import) were never sent; the first real check is the admin's "Test connection" on the test site.

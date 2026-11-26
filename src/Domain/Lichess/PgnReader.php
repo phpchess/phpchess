@@ -18,8 +18,10 @@ use PhpChess\Domain\Chess\San;
  * result. One file may hold many games.
  *
  * This reader is the first half of the content scanner (ContentScanner is
- * the second). It throws away everything that is not a tag or a move:
- *   - comments in { } and after ; (text anyone could have written);
+ * the second). It keeps tags, moves and the comments of the main line
+ * (in { }, B38; the scanner checks their text strictly), and throws away:
+ *   - comments after ; and comments inside variations;
+ *   - Lichess's machine notes in comments, like [%eval 0.3] and [%clk 0:05:00];
  *   - variations in ( ) (side lines);
  *   - NAGs ($1, $2 ...) and the signs ! ? after moves.
  * Then it replays every move with our own rules. A move that is not legal
@@ -99,8 +101,18 @@ final class PgnReader
         // --- Moves: remove comments, variations and signs, then replay ---
         $tokens = self::moveTokens($moveText);
         $sanMoves = [];
+        $comments = [];
         $result = '*';
         foreach ($tokens as $token) {
+            // A comment belongs after the moves played so far (0: before the first).
+            if (str_starts_with($token, '{')) {
+                $text = self::commentText($token);
+                if ($text !== '') {
+                    $ply = count($sanMoves);
+                    $comments[$ply] = isset($comments[$ply]) ? $comments[$ply] . ' ' . $text : $text;
+                }
+                continue;
+            }
             if (in_array($token, ['1-0', '0-1', '1/2-1/2', '*'], true)) {
                 $result = $token;
                 break;
@@ -116,29 +128,42 @@ final class PgnReader
             }
         }
 
-        return new ReadGame($tags, $startFen, $sanMoves, $result);
+        return new ReadGame($tags, $startFen, $sanMoves, $result, $comments);
     }
 
     /**
-     * The move text as a list of words: SAN moves and the result, with
-     * comments, variations, move numbers and signs left out.
+     * The move text as a list of words: SAN moves, the result, and the
+     * main line's comments (each one word starting with "{"). Variations,
+     * ; comments, move numbers and signs are left out.
      *
      * @return list<string>
      */
     private static function moveTokens(string $moveText): array
     {
-        // Comments: { ... } and ; to the end of the line.
-        $text = (string) preg_replace('/\{[^}]*\}/s', ' ', $moveText);
-        $text = (string) preg_replace('/;[^\n]*/', ' ', $text);
-        if (str_contains($text, '{') || str_contains($text, '}')) {
-            throw new UnreadableGame('unclosed comment');
-        }
-
-        // Variations: ( ... ), which may hold more variations inside.
-        $withoutVariations = '';
-        $depth = 0;
-        foreach (str_split($text) as $character) {
-            if ($character === '(') {
+        // --- Walk the text once: comments, variations, the rest ---
+        $mainLine = '';          // the move text outside comments and variations
+        $comments = [];          // the main line's comments, in order
+        $depth = 0;              // how deep inside ( ) we are
+        $length = strlen($moveText);
+        for ($i = 0; $i < $length; $i++) {
+            $character = $moveText[$i];
+            if ($character === '{') {
+                $end = strpos($moveText, '}', $i);
+                if ($end === false) {
+                    throw new UnreadableGame('unclosed comment');
+                }
+                if ($depth === 0) {
+                    // A marker in the move text keeps the comment in its place.
+                    $mainLine .= ' {' . count($comments) . ' ';
+                    $comments[] = substr($moveText, $i + 1, $end - $i - 1);
+                }
+                $i = $end;
+            } elseif ($character === '}') {
+                throw new UnreadableGame('unbalanced comment');
+            } elseif ($character === ';') {
+                $end = strpos($moveText, "\n", $i);
+                $i = $end === false ? $length : $end;
+            } elseif ($character === '(') {
                 $depth++;
             } elseif ($character === ')') {
                 $depth--;
@@ -146,21 +171,42 @@ final class PgnReader
                     throw new UnreadableGame('unbalanced variation');
                 }
             } elseif ($depth === 0) {
-                $withoutVariations .= $character;
+                $mainLine .= $character;
             }
         }
         if ($depth !== 0) {
             throw new UnreadableGame('unbalanced variation');
         }
 
-        // NAGs ($1), move numbers (12. or 12...), and the signs ! ?
-        $text = (string) preg_replace('/\$\d+/', ' ', $withoutVariations);
+        // --- NAGs ($1), move numbers (12. or 12...), and the signs ! ? ---
+        $text = (string) preg_replace('/\$\d+/', ' ', $mainLine);
         $text = (string) preg_replace('/\b\d+\.(\.\.)?/', ' ', $text);
         $text = str_replace(['!', '?'], '', $text);
 
-        $words = preg_split('/\s+/', trim($text)) ?: [];
+        // --- Words; a marker "{3" becomes "{" and the fourth comment's text ---
+        $words = [];
+        foreach (preg_split('/\s+/', trim($text)) ?: [] as $word) {
+            if ($word === '') {
+                continue;
+            }
+            if (preg_match('/^\{(\d+)$/', $word, $match) === 1) {
+                $word = '{' . $comments[(int) $match[1]];
+            }
+            $words[] = $word;
+        }
 
-        return array_values(array_filter($words, static fn (string $word): bool => $word !== ''));
+        return $words;
+    }
+
+    /**
+     * A comment's text: Lichess's machine notes ([%eval ...], [%clk ...])
+     * removed and the spaces tidied. The scanner checks what is left.
+     */
+    private static function commentText(string $token): string
+    {
+        $text = (string) preg_replace('/\[%[^\]]*\]/', ' ', substr($token, 1));
+
+        return trim((string) preg_replace('/\s+/u', ' ', $text));
     }
 
     /**

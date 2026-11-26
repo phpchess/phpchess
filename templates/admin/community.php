@@ -3,7 +3,7 @@
  * Community settings: the word filter (C-05), the kind of game chat
  * (G-12), the newsletter speed (ADM-07) and the archive cut-off (A43).
  *
- * Variables: $wordFilter (string), $chatMode (string), $chatModes (list of string),
+ * Variables: $wordFilter (string), $wordMode (string), $wordModes (list of string), $chatMode (string), $chatModes (list of string),
  * $newsletterPerRun (int), $archiveCutoffMs (int),
  * $warnings, $currentAdminPath, $basePath, $csrfToken, $t, $template.
  */
@@ -18,6 +18,13 @@
     <label for="word_filter"><?= e($t->text('admin.community.word_filter')) ?></label>
     <textarea id="word_filter" name="word_filter" rows="6"><?= e($wordFilter) ?></textarea>
     <p class="muted"><?= e($t->text('admin.community.word_filter_explain')) ?></p>
+
+    <fieldset>
+        <legend><?= e($t->text('admin.community.word_mode')) ?></legend>
+        <?php foreach ($wordModes as $mode) : ?>
+            <label class="checkbox"><input type="radio" name="word_mode" value="<?= e($mode) ?>"<?= $mode === $wordMode ? ' checked' : '' ?>> <?= e($t->text('admin.community.word_mode.' . $mode)) ?></label>
+        <?php endforeach; ?>
+    </fieldset>
 
     <fieldset>
         <legend><?= e($t->text('admin.community.chat_mode')) ?></legend>

@@ -11,10 +11,12 @@
  *      newest games. Every game goes through the content scanner (A81);
  *      rejected games are listed in the audit log.
  *   The link to the Lichess database helps find games to stage (A87).
+ *   4. players' own games: limits and the paste switch (B37).
  *
  * Variables: $themes (list of array{id: int, title: string, games: int}),
  * $lichessIsOn (bool), $testPassedAt (int, 0 = not passed), $testResult (string),
- * $maxGames (int), $lichessDatabaseLink (string), $warnings, $currentAdminPath,
+ * $maxGames (int), $maxBytes (int), $maxOwnGames (int), $importsPerHour (int), $pasteIsOpen (bool), $ownGameDays (int),
+ * $lichessDatabaseLink (string), $warnings, $currentAdminPath,
  * $basePath, $csrfToken, $t, $template.
  */
 ?>
@@ -95,6 +97,14 @@
             <p class="button-row"><button type="submit" class="button"><?= $template->render('partials/icon', ['icon' => 'upload', 'size' => 20]) ?> <?= e($t->text('admin.lichess.upload')) ?></button></p>
         </form>
 
+        <h3><?= e($t->text('admin.lichess.paste_title')) ?></h3>
+        <form method="post" action="<?= e($basePath) ?>/admin/lichess/paste" class="form">
+            <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+            <?= $themeChoiceHtml ?>
+            <label><?= e($t->text('study.paste_label')) ?> <textarea name="pgn" rows="8" required maxlength="<?= e($maxBytes) ?>" spellcheck="false" autocapitalize="off"></textarea></label>
+            <p class="button-row"><button type="submit" class="button"><?= e($t->text('study.paste')) ?></button></p>
+        </form>
+
         <?php if ($lichessIsOn) : ?>
             <p>
                 <a href="<?= e($lichessDatabaseLink) ?>" target="_blank" rel="noopener noreferrer"><?= $template->render('partials/icon', ['icon' => 'link', 'size' => 20]) ?> <?= e($t->text('admin.lichess.database_link')) ?></a>
@@ -119,3 +129,16 @@
         <?php endif; ?>
     </section>
 <?php endif; ?>
+
+<?php // ===== 4. Players' own games (B37) ===== ?>
+<section aria-labelledby="own-settings-title">
+    <h2 id="own-settings-title">4. <?= e($t->text('admin.lichess.settings_title')) ?></h2>
+    <form method="post" action="<?= e($basePath) ?>/admin/lichess/settings" class="form">
+        <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+        <label><?= e($t->text('admin.lichess.max_own_games')) ?> <input type="number" name="max_own_games" min="1" max="500" value="<?= e($maxOwnGames) ?>" required></label>
+        <label><?= e($t->text('admin.lichess.imports_per_hour')) ?> <input type="number" name="imports_per_hour" min="1" max="100" value="<?= e($importsPerHour) ?>" required></label>
+        <label><?= e($t->text('admin.lichess.own_game_days')) ?> <input type="number" name="own_game_days" min="0" max="3650" value="<?= e($ownGameDays) ?>" required></label>
+        <label class="checkbox"><input type="checkbox" name="paste_for_players" value="on"<?= $pasteIsOpen ? ' checked' : '' ?>> <?= e($t->text('admin.lichess.paste_for_players')) ?></label>
+        <p class="button-row"><button type="submit" class="button"><?= e($t->text('admin.lichess.save')) ?></button></p>
+    </form>
+</section>

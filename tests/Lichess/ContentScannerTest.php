@@ -51,23 +51,79 @@ final class ContentScannerTest extends TestCase
         self::assertStringContainsString('4. Qxf7# 1-0', $game->toPgn());
     }
 
-    public function testCommentsVariationsAndSignsAreThrownAway(): void
+    public function testVariationsSignsAndSemicolonCommentsAreThrownAway(): void
     {
         $pgn = <<<'PGN'
             [White "Anna"]
             [Black "Ben"]
             [Result "*"]
 
-            1. e4 {visit my site, message me} e5!? $1 2. Nf3 (2. Bc4 {another line} Nc6 (2... Nf6)) Nc6?? ; a comment to the end
+            1. e4 {A good start.} e5!? $1 2. Nf3 (2. Bc4 {another line} Nc6 (2... Nf6)) Nc6?? ; a note to the end
             3. Bb5 *
             PGN;
 
         $game = $this->scanner()->scan($pgn)->accepted[0];
 
         self::assertSame(['e4', 'e5', 'Nf3', 'Nc6', 'Bb5'], $game->sanMoves);
-        self::assertStringNotContainsString('visit', $game->toPgn());
         self::assertStringNotContainsString('another', $game->toPgn());
-        self::assertStringNotContainsString('comment', $game->toPgn());
+        self::assertStringNotContainsString('note', $game->toPgn());
+    }
+
+    // --- Comments of the main line (B38, A90: plain text only) ---
+
+    public function testMainLineCommentsAreKeptInTheirPlace(): void
+    {
+        $pgn = "[Result \"*\"]\n\n{Before the game.} 1. e4 {A good start.} e5 2. Nf3 { [%eval 0.3] [%clk 0:05:00] } Nc6 {Both develop.} *\n";
+
+        $game = $this->scanner()->scan($pgn)->accepted[0];
+
+        // Half-moves played => comment; Lichess's machine notes are gone.
+        self::assertSame([0 => 'Before the game.', 1 => 'A good start.', 4 => 'Both develop.'], $game->comments);
+        $written = $game->toPgn();
+        self::assertStringContainsString('{ Before the game. } 1. e4 { A good start. } 1... e5', $written);
+        self::assertStringNotContainsString('%eval', $written);
+
+        // Written out and read again, the comments stay the same.
+        self::assertSame($game->comments, $this->scanner()->scan($written)->accepted[0]->comments);
+    }
+
+    /** @return array<string, array{string}> */
+    public static function poisonedComments(): array
+    {
+        return [
+            'html' => ['<script>alert(1)</script>'],
+            'a tag' => ['<b>bold</b>'],
+            'an entity' => ['Tom &amp; Jerry'],
+            'php' => ['Look: $x = 1'],
+            'a backslash' => ['C:\\games'],
+            'quotes' => ['He said "hi"'],
+            'a web address' => ['see lichess.org/abc'],
+            'a web address 2' => ['www dot example dot com https:'],
+            'an e-mail address' => ['write to me at kid@example.com'],
+            'a blocked word' => ['what a badword move'],
+            'a control character' => ["bad\x07bell"],
+            'a brace inside' => ['open { here'],
+            'emoji' => ['nice move 😀'],
+            'too long' => [str_repeat('a', ContentScanner::MAX_COMMENT_LENGTH + 1)],
+        ];
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('poisonedComments')]
+    public function testACommentThatIsNotPlainTextRejectsTheWholeGame(string $comment): void
+    {
+        $result = $this->scanner()->scan("[Result \"*\"]\n\n1. e4 {" . $comment . "} e5 *\n");
+
+        self::assertSame([], $result->accepted);
+        self::assertCount(1, $result->rejected);
+    }
+
+    public function testCommentsInsideVariationsAreNotChecked(): void
+    {
+        // They are thrown away with the variation, so they can't be shown.
+        $result = $this->scanner()->scan("[Result \"*\"]\n\n1. e4 (1. d4 {<script>}) e5 *\n");
+
+        self::assertCount(1, $result->accepted);
+        self::assertSame([], $result->accepted[0]->comments);
     }
 
     public function testUnknownTagsAreDropped(): void

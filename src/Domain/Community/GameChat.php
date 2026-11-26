@@ -71,7 +71,7 @@ final class GameChat
         if ($text === '' || mb_strlen($text) > self::MAX_LENGTH) {
             throw new ActionRefused('chat.bad_length', ['max' => self::MAX_LENGTH]);
         }
-        $this->chat->add($game->id, $userId, $this->wordFilter->clean($text), $now);
+        $this->chat->add($game->id, $userId, $this->wordFilter->forPost($text), $now);
     }
 
     /**

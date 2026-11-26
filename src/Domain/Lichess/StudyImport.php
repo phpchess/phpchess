@@ -8,14 +8,20 @@ use PhpChess\Domain\ActionRefused;
 use PhpChess\Infra\Lichess\LichessClient;
 use PhpChess\Infra\Lichess\StudyRepository;
 use PhpChess\Infra\System\AuditLogRepository;
+use PhpChess\Infra\System\SettingsRepository;
 
 /**
  * Brings games into the study collection (C5-1, L-03, A78, A81, A88).
  *
- * Three ways in, and every one goes through the content scanner first:
- *   - importOneGame():  a player or admin pastes a Lichess game link;
- *   - importUserGames(): an admin fetches a Lichess player's newest games (up to 50);
- *   - importUpload():   an admin uploads a PGN file (up to 1 MB, 50 games).
+ * Four ways in, and every one goes through the content scanner first:
+ *   - importOneGame():    a player or admin pastes a Lichess game link;
+ *   - importUserGames():  an admin fetches a Lichess player's newest games (up to 50);
+ *   - importUpload():     an admin uploads or pastes PGN text (up to 1 MB, 50 games);
+ *   - importPastedGame(): a player pastes one game as PGN text (B37; only
+ *     while the admin allows it, PASTE_SETTING).
+ *
+ * The admin sets how many own games a player may keep and how many imports
+ * a player may make per hour (B37); the constants are the defaults.
  *
  * A player's import has no theme and only that player sees it (A88); an
  * admin's import goes into a theme everyone sees. Every rejected game is
@@ -23,8 +29,20 @@ use PhpChess\Infra\System\AuditLogRepository;
  */
 final class StudyImport
 {
-    /** A player keeps at most this many own imports (A78: one at a time, A88). */
+    /** A player keeps at most this many own imports, unless the admin changes it (A88, B37). */
     public const int MAX_OWN_GAMES = 50;
+
+    /** A player may import this many games per hour, unless the admin changes it (B37). */
+    public const int IMPORTS_PER_HOUR = 10;
+
+    /** A player's own game is removed this many days after its import, unless kept (B37, A92). */
+    public const int OWN_GAME_DAYS = 30;
+
+    /** The admin's settings for players' own games (B37). */
+    public const string MAX_OWN_SETTING = 'study.max_own_games';
+    public const string PER_HOUR_SETTING = 'study.imports_per_hour';
+    public const string PASTE_SETTING = 'study.paste_for_players';
+    public const string DAYS_SETTING = 'study.own_game_days';
 
     public function __construct(
         private readonly LichessClient $lichess,
@@ -32,7 +50,34 @@ final class StudyImport
         private readonly StudyRepository $studies,
         private readonly AuditLogRepository $auditLog,
         private readonly string $ipAddress,
+        private readonly int $maxOwnGames = self::MAX_OWN_GAMES,
     ) {
+    }
+
+    // --- The admin's settings, read in one place ---
+
+    /** How many own games a player may keep (1 to 500). */
+    public static function maxOwnGamesIn(SettingsRepository $settings): int
+    {
+        return max(1, min(500, $settings->getInt(self::MAX_OWN_SETTING, self::MAX_OWN_GAMES)));
+    }
+
+    /** How many imports a player may make per hour (1 to 100). */
+    public static function importsPerHourIn(SettingsRepository $settings): int
+    {
+        return max(1, min(100, $settings->getInt(self::PER_HOUR_SETTING, self::IMPORTS_PER_HOUR)));
+    }
+
+    /** Days before a player's own game is removed (0: never, up to 3650). */
+    public static function ownGameDaysIn(SettingsRepository $settings): int
+    {
+        return max(0, min(3650, $settings->getInt(self::DAYS_SETTING, self::OWN_GAME_DAYS)));
+    }
+
+    /** True when every player may paste a game as PGN; admins always may (B37). */
+    public static function pasteIsOpenIn(SettingsRepository $settings): bool
+    {
+        return $settings->getBool(self::PASTE_SETTING, false);
     }
 
     /**
@@ -47,7 +92,7 @@ final class StudyImport
         if ($gameId === null) {
             throw new ActionRefused('lichess.bad_link');
         }
-        if ($themeId === null && $this->studies->countOwnGames($userId) >= self::MAX_OWN_GAMES) {
+        if ($themeId === null && $this->studies->countOwnGames($userId) >= $this->maxOwnGames) {
             throw new ActionRefused('study.too_many_own');
         }
 
@@ -84,6 +129,31 @@ final class StudyImport
     public function importUpload(string $pgnText, int $themeId, int $adminId): array
     {
         return $this->store($this->scanner->scan($pgnText), $themeId, $adminId, 'upload', 'upload');
+    }
+
+    /**
+     * Imports one game a player pasted as PGN text into their own list
+     * (B37). The text must hold exactly one game, and the game must pass
+     * the scanner; otherwise nothing is kept.
+     *
+     * @return int  the stored game's id
+     */
+    public function importPastedGame(string $pgnText, int $userId): int
+    {
+        if ($this->studies->countOwnGames($userId) >= $this->maxOwnGames) {
+            throw new ActionRefused('study.too_many_own');
+        }
+        if (count(PgnReader::splitGames($pgnText)) > 1) {
+            throw new ActionRefused('study.paste_one_game');
+        }
+
+        $result = $this->scanner->scan($pgnText);
+        $this->logRejections($result, $userId, 'pasted game');
+        if (count($result->accepted) !== 1) {
+            throw new ActionRefused('study.rejected');
+        }
+
+        return $this->studies->addGame($result->accepted[0], null, $userId, 'paste', '', $userId);
     }
 
     /**

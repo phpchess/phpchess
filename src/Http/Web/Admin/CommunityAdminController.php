@@ -116,7 +116,9 @@ final class CommunityAdminController
         $settings = $this->services->settings();
 
         return $this->pages->render($request, 'admin/community', 'admin.community.title', [
-            'wordFilter' => $settings->getString(WordFilter::SETTING),
+            'wordFilter' => $settings->getString(WordFilter::SETTING, WordFilter::starterList()),
+            'wordMode' => $settings->getString(WordFilter::MODE_SETTING, WordFilter::MODE_STARS),
+            'wordModes' => WordFilter::MODES,
             'chatMode' => $this->services->gameChat()->mode(),
             'chatModes' => GameChat::MODES,
             'newsletterPerRun' => $settings->getInt('newsletter.per_run', NewsletterJob::DEFAULT_PER_RUN),
@@ -127,7 +129,11 @@ final class CommunityAdminController
     public function saveSettings(Request $request): Response
     {
         $settings = $this->services->settings();
-        $settings->set(WordFilter::SETTING, mb_substr($request->formValue('word_filter'), 0, 10000));
+        $settings->set(WordFilter::SETTING, mb_substr($request->formValue('word_filter'), 0, 50000));
+        $wordMode = $request->formValue('word_mode');
+        if (in_array($wordMode, WordFilter::MODES, true)) {
+            $settings->set(WordFilter::MODE_SETTING, $wordMode);
+        }
         $chatMode = $request->formValue('chat_mode');
         if (in_array($chatMode, GameChat::MODES, true)) {
             $settings->set('game_chat.mode', $chatMode);
