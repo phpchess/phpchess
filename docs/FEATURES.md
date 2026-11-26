@@ -186,7 +186,7 @@ Decisions A1–A21 are in [DECISIONS.md](DECISIONS.md).
 | Id | Feature | Origin | Chunk | Switch | Status |
 |---|---|---|---|---|---|
 | L-01 | Embedded Lichess learning content and puzzles | new | C5-1 | external content | planned |
-| L-02 | Login with Lichess / account link (OAuth with PKCE) | new | C5-1 | external content | planned |
+| L-02 | Login with Lichess / account link (OAuth with PKCE) | new | C5-1 | external content | dropped (A77) |
 | L-03 | Game import and study links through the Lichess API | new | C5-1 | external content | planned |
 
 ## Dropped by decision
