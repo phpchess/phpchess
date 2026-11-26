@@ -68,9 +68,11 @@ use PhpChess\Domain\Identity\Preferences;
     <button type="submit"><?= e($t->text('preferences.button')) ?></button>
 </form>
 
-<p><a href="<?= e($basePath) ?>/account/password"><?= e($t->text('password.title')) ?></a></p>
-<p><a href="<?= e($basePath) ?>/account/vacation"><?= e($t->text('vacation.title')) ?></a></p>
-<p><a href="<?= e($basePath) ?>/account/profile"><?= e($t->text('profile.edit_title')) ?></a></p>
-<p><a href="<?= e($basePath) ?>/account/notifications"><?= e($t->text('notifications.title')) ?></a></p>
-<p><a href="<?= e($basePath) ?>/account/devices"><?= e($t->text('devices.title')) ?></a></p>
-<p><a href="<?= e($basePath) ?>/account/data"><?= e($t->text('own_data.title')) ?></a></p>
+<div class="button-row account-pages">
+    <a class="button button-secondary" href="<?= e($basePath) ?>/account/password"><?= e($t->text('password.title')) ?></a>
+    <a class="button button-secondary" href="<?= e($basePath) ?>/account/vacation"><?= e($t->text('vacation.title')) ?></a>
+    <a class="button button-secondary" href="<?= e($basePath) ?>/account/profile"><?= e($t->text('profile.edit_title')) ?></a>
+    <a class="button button-secondary" href="<?= e($basePath) ?>/account/notifications"><?= e($t->text('notifications.title')) ?></a>
+    <a class="button button-secondary" href="<?= e($basePath) ?>/account/devices"><?= e($t->text('devices.title')) ?></a>
+    <a class="button button-secondary" href="<?= e($basePath) ?>/account/data"><?= e($t->text('own_data.title')) ?></a>
+</div>

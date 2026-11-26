@@ -151,7 +151,7 @@ $resultText = function ($game) use ($t): string {
                                 <span class="muted"><?= e($resultText($game)) ?></span></li>
                         <?php endforeach; ?>
                     </ul>
-                    <p><a href="<?= e($basePath) ?>/games"><?= e($t->text('home.all_games')) ?></a></p>
+                    <p class="button-row"><a class="button button-secondary" href="<?= e($basePath) ?>/games"><?= e($t->text('home.all_games')) ?></a></p>
                 <?php endif; ?>
             </section>
         </div>
@@ -174,7 +174,7 @@ $resultText = function ($game) use ($t): string {
                 <?= $template->render('content/text', ['text' => $item['body']]) ?>
             </article>
         <?php endforeach; ?>
-        <p><a href="<?= e($basePath) ?>/news"><?= e($t->text('content.all_news')) ?></a></p>
+        <p class="button-row"><a class="button button-secondary" href="<?= e($basePath) ?>/news"><?= e($t->text('content.all_news')) ?></a></p>
     </section>
 <?php endif; ?>
 

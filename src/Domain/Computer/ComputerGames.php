@@ -60,6 +60,54 @@ final class ComputerGames
         return $this->players->all();
     }
 
+    /**
+     * The strength bands of the new game pop-up (F2, A70, A75): name =>
+     * [lowest rating, highest rating]. Choosing a band starts a game against
+     * one computer player of that band, picked at random.
+     */
+    public const array STRENGTH_BANDS = [
+        'beginner' => [0, 800],
+        'improver' => [801, 1300],
+        'club' => [1301, 1700],
+        'strong' => [1701, 3000],
+    ];
+
+    /**
+     * The players of one strength band, weakest first (empty for an unknown band).
+     *
+     * @return list<ComputerPlayer>
+     */
+    public function playersInBand(string $band): array
+    {
+        if (!isset(self::STRENGTH_BANDS[$band])) {
+            return [];
+        }
+        [$lowest, $highest] = self::STRENGTH_BANDS[$band];
+        $inBand = [];
+        foreach ($this->players->all() as $player) {
+            if ($player->elo >= $lowest && $player->elo <= $highest) {
+                $inBand[] = $player;
+            }
+        }
+
+        return $inBand;
+    }
+
+    /**
+     * Starts a game against a computer player of the band, picked at random,
+     * and returns the game's id. Refused for an unknown or empty band.
+     */
+    public function startInBand(int $memberId, string $band, string $colour, int $now): int
+    {
+        $players = $this->playersInBand($band);
+        if ($players === []) {
+            throw new PlayRefused('computer.player_not_found');
+        }
+        $player = $players[random_int(0, count($players) - 1)];
+
+        return $this->start($memberId, $player->id, $colour, $now);
+    }
+
     /** The highest search depth any computer player may use on this site (A49). */
     public function depthCap(SettingsRepository $settings): int
     {

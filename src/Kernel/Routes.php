@@ -132,6 +132,9 @@ final class Routes
         // --- Play: challenges, the Play button and invites (G-05, G-20, G-21) ---
         $router->get('/play', fn (Request $request): Response => $challenges->lobby($request), Access::MEMBERS);
         $router->get('/play/news', fn (Request $request): Response => $challenges->news($request), Access::MEMBERS);
+        $router->get('/play/boxes', fn (Request $request): Response => $challenges->boxes($request), Access::MEMBERS);
+        $router->get('/play/challenge', fn (Request $request): Response => $challenges->newChallengePage($request), Access::MEMBERS);
+        $router->post('/play/start', fn (Request $request): Response => $challenges->startNewGame($request), Access::MEMBERS);
         $router->get('/rules', fn (Request $request): Response => $challenges->rules($request), Access::MEMBERS);
         $router->post('/play/quick', fn (Request $request): Response => $challenges->quickPlay($request), Access::MEMBERS);
         $router->post('/challenges', fn (Request $request): Response => $challenges->create($request), Access::MEMBERS);

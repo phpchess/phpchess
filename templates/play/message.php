@@ -7,4 +7,4 @@
 ?>
 <h1><?= e($title) ?></h1>
 <p><?= e($message) ?></p>
-<p><a href="<?= e($basePath) ?>/play"><?= e($t->text('play.back_to_games')) ?></a></p>
+<p class="button-row"><a class="button button-secondary" href="<?= e($basePath) ?>/play"><?= e($t->text('play.back_to_games')) ?></a></p>

@@ -24,10 +24,15 @@
  * (UI-05, UI-08), both from this site only (K9).
  * Raw HTML is only printed from variables whose names end in "Html" (K6).
  */
+
+// ===== Menu helpers =====
 $isOn = fn (string $name): bool => ($menuSwitches[$name] ?? false) === true;
-$link = fn (string $path, string $label, bool $isCurrent, int $badge = 0): array => [
-    'href' => $basePath . $path, 'label' => $label, 'isCurrent' => $isCurrent, 'badge' => $badge, 't' => $t,
+$link = fn (string $path, string $label, string $icon, bool $isCurrent, int $badge = 0): array => [
+    'href' => $basePath . $path, 'label' => $label, 'icon' => $icon, 'isCurrent' => $isCurrent, 'badge' => $badge, 't' => $t,
 ];
+$isAdminPage = str_starts_with($currentPath, '/admin');
+$bodyClasses = 'layout-' . $skin->layout . ' board-theme-' . $boardTheme
+    . ($user !== null ? ' has-nav' : '') . ($isAdminPage ? ' is-admin-page' : '');
 ?>
 <!doctype html>
 <html lang="<?= e($language) ?>"<?php if ($colourScheme !== 'auto') : ?> data-colour-scheme="<?= e($colourScheme) ?>"<?php endif; ?>>
@@ -50,7 +55,7 @@ $link = fn (string $path, string $label, bool $isCurrent, int $badge = 0): array
     <?php /* The skin comes last, so its colours replace the fallback values in base.css. */ ?>
     <link rel="stylesheet" href="<?= e($basePath) ?>/skin/theme.css">
 </head>
-<body class="layout-<?= e($skin->layout) ?> board-theme-<?= e($boardTheme) ?>"
+<body class="<?= e($bodyClasses) ?>"
       data-base-path="<?= e($basePath) ?>" data-member="<?= $user === null ? 'no' : 'yes' ?>" data-my-move-count="<?= e($user === null ? 0 : $myMoveCount) ?>">
 <a class="skip-link" href="#main"><?= e($t->text('layout.skip_to_content')) ?></a>
 
@@ -62,36 +67,42 @@ $link = fn (string $path, string $label, bool $isCurrent, int $badge = 0): array
         <span><?= e($siteName) ?></span>
     </a>
 
-    <nav class="site-menu" aria-label="<?= e($t->text('layout.menu')) ?>">
-        <ul>
-            <?php if ($user === null) : ?>
-                <?= $template->render('partials/menu_link', $link('/login', $t->text('layout.login'), $currentPath === '/login')) ?>
-            <?php else : ?>
-                <?= $template->render('partials/menu_link', $link('/play', $t->text('layout.play'), str_starts_with($currentPath, '/play'), $myMoveCount)) ?>
-                <?= $template->render('partials/menu_link', $link('/games', $t->text('layout.my_games'), str_starts_with($currentPath, '/games'))) ?>
-                <?php if ($isOn('messages')) : ?>
-                    <?= $template->render('partials/menu_link', $link('/messages', $t->text('layout.messages'), str_starts_with($currentPath, '/messages'), $unreadMessageCount)) ?>
-                <?php endif; ?>
-                <?= $template->render('partials/menu_link', $link('/players', $t->text('layout.players'), str_starts_with($currentPath, '/players'))) ?>
-                <?php if ($isOn('school') && in_array($user->role, ['teacher', 'admin'], true)) : ?>
-                    <?= $template->render('partials/menu_link', $link('/school', $t->text('layout.school'), str_starts_with($currentPath, '/school'))) ?>
-                <?php endif; ?>
-                <?= $template->render('partials/menu_link', $link('/account/preferences', $user->username, str_starts_with($currentPath, '/account'))) ?>
-                <?php if ($user->isAdmin()) : ?>
-                    <?= $template->render('partials/menu_link', $link('/admin', $t->text('layout.admin'), str_starts_with($currentPath, '/admin'))) ?>
-                <?php endif; ?>
-                <li>
-                    <form method="post" action="<?= e($basePath) ?>/logout" class="inline-form">
-                        <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-                        <button type="submit" class="link-button"><?= e($t->text('layout.logout')) ?></button>
-                    </form>
-                </li>
+    <?php /* ===== A few icon buttons on the right: school, admin, log out (or log in) ===== */ ?>
+    <div class="header-actions">
+        <?php if ($user === null) : ?>
+            <a class="button" href="<?= e($basePath) ?>/login"><?= $template->render('partials/icon', ['name' => 'login']) ?><?= e($t->text('layout.login')) ?></a>
+        <?php else : ?>
+            <?php if ($isOn('school') && in_array($user->role, ['teacher', 'admin'], true)) : ?>
+                <a class="button button-secondary icon-button" href="<?= e($basePath) ?>/school" title="<?= e($t->text('layout.school')) ?>" aria-label="<?= e($t->text('layout.school')) ?>"<?= str_starts_with($currentPath, '/school') ? ' aria-current="page"' : '' ?>><?= $template->render('partials/icon', ['name' => 'school']) ?></a>
             <?php endif; ?>
-        </ul>
-    </nav>
+            <?php if ($user->isAdmin()) : ?>
+                <a class="button button-secondary icon-button" href="<?= e($basePath) ?>/admin" title="<?= e($t->text('layout.admin')) ?>" aria-label="<?= e($t->text('layout.admin')) ?>"<?= $isAdminPage ? ' aria-current="page"' : '' ?>><?= $template->render('partials/icon', ['name' => 'admin']) ?></a>
+            <?php endif; ?>
+            <form method="post" action="<?= e($basePath) ?>/logout">
+                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                <button type="submit" class="button-secondary icon-button" title="<?= e($t->text('layout.logout')) ?>" aria-label="<?= e($t->text('layout.logout')) ?>"><?= $template->render('partials/icon', ['name' => 'logout']) ?></button>
+            </form>
+        <?php endif; ?>
+    </div>
 </header>
 
-<main id="main" class="page<?= $isWide ? ' page-wide' : '' ?>">
+<div class="site-frame">
+<?php if ($user !== null) : ?>
+    <?php /* ===== The main menu: a tab bar at the bottom of a phone, a side bar on wider screens (A68) ===== */ ?>
+    <nav class="site-nav" aria-label="<?= e($t->text('layout.menu')) ?>">
+        <ul>
+            <?= $template->render('partials/menu_link', $link('/play', $t->text('layout.play'), 'play', str_starts_with($currentPath, '/play'), $myMoveCount)) ?>
+            <?= $template->render('partials/menu_link', $link('/games', $t->text('layout.my_games'), 'games', str_starts_with($currentPath, '/games'))) ?>
+            <?php if ($isOn('messages')) : ?>
+                <?= $template->render('partials/menu_link', $link('/messages', $t->text('layout.messages'), 'messages', str_starts_with($currentPath, '/messages'), $unreadMessageCount)) ?>
+            <?php endif; ?>
+            <?= $template->render('partials/menu_link', $link('/players', $t->text('layout.players'), 'players', str_starts_with($currentPath, '/players'))) ?>
+            <?= $template->render('partials/menu_link', $link('/account/preferences', $t->text('layout.me'), 'me', str_starts_with($currentPath, '/account'))) ?>
+        </ul>
+    </nav>
+<?php endif; ?>
+
+<main id="main" class="page<?= $isWide ? ' page-wide' : '' ?><?= $isAdminPage ? ' page-admin' : '' ?>">
     <?php if ($serverMessage !== null) : ?>
         <aside class="server-message" role="note" aria-label="<?= e($t->text('content.server_message')) ?>">
             <strong><?= e($serverMessage['title']) ?></strong>
@@ -104,6 +115,7 @@ $link = fn (string $path, string $label, bool $isCurrent, int $badge = 0): array
 
     <?= $contentHtml ?>
 </main>
+</div>
 
 <?php
 // The site-wide news poll (B21): for members, on every page except those

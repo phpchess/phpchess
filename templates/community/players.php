@@ -8,7 +8,7 @@
  */
 ?>
 <h1><?= e($t->text('players.title')) ?></h1>
-<p><a href="<?= e($basePath) ?>/account/profile"><?= e($t->text('profile.edit_title')) ?></a></p>
+<p class="button-row"><a class="button button-secondary" href="<?= e($basePath) ?>/account/profile"><?= e($t->text('profile.edit_title')) ?></a></p>
 
 <section aria-labelledby="buddies-title">
     <h2 id="buddies-title"><?= e($t->text('players.buddies')) ?></h2>

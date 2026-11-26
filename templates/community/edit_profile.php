@@ -8,7 +8,7 @@
  */
 ?>
 <h1><?= e($t->text('profile.edit_title')) ?></h1>
-<p><a href="<?= e($basePath) ?>/players/<?= e(rawurlencode($user->username)) ?>"><?= e($t->text('profile.see_mine')) ?></a></p>
+<p class="button-row"><a class="button button-secondary" href="<?= e($basePath) ?>/players/<?= e(rawurlencode($user->username)) ?>"><?= e($t->text('profile.see_mine')) ?></a></p>
 
 <form method="post" action="<?= e($basePath) ?>/account/profile" class="form">
     <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">

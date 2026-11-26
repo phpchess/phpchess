@@ -116,7 +116,7 @@ body { --board-light: #eeeed2; --board-dark: #769656; }
 .cm-chessboard.phpchess .board .square.white { fill: var(--board-light); }
 .cm-chessboard.phpchess .board .square.black { fill: var(--board-dark); }
 .cm-chessboard.phpchess .board .border { fill: var(--board-dark); stroke: var(--board-dark); stroke-width: 0; }
-.cm-chessboard.phpchess .coordinates .coordinate { font-size: 7px; user-select: none; }
+.cm-chessboard.phpchess .coordinates .coordinate { font-size: 11px; user-select: none; }
 .cm-chessboard.phpchess .coordinates .coordinate.white { fill: var(--board-dark); }
 .cm-chessboard.phpchess .coordinates .coordinate.black { fill: var(--board-light); }
 
@@ -234,7 +234,7 @@ details.confirm summary { cursor: pointer; }
     border-radius: 0.7em;
     background: var(--colour-error);
     color: #fff;
-    font-size: 0.8em;
+    font-size: var(--text-small);
     text-align: center;
 }
 
@@ -280,4 +280,44 @@ details.confirm summary { cursor: pointer; }
 .strength-test .board-frame {
     width: min(calc(100vw - 2rem), calc(100dvh - 12rem), 36rem);
     margin: 0 auto;
+}
+
+/* ===== The Play page (F2: A69, A70) ===== */
+
+/* Big tiles: one per row on a phone, three side by side from 40rem. */
+.play-tiles { display: grid; gap: var(--space-3); grid-template-columns: minmax(0, 1fr); }
+
+.play-tile {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    min-height: 5.5rem;
+    padding: var(--space-4);
+    border: 2px solid var(--colour-accent);
+    border-radius: var(--radius-large);
+    background: var(--colour-accent);
+    color: var(--colour-accent-text);
+    text-decoration: none;
+    transition: transform 0.05s, filter 0.1s;
+}
+.play-tile:active { transform: translateY(1px) scale(0.99); filter: brightness(0.85); }
+.play-tile-text { display: grid; gap: var(--space-1); min-width: 0; }
+.play-tile-title { font-size: var(--text-large); font-weight: 700; }
+.play-tile-hint { font-size: 0.875rem; opacity: 0.9; }
+
+.play-more { margin: var(--space-3) 0 var(--space-6); }
+.play-news { margin-top: var(--space-4); }
+.card-mine { border-left: 4px solid var(--colour-accent); }
+
+/* The pop-up: the bigger buttons of step 1 (who). */
+.choice-group-large { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.choice-group-large .choice { min-height: 5rem; font-size: 1.1rem; }
+
+/* Only the choices that fit: a person's game hides the computer's, and the other way round. */
+.new-game-form:has(input[name="opponent"][value="computer"]:checked) .for-human { display: none; }
+.new-game-form:has(input[name="opponent"][value="human"]:checked) .for-computer { display: none; }
+
+@media (min-width: 40rem) {
+    .play-tiles { grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); }
+    .play-tile { flex-direction: column; justify-content: center; text-align: center; min-height: 9rem; }
 }

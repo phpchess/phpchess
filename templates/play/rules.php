@@ -49,4 +49,4 @@
     <li><?= e($t->text('rules.automatic_draws')) ?></li>
 </ul>
 
-<p><a href="<?= e($basePath) ?>/play"><?= e($t->text('play.title')) ?></a></p>
+<p class="button-row"><a class="button button-secondary" href="<?= e($basePath) ?>/play"><?= e($t->text('play.title')) ?></a></p>

@@ -92,6 +92,24 @@ final class PageRenderer
         return Response::html($layoutHtml, $status);
     }
 
+    /**
+     * Renders one part of a page, without the layout: for a script that
+     * swaps a part of the open page (F2: the Play page's boxes, A69).
+     *
+     * @param array<string, mixed> $variables  the template's own variables
+     */
+    public function renderPart(Request $request, string $templateName, array $variables = []): Response
+    {
+        $html = $this->template->render($templateName, $variables + [
+            't' => $this->translator,
+            'basePath' => $request->basePath,
+            'csrfToken' => $this->csrf->token(),
+            'user' => $this->user,
+        ]);
+
+        return Response::html($html)->withHeader('Cache-Control', 'no-store');
+    }
+
     /** A redirect with a notice shown on the next page ("success" or "error"). */
     public function redirectWithMessage(Request $request, string $path, string $type, string $message): Response
     {

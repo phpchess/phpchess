@@ -187,12 +187,28 @@ final class Challenges
      * move, or the same time control) and rated setting; when nobody is,
      * opens a challenge for them.
      *
+     * From the new game pop-up (F2, A70, A75) also:
+     * - $colour: the colour the player wants ("white", "black" or "random");
+     *   a waiting challenge whose challenger wants the same colour is skipped;
+     * - $skipChallengeIds: waiting challenges the player does not want, for
+     *   example those of players outside their chosen rating range.
+     *
+     * @param list<int> $skipChallengeIds
      * @return array{game_id: int|null, challenge_id: int|null}
      */
-    public function quickPlay(int $userId, int $daysPerMove, bool $isRated, int $now, string $timeControl = '', ?int $nowMs = null): array
-    {
+    public function quickPlay(
+        int $userId,
+        int $daysPerMove,
+        bool $isRated,
+        int $now,
+        string $timeControl = '',
+        ?int $nowMs = null,
+        string $colour = Challenge::COLOUR_RANDOM,
+        array $skipChallengeIds = [],
+    ): array {
         $daysPerMove = $this->checkedDays($daysPerMove);
         $wantedControl = $this->checkedTimeControl($timeControl, $userId);
+        $colour = self::checkedColour($colour);
         foreach ($this->challenges->waitingOpen($now) as $challenge) {
             $samePace = $wantedControl === null
                 ? $challenge->timeControl === null && $challenge->daysPerMove === $daysPerMove
@@ -204,6 +220,11 @@ final class Challenges
             if ($challenge->challengerId === $userId) {
                 return ['game_id' => null, 'challenge_id' => $challenge->id];
             }
+            // Both want the same colour, or the player does not want this opponent.
+            $sameColourWanted = $colour !== Challenge::COLOUR_RANDOM && $challenge->colour === $colour;
+            if ($sameColourWanted || in_array($challenge->id, $skipChallengeIds, true)) {
+                continue;
+            }
             try {
                 return ['game_id' => $this->accept($challenge->id, $userId, $now, $nowMs), 'challenge_id' => null];
             } catch (PlayRefused) {
@@ -212,7 +233,7 @@ final class Challenges
             }
         }
 
-        return ['game_id' => null, 'challenge_id' => $this->createOpen($userId, Challenge::COLOUR_RANDOM, $daysPerMove, $isRated, $now, $wantedControl ?? '')];
+        return ['game_id' => null, 'challenge_id' => $this->createOpen($userId, $colour, $daysPerMove, $isRated, $now, $wantedControl ?? '')];
     }
 
     // --- Settings and checks ---

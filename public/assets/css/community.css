@@ -229,7 +229,7 @@
 }
 
 .login-card-link {
-    font-size: 0.7rem;
+    font-size: var(--text-small);
     overflow-wrap: anywhere;
     text-align: center;
 }

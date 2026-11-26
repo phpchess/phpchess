@@ -40,4 +40,4 @@
     <button type="submit"><?= e($t->text('register.button')) ?></button>
 </form>
 
-<p><a href="<?= e($basePath) ?>/login"><?= e($t->text('register.have_account')) ?></a></p>
+<p class="button-row"><a class="button button-secondary" href="<?= e($basePath) ?>/login"><?= e($t->text('register.have_account')) ?></a></p>

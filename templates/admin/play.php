@@ -108,7 +108,7 @@ use PhpChess\Domain\Play\TimeControl;
         <p class="hint"><?= e($t->text('admin.play.timed_hint')) ?></p>
     </fieldset>
 
-    <p><a href="<?= e($basePath) ?>/rules"><?= e($t->text('admin.play.rules_link')) ?></a></p>
+    <p class="button-row"><a class="button button-secondary" href="<?= e($basePath) ?>/rules"><?= e($t->text('admin.play.rules_link')) ?></a></p>
 
     <button type="submit"><?= e($t->text('admin.save')) ?></button>
 </form>

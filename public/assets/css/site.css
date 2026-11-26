@@ -1,12 +1,18 @@
 /*
- * The site's layout: header, menu, cards, admin pages (UI-03 mobile first, UI-04).
+ * The site's frame: header, menu, boxes, choice buttons, pop-ups and the
+ * admin pages (UI-03 mobile first, UI-04, F2: A66 to A72, A74).
  *
  * Like base.css, it only uses the skin's CSS variables. The class on <body>
  * names the skin's layout ("layout-top-bar"); new layouts add their rules
  * here under their own class.
+ *
+ * The menu (A68): on a phone it is a tab bar at the bottom of the screen,
+ * where the thumb reaches; from 48rem (tablet, laptop) the same menu is a
+ * side bar on the left. On admin pages the side bar shrinks to its icons,
+ * so the admin page gets the full width (A71).
  */
 
-/* --- Skip link: the first thing a keyboard user reaches (UI-04) --- */
+/* ===== Skip link: the first thing a keyboard user reaches (UI-04) ===== */
 .skip-link {
     position: absolute;
     left: -999rem;
@@ -15,7 +21,7 @@
 .skip-link:focus {
     left: 1rem;
     top: 1rem;
-    z-index: 10;
+    z-index: 30;
     padding: 0.5rem 1rem;
     background: var(--colour-surface);
 }
@@ -30,14 +36,18 @@
     white-space: nowrap;
 }
 
-/* --- Header and menu (layout "top-bar") --- */
+/* ===== Header: the site's name and a few icon buttons ===== */
 .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 15;
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
+    gap: var(--space-2);
+    min-height: 3.5rem;
+    padding: var(--space-1) var(--side-margin);
+    padding-top: max(var(--space-1), env(safe-area-inset-top));
     background: var(--colour-surface);
     border-bottom: 1px solid var(--colour-border);
 }
@@ -45,103 +55,379 @@
 .site-brand {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: var(--space-2);
+    min-width: 0;
     color: var(--colour-text);
     font-family: var(--font-headings);
+    font-size: 1.1rem;
     font-weight: 700;
     text-decoration: none;
 }
 
-.site-menu ul, .admin-menu ul {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.25rem;
+.site-brand span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.header-actions { display: flex; align-items: center; gap: var(--space-1); margin: 0; }
+.header-actions form { margin: 0; }
+
+/* A square button with only an icon (its name is read by screen readers). */
+.icon-button {
+    width: var(--touch-size);
+    padding: 0;
+    margin: 0;
+}
+
+/* ===== The menu: bottom tab bar on a phone (A68) ===== */
+.site-nav {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 15;
+    background: var(--colour-surface);
+    border-top: 1px solid var(--colour-border);
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+.site-nav ul {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
     margin: 0;
     padding: 0;
     list-style: none;
 }
 
-.site-menu a, .admin-menu a, .link-button {
-    display: inline-block;
-    min-height: 2.75rem;
-    margin: 0;
-    padding: 0.6rem 0.75rem;
-    border-radius: 0.4rem;
-    background: none;
-    color: var(--colour-accent);
+.site-nav a {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.125rem;
+    min-height: 3.5rem;
+    padding: var(--space-1);
+    color: var(--colour-muted-text);
+    font-size: var(--text-small);
     font-weight: 600;
     text-decoration: none;
 }
 
-[aria-current="page"] {
-    background: var(--colour-page-background);
-    text-decoration: underline;
+.site-nav a[aria-current="page"] { color: var(--colour-accent); }
+
+/* The number of games waiting or messages unread, on the icon. */
+.nav-badge {
+    position: absolute;
+    top: 0.25rem;
+    left: calc(50% + 0.4rem);
+    min-width: 1.25rem;
+    padding: 0 0.3rem;
+    border-radius: 0.65rem;
+    background: var(--colour-error);
+    color: #fff;
+    font-size: var(--text-small);
+    line-height: 1.25rem;
+    text-align: center;
 }
+
+/* Room at the bottom of the page, so the tab bar never covers the last button. */
+body.has-nav { padding-bottom: calc(4rem + env(safe-area-inset-bottom)); }
+
+[aria-current="page"] { text-decoration: none; }
 
 .site-footer {
-    padding: 1rem;
+    padding: var(--space-4);
     text-align: center;
     color: var(--colour-muted-text);
-    font-size: 0.85rem;
+    font-size: 0.875rem;
 }
 
-/* --- Forms --- */
-.inline-form { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin: 0; }
-.form-row { grid-template-columns: 1fr; }
-.checkbox { display: flex !important; align-items: center; gap: 0.5rem; font-weight: normal !important; }
-fieldset { border: 1px solid var(--colour-border); border-radius: 0.5rem; padding: 0.75rem; }
-.button-row { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-
-.button-secondary {
+/* ===== Boxes: the parts of a page (the Play page, the dashboard) ===== */
+.box {
+    padding: var(--space-4);
+    border: 1px solid var(--colour-border);
+    border-radius: var(--radius-large);
     background: var(--colour-surface);
-    color: var(--colour-accent);
-    border: 2px solid var(--colour-accent);
 }
 
-/* --- Feature switches --- */
+.box > h2 {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0 0 var(--space-3);
+    font-size: 1.1rem;
+}
+
+.box-grid { display: grid; gap: var(--space-4); grid-template-columns: minmax(0, 1fr); }
+
+/* ===== Forms ===== */
+.inline-form { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin: 0; }
+.form-row { grid-template-columns: 1fr; }
+.checkbox { display: flex !important; align-items: center; gap: var(--space-2); font-weight: normal !important; }
+fieldset { border: 1px solid var(--colour-border); border-radius: var(--radius); padding: var(--space-3); }
+.button-row { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
+.link-button { margin: 0; }
+
+/*
+ * Choice buttons: a group of radio buttons that look like buttons (A70).
+ * The grid gives every button the same width and never lets two overlap:
+ * a long text wraps inside its own button (A74).
+ */
+.choice-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.choice-group legend {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
+    padding: 0;
+    font-weight: 700;
+}
+
+.choice {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
+    min-height: 3.5rem;
+    padding: var(--space-2);
+    border: 2px solid var(--colour-border);
+    border-radius: var(--radius);
+    background: var(--colour-surface);
+    color: var(--colour-text);
+    font-weight: 600;
+    line-height: 1.2;
+    text-align: center;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+}
+
+.choice small { color: var(--colour-muted-text); font-weight: normal; }
+
+/* The real radio button stays in the page for the keyboard and screen readers. */
+.choice input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+}
+
+.choice:has(input:checked) {
+    border-color: var(--colour-accent);
+    background: var(--colour-accent);
+    color: var(--colour-accent-text);
+}
+
+.choice:has(input:checked) small { color: inherit; }
+.choice:has(input:focus-visible) { outline: 3px solid var(--colour-focus); outline-offset: 2px; }
+
+/* ===== Feature switches and settings: on/off switches (A71) ===== */
 .switch-row {
     display: flex !important;
     align-items: flex-start;
-    gap: 0.75rem;
-    padding: 0.5rem 0;
+    gap: var(--space-3);
+    padding: var(--space-2) 0;
     border-bottom: 1px solid var(--colour-border);
     font-weight: normal !important;
 }
 
-/* --- Cards (lists of users, audit entries) --- */
-.card-list { display: grid; gap: 0.75rem; padding: 0; list-style: none; }
-
-.card {
-    padding: 0.75rem;
-    border: 1px solid var(--colour-border);
-    border-radius: 0.5rem;
+.switch-row input[type="checkbox"] {
+    appearance: none;
+    flex: none;
+    position: relative;
+    width: 3rem;
+    height: 1.75rem;
+    margin: 0;
+    border: 2px solid var(--colour-border);
+    border-radius: 1rem;
+    background: var(--colour-page-background);
+    cursor: pointer;
+    transition: background 0.15s;
 }
 
-.card-title { margin: 0; font-size: 1rem; }
-.card-actions { display: grid; gap: 0.5rem; margin-top: 0.5rem; }
+.switch-row input[type="checkbox"]::before {
+    content: "";
+    position: absolute;
+    top: 0.125rem;
+    left: 0.125rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 50%;
+    background: var(--colour-muted-text);
+    transition: transform 0.15s;
+}
 
-/* --- Admin --- */
+.switch-row input[type="checkbox"]:checked { background: var(--colour-accent); border-color: var(--colour-accent); }
+.switch-row input[type="checkbox"]:checked::before { transform: translateX(1.25rem); background: var(--colour-accent-text); }
+
+/* ===== Cards (lists of users, games, audit entries) ===== */
+.card-list { display: grid; gap: var(--space-3); padding: 0; margin: 0; list-style: none; }
+
+.card {
+    padding: var(--space-3);
+    border: 1px solid var(--colour-border);
+    border-radius: var(--radius);
+}
+
+.card-title { margin: 0; font-size: 1rem; font-weight: 600; }
+.card-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-2); }
+
+/* ===== Tables: the header stays on screen while scrolling (A71) ===== */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: var(--space-2); border-bottom: 1px solid var(--colour-border); text-align: left; vertical-align: top; }
+thead th { position: sticky; top: 3.5rem; z-index: 1; background: var(--colour-surface); }
+
+/* ===== Admin (A71) ===== */
 .admin-banner h2 { margin-top: 0; font-size: 1rem; }
-.admin-menu { margin-bottom: 1rem; border-bottom: 1px solid var(--colour-border); }
 .copyable { user-select: all; white-space: pre-wrap; word-break: break-all; }
 
-/* --- Pop-up (the strength test after the first login, B15) --- */
+/* The admin menu: groups of buttons. On a phone it sits above the page. */
+.admin-menu { margin-bottom: var(--space-4); }
+.admin-menu-group { margin-bottom: var(--space-3); }
+.admin-menu-group h2 {
+    margin: 0 0 var(--space-1);
+    color: var(--colour-muted-text);
+    font-size: var(--text-small);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.admin-menu ul { display: flex; flex-wrap: wrap; gap: var(--space-1); margin: 0; padding: 0; list-style: none; }
+.admin-menu a {
+    display: flex;
+    align-items: center;
+    min-height: 2.5rem;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius);
+    color: var(--colour-text);
+    font-weight: 600;
+    text-decoration: none;
+}
+.admin-menu a[aria-current="page"] { background: var(--colour-accent); color: var(--colour-accent-text); }
+
+/* ===== Pop-ups ===== */
+/* The small one at the bottom: a challenge arrived, the strength test (B15, B21). */
 dialog.pop-up {
     position: fixed;
-    inset: auto 1rem 1rem 1rem;
+    inset: auto var(--side-margin) var(--side-margin) var(--side-margin);
+    width: auto;
     max-width: 30rem;
     margin: 0 auto;
-    padding: 1rem;
+    padding: var(--space-4);
     border: 1px solid var(--colour-border);
-    border-radius: 0.75rem;
+    border-radius: var(--radius-large);
     background: var(--colour-surface);
     color: var(--colour-text);
     box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.25);
     z-index: 20;
 }
 
-/* --- Wider screens --- */
+/*
+ * The large one (the new game pop-up, A70, A74): the whole screen on a phone,
+ * a wide window on a tablet or laptop. It scrolls inside, so buttons and
+ * texts never overlap, however many choices there are.
+ */
+dialog.pop-up-large {
+    inset: 0;
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    max-height: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    overflow-y: auto;
+}
+
+dialog.pop-up-large::backdrop { background: rgba(0, 0, 0, 0.5); }
+
+.pop-up-head {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--side-margin);
+    background: var(--colour-surface);
+    border-bottom: 1px solid var(--colour-border);
+}
+
+.pop-up-head h2 { margin: 0; font-size: 1.2rem; }
+.pop-up-body { display: grid; gap: var(--space-6); padding: var(--space-4) var(--side-margin); }
+
+.pop-up-foot {
+    position: sticky;
+    bottom: 0;
+    padding: var(--space-3) var(--side-margin) max(var(--space-3), env(safe-area-inset-bottom));
+    background: var(--colour-surface);
+    border-top: 1px solid var(--colour-border);
+}
+
+.pop-up-foot button { width: 100%; margin: 0; font-size: var(--text-large); }
+
+/* ===== Tablet and laptop ===== */
 @media (min-width: 48rem) {
     .form-row { grid-template-columns: 2fr 1fr auto; align-items: end; }
-    .card-actions { display: flex; flex-wrap: wrap; }
+
+    /* The menu becomes a side bar on the left (A68). */
+    body.has-nav { padding-bottom: 0; }
+    .site-frame { display: grid; grid-template-columns: 12rem minmax(0, 1fr); align-items: start; }
+    .site-nav {
+        position: sticky;
+        top: 3.5rem;
+        inset: auto;
+        height: calc(100vh - 3.5rem);
+        border-top: 0;
+        border-right: 1px solid var(--colour-border);
+        padding: var(--space-3) var(--space-2);
+    }
+    .site-nav ul { grid-auto-flow: row; gap: var(--space-1); }
+    .site-nav a {
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: var(--space-3);
+        min-height: var(--touch-size);
+        padding: var(--space-2) var(--space-3);
+        border-radius: var(--radius);
+        font-size: var(--text-normal);
+    }
+    .site-nav a[aria-current="page"] { background: var(--colour-accent); color: var(--colour-accent-text); }
+    .nav-badge { position: static; margin-left: auto; }
+
+    /* Admin pages: the side bar shows only its icons, the admin menu sits beside the page (A71). */
+    .is-admin-page .site-frame { grid-template-columns: 4.5rem minmax(0, 1fr); }
+    .is-admin-page .site-nav a { justify-content: center; padding: var(--space-2); }
+    .is-admin-page .site-nav .nav-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+    .is-admin-page .nav-badge { position: absolute; top: 0; right: 0; }
+    .page-admin { display: grid; grid-template-columns: 13rem minmax(0, 1fr); column-gap: var(--space-6); align-content: start; }
+    .page-admin > * { grid-column: 2; }
+    .page-admin > .admin-menu { grid-column: 1; grid-row: 1 / span 200; align-self: start; position: sticky; top: 4.5rem; }
+    .admin-menu ul { display: grid; }
+
+    .box-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+    /* The large pop-up becomes a window in the middle of the screen. */
+    dialog.pop-up-large {
+        inset: 0;
+        width: min(44rem, calc(100% - 3rem));
+        height: auto;
+        max-height: calc(100% - 3rem);
+        margin: auto;
+        border: 1px solid var(--colour-border);
+        border-radius: var(--radius-large);
+    }
 }
+
+@media (min-width: 75rem) {
+    .box-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+.login-other-ways:empty { display: none; }

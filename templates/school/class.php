@@ -10,7 +10,7 @@
 $classPath = $basePath . '/school/classes/' . $class['id'];
 ?>
 <h1><?= e($class['name']) ?></h1>
-<p><a href="<?= e($basePath) ?>/school">‹ <?= e($t->text('school.title')) ?></a></p>
+<p class="button-row"><a class="button button-secondary" href="<?= e($basePath) ?>/school"><?= e($t->text('school.title')) ?></a></p>
 
 <form method="post" action="<?= e($classPath) ?>/limit" class="form form-inline">
     <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">

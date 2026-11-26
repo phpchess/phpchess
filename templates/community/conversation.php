@@ -9,7 +9,7 @@
  */
 ?>
 <h1><?= e($t->text('messages.with', ['name' => $other->username])) ?></h1>
-<p><a href="<?= e($basePath) ?>/messages">‹ <?= e($t->text('messages.title')) ?></a></p>
+<p class="button-row"><a class="button button-secondary" href="<?= e($basePath) ?>/messages"><?= e($t->text('messages.title')) ?></a></p>
 
 <ol class="message-list" id="message-list"
     data-poll-url="<?= e($basePath) ?>/messages/<?= e(rawurlencode($other->username)) ?>/new"

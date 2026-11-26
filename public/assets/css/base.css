@@ -1,15 +1,20 @@
 /*
- * Base styles for every page (A18 mobile first, UI-01 skins, UI-04 accessibility).
+ * Base styles for every page (A18 mobile first, UI-01 skins, UI-04 accessibility,
+ * F2 design system A66, A72, A74).
  *
  * Every colour and font is a CSS variable. The skin sets them (/skin/theme.css,
  * made from skins/<name>/skin.json); the values below are only the fallback
  * for the installer, which runs before any skin exists. So a skin never needs
  * CSS of its own: it only names its colours (A25).
  *
- * Written for a phone first; wider screens get a centred column.
+ * The design system (F2):
+ * - sizes, spacing and corners are variables too, so the look stays the same everywhere;
+ * - every action is a button (A66); text links only inside running text;
+ * - pages use the full width of every device with 16 px side margins (A72);
+ * - no text is ever smaller than 11 px (A74): the smallest size is --text-small (12 px).
  */
 
-/* --- Fallback values (the default skin's light colours) --- */
+/* ===== Fallback values (the default skin's light colours) ===== */
 :root {
     --colour-text: #1f2328;
     --colour-muted-text: #57606a;
@@ -27,88 +32,117 @@
     --colour-focus: #0969da;
     --font-text: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     --font-headings: var(--font-text);
+
+    /* Text sizes. Never use a size below --text-small (A74). */
+    --text-small: 0.75rem;   /* 12 px */
+    --text-normal: 1rem;     /* 16 px */
+    --text-large: 1.25rem;   /* 20 px */
+
+    /* Spacing and shapes */
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-6: 1.5rem;
+    --side-margin: 1rem;     /* 16 px left and right on every device (A72) */
+    --radius: 0.5rem;
+    --radius-large: 0.75rem;
+    --touch-size: 2.75rem;   /* 44 px: the smallest button a finger hits well (A18) */
+    --readable-width: 70ch;  /* running text is never wider than about 70 characters */
 }
 
-/* --- Page --- */
+/* ===== Page ===== */
 * { box-sizing: border-box; }
+
+html { font-size: 100%; }
 
 body {
     margin: 0;
     font-family: var(--font-text);
-    font-size: 1rem;
+    font-size: var(--text-normal);
     line-height: 1.5;
     color: var(--colour-text);
     background: var(--colour-page-background);
 }
 
+/* The page uses all the width there is, on every device (B29, A72). */
 .page {
-    max-width: 40rem;
+    width: 100%;
     min-height: 100vh;
-    margin: 0 auto;
-    padding: 1rem;
+    margin: 0;
+    padding: var(--space-4) var(--side-margin);
     background: var(--colour-surface);
 }
+
+/* Running text keeps a readable line length, even on a wide screen. */
+.page p, .page li, .page dd { max-width: var(--readable-width); }
+.page .card-list li, .page .box li, .page .button-row p { max-width: none; }
 
 .page-header {
     display: flex;
     justify-content: space-between;
     color: var(--colour-muted-text);
-    font-size: 0.9rem;
+    font-size: var(--text-small);
 }
 
-h1, h2, h3 { font-family: var(--font-headings); }
-h1 { font-size: 1.4rem; margin: 0.5rem 0 1rem; }
-h2 { font-size: 1.15rem; }
+h1, h2, h3 { font-family: var(--font-headings); line-height: 1.25; }
+h1 { font-size: 1.5rem; margin: var(--space-2) 0 var(--space-4); }
+h2 { font-size: 1.2rem; }
+h3 { font-size: 1.05rem; }
 
 a { color: var(--colour-accent); }
 
 pre {
     overflow-x: auto;
-    padding: 0.75rem;
-    border-radius: 0.5rem;
+    padding: var(--space-3);
+    border-radius: var(--radius);
     background: var(--colour-page-background);
-    font-size: 0.85rem;
+    font-size: 0.875rem;
 }
 
+small { font-size: var(--text-small); }
 .muted, .hint { color: var(--colour-muted-text); }
-.hint { display: block; font-size: 0.9rem; font-weight: normal; }
+.hint { display: block; font-size: 0.875rem; font-weight: normal; }
 
-/* --- Keyboard focus is always visible (UI-04) --- */
+/* Icons drawn by code (templates/partials/icon.php): they take the text colour. */
+.icon { flex: none; vertical-align: middle; }
+
+/* ===== Keyboard focus is always visible (UI-04) ===== */
 :focus-visible {
     outline: 3px solid var(--colour-focus);
     outline-offset: 2px;
 }
 
-/* --- Check lists --- */
+/* ===== Check lists ===== */
 .checks { list-style: none; padding: 0; }
 
 .checks li {
     display: grid;
-    margin-bottom: 0.5rem;
-    padding: 0.4rem 0.75rem;
+    margin-bottom: var(--space-2);
+    padding: 0.4rem var(--space-3);
     border-left: 0.3rem solid var(--colour-border);
 }
 
 .checks .check-passed { border-color: var(--colour-success); }
 .checks .check-failed { border-color: var(--colour-error); }
 .checks .check-warning { border-color: var(--colour-warning); }
-.fix { font-size: 0.9rem; color: var(--colour-muted-text); }
+.fix { font-size: 0.875rem; color: var(--colour-muted-text); }
 
-/* --- Notices --- */
+/* ===== Notices ===== */
 .notice-error,
 .notice-warning,
-.notice-success { padding: 0.75rem; border-radius: 0.5rem; }
+.notice-success { padding: var(--space-3); border-radius: var(--radius); }
 
 .notice-error { background: var(--colour-error-background); color: var(--colour-error); }
 .notice-warning { background: var(--colour-warning-background); color: var(--colour-text); }
 .notice-success { background: var(--colour-success-background); color: var(--colour-success); }
 
-/* --- Forms and buttons: large touch targets (A18) --- */
-.form { display: grid; gap: 0.75rem; }
-.form label { display: grid; gap: 0.25rem; font-weight: 600; }
+/* ===== Forms and buttons: large touch targets (A18) ===== */
+.form { display: grid; gap: var(--space-3); max-width: 40rem; }
+.form label { display: grid; gap: var(--space-1); font-weight: 600; }
 
-input, select {
-    min-height: 2.75rem;
+input, select, textarea {
+    min-height: var(--touch-size);
     padding: 0.6rem;
     border: 1px solid var(--colour-border);
     border-radius: 0.4rem;
@@ -119,21 +153,33 @@ input, select {
 
 input[type="checkbox"], input[type="radio"] { min-height: auto; width: 1.25rem; height: 1.25rem; }
 
+/* A button: a link that does something looks exactly like this too (A66). */
 button,
 .button {
-    display: inline-block;
-    min-height: 2.75rem;
-    margin-top: 0.5rem;
-    padding: 0.7rem 1.2rem;
-    border: 0;
-    border-radius: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    min-height: var(--touch-size);
+    margin-top: var(--space-2);
+    padding: 0.6rem 1.1rem;
+    border: 2px solid var(--colour-accent);
+    border-radius: var(--radius);
     background: var(--colour-accent);
     color: var(--colour-accent-text);
     font: inherit;
     font-weight: 600;
+    line-height: 1.2;
+    text-align: center;
     text-decoration: none;
     cursor: pointer;
     transition: transform 0.05s, filter 0.1s;
+}
+
+/* The quieter button: outline only. */
+.button-secondary {
+    background: var(--colour-surface);
+    color: var(--colour-accent);
 }
 
 /* Pressed: the button sinks in a little and gets darker, so a tap is felt at once. */
@@ -171,12 +217,8 @@ button.is-busy::after,
     button.is-busy::after, .button.is-busy::after { animation-duration: 2s; }
 }
 
-/* --- Wider screens --- */
+/* ===== Wider screens: a little more room, still the full width ===== */
 @media (min-width: 48rem) {
-    .page {
-        min-height: auto;
-        margin-top: 2rem;
-        padding: 2rem;
-        border-radius: 0.75rem;
-    }
+    :root { --side-margin: 1.5rem; }
+    .page { min-height: auto; padding-top: var(--space-6); padding-bottom: var(--space-6); }
 }

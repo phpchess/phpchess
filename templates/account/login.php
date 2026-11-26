@@ -5,6 +5,7 @@
  * Variables: $nameOrEmail (string), $error (string), $showResend (bool: the
  * account waits for email verification), $next (string, where to go after
  * login), $registrationIsOpen (bool), $basePath, $csrfToken, $t.
+ * F2: actions are buttons (A66); an empty slot waits for other ways to log in (A73).
  */
 ?>
 <h1><?= e($t->text('login.title')) ?></h1>
@@ -34,7 +35,19 @@
     <button type="submit"><?= e($t->text('login.button')) ?></button>
 </form>
 
-<p><a href="<?= e($basePath) ?>/forgot-password"><?= e($t->text('login.forgot_password')) ?></a></p>
-<?php if ($registrationIsOpen) : ?>
-    <p><a href="<?= e($basePath) ?>/register"><?= e($t->text('login.no_account')) ?></a></p>
-<?php endif; ?>
+<?php
+/*
+ * ===== Slot: other ways to log in (A73) =====
+ * Empty on purpose. Chunk C5-1 puts an optional "Log in with Lichess"
+ * button here, as its own template (account/login_other_ways), when its
+ * feature switch is on. Lichess is never needed to play on this site.
+ */
+?>
+<div class="login-other-ways" id="login-other-ways"></div>
+
+<div class="button-row">
+    <a class="button button-secondary" href="<?= e($basePath) ?>/forgot-password"><?= e($t->text('login.forgot_password')) ?></a>
+    <?php if ($registrationIsOpen) : ?>
+        <a class="button button-secondary" href="<?= e($basePath) ?>/register"><?= e($t->text('login.no_account')) ?></a>
+    <?php endif; ?>
+</div>

@@ -1,166 +1,171 @@
 <?php
 /**
- * The Play page (G-05, G-06, G-20, G-21): the one-tap Play button, my
- * running games, challenges (mine, to me, and open ones), and the form for
- * a new challenge or invite link.
+ * The Play page (F2: A69, A70; G-05, G-16, G-20).
  *
- * Variables: $viewerId (int), $myGames (list of Game), $myChallenges and
- * $openChallenges (list of Challenge), $usernames (array of id => name),
- * $opponents (array of id => name), $playDefaults (array{days_per_move: int, rated: bool}),
- * $maximumDays (int), $isFenAllowed (bool), $timeControls (list of "5+3" texts),
- * $basePath, $csrfToken, $t, $template.
+ * From top to bottom:
+ * 1. three big tiles: Computer, Live, Correspondence. Each opens the new
+ *    game pop-up with its own choices already picked;
+ * 2. the live boxes (play/boxes): my games, challenges sent to me, open
+ *    challenges. lobby.js keeps them up to date without reloading the page;
+ * 3. news from the admins, and (later) statistics.
  *
- * Every form has a pace choice: correspondence (days per move) or a time
- * control (G-14). The page asks /play/news every few seconds (lobby.js):
- * that keeps my open timed challenges listed, and goes to the game as soon
- * as someone accepts one (G-16).
+ * The new game pop-up is one form of choice buttons, no text fields:
+ * who (computer or person), how long, what strength, what colour, rated or
+ * not. It works without JavaScript too: each tile is then a link to
+ * "/play?new=..." and the page opens with the pop-up showing.
+ *
+ * Variables: everything play/boxes needs, plus
+ *   $adminNews (list of array{title: string, body: string, created_at: string}),
+ *   $openPopUp (string: "", "computer", "live" or "correspondence"),
+ *   $playDefaults (array{days_per_move: int, rated: bool}),
+ *   $timeControls (list of "5+3" texts), $correspondenceDays (list of int),
+ *   $computerBands (array of name => [lowest, highest]), $ratingRanges (list of int),
+ *   $basePath, $csrfToken, $t, $template.
  */
 
-use PhpChess\Domain\Play\Challenge;
+// ===== Which choices the pop-up starts with =====
+$startsWithPerson = in_array($openPopUp, ['live', 'correspondence'], true);
+$startsLive = $openPopUp === 'live' && $timeControls !== [];
+$defaultDays = in_array($playDefaults['days_per_move'], $correspondenceDays, true)
+    ? $playDefaults['days_per_move']
+    : $correspondenceDays[min(1, count($correspondenceDays) - 1)];
+$defaultPace = $startsLive ? 'live:' . $timeControls[0] : 'days:' . $defaultDays;
 
-$defaultDays = min($playDefaults['days_per_move'], $maximumDays);
-
-// Mine and the ones sent to me, then the open ones of others (each once).
-$listedChallenges = $myChallenges;
-foreach ($openChallenges as $openChallenge) {
-    if ($openChallenge->challengerId !== $viewerId) {
-        $listedChallenges[] = $openChallenge;
-    }
+$tiles = [
+    'computer' => ['icon' => 'computer', 'title' => 'new_game.tile.computer', 'hint' => 'new_game.tile.computer_hint'],
+    'live' => ['icon' => 'live', 'title' => 'new_game.tile.live', 'hint' => 'new_game.tile.live_hint'],
+    'correspondence' => ['icon' => 'correspondence', 'title' => 'new_game.tile.correspondence', 'hint' => 'new_game.tile.correspondence_hint'],
+];
+if ($timeControls === []) {
+    unset($tiles['live']);
 }
 ?>
 <h1><?= e($t->text('play.title')) ?></h1>
-<p><a href="<?= e($basePath) ?>/rules"><?= e($t->text('rules.link')) ?></a> · <a href="<?= e($basePath) ?>/play/computer"><?= e($t->text('computer.link')) ?></a></p>
 
-<form method="post" action="<?= e($basePath) ?>/play/quick" class="form play-now">
-    <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-    <button type="submit" class="button button-large"><?= e($t->text('play.button')) ?></button>
-    <div class="form-row">
-        <label><?= e($t->text('play.pace')) ?>
-            <select name="time_control">
-                <option value=""><?= e($t->text('play.pace_correspondence')) ?></option>
-                <?php foreach ($timeControls as $control) : ?>
-                    <option value="<?= e($control) ?>"><?= e($t->text('play.pace_timed', ['control' => $control])) ?></option>
-                <?php endforeach; ?>
-            </select>
-        </label>
-        <label><?= e($t->text('play.days_per_move')) ?>
-            <input type="number" name="days_per_move" min="1" max="<?= e($maximumDays) ?>" value="<?= e($defaultDays) ?>">
-        </label>
-        <label class="checkbox"><input type="checkbox" name="rated" value="yes"<?= $playDefaults['rated'] ? ' checked' : '' ?>> <?= e($t->text('play.rated')) ?></label>
-    </div>
-    <p class="hint"><?= e($t->text('play.button_hint')) ?></p>
-</form>
+<!-- ===== 1. The tiles: each opens the new game pop-up ===== -->
+<div class="play-tiles">
+    <?php foreach ($tiles as $kind => $tile) : ?>
+        <a class="play-tile" href="<?= e($basePath) ?>/play?new=<?= e($kind) ?>" data-new-game="<?= e($kind) ?>">
+            <?= $template->render('partials/icon', ['name' => $tile['icon'], 'size' => 40]) ?>
+            <span class="play-tile-text">
+                <span class="play-tile-title"><?= e($t->text($tile['title'])) ?></span>
+                <span class="play-tile-hint"><?= e($t->text($tile['hint'])) ?></span>
+            </span>
+        </a>
+    <?php endforeach; ?>
+</div>
+<div class="button-row play-more">
+    <a class="button button-secondary" href="<?= e($basePath) ?>/play/challenge"><?= $template->render('partials/icon', ['name' => 'more']) ?><?= e($t->text('new_game.more_choices')) ?></a>
+    <a class="button button-secondary" href="<?= e($basePath) ?>/play/computer"><?= $template->render('partials/icon', ['name' => 'computer']) ?><?= e($t->text('new_game.pick_computer')) ?></a>
+    <a class="button button-secondary" href="<?= e($basePath) ?>/rules"><?= $template->render('partials/icon', ['name' => 'rules']) ?><?= e($t->text('rules.link')) ?></a>
+</div>
 
-<h2><?= e($t->text('play.my_games')) ?></h2>
-<?php if ($myGames === []) : ?>
-    <p class="muted"><?= e($t->text('play.no_games')) ?></p>
-<?php else : ?>
-    <ul class="card-list">
-        <?php foreach ($myGames as $game) : ?>
-            <?= $template->render('play/game_card', ['game' => $game, 'usernames' => $usernames, 'viewerId' => $viewerId, 'basePath' => $basePath, 't' => $t]) ?>
-        <?php endforeach; ?>
-    </ul>
-<?php endif; ?>
-<p><a href="<?= e($basePath) ?>/games"><?= e($t->text('games.archive_link')) ?></a></p>
+<!-- ===== 2. The live boxes ===== -->
+<?= $template->render('play/boxes', [
+    'viewerId' => $viewerId, 'myGames' => $myGames, 'receivedChallenges' => $receivedChallenges,
+    'myChallenges' => $myChallenges, 'openChallenges' => $openChallenges, 'usernames' => $usernames,
+    'boxesVersion' => $boxesVersion, 'basePath' => $basePath, 'csrfToken' => $csrfToken, 't' => $t,
+]) ?>
 
-<h2><?= e($t->text('play.challenges')) ?></h2>
-<?php if ($listedChallenges === []) : ?>
-    <p class="muted"><?= e($t->text('play.no_challenges')) ?></p>
-<?php else : ?>
-    <ul class="card-list">
-        <?php foreach ($listedChallenges as $challenge) : ?>
-            <li class="card">
-                <p class="card-title">
-                    <?php if ($challenge->challengerId === $viewerId) : ?>
-                        <?= e($t->text('challenge.yours.' . $challenge->kind, ['name' => $usernames[$challenge->opponentId ?? 0] ?? ''])) ?>
-                    <?php else : ?>
-                        <?= e($t->text('challenge.from', ['name' => $usernames[$challenge->challengerId] ?? '?'])) ?>
-                    <?php endif; ?>
-                </p>
-                <p class="muted">
-                    <?php if ($challenge->timeControl !== null) : ?>
-                        <?= e($t->text('play.pace_timed', ['control' => $challenge->timeControl])) ?>
-                    <?php else : ?>
-                        <?= e($t->text('challenge.summary', ['days' => $challenge->daysPerMove])) ?>
-                    <?php endif; ?>
-                    · <?= e($t->text($challenge->isRated ? 'play.rated' : 'game.unrated')) ?>
-                    · <?= e($t->text('challenge.colour.' . $challenge->colour)) ?>
-                    <?php if ($challenge->startFen !== null) : ?>
-                        · <?= e($t->text('challenge.custom_position')) ?>
-                    <?php endif; ?>
-                </p>
-                <div class="card-actions">
-                    <?php if ($challenge->challengerId === $viewerId) : ?>
-                        <form method="post" action="<?= e($basePath) ?>/challenges/<?= e($challenge->id) ?>/cancel" class="inline-form">
-                            <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-                            <button type="submit" class="button-secondary"><?= e($t->text('challenge.cancel')) ?></button>
-                        </form>
-                    <?php else : ?>
-                        <form method="post" action="<?= e($basePath) ?>/challenges/<?= e($challenge->id) ?>/accept" class="inline-form">
-                            <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-                            <button type="submit"><?= e($t->text('challenge.accept')) ?></button>
-                        </form>
-                        <?php if ($challenge->kind === Challenge::KIND_DIRECT) : ?>
-                            <form method="post" action="<?= e($basePath) ?>/challenges/<?= e($challenge->id) ?>/decline" class="inline-form">
-                                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-                                <button type="submit" class="button-secondary"><?= e($t->text('challenge.decline')) ?></button>
-                            </form>
-                        <?php endif; ?>
-                    <?php endif; ?>
-                </div>
-            </li>
-        <?php endforeach; ?>
-    </ul>
-<?php endif; ?>
-
-<details class="new-challenge">
-    <summary><?= e($t->text('challenge.new')) ?></summary>
-    <form method="post" action="<?= e($basePath) ?>/challenges" class="form">
-        <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-        <fieldset>
-            <legend><?= e($t->text('challenge.kind')) ?></legend>
-            <label class="checkbox"><input type="radio" name="kind" value="open" checked> <?= e($t->text('challenge.kind.open')) ?></label>
-            <label class="checkbox"><input type="radio" name="kind" value="direct"> <?= e($t->text('challenge.kind.direct')) ?></label>
-            <label class="checkbox"><input type="radio" name="kind" value="invite"> <?= e($t->text('challenge.kind.invite')) ?></label>
-        </fieldset>
-        <label><?= e($t->text('challenge.opponent')) ?>
-            <input type="text" name="opponent" list="opponent-names" autocomplete="off">
-        </label>
-        <datalist id="opponent-names">
-            <?php foreach ($opponents as $name) : ?>
-                <option value="<?= e($name) ?>"></option>
+<!-- ===== 3. News from the admins (and, later, statistics) ===== -->
+<?php if ($adminNews !== []) : ?>
+    <section class="box play-news" aria-labelledby="box-news-title">
+        <h2 id="box-news-title"><?= $template->render('partials/icon', ['name' => 'news']) ?><?= e($t->text('play.admin_news')) ?></h2>
+        <ul class="card-list">
+            <?php foreach ($adminNews as $item) : ?>
+                <li class="card">
+                    <p class="card-title"><?= e($item['title']) ?></p>
+                    <p class="muted"><?= e(mb_strimwidth($item['body'], 0, 160, '…')) ?></p>
+                </li>
             <?php endforeach; ?>
-        </datalist>
-        <p class="hint"><?= e($t->text('challenge.opponent_hint')) ?></p>
-        <label><?= e($t->text('challenge.colour')) ?>
-            <select name="colour">
-                <?php foreach (Challenge::COLOURS as $colour) : ?>
-                    <option value="<?= e($colour) ?>"><?= e($t->text('challenge.colour.' . $colour)) ?></option>
+        </ul>
+        <div class="button-row">
+            <a class="button button-secondary" href="<?= e($basePath) ?>/news"><?= e($t->text('play.all_news')) ?></a>
+        </div>
+    </section>
+<?php endif; ?>
+<?php /* Statistics (later, F2 A70): a box here, like the news box above. */ ?>
+
+<!-- ===== The new game pop-up ===== -->
+<dialog class="pop-up pop-up-large" id="new-game" aria-labelledby="new-game-title"<?= $openPopUp !== '' ? ' open' : '' ?>>
+    <form method="post" action="<?= e($basePath) ?>/play/start" class="new-game-form">
+        <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+
+        <div class="pop-up-head">
+            <h2 id="new-game-title"><?= e($t->text('new_game.title')) ?></h2>
+            <a class="button button-secondary icon-button" href="<?= e($basePath) ?>/play" data-close-pop-up aria-label="<?= e($t->text('new_game.close')) ?>" title="<?= e($t->text('new_game.close')) ?>"><?= $template->render('partials/icon', ['name' => 'close']) ?></a>
+        </div>
+
+        <div class="pop-up-body">
+            <!-- Step 1: who -->
+            <fieldset class="choice-group choice-group-large">
+                <legend><?= e($t->text('new_game.opponent')) ?></legend>
+                <label class="choice"><input type="radio" name="opponent" value="computer"<?= $startsWithPerson ? '' : ' checked' ?>>
+                    <?= $template->render('partials/icon', ['name' => 'computer', 'size' => 32]) ?><?= e($t->text('new_game.opponent.computer')) ?></label>
+                <label class="choice"><input type="radio" name="opponent" value="human"<?= $startsWithPerson ? ' checked' : '' ?>>
+                    <?= $template->render('partials/icon', ['name' => 'human', 'size' => 32]) ?><?= e($t->text('new_game.opponent.human')) ?></label>
+            </fieldset>
+
+            <!-- Step 2 (person only): how long -->
+            <?php if ($timeControls !== []) : ?>
+                <fieldset class="choice-group for-human">
+                    <legend><?= $template->render('partials/icon', ['name' => 'live']) ?><?= e($t->text('new_game.live')) ?></legend>
+                    <?php foreach ($timeControls as $control) : ?>
+                        <label class="choice"><input type="radio" name="pace" value="live:<?= e($control) ?>"<?= $defaultPace === 'live:' . $control ? ' checked' : '' ?>>
+                            <?= e($control) ?><small><?= e($t->text('new_game.minutes_seconds')) ?></small></label>
+                    <?php endforeach; ?>
+                </fieldset>
+            <?php endif; ?>
+            <fieldset class="choice-group for-human">
+                <legend><?= $template->render('partials/icon', ['name' => 'correspondence']) ?><?= e($t->text('new_game.correspondence')) ?></legend>
+                <?php foreach ($correspondenceDays as $days) : ?>
+                    <label class="choice"><input type="radio" name="pace" value="days:<?= e($days) ?>"<?= $defaultPace === 'days:' . $days ? ' checked' : '' ?>>
+                        <?= e($t->text('new_game.days', ['days' => $days])) ?><small><?= e($t->text('new_game.per_move')) ?></small></label>
                 <?php endforeach; ?>
-            </select>
-        </label>
-        <label><?= e($t->text('play.pace')) ?>
-            <select name="time_control">
-                <option value=""><?= e($t->text('play.pace_correspondence')) ?></option>
-                <?php foreach ($timeControls as $control) : ?>
-                    <option value="<?= e($control) ?>"><?= e($t->text('play.pace_timed', ['control' => $control])) ?></option>
+            </fieldset>
+
+            <!-- Step 3: what strength -->
+            <fieldset class="choice-group for-computer">
+                <legend><?= $template->render('partials/icon', ['name' => 'strength']) ?><?= e($t->text('new_game.strength')) ?></legend>
+                <?php $isFirst = true; ?>
+                <?php foreach ($computerBands as $band => [$lowest, $highest]) : ?>
+                    <label class="choice"><input type="radio" name="band" value="<?= e($band) ?>"<?= $isFirst ? ' checked' : '' ?>>
+                        <?= e($t->text('new_game.band.' . $band)) ?><small><?= e($highest >= 3000 ? $t->text('new_game.rating_from', ['low' => $lowest]) : $t->text('new_game.rating_between', ['low' => $lowest, 'high' => $highest])) ?></small></label>
+                    <?php $isFirst = false; ?>
                 <?php endforeach; ?>
-            </select>
-        </label>
-        <label><?= e($t->text('play.days_per_move')) ?>: <output id="days-output"><?= e($defaultDays) ?></output>
-            <input type="range" name="days_per_move" min="1" max="<?= e($maximumDays) ?>" value="<?= e($defaultDays) ?>" data-shows-in="days-output">
-        </label>
-        <label class="checkbox"><input type="checkbox" name="rated" value="yes" checked> <?= e($t->text('play.rated')) ?></label>
-        <?php if ($isFenAllowed) : ?>
-            <label><?= e($t->text('challenge.start_fen')) ?>
-                <input type="text" name="start_fen" autocomplete="off" spellcheck="false">
-            </label>
-            <p class="hint"><?= e($t->text('challenge.start_fen_hint')) ?></p>
-        <?php endif; ?>
-        <button type="submit"><?= e($t->text('challenge.create')) ?></button>
+            </fieldset>
+            <fieldset class="choice-group for-human">
+                <legend><?= $template->render('partials/icon', ['name' => 'strength']) ?><?= e($t->text('new_game.opponent_strength')) ?></legend>
+                <?php foreach ($ratingRanges as $range) : ?>
+                    <label class="choice"><input type="radio" name="rating_range" value="<?= e($range) ?>"<?= $range === 0 ? ' checked' : '' ?>>
+                        <?= e($range === 0 ? $t->text('new_game.range_any') : $t->text('new_game.range', ['points' => $range])) ?></label>
+                <?php endforeach; ?>
+            </fieldset>
+
+            <!-- Step 4: what colour -->
+            <fieldset class="choice-group">
+                <legend><?= $template->render('partials/icon', ['name' => 'colour']) ?><?= e($t->text('new_game.colour')) ?></legend>
+                <?php foreach (['white', 'random', 'black'] as $colour) : ?>
+                    <label class="choice"><input type="radio" name="colour" value="<?= e($colour) ?>"<?= $colour === 'random' ? ' checked' : '' ?>>
+                        <?= $template->render('partials/icon', ['name' => $colour, 'size' => 28]) ?><?= e($t->text('new_game.colour.' . $colour)) ?></label>
+                <?php endforeach; ?>
+            </fieldset>
+
+            <!-- Step 5 (person only): rated or not -->
+            <fieldset class="choice-group for-human">
+                <legend><?= $template->render('partials/icon', ['name' => 'rated']) ?><?= e($t->text('new_game.rated')) ?></legend>
+                <label class="choice"><input type="radio" name="rated" value="yes"<?= $playDefaults['rated'] ? ' checked' : '' ?>> <?= e($t->text('play.rated')) ?></label>
+                <label class="choice"><input type="radio" name="rated" value="no"<?= $playDefaults['rated'] ? '' : ' checked' ?>> <?= e($t->text('game.unrated')) ?></label>
+            </fieldset>
+            <p class="hint for-computer"><?= e($t->text('new_game.computer_note')) ?></p>
+        </div>
+
+        <div class="pop-up-foot">
+            <button type="submit"><?= $template->render('partials/icon', ['name' => 'play']) ?><?= e($t->text('new_game.start')) ?></button>
+        </div>
     </form>
-</details>
-<script src="<?= e($basePath) ?>/assets/js/play/range-output.js" defer></script>
+</dialog>
+
 <script type="module" src="<?= e($basePath) ?>/assets/js/play/lobby.js" id="lobby-script"
-        data-news-url="<?= e($basePath) ?>/play/news" data-base-path="<?= e($basePath) ?>"
-        data-open-ids="<?= e(implode(',', array_map(fn ($challenge) => $challenge->id, $openChallenges))) ?>"></script>
+        data-news-url="<?= e($basePath) ?>/play/news" data-boxes-url="<?= e($basePath) ?>/play/boxes"
+        data-base-path="<?= e($basePath) ?>"></script>

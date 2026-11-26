@@ -10,7 +10,7 @@
 <h1><?= e($t->text('admin.dashboard.title')) ?></h1>
 
 <?php if ($pendingCount > 0) : ?>
-    <p><a href="<?= e($basePath) ?>/admin/users?state=pending"><?= e($t->text('admin.dashboard.pending', ['count' => $pendingCount])) ?></a></p>
+    <p class="button-row"><a class="button button-secondary" href="<?= e($basePath) ?>/admin/users?state=pending"><?= e($t->text('admin.dashboard.pending', ['count' => $pendingCount])) ?></a></p>
 <?php else : ?>
     <p><?= e($t->text('admin.dashboard.nothing_waiting')) ?></p>
 <?php endif; ?>
