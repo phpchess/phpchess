@@ -12,7 +12,9 @@ use PhpChess\Domain\Lichess\PgnReader;
 use PhpChess\Domain\Lichess\ReadGame;
 use PhpChess\Domain\Lichess\UnreadableGame;
 use PhpChess\Domain\Lichess\ContentScanner;
+use PhpChess\Domain\Lichess\LichessContent;
 use PhpChess\Domain\Lichess\StudyImport;
+use PhpChess\Domain\Lichess\StudyTopics;
 use PhpChess\Domain\System\FeatureSwitches;
 use PhpChess\Http\Request;
 use PhpChess\Http\Response;
@@ -42,8 +44,8 @@ final class LearnController
     /** How long the TV game is kept before Lichess is asked again, in seconds. */
     private const int TV_CACHE_SECONDS = 10;
 
-    /** The TV channels players can pick (names as Lichess uses them). */
-    public const array TV_CHANNELS = ['Top Rated', 'Blitz', 'Rapid', 'Classical', 'Bullet'];
+    /** The TV channels players can pick: Lichess's keys in /api/tv/channels (standard chess only). */
+    public const array TV_CHANNELS = ['best', 'classical', 'rapid', 'blitz', 'bullet'];
 
     public function __construct(
         private readonly Services $services,
@@ -59,8 +61,10 @@ final class LearnController
 
         return $this->services->pages()->render($request, 'learn/hub', $this->pages->text('learn.title'), [
             'themes' => $this->services->studies()->themes(),
+            'sectionOrder' => StudyTopics::SECTIONS,
             'ownGames' => $this->services->studies()->ownGames($user->id),
             'lichessIsOn' => $this->services->switches()->isOn(FeatureSwitches::EXTERNAL_CONTENT),
+            'importsAreOn' => $this->lichessContent()->isShown(LichessContent::IMPORTS),
             'pasteIsOpen' => $this->mayPaste($user->isAdmin()),
             'maxOwnGames' => StudyImport::maxOwnGamesIn($this->services->settings()),
             'maxBytes' => ContentScanner::MAX_BYTES,
@@ -111,7 +115,7 @@ final class LearnController
             'game' => $game,
             'positions' => $positions,
             'isComplete' => count($positions) === count($readGame->sanMoves) + 1,
-            'lichessLink' => $game['source_id'] !== '' ? 'https://lichess.org/' . $game['source_id'] : '',
+            'lichessLink' => self::lichessLinkOf($game['source'], $game['source_id']),
             'theme' => $game['theme_id'] === null ? null : $this->services->studies()->findTheme($game['theme_id']),
             'isOwn' => $game['owner_id'] === $user->id,
             'ownGameDays' => StudyImport::ownGameDaysIn($this->services->settings()),
@@ -122,6 +126,9 @@ final class LearnController
     public function import(Request $request): Response
     {
         $user = $this->pages->user();
+        if (!$this->lichessContent()->isShown(LichessContent::IMPORTS)) {
+            return $this->pages->notFound($request);
+        }
         $link = $request->formValue('link');
 
         return $this->importOwnGame($request, $user->id, fn (): int => $this->services->studyImport()->importOneGame($link, null, $user->id));
@@ -174,8 +181,11 @@ final class LearnController
     {
         $user = $this->pages->user();
 
+        $chosen = $request->queryValue('channel', 'best');
+
         return $this->services->pages()->render($request, 'learn/tv', $this->pages->text('tv.title'), [
             'channels' => self::TV_CHANNELS,
+            'chosenChannel' => in_array($chosen, self::TV_CHANNELS, true) ? $chosen : 'best',
             'boardTheme' => $this->services->preferenceRepository()->findForUser($user->id)->boardTheme,
         ]);
     }
@@ -189,9 +199,9 @@ final class LearnController
     public function tvNow(Request $request): Response
     {
         $this->pages->user();
-        $channel = $request->queryValue('channel', 'Top Rated');
+        $channel = $request->queryValue('channel', 'best');
         if (!in_array($channel, self::TV_CHANNELS, true)) {
-            $channel = 'Top Rated';
+            $channel = 'best';
         }
 
         // --- The shared answer, while it is fresh ---
@@ -237,6 +247,22 @@ final class LearnController
     }
 
     // --- Helpers ---
+
+    /** The game's page on lichess.org: a game, or a study (A95); '' for uploads and pastes. */
+    private static function lichessLinkOf(string $source, string $sourceId): string
+    {
+        if ($sourceId === '') {
+            return '';
+        }
+
+        return $source === 'study' ? 'https://lichess.org/study/' . $sourceId : 'https://lichess.org/' . $sourceId;
+    }
+
+    /** Which kinds of Lichess content the admin turned on (A96). */
+    private function lichessContent(): LichessContent
+    {
+        return new LichessContent($this->services->switches(), $this->services->settings());
+    }
 
     /** Admins may always paste; players only while the admin allows it (B37). */
     private function mayPaste(bool $isAdmin): bool

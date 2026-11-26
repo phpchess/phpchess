@@ -10,9 +10,10 @@
  *    content" is on), or paste one as PGN (when the admin allows it, B37);
  *    only I see them (A88).
  *
- * Variables: $themes (list of array{id: int, title: string, games: int}),
+ * Variables: $themes (list of array{id: int, title: string, section: string, topic: string, games: int}),
+ * $sectionOrder (StudyTopics::SECTIONS, for the order of the headings),
  * $ownGames (list of array{id, white, black, event, played_on, result, opening}),
- * $lichessIsOn (bool), $pasteIsOpen (bool), $maxOwnGames (int), $maxBytes (int), $ownGameDays (int), $basePath, $csrfToken, $t, $template.
+ * $lichessIsOn (bool), $importsAreOn (bool: Lichess imports on, A96), $pasteIsOpen (bool), $maxOwnGames (int), $maxBytes (int), $ownGameDays (int), $basePath, $csrfToken, $t, $template.
  */
 ?>
 <h1><?= e($t->text('learn.title')) ?></h1>
@@ -24,8 +25,9 @@
         <?= $template->render('partials/icon', ['icon' => 'puzzle', 'size' => 64]) ?>
     </a>
     <?php if ($lichessIsOn) : ?>
-        <a class="play-tile play-tile-secondary" href="<?= e($basePath) ?>/learn/tv"
-           aria-label="<?= e($t->text('tv.title')) ?>" title="<?= e($t->text('tv.title')) ?>">
+        <?php // Everything from lichess.org on one page: live games, broadcasts, the daily puzzle (A96). ?>
+        <a class="play-tile play-tile-secondary" href="<?= e($basePath) ?>/learn/lichess"
+           aria-label="<?= e($t->text('lichess.page_title')) ?>" title="<?= e($t->text('lichess.page_title')) ?>">
             <?= $template->render('partials/icon', ['icon' => 'tv', 'size' => 64]) ?>
         </a>
     <?php endif; ?>
@@ -37,21 +39,33 @@
     <?php if ($themes === []) : ?>
         <p class="muted"><?= e($t->text('study.no_themes')) ?></p>
     <?php else : ?>
-        <ul class="text-list">
-            <?php foreach ($themes as $theme) : ?>
-                <li>
-                    <a href="<?= e($basePath) ?>/learn/themes/<?= e($theme['id']) ?>"><?= e($theme['title']) ?></a>
-                    <span class="muted">(<?= e($t->text('study.game_count', ['count' => $theme['games']])) ?>)</span>
-                </li>
-            <?php endforeach; ?>
-        </ul>
+        <?php
+        // Grouped by Lichess's sections, in Lichess's order (A95); older themes last.
+        $bySection = [];
+        foreach ($themes as $theme) {
+            $bySection[$theme['section']][] = $theme;
+        }
+        ?>
+        <?php foreach (array_merge(array_keys($sectionOrder), ['']) as $section) : ?>
+            <?php if (isset($bySection[$section])) : ?>
+                <h3><?= e($t->text($section === '' ? 'study_section.other' : 'study_section.' . $section)) ?></h3>
+                <ul class="text-list">
+                    <?php foreach ($bySection[$section] as $theme) : ?>
+                        <li>
+                            <a href="<?= e($basePath) ?>/learn/themes/<?= e($theme['id']) ?>"><?= e($theme['title']) ?></a>
+                            <span class="muted">(<?= e($t->text('study.game_count', ['count' => $theme['games']])) ?>)</span>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
+        <?php endforeach; ?>
     <?php endif; ?>
 </section>
 
 <?php // ===== 3. My own Lichess games ===== ?>
 <section aria-labelledby="own-title">
     <h2 id="own-title"><?= e($t->text('study.own_games')) ?></h2>
-    <?php if ($lichessIsOn) : ?>
+    <?php if ($importsAreOn) : ?>
         <form method="post" action="<?= e($basePath) ?>/learn/import" class="form">
             <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
             <label>

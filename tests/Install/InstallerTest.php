@@ -85,6 +85,9 @@ final class InstallerTest extends TestCase
         self::assertStringContainsString('Step 6', $browser->get('/install')->body);
         $finished = $browser->post('/install/finish');
         self::assertStringContainsString('phpChess is installed', $finished->body);
+        // The Lichess check (A93): the fake Lichess answered, so it says success.
+        self::assertStringContainsString('Checking connection to lichess.org for content', $finished->body);
+        self::assertStringContainsString('success.', $finished->body);
 
         // Installed: the installer is locked and the site answers.
         $config = Config::load($this->folder->path);
@@ -176,7 +179,7 @@ final class InstallerTest extends TestCase
      */
     private function browserWithServer(Closure $server): TestBrowser
     {
-        return new TestBrowser(new Kernel($this->folder->path, fetchUrl: $server));
+        return new TestBrowser(new Kernel($this->folder->path, fetchUrl: $server, lichessTransport: static fn (string $url, string $accept): array => ['status' => 200, 'body' => '{}']));
     }
 
     /**

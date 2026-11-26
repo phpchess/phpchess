@@ -22,17 +22,19 @@ final class StudyRepository extends Repository
 {
     // --- Themes ---
 
-    /** @return list<array{id: int, title: string, games: int}> newest first */
+    /** @return list<array{id: int, title: string, section: string, topic: string, games: int}> in the order made */
     public function themes(): array
     {
         $rows = $this->database->fetchAll(
-            'SELECT t.id, t.title, (SELECT COUNT(*) FROM ' . $this->table('study_games') . ' g WHERE g.theme_id = t.id) AS games'
-            . ' FROM ' . $this->table('study_themes') . ' t ORDER BY t.id DESC',
+            'SELECT t.id, t.title, t.section, t.topic, (SELECT COUNT(*) FROM ' . $this->table('study_games') . ' g WHERE g.theme_id = t.id) AS games'
+            . ' FROM ' . $this->table('study_themes') . ' t ORDER BY t.id',
         );
 
         return array_map(static fn (array $row): array => [
             'id' => self::intOf($row['id']),
             'title' => self::textOf($row['title']),
+            'section' => self::textOf($row['section']),
+            'topic' => self::textOf($row['topic']),
             'games' => self::intOf($row['games']),
         ], $rows);
     }
@@ -45,11 +47,15 @@ final class StudyRepository extends Repository
         return $row === null ? null : ['id' => self::intOf($row['id']), 'title' => self::textOf($row['title'])];
     }
 
-    public function createTheme(string $title, int $adminId): int
+    /**
+     * A new theme. $title is the name shown: the topic's name for a listed
+     * topic, or the admin's own name (Openings, Famous games), A95.
+     */
+    public function createTheme(string $title, int $adminId, string $section = '', string $topic = ''): int
     {
         $this->database->run(
-            'INSERT INTO ' . $this->table('study_themes') . ' (title, created_by, created_at) VALUES (?, ?, ?)',
-            [$title, $adminId, $this->now()],
+            'INSERT INTO ' . $this->table('study_themes') . ' (title, section, topic, created_by, created_at) VALUES (?, ?, ?, ?, ?)',
+            [$title, $section, $topic, $adminId, $this->now()],
         );
 
         return $this->database->lastInsertId();

@@ -2,10 +2,18 @@
 /**
  * Shown once the install is finished (INS-06, A23).
  *
- * Variables: $installerRemoved (bool: the installer deleted its own files), $basePath.
+ * Variables: $installerRemoved (bool: the installer deleted its own files),
+ * $lichessFound (bool: lichess.org answered the connection check, A93), $basePath.
  */
 ?>
 <p class="notice-success">phpChess is installed.</p>
+<p>Checking connection to lichess.org for content&hellip;
+    <?php if ($lichessFound) : ?>
+        <strong>success.</strong> You can switch on Lichess content on the admin page "Lichess".
+    <?php else : ?>
+        <strong>failed</strong> (configure from settings &rarr; Lichess &rarr; Internet connection). phpChess works fully without it; Lichess content stays off.
+    <?php endif; ?>
+</p>
 <?php if ($installerRemoved) : ?>
     <p>The installer has removed itself from the server, so nobody can run it again.</p>
 <?php else : ?>

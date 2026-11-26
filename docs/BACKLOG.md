@@ -46,6 +46,8 @@ feature ids in [FEATURES.md](FEATURES.md)) when it is planned in
 | B38 | (done in C5-1, 2026-11-26) **Keep PGN commentary** (A89, A90, strict): study games keep comments; plain text only (letters, digits, basic punctuation), anything else rejects the comment or game; each passed through the scanner's checks (web/e-mail addresses, word filter, length), and the viewer shows them. | 2026-11-26 | User, C5-1 review. |
 | B39 | (done in C5-1, 2026-11-26) **A shared PGN checker**: one PGN check for every place games come in or go out; the game viewer reports a move it can't read instead of stopping quietly. | 2026-11-26 | User, C5-1 review. |
 | B40 | **Lichess broadcasts** (A90): show upcoming and live official broadcasts (`/api/broadcast/top`) on our own board. The doc says unauthenticated broadcast requests are heavily rate-limited; check before building. | 2026-11-26 | User, C5-1 review. |
+| B41 | **Puzzle on the main page**: a small puzzle on the start page to keep players coming back (bundled puzzles, works offline). | 2026-11-26 | User, C5-1 review. |
+| B42 | **Puzzle skill ladder**: players earn points for solved puzzles and climb a ladder through thousands of puzzles. Scales: each bundled puzzle has a Lichess rating, so each player gets a puzzle rating (Glicko-2 like games) and is served puzzles near it; points weighted by puzzle rating; one row per attempt or per player keeps the database small. | 2026-11-26 | User, C5-1 review. |
 
 ## Placed: fix chunks before C4-1 (user, 2026-11-25)
 - **F1 Fixes and the strength test** (done 2026-11-25, user review pending): B7, B15, B17 (plus: no chat in games against the computer), B20, B21, B23, B30.

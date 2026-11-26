@@ -9,8 +9,11 @@
  * same puzzle on lichess.org (A75).
  *
  * Variables: $motifs (list of string), $levels (list of string),
+ * $dailyPuzzle (array{id, fen, moves, rating}|null, optional: Lichess's puzzle of the day, A96;
+ * then the choices are hidden and this one puzzle starts at once),
  * $boardTheme (string), $puzzleCount (int), $lichessTrainingLink (string, the start of a puzzle's address on lichess.org), $basePath, $csrfToken, $t, $template.
  */
+$dailyPuzzle ??= null;
 ?>
 <p><a class="icon-button" href="<?= e($basePath) ?>/learn" aria-label="<?= e($t->text('learn.title')) ?>" title="<?= e($t->text('learn.title')) ?>"><?= $template->render('partials/icon', ['icon' => 'back']) ?></a></p>
 <h1><?= e($t->text('puzzles.title')) ?></h1>
@@ -23,7 +26,8 @@
      data-text-solved="<?= e($t->text('puzzles.solved')) ?>"
      data-text-wrong="<?= e($t->text('puzzles.wrong')) ?>"
      data-text-rating="<?= e($t->text('puzzles.rating')) ?>"
-     data-text-error="<?= e($t->text('puzzles.none')) ?>">
+     data-text-error="<?= e($t->text('puzzles.none')) ?>"
+     data-daily-puzzle="<?= e($dailyPuzzle === null ? '' : (string) json_encode($dailyPuzzle)) ?>">
 
     <?php // --- The choices: one row of buttons each (no drop-down menus, F2) --- ?>
     <fieldset class="choice-group">

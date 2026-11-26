@@ -6,7 +6,9 @@ namespace PhpChess\Http\Web\Admin;
 
 use PhpChess\Domain\ActionRefused;
 use PhpChess\Domain\Lichess\ContentScanner;
+use PhpChess\Domain\Lichess\LichessContent;
 use PhpChess\Domain\Lichess\StudyImport;
+use PhpChess\Domain\Lichess\StudyTopics;
 use PhpChess\Domain\System\FeatureSwitches;
 use PhpChess\Http\Request;
 use PhpChess\Http\Response;
@@ -20,6 +22,9 @@ use PhpChess\Kernel\Services;
  * Addresses (Routes.php), admins only:
  *   GET  /admin/lichess                    connection test, study themes, imports
  *   POST /admin/lichess/test               the "Test connection" button (works with the switch off, A80)
+ *   POST /admin/lichess/proxy              the Internet connection: direct or through a proxy (A94)
+ *   POST /admin/lichess/content            "external content" and the kinds of Lichess content (A96)
+ *   POST /admin/lichess/import-study       a Lichess study into a theme ("external content", A95)
  *   POST /admin/lichess/themes             create a study theme
  *   POST /admin/lichess/themes/{id}/remove remove a theme and its games
  *   POST /admin/lichess/upload             upload a PGN file into a theme (works offline)
@@ -48,6 +53,11 @@ final class LichessController
             'lichessIsOn' => $this->services->switches()->isOn(FeatureSwitches::EXTERNAL_CONTENT),
             'testPassedAt' => $settings->getInt(LichessClient::TEST_PASSED_AT_SETTING),
             'testResult' => $settings->getString(LichessClient::TEST_RESULT_SETTING),
+            'proxy' => $this->services->proxySettings(),
+            'content' => new LichessContent($this->services->switches(), $settings),
+            'contentKinds' => LichessContent::KINDS,
+            'sections' => StudyTopics::SECTIONS,
+            'ownNameSections' => StudyTopics::OWN_NAME_SECTIONS,
             'maxGames' => ContentScanner::MAX_GAMES,
             'maxBytes' => ContentScanner::MAX_BYTES,
             'maxOwnGames' => StudyImport::maxOwnGamesIn($settings),
@@ -67,13 +77,75 @@ final class LichessController
         return $this->pages->redirect($request, '/admin/lichess', $passed ? 'success' : 'error', $passed ? 'admin.lichess.test_passed' : 'admin.lichess.test_failed');
     }
 
+    /** The Internet connection: direct, or through the network's proxy (A94). */
+    public function saveProxy(Request $request): Response
+    {
+        try {
+            $this->services->proxySettings()->save(
+                $request->formValue('proxy_mode'),
+                trim($request->formValue('proxy_host')),
+                (int) $request->formValue('proxy_port', '8080'),
+                trim($request->formValue('proxy_user')),
+                $request->formValue('proxy_password'),
+                $request->formValue('proxy_clear_login') === 'on',
+            );
+        } catch (ActionRefused $refusal) {
+            return $this->pages->redirect($request, '/admin/lichess', 'error', $refusal->languageKey);
+        }
+        // The password never goes into the audit log, only that the settings changed.
+        $this->pages->audit($request, 'lichess.proxy', $this->services->proxySettings()->usesProxy() ? 'proxy set' : 'direct connection');
+
+        return $this->pages->redirect($request, '/admin/lichess', 'success', 'admin.saved');
+    }
+
+    /**
+     * "External content" and the kinds of Lichess content (A96). The switch
+     * can only be turned on after a passed connection test (A80); it is the
+     * same switch as on the switches page.
+     */
+    public function saveContent(Request $request): Response
+    {
+        $wantsOn = $request->formValue('external_content') === 'on';
+        $switches = $this->services->switches();
+        if ($wantsOn && !$this->services->lichess()->hasPassedSelfTest()) {
+            return $this->pages->redirect($request, '/admin/lichess', 'error', 'admin.switches.needs.lichess_test');
+        }
+        $switches->set(FeatureSwitches::EXTERNAL_CONTENT, $wantsOn);
+        $content = new LichessContent($switches, $this->services->settings());
+        foreach (LichessContent::KINDS as $kind) {
+            $content->choose($kind, $request->formValue('show_' . $kind) === 'on');
+        }
+        $this->pages->audit($request, 'lichess.content', 'external content ' . ($wantsOn ? 'on' : 'off'));
+
+        return $this->pages->redirect($request, '/admin/lichess', 'success', 'admin.saved');
+    }
+
+    public function importStudy(Request $request): Response
+    {
+        $link = $request->formValue('link');
+
+        return $this->runImport($request, 'lichess study', fn (int $themeId, int $adminId): array => $this->services->studyImport()->importStudy($link, $themeId, $adminId));
+    }
+
+    /**
+     * A new theme from the Lichess list (A95): the form sends "section:topic",
+     * or "openings:" / "famous_games:" with the admin's own name in "title".
+     */
     public function createTheme(Request $request): Response
     {
-        $title = trim($request->formValue('title'));
-        if ($title === '' || mb_strlen($title) > 100 || $this->services->wordFilter()->blocks($title)) {
+        [$section, $topic] = array_pad(explode(':', $request->formValue('topic'), 2), 2, '');
+        if (!StudyTopics::isValid($section, $topic)) {
             return $this->pages->redirect($request, '/admin/lichess', 'error', 'admin.lichess.bad_title');
         }
-        $this->services->studies()->createTheme($title, $this->pages->admin()->id);
+        if ($topic !== '') {
+            $title = $this->pages->text(StudyTopics::topicKey($section, $topic));
+        } else {
+            $title = trim($request->formValue('title'));
+            if ($title === '' || mb_strlen($title) > 100 || $this->services->wordFilter()->blocks($title)) {
+                return $this->pages->redirect($request, '/admin/lichess', 'error', 'admin.lichess.bad_title');
+            }
+        }
+        $this->services->studies()->createTheme($title, $this->pages->admin()->id, $section, $topic);
         $this->pages->audit($request, 'study.theme', 'created "' . $title . '"');
 
         return $this->pages->redirect($request, '/admin/lichess', 'success', 'admin.saved');

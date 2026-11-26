@@ -13,8 +13,10 @@
  *   The link to the Lichess database helps find games to stage (A87).
  *   4. players' own games: limits and the paste switch (B37).
  *
- * Variables: $themes (list of array{id: int, title: string, games: int}),
+ * Variables: $themes (list of array{id: int, title: string, section: string, topic: string, games: int}),
+ * $sections (array<string, list<string>>, StudyTopics::SECTIONS), $ownNameSections (list of string),
  * $lichessIsOn (bool), $testPassedAt (int, 0 = not passed), $testResult (string),
+ * $proxy (ProxySettings), $content (LichessContent), $contentKinds (list of string),
  * $maxGames (int), $maxBytes (int), $maxOwnGames (int), $importsPerHour (int), $pasteIsOpen (bool), $ownGameDays (int),
  * $lichessDatabaseLink (string), $warnings, $currentAdminPath,
  * $basePath, $csrfToken, $t, $template.
@@ -24,6 +26,28 @@
 
 <h1><?= e($t->text('admin.lichess.title')) ?></h1>
 <p><?= e($t->text('admin.lichess.explain')) ?></p>
+
+<?php // ===== 0. The Internet connection (A94) ===== ?>
+<section aria-labelledby="proxy-title">
+    <h2 id="proxy-title"><?= e($t->text('admin.lichess.proxy_title')) ?></h2>
+    <p class="hint"><?= e($t->text('admin.lichess.proxy_explain')) ?></p>
+    <form method="post" action="<?= e($basePath) ?>/admin/lichess/proxy" class="form">
+        <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+        <fieldset class="choice-group">
+            <label class="choice"><input type="radio" name="proxy_mode" value="direct"<?= $proxy->usesProxy() ? '' : ' checked' ?>> <span><?= e($t->text('admin.lichess.proxy_direct')) ?></span></label>
+            <label class="choice"><input type="radio" name="proxy_mode" value="proxy"<?= $proxy->usesProxy() ? ' checked' : '' ?>> <span><?= e($t->text('admin.lichess.proxy_through')) ?></span></label>
+        </fieldset>
+        <label><?= e($t->text('admin.lichess.proxy_host')) ?> <input type="text" name="proxy_host" maxlength="253" value="<?= e($proxy->host()) ?>" placeholder="proxy.school.local" autocapitalize="off" spellcheck="false"></label>
+        <label><?= e($t->text('admin.lichess.proxy_port')) ?> <input type="number" name="proxy_port" min="1" max="65535" value="<?= e($proxy->port()) ?>"></label>
+        <label><?= e($t->text('admin.lichess.proxy_user')) ?> <input type="text" name="proxy_user" maxlength="200" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+        <label><?= e($t->text('admin.lichess.proxy_password')) ?> <input type="password" name="proxy_password" maxlength="200" autocomplete="new-password"></label>
+        <?php if ($proxy->hasLogin()) : ?>
+            <p class="hint"><?= e($t->text('admin.lichess.proxy_login_saved')) ?></p>
+            <label class="checkbox"><input type="checkbox" name="proxy_clear_login" value="on"> <?= e($t->text('admin.lichess.proxy_clear_login')) ?></label>
+        <?php endif; ?>
+        <p class="button-row"><button type="submit" class="button"><?= e($t->text('admin.lichess.save')) ?></button></p>
+    </form>
+</section>
 
 <?php // ===== 1. The connection test ===== ?>
 <section aria-labelledby="test-title">
@@ -37,11 +61,26 @@
             <?= e($t->text('admin.lichess.test_never')) ?>
         <?php endif; ?>
     </p>
-    <p><?= e($t->text($lichessIsOn ? 'admin.lichess.switch_on' : 'admin.lichess.switch_off')) ?>
-        <a href="<?= e($basePath) ?>/admin/switches"><?= e($t->text('admin.switches.title')) ?></a></p>
+    <?php if ($proxy->usesProxy()) : ?>
+        <p class="muted"><?= e($t->text('admin.lichess.via_proxy', ['proxy' => $proxy->description()])) ?></p>
+    <?php endif; ?>
     <form method="post" action="<?= e($basePath) ?>/admin/lichess/test" class="inline-form">
         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
         <button type="submit" class="button button-secondary"><?= e($t->text('admin.lichess.test_now')) ?></button>
+    </form>
+
+    <?php // The switch and what it brings, in one place (A96); the switches page shows the same switch. ?>
+    <h3><?= e($t->text('admin.lichess.content_title')) ?></h3>
+    <form method="post" action="<?= e($basePath) ?>/admin/lichess/content" class="form">
+        <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+        <label class="checkbox"><input type="checkbox" name="external_content" value="on"<?= $lichessIsOn ? ' checked' : '' ?><?= $testPassedAt > 0 || $lichessIsOn ? '' : ' disabled' ?>> <strong><?= e($t->text('admin.lichess.external_content')) ?></strong></label>
+        <?php if ($testPassedAt === 0 && !$lichessIsOn) : ?>
+            <p class="hint"><?= e($t->text('admin.switches.needs.lichess_test')) ?></p>
+        <?php endif; ?>
+        <?php foreach ($contentKinds as $kind) : ?>
+            <label class="checkbox"><input type="checkbox" name="show_<?= e($kind) ?>" value="on"<?= $content->isChosen($kind) ? ' checked' : '' ?>> <?= e($t->text('admin.lichess.kind.' . $kind)) ?></label>
+        <?php endforeach; ?>
+        <p class="button-row"><button type="submit" class="button"><?= e($t->text('admin.lichess.save')) ?></button></p>
     </form>
 </section>
 
@@ -66,9 +105,25 @@
     <?php endif; ?>
     <form method="post" action="<?= e($basePath) ?>/admin/lichess/themes" class="form">
         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+        <?php // The Lichess sections and topics (A95); Openings and Famous games take a name. ?>
+        <label>
+            <?= e($t->text('admin.lichess.theme_topic')) ?>
+            <select name="topic" required>
+                <?php foreach ($sections as $section => $topics) : ?>
+                    <optgroup label="<?= e($t->text('study_section.' . $section)) ?>">
+                        <?php if (in_array($section, $ownNameSections, true)) : ?>
+                            <option value="<?= e($section) ?>:"><?= e($t->text('study_section.' . $section)) ?>: <?= e($t->text('admin.lichess.own_name')) ?></option>
+                        <?php endif; ?>
+                        <?php foreach ($topics as $topic) : ?>
+                            <option value="<?= e($section . ':' . $topic) ?>"><?= e($t->text('study_topic.' . $section . '.' . $topic)) ?></option>
+                        <?php endforeach; ?>
+                    </optgroup>
+                <?php endforeach; ?>
+            </select>
+        </label>
         <label>
             <?= e($t->text('admin.lichess.theme_title')) ?>
-            <input type="text" name="title" required maxlength="100">
+            <input type="text" name="title" maxlength="100">
             <span class="hint"><?= e($t->text('admin.lichess.theme_hint')) ?></span>
         </label>
         <p class="button-row"><button type="submit" class="button"><?= e($t->text('admin.lichess.add_theme')) ?></button></p>
@@ -115,6 +170,14 @@
                 <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
                 <?= $themeChoiceHtml ?>
                 <label><?= e($t->text('study.import_link')) ?> <input type="url" name="link" required maxlength="80" inputmode="url"></label>
+                <p class="button-row"><button type="submit" class="button"><?= e($t->text('study.import')) ?></button></p>
+            </form>
+
+            <h3><?= e($t->text('admin.lichess.study_title')) ?></h3>
+            <form method="post" action="<?= e($basePath) ?>/admin/lichess/import-study" class="form">
+                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                <?= $themeChoiceHtml ?>
+                <label><?= e($t->text('admin.lichess.study_link')) ?> <input type="url" name="link" required maxlength="80" inputmode="url" placeholder="https://lichess.org/study/abcdEFGH"></label>
                 <p class="button-row"><button type="submit" class="button"><?= e($t->text('study.import')) ?></button></p>
             </form>
 

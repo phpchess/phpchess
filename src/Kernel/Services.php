@@ -18,6 +18,8 @@ use PhpChess\Domain\Lichess\ContentScanner;
 use PhpChess\Domain\Lichess\StudyImport;
 use PhpChess\Domain\Puzzles\PuzzleSet;
 use PhpChess\Infra\Lichess\LichessClient;
+use PhpChess\Infra\Lichess\ProxySettings;
+use PhpChess\Infra\System\SecretBox;
 use PhpChess\Infra\Lichess\StudyRepository;
 use PhpChess\Infra\Community\BuddyRepository;
 use PhpChess\Infra\Community\GameChatRepository;
@@ -92,6 +94,8 @@ final class Services
         private readonly Closure $connectDatabase,
         private readonly ?Mailer $mailerOverride = null,
         private readonly ?int $fixedNowMs = null,
+        /** Tests pass a fake Lichess; null: real requests through LichessClient's curl. */
+        private readonly ?Closure $lichessTransport = null,
     ) {
     }
 
@@ -367,7 +371,26 @@ final class Services
             mkdir($lockFolder, 0775, true);
         }
 
-        return new LichessClient($this->switches(), $this->settings(), $lockFolder . '/lichess.lock', $this->now);
+        return new LichessClient(
+            $this->switches(),
+            $this->settings(),
+            $lockFolder . '/lichess.lock',
+            $this->now,
+            $this->lichessTransport,
+            $this->proxySettings(),
+        );
+    }
+
+    /** The proxy for outside requests (A94). */
+    public function proxySettings(): ProxySettings
+    {
+        return new ProxySettings($this->settings(), $this->secrets());
+    }
+
+    /** Small encrypted secrets; the key lives in config/secret.key (A94). */
+    public function secrets(): SecretBox
+    {
+        return new SecretBox($this->appRoot . '/config/secret.key');
     }
 
     public function studies(): StudyRepository

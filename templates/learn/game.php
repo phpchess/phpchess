@@ -13,9 +13,10 @@
  * $isComplete (bool: false when the board couldn't follow every move, B39),
  * $isOwn (bool: the viewer's own game, with Keep and Remove), $ownGameDays (int, 0 = never removed),
  * $lichessLink (string, '' for an upload),
- * $boardTheme (string), $basePath, $csrfToken, $t, $template.
+ * $boardTheme (string), $backPath (string, optional), $basePath, $csrfToken, $t, $template.
  */
-$backPath = $theme === null ? '/learn' : '/learn/themes/' . $theme['id'];
+// Back to the theme, to Learn, or where the page was opened from ($backPath, broadcasts).
+$backPath ??= $theme === null ? '/learn' : '/learn/themes/' . $theme['id'];
 ?>
 <p><a class="icon-button" href="<?= e($basePath . $backPath) ?>" aria-label="<?= e($theme['title'] ?? $t->text('learn.title')) ?>" title="<?= e($theme['title'] ?? $t->text('learn.title')) ?>"><?= $template->render('partials/icon', ['icon' => 'back']) ?></a></p>
 

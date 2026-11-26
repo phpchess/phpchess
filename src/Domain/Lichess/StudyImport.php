@@ -18,7 +18,9 @@ use PhpChess\Infra\System\SettingsRepository;
  *   - importUserGames():  an admin fetches a Lichess player's newest games (up to 50);
  *   - importUpload():     an admin uploads or pastes PGN text (up to 1 MB, 50 games);
  *   - importPastedGame(): a player pastes one game as PGN text (B37; only
- *     while the admin allows it, PASTE_SETTING).
+ *     while the admin allows it, PASTE_SETTING);
+ *   - importStudy():      an admin imports a public Lichess study by its link,
+ *     one game per chapter (A95).
  *
  * The admin sets how many own games a player may keep and how many imports
  * a player may make per hour (B37); the constants are the defaults.
@@ -129,6 +131,45 @@ final class StudyImport
     public function importUpload(string $pgnText, int $themeId, int $adminId): array
     {
         return $this->store($this->scanner->scan($pgnText), $themeId, $adminId, 'upload', 'upload');
+    }
+
+    /**
+     * Imports a public Lichess study into a theme (admins, A95): every
+     * chapter passes the scanner on its own; chapters it rejects are left
+     * out and listed in the audit log.
+     *
+     * @return array{added: int, rejected: int}
+     */
+    public function importStudy(string $link, int $themeId, int $adminId): array
+    {
+        $studyId = self::studyIdFrom($link);
+        if ($studyId === null) {
+            throw new ActionRefused('lichess.bad_link');
+        }
+        $result = $this->scanner->scan($this->lichess->studyPgn($studyId));
+        if ($this->studies->findTheme($themeId) === null) {
+            throw new ActionRefused('study.no_theme');
+        }
+        $this->logRejections($result, $adminId, 'lichess study ' . $studyId);
+        foreach ($result->accepted as $game) {
+            $this->studies->addGame($game, $themeId, null, 'study', $studyId, $adminId);
+        }
+
+        return ['added' => count($result->accepted), 'rejected' => count($result->rejected)];
+    }
+
+    /**
+     * The study id in a link like https://lichess.org/study/abcdEFGH or
+     * https://lichess.org/study/abcdEFGH/chapter12; null for anything else.
+     */
+    public static function studyIdFrom(string $link): ?string
+    {
+        $text = trim($link);
+        if (preg_match('~^https://lichess\.org/study/([A-Za-z0-9]{8})(?:/[A-Za-z0-9]{8})?(?:#\d+)?$~', $text, $match) === 1) {
+            return $match[1];
+        }
+
+        return null;
     }
 
     /**

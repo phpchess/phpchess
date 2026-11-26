@@ -83,7 +83,8 @@ final class ContentScanner
             try {
                 // --- 2. Strict reading, 3. allowed tags only ---
                 $game = PgnReader::readGame($gameText)->withOnlyTags(self::ALLOWED_TAGS);
-                if ($game->sanMoves === []) {
+                // A game needs moves; a study chapter may be just a position (FEN) to look at.
+                if ($game->sanMoves === [] && $game->tag('FEN') === '') {
                     throw new UnreadableGame('no moves');
                 }
 

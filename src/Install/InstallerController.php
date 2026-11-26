@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace PhpChess\Install;
 
 use Closure;
+use PhpChess\Domain\System\FeatureSwitches;
 use PhpChess\Http\Request;
 use PhpChess\Http\Response;
 use PhpChess\Http\Template;
 use PhpChess\Infra\Database;
 use PhpChess\Infra\Identity\UserRepository;
+use PhpChess\Infra\Lichess\LichessClient;
 use PhpChess\Infra\Migration\MigrationRunner;
 use PhpChess\Infra\System\SettingsRepository;
 use PhpChess\Kernel\Config;
@@ -62,6 +64,8 @@ final class InstallerController
         private readonly Closure $connectDatabase,
         private readonly ?Closure $fetchUrl,
         private readonly int $now,
+        /** Tests pass a fake Lichess; null: the real check (A93). */
+        private readonly ?Closure $lichessTransport = null,
     ) {
     }
 
@@ -373,6 +377,11 @@ final class InstallerController
         $settings->set('install.protection_result', $protectionResult === '' ? 'protected' : $protectionResult);
         $settings->set('install.finished_at', $this->now);
 
+        // Checking the connection to lichess.org for content (A93). One small
+        // public request; the result is stored like the admin's Test
+        // connection, and "external content" stays off either way.
+        $lichessFound = $this->checkLichess($settings);
+
         if (!$config->installed && !$this->writeConfig($config->withInstallState(true, ''))) {
             return $this->page($request, 'install/config_upload', 'Step 6: Upload the final config file', 6, [
                 'fileContents' => $config->withInstallState(true, '')->toFileContents(),
@@ -389,10 +398,23 @@ final class InstallerController
         $codeRemoved = self::deleteFolder($this->appRoot . '/src/Install');
         $response = $this->page($request, 'install/done', 'phpChess is installed', 6, [
             'installerRemoved' => $codeRemoved,
+            'lichessFound' => $lichessFound,
         ]);
         self::deleteFolder($this->appRoot . '/templates/install');
 
         return $response;
+    }
+
+    /** The installer's Lichess check (A93): true when lichess.org answered. */
+    private function checkLichess(SettingsRepository $settings): bool
+    {
+        $lockFolder = $this->appRoot . '/storage/logs';
+        if (!is_dir($lockFolder)) {
+            mkdir($lockFolder, 0775, true);
+        }
+        $client = new LichessClient(new FeatureSwitches($settings), $settings, $lockFolder . '/lichess.lock', $this->now, $this->lichessTransport);
+
+        return $client->selfTest();
     }
 
     /**

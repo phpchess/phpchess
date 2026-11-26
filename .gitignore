@@ -5,6 +5,7 @@
 
 # Install-specific and generated files: never committed
 /config/config.php
+/config/secret.key
 /storage/*
 !/storage/.htaccess
 !/storage/logs/

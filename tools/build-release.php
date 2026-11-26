@@ -26,7 +26,7 @@ $includedPaths = [
 ];
 
 /** Never released, even when inside an included folder. */
-$excludedPaths = ['public/proof', 'templates/local', 'config/config.php'];
+$excludedPaths = ['public/proof', 'templates/local', 'config/config.php', 'config/secret.key'];
 
 /** Folders that must not be in the release (K10). */
 $forbiddenFolders = ['tests', 'tools', 'docs', '.github', 'vendor/phpunit', 'vendor/phpstan'];

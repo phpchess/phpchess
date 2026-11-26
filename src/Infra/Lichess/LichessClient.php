@@ -24,7 +24,8 @@ use PhpChess\Infra\System\SettingsRepository;
  *   - a User-Agent naming phpChess (A79);
  *   - one request at a time for the whole site (a lock file), and after a
  *     "429 Too Many Requests" a full minute of rest (A79);
- *   - a reply larger than MAX_REPLY_BYTES is cut off and refused.
+ *   - a reply larger than MAX_REPLY_BYTES is cut off and refused;
+ *   - through the network's proxy when the admin set one (ProxySettings, A94).
  *
  * The browser never talks to Lichess: pages ask our server, which asks here.
  * So the site's Content-Security-Policy stays 'self' (K9).
@@ -49,6 +50,7 @@ final class LichessClient
 
     /**
      * @param Closure(string $url, string $accept): array{status: int, body: string}|null $transport  null: real curl
+     * @param ProxySettings|null $proxy  the admin's proxy, for the real curl; null: connect directly
      */
     public function __construct(
         private readonly FeatureSwitches $switches,
@@ -56,8 +58,10 @@ final class LichessClient
         private readonly string $lockFile,
         private readonly int $now,
         ?Closure $transport = null,
+        ?ProxySettings $proxy = null,
     ) {
-        $this->transport = $transport ?? Closure::fromCallable([self::class, 'curlGet']);
+        $this->transport = $transport
+            ?? static fn (string $url, string $accept): array => self::curlGet($url, $accept, $proxy?->forCurl());
     }
 
     // --- The addresses we use (public, read-only) ---
@@ -81,6 +85,40 @@ final class LichessClient
     public function tvChannels(): string
     {
         return $this->get('/api/tv/channels', 'application/json');
+    }
+
+    /** The official broadcasts now and soon (JSON text: active, upcoming, past). */
+    public function topBroadcasts(): string
+    {
+        return $this->get('/api/broadcast/top?page=1', 'application/json');
+    }
+
+    /** All games of one broadcast round as PGN. */
+    public function broadcastRoundPgn(string $roundId): string
+    {
+        return $this->get('/api/broadcast/round/' . self::checkedId($roundId) . '.pgn', 'application/x-chess-pgn');
+    }
+
+    /** Lichess's puzzle of the day (JSON text: game, puzzle). */
+    public function dailyPuzzle(): string
+    {
+        return $this->get('/api/puzzle/daily', 'application/json');
+    }
+
+    /** All chapters of one public study as PGN, without clocks. */
+    public function studyPgn(string $studyId): string
+    {
+        return $this->get('/api/study/' . self::checkedId($studyId) . '.pgn?clocks=false', 'application/x-chess-pgn');
+    }
+
+    /** A Lichess id is 8 letters and digits; anything else never reaches the address. */
+    private static function checkedId(string $id): string
+    {
+        if (preg_match('/^[A-Za-z0-9]{8}$/', $id) !== 1) {
+            throw new ActionRefused('lichess.bad_link');
+        }
+
+        return $id;
     }
 
     // --- The self-test (A80) ---
@@ -177,9 +215,10 @@ final class LichessClient
      * The real transport: curl, https only, certificate checked, no
      * redirects, a time limit and a size limit.
      *
+     * @param array{address: string, login: string}|null $proxy  the proxy to go through, or null
      * @return array{status: int, body: string}
      */
-    private static function curlGet(string $url, string $accept): array
+    private static function curlGet(string $url, string $accept, ?array $proxy = null): array
     {
         if (!str_starts_with($url, self::HOST . '/') || !function_exists('curl_init')) {
             throw new ActionRefused('lichess.unavailable');
@@ -197,6 +236,9 @@ final class LichessClient
             CURLOPT_TIMEOUT => self::TIMEOUT_SECONDS,
             CURLOPT_USERAGENT => 'phpChess/6 (self-hosted chess server)',
             CURLOPT_HTTPHEADER => ['Accept: ' . $accept],
+            // The admin's proxy, or none at all ('' also ignores proxy settings of the server).
+            CURLOPT_PROXY => $proxy['address'] ?? '',
+            CURLOPT_PROXYTYPE => CURLPROXY_HTTP,
             // Collect the reply piece by piece, and stop when it gets too large.
             CURLOPT_WRITEFUNCTION => static function ($curl, string $piece) use (&$body, &$tooLarge): int {
                 if (strlen($body) + strlen($piece) > self::MAX_REPLY_BYTES) {
@@ -209,12 +251,24 @@ final class LichessClient
                 return strlen($piece);
             },
         ]);
+        if (($proxy['login'] ?? '') !== '') {
+            curl_setopt($handle, CURLOPT_PROXYUSERPWD, $proxy['login']);
+        }
         curl_exec($handle);
         $status = (int) curl_getinfo($handle, CURLINFO_RESPONSE_CODE);
+        $proxyStatus = (int) curl_getinfo($handle, CURLINFO_HTTP_CONNECTCODE);
+        $errorNumber = curl_errno($handle);
         curl_close($handle);
 
         if ($tooLarge) {
             throw new ActionRefused('lichess.too_large');
+        }
+        // Tell the admin which part failed: the proxy's login, the proxy, or Lichess.
+        if ($proxy !== null && $proxyStatus === 407) {
+            throw new ActionRefused('lichess.proxy_login');
+        }
+        if ($proxy !== null && in_array($errorNumber, [CURLE_COULDNT_RESOLVE_PROXY, CURLE_COULDNT_CONNECT], true)) {
+            throw new ActionRefused('lichess.proxy_unreachable');
         }
         if ($status === 0) {
             throw new ActionRefused('lichess.unavailable');

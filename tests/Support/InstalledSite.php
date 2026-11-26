@@ -19,7 +19,8 @@ use PHPUnit\Framework\TestCase;
  * Makes a test install folder with an "installed" config, runs every
  * migration on the test database, and creates an admin ("admin" /
  * "admin password 1"). The mailer keeps the emails (RecordingMailer), the
- * push sender keeps the pushes (RecordingPushSender).
+ * push sender keeps the pushes (RecordingPushSender). Lichess is never
+ * asked: lichessReplies answers instead (path => reply body; anything else 503).
  * browser() gives a fresh visitor; loggedInBrowser() one that is logged in.
  */
 final class InstalledSite
@@ -32,6 +33,12 @@ final class InstalledSite
     public readonly RecordingMailer $mailer;
     public readonly RecordingPushSender $pushSender;
     public readonly Kernel $kernel;
+
+    /** @var array<string, string> what the fake Lichess answers: a path start => the reply body */
+    public array $lichessReplies = [];
+
+    /** @var list<string> the addresses the fake Lichess was asked, in order */
+    public array $lichessAsked = [];
 
     public function __construct(TestCase $test)
     {
@@ -46,7 +53,25 @@ final class InstalledSite
         (new MigrationRunner($this->database, MigrationRunner::loadFolder($this->folder->path . '/migrations')))->runPending();
         (new UserRepository($this->database))->createAdmin(self::ADMIN_NAME, 'admin@example.test', PasswordRules::hash(self::PASSWORD));
 
-        $this->kernel = new Kernel($this->folder->path, mailer: $this->mailer, pushSender: $this->pushSender);
+        // References to the two lists, not to $this: a closure holding $this
+        // would keep the whole site, and its database connection, alive.
+        $replies = &$this->lichessReplies;
+        $asked = &$this->lichessAsked;
+        $this->kernel = new Kernel(
+            $this->folder->path,
+            mailer: $this->mailer,
+            pushSender: $this->pushSender,
+            lichessTransport: static function (string $url, string $accept) use (&$replies, &$asked): array {
+                $asked[] = $url;
+                foreach ($replies as $pathStart => $body) {
+                    if (str_starts_with($url, 'https://lichess.org' . $pathStart)) {
+                        return ['status' => 200, 'body' => $body];
+                    }
+                }
+
+                return ['status' => 503, 'body' => ''];
+            },
+        );
     }
 
     /** Removes the folder and the test tables. */

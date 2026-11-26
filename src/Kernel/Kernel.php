@@ -80,6 +80,7 @@ final class Kernel
      * @param int|null                         $now              the time to use; tests fix it
      * @param Mailer|null                      $mailer           tests pass one that keeps the emails; null = the settings' choice
      * @param PushSender|null                  $pushSender       tests pass one that only records; null = real Web Push
+     * @param Closure|null                     $lichessTransport tests pass a fake Lichess; null = real requests (A93)
      */
     public function __construct(
         private readonly string $appRoot,
@@ -88,6 +89,7 @@ final class Kernel
         private readonly ?int $now = null,
         private readonly ?Mailer $mailer = null,
         private readonly ?PushSender $pushSender = null,
+        private readonly ?Closure $lichessTransport = null,
     ) {
         $this->connectDatabase = $connectDatabase ?? Database::connect(...);
         $this->fetchUrl = $fetchUrl;
@@ -134,6 +136,7 @@ final class Kernel
                 $this->connectDatabase,
                 $this->fetchUrl,
                 $this->currentTime(),
+                $this->lichessTransport,
             );
             Routes::addInstaller($router, $installer);
         }
@@ -148,6 +151,7 @@ final class Kernel
                 $this->connectDatabase,
                 $this->mailer,
                 $this->now === null ? (int) floor(microtime(true) * 1000) : null,
+                $this->lichessTransport,
             );
             Routes::addApplication($router, $services);
         }

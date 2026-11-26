@@ -8,7 +8,7 @@
  * and the game's PGN passes the content scanner like every other game (A81).
  * Only shown while "external content" is on (K8).
  *
- * Variables: $channels (list of string), $boardTheme (string), $basePath, $t, $template.
+ * Variables: $channels (list of string: Lichess's channel keys), $chosenChannel (string), $boardTheme (string), $basePath, $t, $template.
  */
 ?>
 <p><a class="icon-button" href="<?= e($basePath) ?>/learn" aria-label="<?= e($t->text('learn.title')) ?>" title="<?= e($t->text('learn.title')) ?>"><?= $template->render('partials/icon', ['icon' => 'back']) ?></a></p>
@@ -19,8 +19,8 @@
         <legend><?= e($t->text('tv.channel')) ?></legend>
         <?php foreach ($channels as $index => $channel) : ?>
             <label class="choice">
-                <input type="radio" name="channel" value="<?= e($channel) ?>"<?= $index === 0 ? ' checked' : '' ?>>
-                <span><?= e($channel) ?></span>
+                <input type="radio" name="channel" value="<?= e($channel) ?>"<?= $channel === $chosenChannel ? ' checked' : '' ?>>
+                <span><?= e($t->text('tv.channel.' . $channel)) ?></span>
             </label>
         <?php endforeach; ?>
     </fieldset>

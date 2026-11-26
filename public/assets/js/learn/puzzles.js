@@ -14,6 +14,9 @@
  *      Wrong: the move is taken back and the player may try again.
  *   4. "Show me" plays the rest of the solution, one move at a time.
  *
+ * The daily puzzle page (A96) puts one puzzle on the page (data-daily-puzzle):
+ * then it starts at once, and the choices and "Next" are hidden.
+ *
  * The same rules as the strength test (account/strength-test.js), without
  * the scoring: a puzzle here is practice.
  *
@@ -253,4 +256,13 @@ function keepDraggingWithinTheSecurityPolicy(chessboard) {
         this.draggablePiece.style.left = (x - halfSquare) + 'px';
         this.draggablePiece.style.top = (y - halfSquare) + 'px';
     };
+}
+
+// --- The daily puzzle: one puzzle given by the page, started at once (A96) ---
+
+if (page.dataset.dailyPuzzle) {
+    page.querySelectorAll('.choice-group').forEach((group) => { group.hidden = true; });
+    startButton.hidden = true;
+    nextButton.hidden = true;
+    showPuzzle(JSON.parse(page.dataset.dailyPuzzle));
 }
