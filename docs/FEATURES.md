@@ -118,10 +118,10 @@ Decisions A1–A21 are in [DECISIONS.md](DECISIONS.md).
 | AI-08 | Computer move delay chosen by the member: none, short, normal, long (B30, A65) | new | F1 | — | done (2026-11-25), review pending |
 | ID-14 | Strength test: 10 adaptive Lichess puzzles (CC0), pop-up at first login, link next to the rating (B15, A59, A60) | new | F1 | — | done (2026-11-25), review pending |
 | UI-10 | Site-wide news poll: timed-challenge pop-up with Accept/Decline, message badge (B21, A63) | new | F1 | — | done (2026-11-25), review pending |
-| UI-11 | Design system: button-centred, full width, bottom tab bar on phones, side bar on wider screens, no text below 11 px (B29, A66, A68, A72, A82) | new | F2 | — | built (2026-11-26), review pending |
-| UI-12 | Icons drawn by code (inline SVG in the text colour), restyled with the look (A67) | new | F2 | — | built (2026-11-26), review pending |
-| G-24 | Play page: tiles for Computer, Live, Correspondence; new game pop-up of choice buttons; live boxes for games and challenges; admin news (A69, A70, A83) | new | F2 | — | built (2026-11-26), review pending |
-| ADM-08 | Admin pages full width with a grouped side menu, sticky table headers, switches (B28, A71) | new | F2 | — | built (2026-11-26), review pending |
+| UI-11 | Design system: button-centred, full width, bottom tab bar on phones, side bar on wider screens, no text below 11 px (B29, A66, A68, A72, A82) | new | F2 | — | done (2026-11-26) |
+| UI-12 | Icons drawn by code (inline SVG in the text colour), restyled with the look (A67) | new | F2 | — | done (2026-11-26) |
+| G-24 | Play page: tiles for Computer, Live, Correspondence; new game pop-up of choice buttons; live boxes for games and challenges; admin news (A69, A70, A83) | new | F2 | — | done (2026-11-26) |
+| ADM-08 | Admin pages full width with a grouped side menu, sticky table headers, switches (B28, A71) | new | F2 | — | done (2026-11-26) |
 
 ## T — Tournaments
 | Id | Feature | Origin | Chunk | Switch | Status |

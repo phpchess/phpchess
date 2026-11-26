@@ -25,7 +25,7 @@ The plan is six blocks, split into eleven large chunks.
 | 3 Live and computer | C3-1 Timed play | clock, lobby, polling transport, limits, measurements | done (2026-11-24, 5+3 games played on the local install) |
 | | C3-2 Computer opponent | engine in the browser, selection layer, characters, calibration | done (2026-11-25, tuned to real players, A55–A58); reviewed and play-tested 2026-11-25 |
 | | F1 Fixes and the strength test | B7, B15, B17, B20, B21, B23, B30 (A59–A65) | done for review (2026-11-25): all checks pass |
-| | F2 UI overhaul | B28, B29, new Play page (A66–A73, A82, A83) | built (2026-11-26), checks and review pending |
+| | F2 UI overhaul | B28, B29, new Play page (A66–A73, A82–A86) | done (2026-11-26), reviewed by the user |
 | 4 Tournaments | C4-1 Tournament core | model, Round Robin, Swiss, knockout, League with drag-and-drop, tie-breaks | planned |
 | | C4-2 Special formats | Team vs Team, Arena, voting, class tournaments | planned |
 | 5 Lichess | C5-1 Lichess | embeds, login with Lichess, API | planned |
