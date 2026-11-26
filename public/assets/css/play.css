@@ -370,46 +370,67 @@ details.confirm summary { cursor: pointer; }
 
 /* ===== Learn: study games, puzzles, Lichess TV (C5-1) ===== */
 
-/* ===== The game replay (B44, B45, B47, B48): partials/replay.php ===== */
-
-/* Phones: board, controls, then the move table below. Wide screens: the table beside the board. */
-.replay {
+/* ===== The game replay (B44, B45, B47, B48): partials/replay.php =====
+ *
+ * The board must never leave the screen:
+ *   - its size is the smaller of the room in width and the screen's
+ *     height less the page header, the controls and a margin;
+ *   - the move table sits beside it and is exactly as tall as the board
+ *     (on a phone held upright: below it, a few rows high);
+ *   - only the table scrolls (replay.js), never the page.
+ * "cqw" is a hundredth of the replay's own width (container-type below),
+ * so a side menu or panel is already taken off.
+ */
+.replay { container-type: inline-size; }
+.replay-layout {
+    /* Phone held upright: the whole width, but never taller than the screen allows. */
+    --replay-board-size: min(100cqw, calc(100dvh - 13rem));
     display: grid;
-    gap: var(--space-3);
-    justify-items: center;
+    grid-template-columns: var(--replay-board-size);
+    justify-content: center;
+    gap: var(--space-2) var(--space-3);
+    padding: var(--space-2) 0;
 }
-.replay-board { width: 100%; max-width: 36rem; }
-@media (min-width: 60rem) {
-    .replay { grid-template-columns: minmax(0, 36rem) minmax(14rem, 20rem); justify-content: center; align-items: start; }
+.replay-board { width: var(--replay-board-size); }
+.replay-table-box { max-height: 8.5rem; }
+
+/* From about 600 px wide: the moves beside the board, as tall as the board. */
+@container (min-width: 37.5rem) {
+    .replay-layout {
+        --replay-table-width: 11rem;
+        --replay-board-size: min(calc(100cqw - var(--replay-table-width) - var(--space-3)), calc(100dvh - 13rem));
+        grid-template-columns: var(--replay-board-size) var(--replay-table-width);
+        align-items: start;
+    }
+    .replay-table-box { max-height: none; height: var(--replay-board-size); }
 }
 
-/* The seven controls in one row, centred, large enough for a finger (A18). */
+/* The seven controls in one row under the board, centred, still big enough for a finger (A18). */
 .replay-controls {
     display: flex;
     justify-content: center;
-    flex-wrap: wrap;
-    gap: var(--space-1);
-    margin: var(--space-2) 0;
+    flex-wrap: nowrap;
+    gap: 2px;
+    margin: var(--space-1) 0 0;
 }
-.replay-comment { min-height: 1.5em; margin: var(--space-2) 0; font-style: italic; text-align: center; }
+.replay-controls .icon-button { min-width: 2.5rem; min-height: 2.5rem; padding: 0; }
+.replay-comment { min-height: 1.25em; margin: var(--space-1) 0 0; font-style: italic; text-align: center; font-size: var(--text-small); }
 
-/* The move table: scrolls by itself, so a long game never pushes the board away. */
+/* The move table: compact, and it scrolls by itself. */
 .replay-table-box {
-    width: 100%;
-    max-width: 36rem;
-    max-height: 24rem;
+    position: relative; /* so a row's offsetTop is measured from the box (replay.js) */
     overflow-y: auto;
     border: 1px solid var(--colour-border);
     border-radius: var(--radius);
 }
 .replay-table { width: 100%; border-collapse: collapse; font-size: var(--text-small); }
-.replay-table th, .replay-table td { padding: 2px var(--space-1); text-align: left; }
-.replay-table thead th { position: sticky; top: 0; background: var(--colour-surface); }
-.replay-table tbody th { width: 3rem; color: var(--colour-muted-text); font-weight: normal; }
+.replay-table th, .replay-table td { padding: 0 2px; text-align: left; }
+.replay-table thead th { position: sticky; top: 0; background: var(--colour-surface); padding: 2px; }
+.replay-table tbody th { width: 2.25rem; color: var(--colour-muted-text); font-weight: normal; text-align: right; padding-right: var(--space-1); }
 .replay-move {
     width: 100%;
-    min-height: 2.25rem;
-    padding: 0 var(--space-2);
+    min-height: 1.75rem;
+    padding: 0 var(--space-1);
     border: 1px solid transparent;
     border-radius: var(--radius);
     background: transparent;

@@ -66,5 +66,5 @@ $backPath ??= $theme === null ? '/learn' : '/learn/themes/' . $theme['id'];
 
 <link rel="stylesheet" href="<?= e($basePath) ?>/assets/vendor/cm-chessboard/assets/chessboard.css">
 <link rel="stylesheet" href="<?= e($basePath) ?>/assets/vendor/cm-chessboard/assets/extensions/markers/markers.css">
-<?php // ?v=2: a new address, so browsers drop the old copy they kept. ?>
-<script type="module" src="<?= e($basePath) ?>/assets/js/learn/study-game.js?v=2"></script>
+<?php // ?v=3: a new address, so browsers drop the old copy they kept. ?>
+<script type="module" src="<?= e($basePath) ?>/assets/js/learn/study-game.js?v=3"></script>

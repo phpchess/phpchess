@@ -48,6 +48,7 @@ export class Replay {
         this.isFollowing = isLive; // live only: new moves are played as they come
 
         this.tableBody = root.querySelector('[data-replay-moves]');
+        this.tableBox = root.querySelector('.replay-table-box');
         this.commentBox = root.querySelector('[data-replay-comment]');
         this.board = new Chessboard(root.querySelector('[data-replay-board]'), {
             position: positions[0].fen,
@@ -82,9 +83,24 @@ export class Replay {
             const isCurrent = Number(button.dataset.index) === this.current;
             button.classList.toggle('is-current', isCurrent);
             if (isCurrent) {
-                button.scrollIntoView({block: 'nearest', inline: 'nearest'});
+                this.scrollTableTo(button.closest('tr'));
             }
         });
+    }
+
+    /**
+     * Scrolls the move table, and only the table, so `row` is in view.
+     * (scrollIntoView() would scroll the whole page too and push the
+     * board out of sight.)
+     */
+    scrollTableTo(row) {
+        const box = this.tableBox;
+        const rowTop = row.offsetTop;
+        const rowBottom = rowTop + row.offsetHeight;
+        const headerHeight = box.querySelector('thead').offsetHeight;
+        if (rowTop - headerHeight < box.scrollTop || rowBottom > box.scrollTop + box.clientHeight) {
+            box.scrollTop = rowTop - box.clientHeight / 2;
+        }
     }
 
     // --- The move table ---

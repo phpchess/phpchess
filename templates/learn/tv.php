@@ -35,4 +35,4 @@
 
 <link rel="stylesheet" href="<?= e($basePath) ?>/assets/vendor/cm-chessboard/assets/chessboard.css">
 <link rel="stylesheet" href="<?= e($basePath) ?>/assets/vendor/cm-chessboard/assets/extensions/markers/markers.css">
-<script type="module" src="<?= e($basePath) ?>/assets/js/learn/tv.js?v=4"></script><?php // ?v=4: a new address, so browsers drop the old copy they kept ?>
+<script type="module" src="<?= e($basePath) ?>/assets/js/learn/tv.js?v=5"></script><?php // ?v=5: a new address, so browsers drop the old copy they kept ?>

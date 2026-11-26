@@ -8,6 +8,10 @@
  *   |<< start, << back one move, < play backwards, = stop,
  *   > play forward, >> forward one move, >>| end (on TV: the live game).
  *
+ * Layout (play.css): the board always fits the screen with a margin, and
+ * the move table sits beside it (below it on a phone held upright); only
+ * the table scrolls, never the page.
+ *
  * Variables: $replayId (string, the element's id), $boardTheme (string),
  * $isLive (bool: Lichess TV), $basePath, $t, $template.
  */
@@ -22,6 +26,7 @@ $controls = [
 ];
 ?>
 <div class="replay" id="<?= e($replayId) ?>" data-base-path="<?= e($basePath) ?>">
+<div class="replay-layout">
     <div class="replay-board">
         <div class="board-frame board-theme-<?= e($boardTheme) ?>" data-replay-board></div>
         <p class="replay-comment" data-replay-comment aria-live="polite"></p>
@@ -44,4 +49,5 @@ $controls = [
             <tbody data-replay-moves></tbody>
         </table>
     </div>
+</div>
 </div>

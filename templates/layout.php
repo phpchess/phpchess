@@ -48,7 +48,7 @@ $bodyClasses = 'layout-' . $skin->layout . ' board-theme-' . $boardTheme
     <meta name="mobile-web-app-capable" content="yes">
     <link rel="stylesheet" href="<?= e($basePath) ?>/assets/css/base.css">
     <link rel="stylesheet" href="<?= e($basePath) ?>/assets/css/site.css">
-    <link rel="stylesheet" href="<?= e($basePath) ?>/assets/css/play.css">
+    <link rel="stylesheet" href="<?= e($basePath) ?>/assets/css/play.css?v=2"><?php // ?v=: a new address after a change, so browsers drop the old copy ?>
     <link rel="stylesheet" href="<?= e($basePath) ?>/assets/css/community.css">
     <script type="module" src="<?= e($basePath) ?>/assets/js/busy-buttons.js"></script>
     <script type="module" src="<?= e($basePath) ?>/assets/js/app/install.js"></script>
