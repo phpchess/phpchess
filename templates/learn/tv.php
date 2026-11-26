@@ -33,4 +33,4 @@
 <p class="hint"><?= e($t->text('tv.credit')) ?></p>
 
 <link rel="stylesheet" href="<?= e($basePath) ?>/assets/vendor/cm-chessboard/assets/chessboard.css">
-<script type="module" src="<?= e($basePath) ?>/assets/js/learn/tv.js?v=2"></script><?php // ?v=2: a new address, so browsers drop the old copy they kept ?>
+<script type="module" src="<?= e($basePath) ?>/assets/js/learn/tv.js?v=3"></script><?php // ?v=3: a new address, so browsers drop the old copy they kept ?>

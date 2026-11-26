@@ -71,7 +71,13 @@ function stopAsking() {
 }
 
 page.querySelectorAll('input[name="channel"]').forEach((input) => {
-    input.addEventListener('change', startAsking);
+    input.addEventListener('change', () => {
+        // The address shows the chosen channel, so a reload or a shared link keeps it.
+        const address = new URL(window.location.href);
+        address.searchParams.set('channel', input.value);
+        window.history.replaceState(null, '', address);
+        startAsking();
+    });
 });
 
 document.addEventListener('visibilitychange', () => {
