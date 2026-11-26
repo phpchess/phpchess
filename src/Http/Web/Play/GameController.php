@@ -174,7 +174,7 @@ final class GameController
      * (C3-2): its colour, name and engine settings, and the admin's depth
      * cap. Null when two people play, or for someone watching.
      *
-     * @return array{colour: string, name: string, engineJson: string, depthCap: int, delay: string}|null
+     * @return array{colour: string, name: string, engineJson: string, depthCap: int, delay: string, replyText: string}|null
      */
     private function computerFor(Game $game, int $viewerId): ?array
     {
@@ -190,6 +190,7 @@ final class GameController
             'engineJson' => json_encode($side['player']->engine, JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR),
             'depthCap' => $computerGames->depthCap($this->services->settings()),
             'delay' => $this->services->preferenceRepository()->computerDelay($viewerId),
+            'replyText' => $this->computerReplyText($game->id),
         ];
     }
 
@@ -296,8 +297,9 @@ final class GameController
     public function computerMove(Request $request, array $parts): Response
     {
         $gameId = PlayPages::idFrom($parts);
+        $computerGames = $this->services->play()->computerGames();
         try {
-            $this->services->play()->computerGames()->playComputerMove(
+            $computerGames->playComputerMove(
                 $gameId,
                 $this->pages->user()->id,
                 (int) $request->formValue('ply', '-1'),
@@ -309,7 +311,16 @@ final class GameController
             return $this->answer($request, $gameId, $refusal);
         }
 
-        return $this->answer($request, $gameId, null);
+        // In a correspondence game the reply waits for its time (A86): the page says when.
+        return $this->answer($request, $gameId, null, ['computer_reply_text' => $this->computerReplyText($gameId)]);
+    }
+
+    /** "The computer answers by ..." for a held reply, or '' when none waits (A86). */
+    private function computerReplyText(int $gameId): string
+    {
+        $replyAt = $this->services->play()->computerGames()->heldReplyAt($gameId);
+
+        return $replyAt === null ? '' : $this->pages->text('computer.reply_waiting', ['time' => gmdate('Y-m-d H:i', $replyAt) . ' UTC']);
     }
 
     // --- The game buttons (G-09, G-22) ---
@@ -494,8 +505,12 @@ final class GameController
         return $this->answer($request, $gameId, null);
     }
 
-    /** The answer after a move or a button: JSON for the board script, else back to the board. */
-    private function answer(Request $request, int $gameId, ?PlayRefused $refusal): Response
+    /**
+     * The answer after a move or a button: JSON for the board script, else back to the board.
+     *
+     * @param array<string, string> $extra  more fields for the JSON answer
+     */
+    private function answer(Request $request, int $gameId, ?PlayRefused $refusal, array $extra = []): Response
     {
         $wantsJson = str_contains($request->header('Accept'), 'application/json');
         if (!$wantsJson) {
@@ -515,7 +530,7 @@ final class GameController
         }
         $since = max(0, (int) $request->formValue('ply', '0'));
 
-        return Response::json((new GamePoll($this->services))->answer($game, $this->pages->user()->id, $since, ''));
+        return Response::json((new GamePoll($this->services))->answer($game, $this->pages->user()->id, $since, '') + $extra);
     }
 
     /**

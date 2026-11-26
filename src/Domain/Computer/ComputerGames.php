@@ -9,6 +9,7 @@ use PhpChess\Domain\Play\Game;
 use PhpChess\Domain\Play\Games;
 use PhpChess\Domain\Play\PlayRefused;
 use PhpChess\Infra\Computer\ComputerAccountRepository;
+use PhpChess\Infra\Computer\HeldMoveRepository;
 use PhpChess\Infra\Play\GameRepository;
 use PhpChess\Infra\System\SettingsRepository;
 
@@ -25,6 +26,11 @@ use PhpChess\Infra\System\SettingsRepository;
  *   that game may send the computer's move, and only on the computer's turn.
  * - The browser could send any legal move for the computer; that is accepted
  *   because these games are never rated (A4).
+ * - Keeping the pace (F2 review, A86): in a correspondence game the reply is
+ *   not played at once. It is held (HeldMoveRepository) and played by the job
+ *   runner (ComputerMoveJob, cron or pseudo-cron) between a quarter and three
+ *   quarters of the days per move after the player's move, even when nobody
+ *   is online. Timed games are answered at once, as before.
  */
 final class ComputerGames
 {
@@ -45,6 +51,7 @@ final class ComputerGames
         private readonly ComputerAccountRepository $accounts,
         private readonly GameRepository $gameRepository,
         private readonly Games $games,
+        private readonly HeldMoveRepository $heldMoves,
     ) {
     }
 
@@ -249,6 +256,67 @@ final class ComputerGames
         }
         $computerId = $computer['colour'] === Position::WHITE ? $game->whiteId : $game->blackId;
 
+        // A correspondence game: keep the reply for later, to the pace (A86).
+        if (!$game->isTimed()) {
+            if ($game->ply !== $expectedPly) {
+                throw new PlayRefused('play.board_out_of_date');
+            }
+            // Checked now with the same rules as every move (K1), played later.
+            if (Games::readMove($game->position(), $moveText) === null) {
+                throw new PlayRefused('play.illegal_move');
+            }
+            $this->heldMoves->hold($gameId, $expectedPly, $moveText, $this->replyTime($game, $now));
+
+            return $game;
+        }
+
         return $this->games->move($gameId, $computerId, $expectedPly, $moveText, $now, $nowMs);
+    }
+
+    /**
+     * When the computer's held reply is played: between a quarter and three
+     * quarters of the days per move after the turn began (A86), but never
+     * before now. With 1 day per move that is 6 to 18 hours.
+     */
+    private function replyTime(Game $game, int $now): int
+    {
+        $turnStartedAt = $game->lastMoveAt ?? $game->startedAt;
+        $allowedSeconds = max(1, (int) $game->daysPerMove) * 86_400;
+        $wait = random_int(intdiv($allowedSeconds, 4), intdiv($allowedSeconds * 3, 4));
+
+        return max($now, $turnStartedAt + $wait);
+    }
+
+    /** When the computer's held reply in a game is played, or null when none waits. */
+    public function heldReplyAt(int $gameId): ?int
+    {
+        return $this->heldMoves->find($gameId)['play_at'] ?? null;
+    }
+
+    /**
+     * Plays the held replies whose time has come (ComputerMoveJob, A86).
+     * A reply that no longer fits (the game ended, the move was refused) is
+     * dropped; the player's page then decides a new one. Returns how many were played.
+     */
+    public function playDueReplies(int $now, int $limit): int
+    {
+        $played = 0;
+        foreach ($this->heldMoves->due($now, $limit) as $held) {
+            $this->heldMoves->remove($held['game_id']);
+            $game = $this->gameRepository->find($held['game_id']);
+            $computer = $game === null ? null : $this->computerSideOf($game);
+            if ($game === null || $computer === null || !$game->isRunning() || $game->ply !== $held['ply']) {
+                continue;
+            }
+            $computerId = $computer['colour'] === Position::WHITE ? $game->whiteId : $game->blackId;
+            try {
+                $this->games->move($game->id, $computerId, $held['ply'], $held['move_uci'], $now);
+                $played++;
+            } catch (PlayRefused) {
+                // Not playable any more: dropped above.
+            }
+        }
+
+        return $played;
     }
 }

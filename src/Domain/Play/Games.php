@@ -54,6 +54,8 @@ final class Games
     public const string REASON_ABORT_COUNTED_AS_LOSS = 'abort_counted_as_loss';
     public const string REASON_TIMEOUT = 'timeout';
     public const string REASON_TIMEOUT_DRAW = 'timeout_insufficient_material';
+    /** A timed game against the computer: the player left the board and the computer ran out of time (A86). */
+    public const string REASON_LEFT_BOARD = 'left_board';
     public const string REASON_ADJUDICATION_PREFIX = 'adjudicated_';
 
     // --- The admin's abort rule (A33) ---
@@ -547,6 +549,21 @@ final class Games
             );
         }
         $winnerColour = Position::opposite($lockedGame->sideToMove());
+
+        // A timed game against the computer (A86): the computer can only move
+        // while its opponent has the board open. When its time runs out because
+        // the player left the board, the player loses, as if they had resigned.
+        $moverId = $lockedGame->playerToMoveId();
+        if ($lockedGame->isTimed() && $this->games->isComputerAccount($moverId)) {
+            $humanId = $moverId === $lockedGame->whiteId ? $lockedGame->blackId : $lockedGame->whiteId;
+            $seenAt = $lockedGame->seenAtBy($humanId);
+            if ($seenAt === null || $now - $seenAt > self::ONLINE_SECONDS) {
+                $this->finish($lockedGame, self::resultForWinner($lockedGame->sideToMove()), self::REASON_LEFT_BOARD, $now);
+
+                return;
+            }
+        }
+
         if (Rules::canEverMate($lockedGame->position(), $winnerColour)) {
             $this->finish($lockedGame, self::resultForWinner($winnerColour), self::REASON_TIMEOUT, $now);
         } else {

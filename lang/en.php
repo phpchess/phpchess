@@ -455,6 +455,7 @@ return [
     'end_reason.abort_counted_as_loss' => 'aborted, counted as a loss',
     'end_reason.timeout' => 'time ran out',
     'end_reason.timeout_insufficient_material' => 'time ran out, but the opponent could not mate',
+    'end_reason.left_board' => 'left the board (counts as resigning)',
     'end_reason.adjudicated' => 'decided by an admin',
     'result.white_won' => 'White wins',
     'result.black_won' => 'Black wins',
@@ -936,6 +937,7 @@ return [
     'computer.not_its_turn' => 'It is not the computer\'s turn in this game.',
     'computer.label' => 'Computer',
     'computer.thinking' => '{name} is thinking …',
+    'computer.reply_waiting' => 'The computer answers by {time}.',
     'computer.engine_failed' => 'The computer could not decide a move. Reload the page to try again.',
     'computer.no_draws' => 'The computer does not take draw offers or rematches; resign or play on.',
 

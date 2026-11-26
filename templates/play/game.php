@@ -109,6 +109,7 @@ $partVariables = [
      data-computer-delay="<?= e($computer['delay']) ?>"
      data-text-computer-thinking="<?= e($t->text('computer.thinking', ['name' => $computer['name']])) ?>"
      data-text-computer-failed="<?= e($t->text('computer.engine_failed')) ?>"
+     data-computer-reply-waiting="<?= e($computer['replyText']) ?>"
      <?php endif; ?>>
 
     <!-- ===== Above the board: White | clock | Black ===== -->

@@ -29,6 +29,7 @@ use PhpChess\Domain\System\FeatureSwitches;
 use PhpChess\Infra\Identity\PreferenceRepository;
 use PhpChess\Infra\Identity\UserRepository;
 use PhpChess\Infra\Jobs\CleanupJob;
+use PhpChess\Infra\Jobs\ComputerMoveJob;
 use PhpChess\Infra\Jobs\GameClockJob;
 use PhpChess\Infra\Jobs\MoveEmailJob;
 use PhpChess\Infra\Jobs\JobRunner;
@@ -341,6 +342,7 @@ final class Kernel
                     new LoginAttemptRepository($database),
                 ),
                 new GameClockJob($play->games(), $play->gameRepository(), $play->challengeRepository(), $this->now),
+                new ComputerMoveJob($play->computerGames(), $this->now),
                 new MoveEmailJob($moveEmails, new FeatureSwitches($settings), $settings, $this->now),
                 new PushJob($buildPushNotifications, new FeatureSwitches($settings), $settings, $this->now),
                 new NewsletterJob(new NewsletterRepository($database), $mailer, new FeatureSwitches($settings), $settings, $this->now),

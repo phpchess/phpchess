@@ -78,10 +78,53 @@ final class ComputerPlayTest extends TestCase
         $computer = $this->play->computerGames();
         $gameId = $computer->start($this->annaId, self::PLAYER_ID, 'b', 1_800_000_000);
 
-        $game = $computer->playComputerMove($gameId, $this->annaId, 0, 'e2e4', 1_800_000_010);
+        // Correspondence (A86): the reply is held, then played by the job within 1/4 to 3/4 of 14 days.
+        $held = $computer->playComputerMove($gameId, $this->annaId, 0, 'e2e4', 1_800_000_010);
+        $replyAt = $computer->heldReplyAt($gameId);
+        $tooEarly = $computer->playDueReplies(1_800_000_000 + 3 * 86_400, 10);
+        $played = $computer->playDueReplies(1_800_000_000 + 11 * 86_400, 10);
+        $game = $this->play->gameRepository()->find($gameId);
+
+        self::assertSame(0, $held->ply);
+        self::assertNotNull($replyAt);
+        self::assertGreaterThanOrEqual(1_800_000_000 + (int) (3.5 * 86_400), $replyAt);
+        self::assertLessThanOrEqual(1_800_000_000 + (int) (10.5 * 86_400), $replyAt);
+        self::assertSame(0, $tooEarly);
+        self::assertSame(1, $played);
+        self::assertSame(1, $game?->ply);
+        self::assertSame('b', $game?->sideToMove());
+        self::assertNull($computer->heldReplyAt($gameId));
+    }
+
+    public function testATimedComputerGameIsAnsweredAtOnce(): void
+    {
+        $controls = $this->play->games()->allowedTimeControls();
+        if ($controls === []) {
+            self::markTestSkipped('No time control allowed on this test site.');
+        }
+        $computer = $this->play->computerGames();
+        $gameId = $computer->start($this->annaId, self::PLAYER_ID, 'b', 1_800_000_000, 3, $controls[0], 1_800_000_000_000);
+
+        $game = $computer->playComputerMove($gameId, $this->annaId, 0, 'e2e4', 1_800_000_001, 1_800_000_001_000);
 
         self::assertSame(1, $game->ply);
-        self::assertSame('b', $game->sideToMove());
+    }
+
+    public function testTheComputerOutOfTimeBecauseThePlayerLeftMeansThePlayerLoses(): void
+    {
+        $controls = $this->play->games()->allowedTimeControls();
+        if ($controls === []) {
+            self::markTestSkipped('No time control allowed on this test site.');
+        }
+        $computer = $this->play->computerGames();
+        // Anna plays Black; the computer (White) is to move and Anna never opens the board.
+        $gameId = $computer->start($this->annaId, self::PLAYER_ID, 'b', 1_800_000_000, 3, $controls[0], 1_800_000_000_000);
+        $muchLater = 1_800_000_000 + 7_200;
+
+        self::assertTrue($this->play->games()->endIfOverdue($gameId, $muchLater, $muchLater * 1000));
+        $game = $this->play->gameRepository()->find($gameId);
+        self::assertSame(Game::RESULT_WHITE_WON, $game?->result, 'the computer wins');
+        self::assertSame('left_board', $game?->endReason);
     }
 
     public function testTheComputersMoveIsRefusedOnTheHumansTurn(): void
@@ -157,7 +200,7 @@ final class ComputerPlayTest extends TestCase
         self::assertStringNotContainsString('(computer)', $players->body);
     }
 
-    public function testTheComputerMoveAddressAnswersWithTheNewState(): void
+    public function testTheComputerMoveAddressSaysWhenTheHeldReplyComes(): void
     {
         $gameId = $this->play->computerGames()->start($this->annaId, self::PLAYER_ID, 'b', 1_800_000_000);
         $anna = $this->site->loggedInBrowser('anna');
@@ -166,7 +209,8 @@ final class ComputerPlayTest extends TestCase
         $answer = $anna->postJson('/games/' . $gameId . '/computer-move', ['ply' => '0', 'move' => 'e2e4']);
 
         self::assertSame(200, $answer->status);
-        self::assertStringContainsString('"ply":1', $answer->body);
+        // Correspondence (A86): the reply is held; the answer says when it comes.
+        self::assertStringContainsString('"computer_reply_text":"The computer answers by', $answer->body);
     }
 
     public function testTheAdminEnginePageShowsTheEngineAndSavesTheDepthCap(): void

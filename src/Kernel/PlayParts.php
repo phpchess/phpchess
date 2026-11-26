@@ -14,6 +14,7 @@ use PhpChess\Domain\Rating\Ratings;
 use PhpChess\Domain\School\ClassRules;
 use PhpChess\Domain\System\FeatureSwitches;
 use PhpChess\Infra\Computer\ComputerAccountRepository;
+use PhpChess\Infra\Computer\HeldMoveRepository;
 use PhpChess\Infra\Identity\UserRepository;
 use PhpChess\Infra\School\SchoolRepository;
 use PhpChess\Infra\Database;
@@ -103,6 +104,6 @@ final class PlayParts
     /** Games against the computer players (C3-2, AI-06). */
     public function computerGames(): ComputerGames
     {
-        return new ComputerGames(new ComputerPlayers(), new ComputerAccountRepository($this->database), $this->gameRepository(), $this->games());
+        return new ComputerGames(new ComputerPlayers(), new ComputerAccountRepository($this->database), $this->gameRepository(), $this->games(), new HeldMoveRepository($this->database));
     }
 }

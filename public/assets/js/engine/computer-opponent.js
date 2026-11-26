@@ -16,7 +16,8 @@
  * data-computer-colour, data-computer-engine (the player's engine block),
  * data-computer-depth-cap (the admin's cap, A49), data-computer-delay (the
  * member's choice: none, short, normal, long; B30), data-text-computer-thinking,
- * data-text-computer-failed.
+ * data-text-computer-failed, data-computer-reply-waiting (A86: "The computer
+ * answers by ..." when its correspondence reply waits on the server).
  */
 
 // --- Reading what the server put on the page ---
@@ -55,6 +56,9 @@ const worker = new Worker(basePath + '/assets/js/engine/computer-player.worker.j
 // The ply the computer is working on, so one turn is never played twice.
 let decidingPly = null;
 
+// The ply whose reply waits on the server (A86): set from the page, then from answers.
+let waitingReplyPly = page.dataset.computerReplyWaiting ? JSON.parse(page.dataset.state).ply : null;
+
 // --- Status line ---
 
 function showStatus(text) {
@@ -66,6 +70,13 @@ function showStatus(text) {
 /** Starts the computer's move when the game is running and it is its turn. */
 function takeTurnIfNeeded(state) {
     if (state.state !== 'running' || state.side_to_move !== computerColour || decidingPly === state.ply) {
+        return;
+    }
+    // A correspondence game whose reply is already decided and waits for its
+    // time on the server (A86): only say when it comes.
+    if (!state.time_control && page.dataset.computerReplyWaiting && waitingReplyPly === state.ply) {
+        decidingPly = state.ply;
+        showStatus(page.dataset.computerReplyWaiting);
         return;
     }
     decidingPly = state.ply;
@@ -111,6 +122,12 @@ async function sendComputerMove(gameId, ply, uci) {
             return;
         }
         page.dispatchEvent(new CustomEvent('game-news', {detail: answer}));
+        // Held for the correspondence pace (A86): the server says when it is played.
+        if (answer.computer_reply_text) {
+            page.dataset.computerReplyWaiting = answer.computer_reply_text;
+            waitingReplyPly = ply;
+            showStatus(answer.computer_reply_text);
+        }
     } catch (error) {
         // No connection: try again with the next news from the server.
         decidingPly = null;
