@@ -17,7 +17,8 @@ use PhpChess\Domain\Community\WordFilter;
  *   2. Strict reading (PgnReader): every move is replayed with our rules;
  *      a game that can't be read is rejected whole. Variations and signs
  *      are thrown away; the main line's comments are kept (B38).
- *   3. Only the ALLOWED_TAGS are kept; every other tag is dropped.
+ *   3. Only the ALLOWED_TAGS are kept; every other tag is dropped, and so
+ *      is a "Site" holding a long lichess.org address (broadcasts, studies).
  *   4. No tag value may hold a web address, an e-mail address or a control
  *      character, and none may be longer than MAX_TAG_LENGTH.
  *   5. Every kept text is checked by the site's word filter (the list the
@@ -83,6 +84,12 @@ final class ContentScanner
             try {
                 // --- 2. Strict reading, 3. allowed tags only ---
                 $game = PgnReader::readGame($gameText)->withOnlyTags(self::ALLOWED_TAGS);
+                // A broadcast or study game has a long lichess.org address in "Site"
+                // (a page, not one game): we don't need it, so the tag is dropped
+                // and the game may stay. An address of any other site still rejects it.
+                if (self::isLongLichessAddress($game->tag('Site'))) {
+                    $game = $game->withOnlyTags(array_values(array_diff(self::ALLOWED_TAGS, ['Site'])));
+                }
                 // A game needs moves; a study chapter may be just a position (FEN) to look at.
                 if ($game->sanMoves === [] && $game->tag('FEN') === '') {
                     throw new UnreadableGame('no moves');
@@ -114,6 +121,13 @@ final class ContentScanner
         }
 
         return new ScanResult($accepted, $rejected);
+    }
+
+    /** True for a lichess.org address that isn't just one game (a broadcast or study page). */
+    private static function isLongLichessAddress(string $value): bool
+    {
+        return str_starts_with($value, 'https://lichess.org/')
+            && preg_match('~^https://lichess\.org/[A-Za-z0-9]{8,12}$~', $value) !== 1;
     }
 
     /** What is wrong with a comment, or null when it may be kept. */

@@ -215,6 +215,35 @@ final class ContentScannerTest extends TestCase
         self::assertSame([], $this->scanner()->scan($pgn)->accepted);
     }
 
+    public function testABroadcastGameFromLichessPasses(): void
+    {
+        // The shape of a real Lichess broadcast game (2026-11-26): long lichess.org
+        // addresses, clock and engine notes, signs like ?! and the engine's comments.
+        $pgn = "[Event \"Round 4: Lerma Castillo, Juan - Brito De La O, Ricardo Gael\"]
+"
+            . "[Site \"https://lichess.org/broadcast/olimpiada-nacional-conade-2026/round-4/K2jjyI9Y/nxwhtvur\"]
+"
+            . "[White \"Lerma Castillo, Juan\"]
+[Black \"Brito De La O, Ricardo Gael\"]
+[Result \"1-0\"]
+"
+            . "[BroadcastName \"Olimpiada Nacional CONADE 2026 Etapa Estatal Estado de México | Sub  16 Varonil\"]
+"
+            . "[GameURL \"https://lichess.org/broadcast/olimpiada/round-4/K2jjyI9Y/nxwhtvur\"]
+
+"
+            . "1. e4 { [%eval 0.18] [%clk 0:30:57] } 1... c5 { [%eval 0.25] [%clk 0:30:45] } "
+            . "2. Nf3?! { [%eval 0.45] } { Inaccuracy. a5 was best. } { [%clk 0:10:50] } 2... g6?? { [%eval 0.34] } 1-0
+";
+
+        $result = $this->scanner()->scan($pgn);
+
+        self::assertSame([], $result->rejected);
+        self::assertCount(1, $result->accepted);
+        self::assertSame('', $result->accepted[0]->tag('Site'));
+        self::assertSame('Lerma Castillo, Juan', $result->accepted[0]->tag('White'));
+    }
+
     public function testAnOpenCommentOrVariationRejectsTheGame(): void
     {
         self::assertSame([], $this->scanner()->scan("[Result \"*\"]\n\n1. e4 { never closed e5 *\n")->accepted);
