@@ -38,9 +38,9 @@
 <?php
 /*
  * ===== Slot: other ways to log in (A73) =====
- * Empty on purpose. Chunk C5-1 puts an optional "Log in with Lichess"
- * button here, as its own template (account/login_other_ways), when its
- * feature switch is on. Lichess is never needed to play on this site.
+ * Empty on purpose, for a later optional way to log in. C5-1 decided on
+ * no Lichess login (A77), so nothing fills it for now. Lichess is never
+ * needed to play on this site.
  */
 ?>
 <div class="login-other-ways" id="login-other-ways"></div>

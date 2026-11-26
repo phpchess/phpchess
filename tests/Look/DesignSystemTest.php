@@ -8,14 +8,14 @@ use PhpChess\Http\Template;
 use PHPUnit\Framework\TestCase;
 
 /**
- * The F2 design system (A67, A74): icons drawn by code, and no text
+ * The F2 design system (A67, A82): icons drawn by code, and no text
  * smaller than 11 px in any style sheet.
  */
 final class DesignSystemTest extends TestCase
 {
     private const string ROOT = __DIR__ . '/../..';
 
-    /** The smallest text allowed, in pixels (A74). */
+    /** The smallest text allowed, in pixels (A82). */
     private const float SMALLEST_TEXT_PX = 11.0;
 
     // --- Icons (A67) ---
@@ -39,7 +39,7 @@ final class DesignSystemTest extends TestCase
         self::assertStringContainsString('width="40"', $html);
     }
 
-    // --- Text sizes (A74) ---
+    // --- Text sizes (A82) ---
 
     public function testNoStyleSheetSetsTextBelowElevenPixels(): void
     {

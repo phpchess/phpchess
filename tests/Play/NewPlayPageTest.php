@@ -11,7 +11,7 @@ use PhpChess\Tests\Support\Values;
 use PHPUnit\Framework\TestCase;
 
 /**
- * The new Play page of F2 (A69, A70, A73, A75) through the Kernel, as a
+ * The new Play page of F2 (A69, A70, A73, A83) through the Kernel, as a
  * browser uses it: the tiles and the new game pop-up, starting games from
  * the pop-up, the live boxes, and the empty slot on the login page.
  */

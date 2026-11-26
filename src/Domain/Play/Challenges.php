@@ -187,7 +187,7 @@ final class Challenges
      * move, or the same time control) and rated setting; when nobody is,
      * opens a challenge for them.
      *
-     * From the new game pop-up (F2, A70, A75) also:
+     * From the new game pop-up (F2, A70, A83) also:
      * - $colour: the colour the player wants ("white", "black" or "random");
      *   a waiting challenge whose challenger wants the same colour is skipped;
      * - $skipChallengeIds: waiting challenges the player does not want, for

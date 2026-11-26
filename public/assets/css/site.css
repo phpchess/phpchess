@@ -1,6 +1,6 @@
 /*
  * The site's frame: header, menu, boxes, choice buttons, pop-ups and the
- * admin pages (UI-03 mobile first, UI-04, F2: A66 to A72, A74).
+ * admin pages (UI-03 mobile first, UI-04, F2: A66 to A72, A82).
  *
  * Like base.css, it only uses the skin's CSS variables. The class on <body>
  * names the skin's layout ("layout-top-bar"); new layouts add their rules
@@ -168,7 +168,7 @@ fieldset { border: 1px solid var(--colour-border); border-radius: var(--radius);
 /*
  * Choice buttons: a group of radio buttons that look like buttons (A70).
  * The grid gives every button the same width and never lets two overlap:
- * a long text wraps inside its own button (A74).
+ * a long text wraps inside its own button (A82).
  */
 .choice-group {
     display: grid;
@@ -329,7 +329,7 @@ dialog.pop-up {
 }
 
 /*
- * The large one (the new game pop-up, A70, A74): the whole screen on a phone,
+ * The large one (the new game pop-up, A70, A82): the whole screen on a phone,
  * a wide window on a tablet or laptop. It scrolls inside, so buttons and
  * texts never overlap, however many choices there are.
  */

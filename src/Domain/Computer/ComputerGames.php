@@ -61,7 +61,7 @@ final class ComputerGames
     }
 
     /**
-     * The strength bands of the new game pop-up (F2, A70, A75): name =>
+     * The strength bands of the new game pop-up (F2, A70, A83): name =>
      * [lowest rating, highest rating]. Choosing a band starts a game against
      * one computer player of that band, picked at random.
      */

@@ -50,7 +50,7 @@ final class ChallengeController
     /** The days-per-move buttons of the new game pop-up (A70). */
     private const array DAY_CHOICES = [1, 3, 7, 14];
 
-    /** The rating range buttons for a game against a person, 0 = anyone (A75). */
+    /** The rating range buttons for a game against a person, 0 = anyone (A83). */
     public const array RATING_RANGES = [0, 100, 200, 400];
 
     public function __construct(
@@ -220,7 +220,7 @@ final class ChallengeController
         ])->withHeader('Cache-Control', 'no-store');
     }
 
-    // --- Starting a game from the new game pop-up (F2, A70, A75) ---
+    // --- Starting a game from the new game pop-up (F2, A70, A83) ---
 
     /**
      * The pop-up's one form: against the computer (a strength band) or a
@@ -270,7 +270,7 @@ final class ChallengeController
 
     /**
      * The waiting open challenges whose challenger's rating is more than
-     * $range away from the player's own, at this pace (A75). A range of 0
+     * $range away from the player's own, at this pace (A83). A range of 0
      * means anyone.
      *
      * @return list<int>

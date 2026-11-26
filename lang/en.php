@@ -292,7 +292,7 @@ return [
     'play.no_games' => 'No games running.',
     'play.challenges' => 'Challenges',
     'play.no_challenges' => 'No challenges waiting.',
-    // --- The Play page and the new game pop-up (F2, A69, A70, A75) ---
+    // --- The Play page and the new game pop-up (F2, A69, A70, A83) ---
     'play.received_challenges' => 'Challenges for you',
     'play.no_received_challenges' => 'Nobody has challenged you.',
     'play.open_challenges' => 'Open challenges',

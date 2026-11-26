@@ -1,6 +1,6 @@
 /*
  * Base styles for every page (A18 mobile first, UI-01 skins, UI-04 accessibility,
- * F2 design system A66, A72, A74).
+ * F2 design system A66, A72, A82).
  *
  * Every colour and font is a CSS variable. The skin sets them (/skin/theme.css,
  * made from skins/<name>/skin.json); the values below are only the fallback
@@ -11,7 +11,7 @@
  * - sizes, spacing and corners are variables too, so the look stays the same everywhere;
  * - every action is a button (A66); text links only inside running text;
  * - pages use the full width of every device with 16 px side margins (A72);
- * - no text is ever smaller than 11 px (A74): the smallest size is --text-small (12 px).
+ * - no text is ever smaller than 11 px (A82): the smallest size is --text-small (12 px).
  */
 
 /* ===== Fallback values (the default skin's light colours) ===== */
@@ -33,7 +33,7 @@
     --font-text: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     --font-headings: var(--font-text);
 
-    /* Text sizes. Never use a size below --text-small (A74). */
+    /* Text sizes. Never use a size below --text-small (A82). */
     --text-small: 0.75rem;   /* 12 px */
     --text-normal: 1rem;     /* 16 px */
     --text-large: 1.25rem;   /* 20 px */
