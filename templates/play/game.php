@@ -39,6 +39,9 @@
  * (array{rating: int, games_played: int, is_newbie: bool, is_provisional: bool}),
  * $boardTheme and $planningBoardTheme (string), $paceChoices (list of "5+3" / "3d"),
  * $currentPace (string), $basePath, $csrfToken, $t, $template.
+ * $tournamentLine: for a tournament game (C4-1, B49), array{id, name, round},
+ * else null: a line under the status leads back to the tournament, so a
+ * finished game stays on the board with its result and the way on.
  * $computer: when the viewer plays the computer (C3-2), array{colour, name,
  * engineJson, depthCap}, else null. Then the engine runs in this page
  * (computer-opponent.js) and there are no draw offers, pace changes or rematches.
@@ -142,6 +145,12 @@ $partVariables = [
     <p class="game-status" id="game-status" role="status" aria-live="polite">
         <?= $template->render('play/game_parts', ['part' => 'status'] + $partVariables) ?>
     </p>
+    <?php if (($tournamentLine ?? null) !== null) : ?>
+        <p class="tournament-line">
+            <a href="<?= e($basePath) ?>/tournaments/<?= e($tournamentLine['id']) ?>?view=rounds"><?= $template->render('partials/icon', ['icon' => 'trophy']) ?>
+                <?= e($tournamentLine['name']) ?> · <?= e($t->text('tournament.round_number', ['round' => $tournamentLine['round']])) ?></a>
+        </p>
+    <?php endif; ?>
 
     <!-- ===== The board ===== -->
     <h2 class="planning-title" id="planning-title" hidden></h2>

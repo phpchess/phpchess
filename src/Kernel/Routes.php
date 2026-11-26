@@ -44,6 +44,10 @@ use PhpChess\Http\Web\LichessPagesController;
 use PhpChess\Http\Web\PuzzlesController;
 use PhpChess\Http\Web\Admin\LichessController as AdminLichessController;
 use PhpChess\Http\Web\SkinController;
+use PhpChess\Http\Web\Admin\TournamentsAdminController;
+use PhpChess\Http\Web\Tournament\TournamentManageController;
+use PhpChess\Http\Web\Tournament\TournamentPages;
+use PhpChess\Http\Web\Tournament\TournamentsController;
 use PhpChess\Install\InstallerController;
 
 /**
@@ -218,6 +222,7 @@ final class Routes
         $router->post('/account/vacation/cancel', fn (Request $request): Response => $vacation->cancel($request), Access::MEMBERS);
 
         self::addCommunityAndSchool($router, $services);
+        self::addTournaments($router, $services);
 
         // --- Admin (ADM-01 to ADM-03, SCH-01, INS-06); the password is confirmed first (ID-08) ---
         $router->get('/admin/confirm', fn (Request $request): Response => $dashboard->showConfirm($request), Access::ADMINS_BEFORE_CONFIRMATION);
@@ -288,6 +293,66 @@ final class Routes
     }
 
     /** Community, content, own data, devices, notifications, the app and school mode (C2-2). */
+    /**
+     * Tournaments (C4-1: T-01 to T-08, ADM-06). The fixed addresses come
+     * before /tournaments/{id}, because the first matching route wins.
+     */
+    private static function addTournaments(Router $router, Services $services): void
+    {
+        $pages = new TournamentPages($services, new MemberPages($services));
+        $player = new TournamentsController($services, $pages);
+        $organiser = new TournamentManageController($services, $pages);
+        $admin = new TournamentsAdminController($services, new AdminPages($services));
+        $members = Access::MEMBERS;
+
+        // --- Players and watchers ---
+        $router->get('/tournaments', fn (Request $request): Response => $player->list($request), $members);
+        $router->get('/tournaments/new', fn (Request $request): Response => $organiser->showCreate($request), $members);
+        $router->post('/tournaments/new', fn (Request $request): Response => $organiser->create($request), $members);
+        $router->get('/tournaments/invite/{token}', fn (Request $request, array $parts): Response => $player->invitation($request, $parts), $members);
+        $router->get('/tournaments/{id}', fn (Request $request, array $parts): Response => $player->show($request, $parts), $members);
+        $router->get('/tournaments/{id}/pgn', fn (Request $request, array $parts): Response => $player->pgn($request, $parts), $members);
+        $router->post('/tournaments/{id}/join', fn (Request $request, array $parts): Response => $player->join($request, $parts), $members);
+        $router->post('/tournaments/{id}/leave', fn (Request $request, array $parts): Response => $player->leave($request, $parts), $members);
+        $router->post('/tournaments/{id}/absence', fn (Request $request, array $parts): Response => $player->absence($request, $parts), $members);
+        $router->post('/tournaments/{id}/withdraw', fn (Request $request, array $parts): Response => $player->withdraw($request, $parts), $members);
+        $router->post('/tournaments/{id}/boards/{board}/dispute', fn (Request $request, array $parts): Response => $player->dispute($request, $parts), $members);
+
+        // --- Organisers (the controller answers 404 to everyone else, K14) ---
+        $router->get('/tournaments/{id}/manage', fn (Request $request, array $parts): Response => $organiser->show($request, $parts), $members);
+        $router->post('/tournaments/{id}/settings', fn (Request $request, array $parts): Response => $organiser->saveSettings($request, $parts), $members);
+        $router->post('/tournaments/{id}/players/add', fn (Request $request, array $parts): Response => $organiser->addPlayer($request, $parts), $members);
+        $router->post('/tournaments/{id}/players/computer', fn (Request $request, array $parts): Response => $organiser->addComputer($request, $parts), $members);
+        $router->post('/tournaments/{id}/players/{user}/remove', fn (Request $request, array $parts): Response => $organiser->removePlayer($request, $parts), $members);
+        $router->post('/tournaments/{id}/players/{user}/withdraw', fn (Request $request, array $parts): Response => $organiser->withdrawPlayer($request, $parts), $members);
+        $router->post('/tournaments/{id}/players/{user}/replace', fn (Request $request, array $parts): Response => $organiser->replacePlayer($request, $parts), $members);
+        $router->post('/tournaments/{id}/organisers/add', fn (Request $request, array $parts): Response => $organiser->addOrganiser($request, $parts), $members);
+        $router->post('/tournaments/{id}/organisers/{user}/remove', fn (Request $request, array $parts): Response => $organiser->removeOrganiser($request, $parts), $members);
+        $router->post('/tournaments/{id}/invitation', fn (Request $request, array $parts): Response => $organiser->renewInvitation($request, $parts), $members);
+        $router->post('/tournaments/{id}/guests', fn (Request $request, array $parts): Response => $organiser->createGuests($request, $parts), $members);
+        $router->post('/tournaments/{id}/start', fn (Request $request, array $parts): Response => $organiser->start($request, $parts), $members);
+        $router->post('/tournaments/{id}/round/start', fn (Request $request, array $parts): Response => $organiser->startRound($request, $parts), $members);
+        $router->post('/tournaments/{id}/round/repair', fn (Request $request, array $parts): Response => $organiser->repairRound($request, $parts), $members);
+        $router->post('/tournaments/{id}/round/close', fn (Request $request, array $parts): Response => $organiser->closeRound($request, $parts), $members);
+        $router->post('/tournaments/{id}/boards/{board}/decide', fn (Request $request, array $parts): Response => $organiser->decideBoard($request, $parts), $members);
+        $router->post('/tournaments/{id}/boards/{board}/postpone', fn (Request $request, array $parts): Response => $organiser->postponeBoard($request, $parts), $members);
+        $router->post('/tournaments/{id}/boards/{board}/start', fn (Request $request, array $parts): Response => $organiser->startBoard($request, $parts), $members);
+        $router->post('/tournaments/{id}/boards/{board}/replay', fn (Request $request, array $parts): Response => $organiser->replayBoard($request, $parts), $members);
+        $router->post('/tournaments/{id}/disputes/{dispute}/answer', fn (Request $request, array $parts): Response => $organiser->answerDispute($request, $parts), $members);
+        $router->post('/tournaments/{id}/pause', fn (Request $request, array $parts): Response => $organiser->pause($request, $parts), $members);
+        $router->post('/tournaments/{id}/cancel', fn (Request $request, array $parts): Response => $organiser->cancel($request, $parts), $members);
+        $router->get('/tournaments/{id}/league', fn (Request $request, array $parts): Response => $organiser->showLeague($request, $parts), $members);
+        $router->post('/tournaments/{id}/league', fn (Request $request, array $parts): Response => $organiser->saveLeague($request, $parts), $members);
+        $router->post('/tournaments/{id}/league/divisions/add', fn (Request $request, array $parts): Response => $organiser->addDivision($request, $parts), $members);
+        $router->post('/tournaments/{id}/league/divisions/remove', fn (Request $request, array $parts): Response => $organiser->removeDivision($request, $parts), $members);
+        $router->post('/tournaments/{id}/next-season', fn (Request $request, array $parts): Response => $organiser->nextSeason($request, $parts), $members);
+
+        // --- Admin (ADM-06) ---
+        $router->get('/admin/tournaments', fn (Request $request): Response => $admin->show($request), Access::ADMINS);
+        $router->post('/admin/tournaments/organisers', fn (Request $request): Response => $admin->addOrganiser($request), Access::ADMINS);
+        $router->post('/admin/tournaments/organisers/{user}/remove', fn (Request $request, array $parts): Response => $admin->removeOrganiser($request, $parts), Access::ADMINS);
+    }
+
     private static function addCommunityAndSchool(Router $router, Services $services): void
     {
         $memberPages = new MemberPages($services);

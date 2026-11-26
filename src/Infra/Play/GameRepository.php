@@ -269,6 +269,18 @@ final class GameRepository extends Repository
         );
     }
 
+    /**
+     * Writes a corrected result into a finished game (ADM-06, A108). Only
+     * Games::correctResult() calls this, inside the game's lock (K3).
+     */
+    public function writeCorrectedResult(int $gameId, string $result, string $reason, int $now): void
+    {
+        $this->database->run(
+            'UPDATE ' . $this->table('games') . " SET result = ?, end_reason = ?, ended_at = ? WHERE id = ? AND state = 'finished'",
+            [$result, $reason, self::dateTime($now), $gameId],
+        );
+    }
+
     // --- Offers, clocks and presence ---
 
     public function setDrawOffer(int $gameId, ?int $userId): void

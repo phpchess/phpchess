@@ -119,7 +119,27 @@ final class GameController
             'paceChoices' => $this->paceChoices(),
             'currentPace' => Games::paceOf($game),
             'computer' => $this->computerFor($game, $user->id),
+            'tournamentLine' => $this->tournamentLineFor($game),
         ]);
+    }
+
+    /**
+     * For a tournament game: the tournament's id, name and the round, for the
+     * line back to the tournament (C4-1, B49); null for any other game.
+     *
+     * @return array{id: int, name: string, round: int}|null
+     */
+    private function tournamentLineFor(Game $game): ?array
+    {
+        $repository = $this->services->tournaments()->repository();
+        $tournamentId = $repository->tournamentIdOfGame($game->id);
+        $tournament = $tournamentId === null ? null : $repository->find($tournamentId);
+        $pairing = $tournament === null ? null : $repository->findPairingByGame($game->id);
+        if ($tournament === null || $pairing === null) {
+            return null;
+        }
+
+        return ['id' => $tournament->id, 'name' => $tournament->name, 'round' => $pairing->round];
     }
 
     /**

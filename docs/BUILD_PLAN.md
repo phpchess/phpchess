@@ -26,7 +26,7 @@ The plan is six blocks, split into eleven large chunks.
 | | C3-2 Computer opponent | engine in the browser, selection layer, characters, calibration | done (2026-11-25, tuned to real players, A55–A58); reviewed and play-tested 2026-11-25 |
 | | F1 Fixes and the strength test | B7, B15, B17, B20, B21, B23, B30 (A59–A65) | done for review (2026-11-25): all checks pass |
 | | F2 UI overhaul | B28, B29, new Play page (A66–A73, A82–A86) | done (2026-11-26), reviewed by the user |
-| 4 Tournaments | C4-1 Tournament core | model, Round Robin, Swiss, knockout, League with drag-and-drop, tie-breaks | planned |
+| 4 Tournaments | C4-1 Tournament core | model, Round Robin, Swiss, knockout, League with drag-and-drop, tie-breaks (A97–A110) | built (2026-11-26); tests, checks and review pending |
 | | C4-2 Special formats | Team vs Team, Arena, voting, class tournaments | planned |
 | 5 Lichess | C5-1 Lichess | puzzles, study games, Lichess TV, content scanner (A74–A88; login dropped, A77) | done (2026-11-26, reviewed) |
 
@@ -186,6 +186,12 @@ Release 6.0 is C0-1 to C4-2, plus a check on a real shared host before release.
   - a round closing with unfinished games under each forfeit rule;
   - drag-and-drop changes saved and checked on the server.
 - **Done**: one tournament of each format runs to the end on the local install with real games.
+- **Result (2026-11-26)**: built; nothing run yet (tests, PHPStan, audit, checks wait for the user's go).
+  - Migration 12; module `src/Domain/Tournament` (Tournaments, TournamentRounds, TournamentDesk, LeagueDivisions, DutchPairing, BergerTables, KnockoutBracket, TieBreaks, TournamentResults); job `TournamentRoundJob`.
+  - Pages: `/tournaments` (list, page with five views, PGN), `/tournaments/{id}/manage` (the organiser's desk), `/tournaments/{id}/league` (editor), `/admin/tournaments`.
+  - Games::end() tells TournamentResults (K3); Games::correctResult() for corrections; Games::startForTournament() for guests (A109).
+  - Tests: `tests/Tournament/` (pairing tables, Dutch, tie-breaks, whole tournaments on the database).
+  - Open: the Swiss check against JaVaFo/bbpPairings TRF files needs those files downloaded (A99, asked the user).
 
 ## C4-2 Special formats
 - **Scope**: T-09 to T-13.

@@ -21,6 +21,7 @@ $adminMenu = [
     ],
     'admin.menu.play' => [
         '/admin/games' => 'admin.games.title',
+        '/admin/tournaments' => 'admin.tournaments.title',
         '/admin/play' => 'admin.play.title',
         '/admin/engine' => 'admin.engine.title',
         '/admin/lichess' => 'admin.lichess.title',

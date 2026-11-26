@@ -225,6 +225,12 @@ final class Services
         return $this->play ??= new PlayParts($this->database(), $this->settings());
     }
 
+    /** Tournaments: setup, rounds, the organiser's desk and the League (C4-1), built in TournamentParts. */
+    public function tournaments(): TournamentParts
+    {
+        return new TournamentParts($this->database(), $this->play());
+    }
+
     public function moveEmails(): MoveEmails
     {
         return new MoveEmails(

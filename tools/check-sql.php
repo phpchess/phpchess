@@ -77,7 +77,7 @@ foreach ($foldersToCheck as $folder) {
             if ($path !== $resultWriterFile && preg_match('/\bSET\b.*\bresult\s*=/', $line) === 1) {
                 $problems[] = "{$path}:{$lineNumber}: writes a game result outside GameRepository::writeResult() (K3)";
             }
-            if ($path !== $gameEndFile && $path !== $resultWriterFile && str_contains($line, '->writeResult(')) {
+            if ($path !== $gameEndFile && $path !== $resultWriterFile && (str_contains($line, '->writeResult(') || str_contains($line, '->writeCorrectedResult('))) {
                 $problems[] = "{$path}:{$lineNumber}: calls writeResult() outside Games::end() (K3)";
             }
         }

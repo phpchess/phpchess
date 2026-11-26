@@ -143,7 +143,7 @@ Each contract has an id. A chunk names the contracts it touches, and a test or a
 - **The job runner** (INS-08): one entry point that runs due jobs, each with a database lock so two runners never overlap. The jobs:
   - timeouts;
   - vote resolution;
-  - round scheduling;
+  - round scheduling (`TournamentRoundJob` → `TournamentRounds::tick()`, also called by every tournament page, A104);
   - mail queue;
   - cleanup and retention.
 - **With cron**: a real cron calls it every minute.

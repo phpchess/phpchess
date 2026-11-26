@@ -126,14 +126,14 @@ Decisions A1–A21 are in [DECISIONS.md](DECISIONS.md).
 ## T — Tournaments
 | Id | Feature | Origin | Chunk | Switch | Status |
 |---|---|---|---|---|---|
-| T-01 | One tournament model: formats, registration, organisers, schedule, status | redesign | C4-1 | — | planned |
-| T-02 | Round Robin with Berger tables and proper byes | redesign | C4-1 | — | planned |
-| T-03 | Swiss (Dutch system) | new | C4-1 | — | planned |
-| T-04 | Knockout | new | C4-1 | — | planned |
-| T-05 | League: divisions, promotion and relegation; drag-and-drop to place and order players (A15) | redesign | C4-1 | — | planned |
-| T-06 | Tie-breaks: Buchholz, Sonneborn-Berger, direct encounter | new | C4-1 | — | planned |
-| T-07 | Standings, crosstables, PGN export of a tournament | 4.4 | C4-1 | — | planned |
-| T-08 | Rounds scheduled by the job runner; forfeits only by a configured, visible rule | redesign | C4-1 | — | planned |
+| T-01 | One tournament model: formats, registration, organisers, schedule, status | redesign | C4-1 | — | built |
+| T-02 | Round Robin with Berger tables and proper byes | redesign | C4-1 | — | built |
+| T-03 | Swiss (Dutch system) | new | C4-1 | — | built |
+| T-04 | Knockout | new | C4-1 | — | built |
+| T-05 | League: divisions, promotion and relegation; drag-and-drop to place and order players (A15) | redesign | C4-1 | — | built |
+| T-06 | Tie-breaks: Buchholz, Sonneborn-Berger, direct encounter | new | C4-1 | — | built |
+| T-07 | Standings, crosstables, PGN export of a tournament | 4.4 | C4-1 | — | built |
+| T-08 | Rounds scheduled by the job runner; forfeits only by a configured, visible rule | redesign | C4-1 | — | built |
 | T-09 | Team vs Team (A10) | 4.4 | C4-2 | — | planned |
 | T-10 | Arena (timed play) | new | C4-2 | — | planned |
 | T-11 | Voting tournaments (A7): one player against a group voting each move; the server resolves the vote on time, with a stated tie rule | redesign | C4-2 | — | planned |
@@ -183,7 +183,7 @@ Decisions A1–A21 are in [DECISIONS.md](DECISIONS.md).
 | ADM-03 | Audit log of admin actions | new | C1-2 | — | done |
 | ADM-04 | Games: list, adjudicate through the game-end function (G-03), admin FEN game setup | 4.4 | C2-1 | — | built |
 | ADM-05 | Content: news, server messages, tips, FAQ, pages | 4.4 | C2-2 | — | done (C2-2, 2026-11-23) |
-| ADM-06 | Tournaments: create, edit, run, correct results through the game-end function | 4.4 | C4-1 | — | planned |
+| ADM-06 | Tournaments: create, edit, run, correct results through the game-end function | 4.4 | C4-1 | — | built |
 | ADM-07 | Newsletter to all users (admin only, queued, throttled) | 4.4 | C2-2 | — | done (C2-2, 2026-11-23) |
 
 ## L — Lichess (A9)

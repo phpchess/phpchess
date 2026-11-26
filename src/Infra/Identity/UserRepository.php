@@ -229,6 +229,20 @@ final class UserRepository extends Repository
         );
     }
 
+    /**
+     * The tournament a guest login belongs to (A109), or null for a normal
+     * member. Before migration 12 has run the column does not exist yet;
+     * then nobody is a guest (A54: the site keeps working until the update).
+     */
+    public function guestTournamentOf(int $userId): ?int
+    {
+        try {
+            return self::intOrNull($this->database->fetchValue('SELECT guest_tournament_id FROM ' . $this->table('users') . ' WHERE id = ?', [$userId]));
+        } catch (\PDOException) {
+            return null;
+        }
+    }
+
     /** When the user was last seen on the site (Unix seconds), or null when never. */
     public function lastSeenAt(int $userId): ?int
     {

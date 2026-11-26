@@ -60,6 +60,7 @@ final class PlayPages
     /**
      * Who may look at a game (G-13, K14): its players and admins always;
      * other members only while the "player list visibility" switch is on.
+     * A game of a closed tournament only its players and organisers (A106).
      */
     public function mayWatch(Game $game, User $user): bool
     {
@@ -70,6 +71,9 @@ final class PlayPages
         $rules = $this->services->play()->classRules();
         if ($user->role === User::ROLE_TEACHER && ($rules->mayLookAfter($user, $game->whiteId) || $rules->mayLookAfter($user, $game->blackId))) {
             return true;
+        }
+        if (!$this->services->tournaments()->access()->mayWatchGame($game->id, $user)) {
+            return false;
         }
 
         return $this->services->switches()->isOn(FeatureSwitches::PLAYER_LIST_VISIBILITY);

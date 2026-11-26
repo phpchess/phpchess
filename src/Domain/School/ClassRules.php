@@ -19,6 +19,8 @@ use PhpChess\Infra\School\SchoolRepository;
  *   reach them;
  * - everyone else is free.
  * Games::start, Messages::send and the buddy list all ask mayContact().
+ * Games::start also asks isTournamentGuest(): guest logins (A109) only play
+ * in their own tournament.
  */
 final class ClassRules
 {
@@ -37,6 +39,15 @@ final class ClassRules
         }
 
         return $this->mayReach($userId, $otherUserId) && $this->mayReach($otherUserId, $userId);
+    }
+
+    /**
+     * True for a guest login made for one tournament (A109): it plays only
+     * that tournament's games, so Games::start() refuses it.
+     */
+    public function isTournamentGuest(int $userId): bool
+    {
+        return $this->users->guestTournamentOf($userId) !== null;
     }
 
     /** True when $teacher may see the games and accounts of $studentId (SCH-06): their teacher, or an admin. */

@@ -12,6 +12,7 @@ use PhpChess\Domain\Chess\San;
 use PhpChess\Domain\Notify\Notices;
 use PhpChess\Domain\Rating\Ratings;
 use PhpChess\Domain\School\ClassRules;
+use PhpChess\Domain\Tournament\TournamentResults;
 use PhpChess\Infra\Database;
 use PhpChess\Infra\Play\GameRepository;
 use PhpChess\Infra\Play\VacationRepository;
@@ -42,8 +43,14 @@ use PhpChess\Infra\System\SettingsRepository;
  * opponent's move transaction. The players can change the pace of a game
  * (timed <-> correspondence) when both agree (G-23).
  *
+ * Tournaments (C4-1): a tournament game ends here like every other game;
+ * finish() then tells TournamentResults, which copies the result into the
+ * tournament board (K3). Tournament games start through
+ * startForTournament(), the only way a guest login (A109) gets a game.
+ *
  * Called by the GameController, the API, Challenges (start), the clock job
- * (timeouts) and the admin's games page (adjudication).
+ * (timeouts), the admin's games page (adjudication) and the tournament
+ * round services (starting games, round deadlines, corrections).
  */
 final class Games
 {
@@ -82,6 +89,7 @@ final class Games
         private readonly Notices $notices,
         private readonly SettingsRepository $settings,
         private readonly ?ClassRules $classRules = null,
+        private readonly ?TournamentResults $tournamentResults = null,
     ) {
     }
 
@@ -97,6 +105,27 @@ final class Games
      */
     public function start(int $whiteId, int $blackId, int $daysPerMove, bool $isRated, string $startFen, int $now, ?string $timeControl = null, ?int $nowMs = null): int
     {
+        // Guest logins play only in their tournament (A109).
+        if ($this->classRules !== null && ($this->classRules->isTournamentGuest($whiteId) || $this->classRules->isTournamentGuest($blackId))) {
+            throw new PlayRefused('tournament.guest_only_tournament');
+        }
+
+        return $this->startGame($whiteId, $blackId, $daysPerMove, $isRated, $startFen, $now, $timeControl, $nowMs);
+    }
+
+    /**
+     * Starts a tournament game (C4-1). The same as start(), but a guest
+     * login of the tournament may play, and the live-game limits do not
+     * hold back a round that the organiser has started.
+     */
+    public function startForTournament(int $whiteId, int $blackId, int $daysPerMove, bool $isRated, int $now, ?string $timeControl = null, ?int $nowMs = null): int
+    {
+        return $this->startGame($whiteId, $blackId, $daysPerMove, $isRated, '', $now, $timeControl, $nowMs, false);
+    }
+
+    /** The common part of start() and startForTournament(). */
+    private function startGame(int $whiteId, int $blackId, int $daysPerMove, bool $isRated, string $startFen, int $now, ?string $timeControl, ?int $nowMs, bool $checkLiveLimits = true): int
+    {
         if ($whiteId === $blackId) {
             throw new PlayRefused('play.not_against_yourself');
         }
@@ -106,7 +135,9 @@ final class Games
         // --- A timed game (G-14) ---
         if ($timeControl !== null && $timeControl !== '') {
             $control = $this->checkedTimeControl($timeControl);
-            $this->checkLiveLimits([$whiteId, $blackId]);
+            if ($checkLiveLimits) {
+                $this->checkLiveLimits([$whiteId, $blackId]);
+            }
             $nowMs ??= $now * 1000;
 
             return $this->games->createTimed(
@@ -334,15 +365,41 @@ final class Games
     /**
      * Ends a running game with a result and a reason. Returns true when this
      * call ended it, false when it had already ended (nothing changes then).
+     * $countsForRating false keeps the ratings as they are, for a game
+     * decided without being played out (a tournament forfeit, A102).
      */
-    public function end(int $gameId, string $result, string $reason, int $now): bool
+    public function end(int $gameId, string $result, string $reason, int $now, bool $countsForRating = true): bool
     {
-        return $this->database->transaction(function () use ($gameId, $result, $reason, $now): bool {
+        return $this->database->transaction(function () use ($gameId, $result, $reason, $now, $countsForRating): bool {
             $game = $this->games->findForUpdate($gameId);
             if ($game === null || !$game->isRunning()) {
                 return false;
             }
-            $this->finish($game, $result, $reason, $now);
+            $this->finish($game, $result, $reason, $now, $countsForRating);
+
+            return true;
+        });
+    }
+
+    /**
+     * Corrects the result of a finished game (ADM-06, A108): an organiser's
+     * or admin's decision, for example after a dispute. The ratings stay as
+     * they were (each game is rated once, K4; A110); the tournament board
+     * takes the new result. Returns false when the game is not finished.
+     */
+    public function correctResult(int $gameId, string $result, string $reason, int $now): bool
+    {
+        if (!in_array($result, [Game::RESULT_WHITE_WON, Game::RESULT_BLACK_WON, Game::RESULT_DRAW], true)) {
+            throw new PlayRefused('play.result_invalid');
+        }
+
+        return $this->database->transaction(function () use ($gameId, $result, $reason, $now): bool {
+            $game = $this->games->findForUpdate($gameId);
+            if ($game === null || $game->state !== Game::STATE_FINISHED) {
+                return false;
+            }
+            $this->games->writeCorrectedResult($game->id, $result, $reason, $now);
+            $this->tournamentResults?->gameEnded($game, $result, $reason);
 
             return true;
         });
@@ -353,10 +410,14 @@ final class Games
      * and running; then the result is written, the ratings applied once
      * (K4) and both players told.
      */
-    private function finish(Game $lockedGame, string $result, string $reason, int $now): void
+    private function finish(Game $lockedGame, string $result, string $reason, int $now, bool $countsForRating = true): void
     {
         $this->games->writeResult($lockedGame->id, $result, $reason, $now);
-        $this->ratings->applyGameResult($lockedGame, $result, $now);
+        if ($countsForRating) {
+            $this->ratings->applyGameResult($lockedGame, $result, $now);
+        }
+        // A tournament game: its board takes the result (K3).
+        $this->tournamentResults?->gameEnded($lockedGame, $result, $reason);
         foreach ([$lockedGame->whiteId, $lockedGame->blackId] as $playerId) {
             $this->notices->tellAboutGame($lockedGame, $playerId, Notices::GAME_ENDED, null, $now);
         }

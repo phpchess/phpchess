@@ -47,6 +47,20 @@ $drawings = [
     'rules' => '<path d="M13 2.5l8.5 8.5-3 3L10 5.5z"/><path d="M12.5 10.5L4 19"/><path d="M3 21.5h10"/>', // a gavel: head, handle, block
     'link' => '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
     'stats' => '<path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 6-6"/>',
+    // Tournaments (C4-1)
+    'trophy' => '<path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/><path d="M12 14v4M8 21h8M9 18h6"/>', // a cup
+    'bracket' => '<path d="M3 5h5v4H3M3 15h5v4H3M8 7h3v10H8M11 12h4M15 9h6v6h-6z"/>', // a knockout bracket
+    'swiss' => '<path d="M10 3h4v7h7v4h-7v7h-4v-7H3v-4h7z"/>', // a cross
+    'circle' => '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="4" r="1.5" fill="currentColor"/><circle cx="19" cy="15" r="1.5" fill="currentColor"/><circle cx="5" cy="15" r="1.5" fill="currentColor"/>', // everyone meets everyone
+    'league' => '<path d="M4 5h16M4 12h16M4 19h16"/><path d="M8 3l-2 2 2 2M16 17l2 2-2 2"/>', // divisions, up and down
+    'away' => '<circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/>',
+    'flag' => '<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
+    'pause' => '<path d="M8 5v14M16 5v14"/>',
+    'add' => '<path d="M12 5v14M5 12h14"/>',
+    'up' => '<path d="M5 15l7-7 7 7"/>',
+    'down' => '<path d="M5 9l7 7 7-7"/>',
+    'undo' => '<path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/>',
+    'download' => '<path d="M12 4v12M7 11l5 5 5-5"/><path d="M4 20h16"/>',
     // Learning (C5-1)
     'learn' => '<path d="M4 4h6a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H4z"/><path d="M20 4h-6a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h6z"/>', // an open book
     'puzzle' => '<path d="M5 8h3a2 2 0 1 1 4 0h3v3a2 2 0 1 1 0 4v4H5v-4a2 2 0 1 0 0-4z"/>', // a puzzle piece

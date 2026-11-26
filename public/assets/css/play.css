@@ -480,3 +480,66 @@ details.confirm summary { cursor: pointer; }
 #puzzle-board { max-width: 36rem; }
 .puzzle-trainer .choice-group, .lichess-tv .choice-group { margin-bottom: var(--space-3); }
 .lichess-tv-players { font-weight: 700; min-height: 1.5em; }
+
+/* ===== Tournaments (C4-1, A107: easy views; mobile first) ===== */
+
+/* The view tabs: icons with a short word, a row of buttons that wraps on a phone. */
+.tab-bar { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: var(--space-3) 0; }
+.tab-bar a {
+    display: inline-flex; align-items: center; gap: var(--space-1);
+    padding: var(--space-2) var(--space-3); border: 1px solid var(--colour-border); border-radius: 999px;
+    color: var(--colour-text); text-decoration: none; background: var(--colour-surface);
+}
+.tab-bar a[aria-current="page"] { background: var(--colour-accent); color: var(--colour-accent-text); border-color: var(--colour-accent); }
+
+/* Rows: my own line, and League rows that go up or down at the end of the season. */
+.row-mine { font-weight: 700; }
+.row-up td:first-child { box-shadow: inset 4px 0 0 var(--colour-success); }
+.row-down td:first-child { box-shadow: inset 4px 0 0 var(--colour-error); }
+.crosstable td, .crosstable th { text-align: center; white-space: nowrap; }
+.crosstable td:nth-child(2), .crosstable th:nth-child(2) { text-align: left; }
+.crosstable-self { background: var(--colour-border); }
+.keeps-lines { white-space: pre-line; }
+.tournament-log time { margin-right: var(--space-2); }
+
+/* Small panels that open in place (withdraw, dispute, board tools). */
+.inline-details { display: inline-block; }
+.inline-details > summary { list-style: none; cursor: pointer; }
+.inline-details > summary::-webkit-details-marker { display: none; }
+.inline-details[open] > form, .inline-details[open] > .board-tools {
+    margin-top: var(--space-2); padding: var(--space-3);
+    border: 1px solid var(--colour-border); border-radius: 0.5rem; background: var(--colour-surface);
+}
+.board-tools { display: grid; gap: var(--space-2); }
+.more-settings { margin: var(--space-3) 0; }
+.more-settings > summary { cursor: pointer; font-weight: 700; padding: var(--space-2) 0; }
+
+/* The knockout bracket: rounds side by side, scrolling sideways on a phone. */
+.bracket { display: flex; gap: var(--space-3); overflow-x: auto; padding-bottom: var(--space-2); }
+.bracket-round { flex: 0 0 12rem; display: flex; flex-direction: column; justify-content: space-around; gap: var(--space-2); }
+.bracket-round h3 { margin: 0 0 var(--space-2); font-size: 1rem; }
+.bracket-match { border: 1px solid var(--colour-border); border-radius: 0.5rem; padding: var(--space-2); background: var(--colour-surface); }
+.bracket-match > div + div { border-top: 1px solid var(--colour-border); margin-top: var(--space-1); padding-top: var(--space-1); }
+.bracket-winner { font-weight: 700; }
+
+/* The League editor (A103, F2 look): full width, one column per division. */
+.league-editor-page { max-width: none; }
+.league-board { display: grid; gap: var(--space-3); grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); }
+.league-column { border: 1px solid var(--colour-border); border-radius: 0.5rem; padding: var(--space-2); background: var(--colour-surface); }
+.league-column h2 { font-size: 1rem; margin: 0 0 var(--space-2); }
+.league-column-unplaced { border-style: dashed; }
+.league-list { list-style: none; margin: 0; padding: 0; min-height: 3rem; display: grid; gap: var(--space-1); counter-reset: seed; }
+.league-card {
+    counter-increment: seed;
+    display: flex; align-items: center; justify-content: space-between; gap: var(--space-2);
+    padding: var(--space-2); border: 1px solid var(--colour-border); border-radius: 0.4rem;
+    background: var(--colour-page-background); cursor: grab;
+}
+.league-card::before { content: counter(seed) "."; color: var(--colour-muted-text); min-width: 1.5em; }
+.league-card-name { flex: 1; }
+.league-card-buttons { display: flex; gap: 2px; }
+.league-card-buttons .button { padding: 0.2rem; min-height: 2rem; min-width: 2rem; }
+.league-card.sortable-ghost { opacity: 0.4; }
+.league-status { margin-left: auto; }
+.tournament-line { margin: 0 0 var(--space-2); text-align: center; }
+.tournament-line a { display: inline-flex; align-items: center; gap: var(--space-1); }

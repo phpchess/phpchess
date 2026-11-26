@@ -12,6 +12,7 @@ use PhpChess\Domain\Play\Games;
 use PhpChess\Domain\Play\Vacations;
 use PhpChess\Domain\Rating\Ratings;
 use PhpChess\Domain\School\ClassRules;
+use PhpChess\Domain\Tournament\TournamentResults;
 use PhpChess\Domain\System\FeatureSwitches;
 use PhpChess\Infra\Computer\ComputerAccountRepository;
 use PhpChess\Infra\Computer\HeldMoveRepository;
@@ -24,6 +25,7 @@ use PhpChess\Infra\Play\GameRepository;
 use PhpChess\Infra\Play\VacationRepository;
 use PhpChess\Infra\Rating\RatingRepository;
 use PhpChess\Infra\System\SettingsRepository;
+use PhpChess\Infra\Tournament\TournamentRepository;
 
 /**
  * Builds the play services (C2-1) from a database connection.
@@ -82,6 +84,7 @@ final class PlayParts
             $this->notices(),
             $this->settings,
             $this->classRules(),
+            new TournamentResults(new TournamentRepository($this->database)),
         );
     }
 

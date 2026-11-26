@@ -29,7 +29,7 @@ phpChess 6 is built in large chunks, each a working, tested whole. The full list
 | C3-2 Computer opponent | Engine in the browser, beginner-level characters (~600 Elo), calibration | ✅ Done |
 | F1 Fixes and the strength test | Strength test with 10 puzzles, challenge pop-up on every page, no board flicker, C2-2 review fixes | ✅ Done |
 | F2 UI overhaul | Minimal button-centred look, runtime icons, new Play page, computer keeps the pace | ✅ Done |
-| C4-1 Tournaments | Round Robin, Swiss, knockout, League with drag-and-drop | Planned |
+| C4-1 Tournaments | Round Robin, Swiss, knockout, League with drag-and-drop | Built, in review |
 | C4-2 Special tournaments | Team vs Team, Arena, voting tournaments, class tournaments | Planned |
 | C5-1 Lichess | Puzzles that work offline, study games, Lichess TV; every outside game is safety-checked | ✅ Done |
 

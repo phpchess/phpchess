@@ -48,7 +48,7 @@ $bodyClasses = 'layout-' . $skin->layout . ' board-theme-' . $boardTheme
     <meta name="mobile-web-app-capable" content="yes">
     <link rel="stylesheet" href="<?= e($basePath) ?>/assets/css/base.css">
     <link rel="stylesheet" href="<?= e($basePath) ?>/assets/css/site.css">
-    <link rel="stylesheet" href="<?= e($basePath) ?>/assets/css/play.css?v=4"><?php // ?v=: a new address after a change, so browsers drop the old copy ?>
+    <link rel="stylesheet" href="<?= e($basePath) ?>/assets/css/play.css?v=5"><?php // ?v=: a new address after a change, so browsers drop the old copy ?>
     <link rel="stylesheet" href="<?= e($basePath) ?>/assets/css/community.css">
     <script type="module" src="<?= e($basePath) ?>/assets/js/busy-buttons.js"></script>
     <script type="module" src="<?= e($basePath) ?>/assets/js/app/install.js"></script>
@@ -97,6 +97,7 @@ $bodyClasses = 'layout-' . $skin->layout . ' board-theme-' . $boardTheme
                 <?= $template->render('partials/menu_link', $link('/messages', $t->text('layout.messages'), 'messages', str_starts_with($currentPath, '/messages'), $unreadMessageCount)) ?>
             <?php endif; ?>
             <?= $template->render('partials/menu_link', $link('/players', $t->text('layout.players'), 'players', str_starts_with($currentPath, '/players'))) ?>
+            <?= $template->render('partials/menu_link', $link('/tournaments', $t->text('layout.tournaments'), 'trophy', str_starts_with($currentPath, '/tournaments'))) ?>
             <?= $template->render('partials/menu_link', $link('/learn', $t->text('layout.learn'), 'learn', str_starts_with($currentPath, '/learn'))) ?>
             <?= $template->render('partials/menu_link', $link('/rules', $t->text('layout.rules'), 'rules', $currentPath === '/rules')) ?>
             <?= $template->render('partials/menu_link', $link('/account/preferences', $t->text('layout.me'), 'me', str_starts_with($currentPath, '/account'))) ?>

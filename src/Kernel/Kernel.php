@@ -33,6 +33,8 @@ use PhpChess\Infra\Jobs\StudyGamesCleanupJob;
 use PhpChess\Infra\Lichess\StudyRepository;
 use PhpChess\Infra\Jobs\ComputerMoveJob;
 use PhpChess\Infra\Jobs\GameClockJob;
+use PhpChess\Infra\Jobs\TournamentRoundJob;
+use PhpChess\Infra\Tournament\TournamentRepository;
 use PhpChess\Infra\Jobs\MoveEmailJob;
 use PhpChess\Infra\Jobs\JobRunner;
 use PhpChess\Infra\Mail\Mailer;
@@ -349,6 +351,7 @@ final class Kernel
                 ),
                 new GameClockJob($play->games(), $play->gameRepository(), $play->challengeRepository(), $this->now),
                 new ComputerMoveJob($play->computerGames(), $this->now),
+                new TournamentRoundJob((new TournamentParts($database, $play))->rounds(), new TournamentRepository($database), $this->now),
                 new MoveEmailJob($moveEmails, new FeatureSwitches($settings), $settings, $this->now),
                 new PushJob($buildPushNotifications, new FeatureSwitches($settings), $settings, $this->now),
                 new NewsletterJob(new NewsletterRepository($database), $mailer, new FeatureSwitches($settings), $settings, $this->now),
