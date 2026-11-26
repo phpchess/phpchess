@@ -97,6 +97,7 @@ $bodyClasses = 'layout-' . $skin->layout . ' board-theme-' . $boardTheme
                 <?= $template->render('partials/menu_link', $link('/messages', $t->text('layout.messages'), 'messages', str_starts_with($currentPath, '/messages'), $unreadMessageCount)) ?>
             <?php endif; ?>
             <?= $template->render('partials/menu_link', $link('/players', $t->text('layout.players'), 'players', str_starts_with($currentPath, '/players'))) ?>
+            <?= $template->render('partials/menu_link', $link('/rules', $t->text('layout.rules'), 'rules', $currentPath === '/rules')) ?>
             <?= $template->render('partials/menu_link', $link('/account/preferences', $t->text('layout.me'), 'me', str_starts_with($currentPath, '/account'))) ?>
         </ul>
     </nav>

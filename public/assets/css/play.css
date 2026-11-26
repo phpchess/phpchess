@@ -285,7 +285,8 @@ details.confirm summary { cursor: pointer; }
 /* ===== The Play page (F2: A69, A70) ===== */
 
 /* Big tiles: one per row on a phone, three side by side from 40rem. */
-.play-tiles { display: grid; gap: var(--space-3); grid-template-columns: minmax(0, 1fr); }
+/* Big icon buttons: two side by side on a phone, four from 40rem. */
+.play-tiles { display: grid; gap: var(--space-3); grid-template-columns: repeat(2, minmax(0, 1fr)); margin-bottom: var(--space-6); }
 
 .play-tile {
     display: flex;
@@ -301,11 +302,7 @@ details.confirm summary { cursor: pointer; }
     transition: transform 0.05s, filter 0.1s;
 }
 .play-tile:active { transform: translateY(1px) scale(0.99); filter: brightness(0.85); }
-.play-tile-text { display: grid; gap: var(--space-1); min-width: 0; }
-.play-tile-title { font-size: var(--text-large); font-weight: 700; }
-.play-tile-hint { font-size: 0.875rem; opacity: 0.9; }
 
-.play-more { margin: var(--space-3) 0 var(--space-6); }
 .play-news { margin-top: var(--space-4); }
 .card-mine { border-left: 4px solid var(--colour-accent); }
 
@@ -318,7 +315,9 @@ details.confirm summary { cursor: pointer; }
 .new-game-form:has(input[name="opponent"][value="human"]:checked) .for-computer { display: none; }
 
 @media (min-width: 40rem) {
-    .play-tiles { grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); }
-    .play-tile { flex-direction: column; justify-content: center; text-align: center; min-height: 9rem; }
+    .play-tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .play-tile { min-height: 8rem; }
 }
-.play-tile .icon { width: 2.75rem; height: 2.75rem; }
+.play-tile { justify-content: center; }
+.play-tile .icon { width: 4rem; height: 4rem; }
+.play-tile-secondary { background: var(--colour-surface); color: var(--colour-accent); }

@@ -624,6 +624,7 @@ return [
     // --- C2-2: start page dashboard (A44) and menu ---
     'layout.messages' => 'Messages',
     'layout.players' => 'Players',
+    'layout.rules' => 'Rules',
     'layout.me' => 'Me',
     'layout.school' => 'School',
     'layout.waiting' => '{count} waiting',

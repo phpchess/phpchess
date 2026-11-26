@@ -43,7 +43,7 @@ $drawings = [
     'rated' => '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',
     'more' => '<circle cx="5" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="19" cy="12" r="1.5" fill="currentColor"/>',
     'news' => '<path d="M4 9v6h3l6 4V5L7 9z"/><path d="M17 9c1.3 1.6 1.3 4.4 0 6"/>',
-    'rules' => '<path d="M5 3h11l3 3v15H5z"/><path d="M9 9h6M9 13h6M9 17h4"/>',
+    'rules' => '<path d="M13 2.5l8.5 8.5-3 3L10 5.5z"/><path d="M12.5 10.5L4 19"/><path d="M3 21.5h10"/>', // a gavel: head, handle, block
     'link' => '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
     'stats' => '<path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 6-6"/>',
 ];

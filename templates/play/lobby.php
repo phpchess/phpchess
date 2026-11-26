@@ -42,22 +42,22 @@ if ($timeControls === []) {
 ?>
 <h1><?= e($t->text('play.title')) ?></h1>
 
-<!-- ===== 1. The tiles: each opens the new game pop-up ===== -->
+<!--
+    ===== 1. The tiles: big icon buttons, each opens the new game pop-up =====
+    The name is only read out (aria-label) and shown when pointing at it (title):
+    the icon itself says what the tile is (user, F2 review).
+-->
 <div class="play-tiles">
     <?php foreach ($tiles as $kind => $tile) : ?>
-        <a class="play-tile" href="<?= e($basePath) ?>/play?new=<?= e($kind) ?>" data-new-game="<?= e($kind) ?>">
-            <?= $template->render('partials/icon', ['icon' => $tile['icon'], 'size' => 40]) ?>
-            <span class="play-tile-text">
-                <span class="play-tile-title"><?= e($t->text($tile['title'])) ?></span>
-                <span class="play-tile-hint"><?= e($t->text($tile['hint'])) ?></span>
-            </span>
+        <a class="play-tile" href="<?= e($basePath) ?>/play?new=<?= e($kind) ?>" data-new-game="<?= e($kind) ?>"
+           aria-label="<?= e($t->text($tile['title'])) ?>" title="<?= e($t->text($tile['title']) . ': ' . $t->text($tile['hint'])) ?>">
+            <?= $template->render('partials/icon', ['icon' => $tile['icon'], 'size' => 64]) ?>
         </a>
     <?php endforeach; ?>
-</div>
-<div class="button-row play-more">
-    <a class="button button-secondary" href="<?= e($basePath) ?>/play/challenge"><?= $template->render('partials/icon', ['icon' => 'more']) ?><?= e($t->text('new_game.more_choices')) ?></a>
-    <a class="button button-secondary" href="<?= e($basePath) ?>/play/computer"><?= $template->render('partials/icon', ['icon' => 'computer']) ?><?= e($t->text('new_game.pick_computer')) ?></a>
-    <a class="button button-secondary" href="<?= e($basePath) ?>/rules"><?= $template->render('partials/icon', ['icon' => 'rules']) ?><?= e($t->text('rules.link')) ?></a>
+    <a class="play-tile play-tile-secondary" href="<?= e($basePath) ?>/play/challenge"
+       aria-label="<?= e($t->text('new_game.more_choices')) ?>" title="<?= e($t->text('new_game.more_choices')) ?>">
+        <?= $template->render('partials/icon', ['icon' => 'more', 'size' => 64]) ?>
+    </a>
 </div>
 
 <!-- ===== 2. The live boxes ===== -->
@@ -134,6 +134,9 @@ if ($timeControls === []) {
                     <?php $isFirst = false; ?>
                 <?php endforeach; ?>
             </fieldset>
+            <div class="button-row for-computer">
+                <a class="button button-secondary" href="<?= e($basePath) ?>/play/computer"><?= $template->render('partials/icon', ['icon' => 'players']) ?><?= e($t->text('new_game.pick_computer')) ?></a>
+            </div>
             <fieldset class="choice-group for-human">
                 <legend><?= $template->render('partials/icon', ['icon' => 'strength']) ?><?= e($t->text('new_game.opponent_strength')) ?></legend>
                 <?php foreach ($ratingRanges as $range) : ?>
