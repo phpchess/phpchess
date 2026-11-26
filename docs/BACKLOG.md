@@ -55,6 +55,9 @@ feature ids in [FEATURES.md](FEATURES.md)) when it is planned in
 | B47 | **Last move highlight**: the squares of the last move are marked on every board (games, replays, puzzles, TV). | 2026-11-26 | User, C5-1 review. |
 | B48 | **Live games like replays**: Lichess TV gets the move table (B44, the whole game: our server already reads the full PGN) and the replay controls (B45), and returns to the live position on request. Smooth play: moves that arrive in one update are played one after another, spread over the time until the next update (e.g. 4 moves in 10 s = one every 2.5 s), so it looks live. | 2026-11-26 | User, C5-1 review. |
 
+## Grouped: game replay overhaul (user, 2026-11-26)
+- One piece of work: B44 move table, B45 replay controls, B47 last move highlight and B48 live games like replays, for every board that replays a game (study games, own games, broadcasts, Lichess TV). Not yet placed in a chunk.
+
 ## Placed: fix chunks before C4-1 (user, 2026-11-25)
 - **F1 Fixes and the strength test** (done 2026-11-25, user review pending): B7, B15, B17 (plus: no chat in games against the computer), B20, B21, B23, B30.
   - **B15**: uses Lichess puzzle data (CC0), which the user approved downloading. The test pops up on the first login. Until the player's strength is known, it is offered next to their rating.
