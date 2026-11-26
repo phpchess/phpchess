@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PhpChess\Http\Web;
 
 use PhpChess\Domain\ActionRefused;
+use PhpChess\Domain\Chess\Move;
 use PhpChess\Domain\Chess\MoveGenerator;
 use PhpChess\Domain\Chess\Position;
 use PhpChess\Domain\Chess\San;
@@ -33,7 +34,7 @@ use PhpChess\Kernel\Services;
  *   POST /learn/games/{id}/remove  a player removes one of their own imports
  *   POST /learn/games/{id}/keep    a player keeps one of their own games, or stops keeping it (B37)
  *   GET  /learn/tv                 Lichess TV on our own board ("external content")
- *   GET  /learn/tv/now             the TV game now: {channel, gameId, pgn} ("external content")
+ *   GET  /learn/tv/now             the TV game now: {channel, gameId, white, black, fen, lastMove, positions} ("external content")
  *
  * Study themes and their games are local content (an admin's uploads work
  * offline), so they need no switch. Everything that asks lichess.org does.
@@ -206,7 +207,8 @@ final class LearnController
 
         // --- The shared answer, while it is fresh ---
         $settings = $this->services->settings();
-        $cacheName = 'lichess.tv.' . md5($channel);
+        // "tv2": answers saved before the move table (B48) have no positions.
+        $cacheName = 'lichess.tv2.' . md5($channel);
         $cached = json_decode($settings->getString($cacheName), true);
         if (is_array($cached) && is_int($cached['at'] ?? null) && $cached['at'] > $this->services->now - self::TV_CACHE_SECONDS) {
             unset($cached['at']);
@@ -240,6 +242,8 @@ final class LearnController
             'black' => $game->tag('Black') . ($game->tag('BlackElo') !== '' ? ' (' . $game->tag('BlackElo') . ')' : ''),
             'fen' => $positions[count($positions) - 1]['fen'],
             'lastMove' => $positions[count($positions) - 1]['san'],
+            // Every position from the start, for the move table and smooth play (B48).
+            'positions' => $positions,
         ];
         $settings->set($cacheName, (string) json_encode($answer + ['at' => $this->services->now]));
 
@@ -297,18 +301,25 @@ final class LearnController
      * (learn/game, study-game.js). It stops at a move it can't play; the
      * caller compares the count with the game's moves (B39).
      *
-     * @return list<array{fen: string, san: string, comment: string}>
+     * @return list<array{fen: string, san: string, from: string, to: string, comment: string}>
      */
     public static function positionsOf(ReadGame $game): array
     {
         $position = Position::fromFen($game->startFen);
-        $positions = [['fen' => $position->toFen(), 'san' => '', 'comment' => $game->comments[0] ?? '']];
+        $positions = [['fen' => $position->toFen(), 'san' => '', 'from' => '', 'to' => '', 'comment' => $game->comments[0] ?? '']];
         foreach ($game->sanMoves as $index => $san) {
             $played = false;
             foreach (MoveGenerator::legalMoves($position) as $move) {
                 if (San::of($position, $move) === $san) {
                     $position = $position->play($move);
-                    $positions[] = ['fen' => $position->toFen(), 'san' => $san, 'comment' => $game->comments[$index + 1] ?? ''];
+                    $positions[] = [
+                        'fen' => $position->toFen(),
+                        'san' => $san,
+                        // The two squares of the move, so the board can mark the last move (B47).
+                        'from' => Move::squareName($move->from),
+                        'to' => Move::squareName($move->to),
+                        'comment' => $game->comments[$index + 1] ?? '',
+                    ];
                     $played = true;
                     break;
                 }

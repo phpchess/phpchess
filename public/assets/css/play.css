@@ -370,32 +370,60 @@ details.confirm summary { cursor: pointer; }
 
 /* ===== Learn: study games, puzzles, Lichess TV (C5-1) ===== */
 
-/* The moves of a study game: a row of small buttons that wraps, like a score sheet. */
-.study-game-moves {
+/* ===== The game replay (B44, B45, B47, B48): partials/replay.php ===== */
+
+/* Phones: board, controls, then the move table below. Wide screens: the table beside the board. */
+.replay {
+    display: grid;
+    gap: var(--space-3);
+    justify-items: center;
+}
+.replay-board { width: 100%; max-width: 36rem; }
+@media (min-width: 60rem) {
+    .replay { grid-template-columns: minmax(0, 36rem) minmax(14rem, 20rem); justify-content: center; align-items: start; }
+}
+
+/* The seven controls in one row, centred, large enough for a finger (A18). */
+.replay-controls {
     display: flex;
+    justify-content: center;
     flex-wrap: wrap;
     gap: var(--space-1);
-    margin: var(--space-3) 0;
-    padding-left: 0;
-    list-style: none;
+    margin: var(--space-2) 0;
 }
-.study-game-move {
-    min-height: 2.25rem;
-    padding: 0 var(--space-2);
+.replay-comment { min-height: 1.5em; margin: var(--space-2) 0; font-style: italic; text-align: center; }
+
+/* The move table: scrolls by itself, so a long game never pushes the board away. */
+.replay-table-box {
+    width: 100%;
+    max-width: 36rem;
+    max-height: 24rem;
+    overflow-y: auto;
     border: 1px solid var(--colour-border);
     border-radius: var(--radius);
-    background: var(--colour-surface);
-    color: var(--colour-text);
-    font-size: var(--text-small);
 }
-.study-game-move.is-current { background: var(--colour-accent); color: var(--colour-accent-text); border-color: var(--colour-accent); }
-.study-game-buttons { justify-content: center; }
+.replay-table { width: 100%; border-collapse: collapse; font-size: var(--text-small); }
+.replay-table th, .replay-table td { padding: 2px var(--space-1); text-align: left; }
+.replay-table thead th { position: sticky; top: 0; background: var(--colour-surface); }
+.replay-table tbody th { width: 3rem; color: var(--colour-muted-text); font-weight: normal; }
+.replay-move {
+    width: 100%;
+    min-height: 2.25rem;
+    padding: 0 var(--space-2);
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--colour-text);
+    text-align: left;
+    font: inherit;
+}
+.replay-move.is-current { background: var(--colour-accent); color: var(--colour-accent-text); }
 /* A move with a comment gets a line under it; the comment shows below the board. */
-.study-game-move.has-comment { text-decoration: underline dotted; }
-.study-game-comment { min-height: 1.5em; margin: var(--space-2) 0; font-style: italic; }
+.replay-move.has-comment { text-decoration: underline dotted; }
+
 .study-game-pgn { white-space: pre-wrap; overflow-wrap: anywhere; font-size: var(--text-small); }
 
 /* The puzzle and TV boards: as wide as the phone, never wider than a laptop needs. */
-#puzzle-board, #lichess-tv-board, #study-game-board { max-width: 36rem; }
+#puzzle-board { max-width: 36rem; }
 .puzzle-trainer .choice-group, .lichess-tv .choice-group { margin-bottom: var(--space-3); }
 .lichess-tv-players { font-weight: 700; min-height: 1.5em; }

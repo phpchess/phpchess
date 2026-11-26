@@ -58,6 +58,14 @@ $drawings = [
     'last' => '<path d="M7 5l7 7-7 7M17 5v14"/>',
     'remove' => '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
     'hint' => '<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9V16h7v-2.1A6 6 0 0 0 12 3z"/>',
+    // The seven replay controls (B45): |<<  <<  <  =  >  >>  >>|
+    'replay-first' => '<path d="M5 5v14M13 6l-6 6 6 6M20 6l-6 6 6 6"/>',
+    'replay-back' => '<path d="M12 6l-6 6 6 6M19 6l-6 6 6 6"/>',
+    'replay-play-back' => '<path d="M17 5v14L6 12z"/>',
+    'replay-stop' => '<path d="M6 9h12M6 15h12"/>',
+    'replay-play' => '<path d="M7 5v14l11-7z"/>',
+    'replay-forward' => '<path d="M5 6l6 6-6 6M12 6l6 6-6 6"/>',
+    'replay-last' => '<path d="M4 6l6 6-6 6M11 6l6 6-6 6M19 5v14"/>',
 ];
 
 $shapes = $drawings[$icon] ?? '<circle cx="12" cy="12" r="8"/>';

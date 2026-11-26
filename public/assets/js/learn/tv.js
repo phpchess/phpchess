@@ -3,7 +3,10 @@
  *
  * templates/learn/tv.php draws the page; this script asks our own server
  * (GET /learn/tv/now?channel=...) every POLL_SECONDS for the game now on
- * the chosen channel, and shows the players and the position. The browser
+ * the chosen channel, and shows the players and the game on the shared
+ * replay (replay.js, B48): the whole game in the move table, and new moves
+ * played one after the other until the next update, so it looks live.
+ * Stepping back in the game is allowed; >>| returns to the live game. The browser
  * never talks to lichess.org itself (K9): our server does, and shares one
  * answer between all viewers.
  *
@@ -12,8 +15,8 @@
  * Library (local, A16): cm-chessboard 8.15.8 in /assets/vendor/.
  */
 
-import {Chessboard} from '../../vendor/cm-chessboard/src/Chessboard.js';
 import {FEN} from '../../vendor/cm-chessboard/src/model/Position.js';
+import {Replay} from './replay.js';
 
 // --- Reading what the server put on the page ---
 
@@ -22,14 +25,14 @@ const basePath = page.dataset.basePath;
 const playersLine = document.getElementById('lichess-tv-players');
 const statusLine = document.getElementById('lichess-tv-status');
 
-/** How often to ask, in seconds. Our server asks Lichess at most every 10 seconds. */
+/** How often to ask, in seconds. */
 const POLL_SECONDS = 5;
 
-const board = new Chessboard(document.getElementById('lichess-tv-board'), {
-    position: FEN.start, // cm-chessboard has no 'start' word: it would stop the script
-    assetsUrl: basePath + '/assets/vendor/cm-chessboard/assets/',
-    style: {cssClass: 'phpchess', showCoordinates: false, animationDuration: 300},
-});
+/** Our server asks Lichess at most every 10 seconds, so new moves are spread over that time. */
+const SPREAD_MILLISECONDS = 10000;
+
+// The board starts with the start position (cm-chessboard has no 'start' word: use FEN.start).
+const replay = new Replay(document.getElementById('lichess-tv-replay'), [{fen: FEN.start, san: '', from: '', to: '', comment: ''}], true);
 
 let timer = null;
 
@@ -47,8 +50,8 @@ async function showGameNow() {
             statusLine.textContent = answer.error || page.dataset.textError;
         } else {
             playersLine.textContent = answer.white + ' – ' + answer.black;
-            statusLine.textContent = answer.lastMove;
-            board.setPosition(answer.fen, true);
+            statusLine.textContent = '';
+            replay.updateLive(answer.positions, SPREAD_MILLISECONDS);
         }
     } catch (error) {
         statusLine.textContent = page.dataset.textError;

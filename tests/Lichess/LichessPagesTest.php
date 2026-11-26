@@ -89,6 +89,42 @@ final class LichessPagesTest extends TestCase
         self::assertSame(404, $anna->get('/learn/lichess/broadcast/not-an-id')->status);
     }
 
+    public function testABroadcastGameHasTheReplayWithMoveTableAndControls(): void
+    {
+        $page = $this->site->loggedInBrowser('anna')->get('/learn/lichess/broadcast/fnmEB1kH/1')->body;
+
+        // The seven controls (B45) and the move table (B44).
+        foreach (['first', 'back', 'play-back', 'stop', 'play', 'forward', 'last'] as $control) {
+            self::assertStringContainsString('data-replay="' . $control . '"', $page);
+        }
+        self::assertStringContainsString('data-replay-moves', $page);
+        // Each move brings its two squares, for the last-move marks (B47): 1. e4 is e2 to e4.
+        self::assertStringContainsString('&quot;san&quot;:&quot;e4&quot;,&quot;from&quot;:&quot;e2&quot;,&quot;to&quot;:&quot;e4&quot;', $page);
+    }
+
+    public function testTvSendsTheWholeGameForTheMoveTable(): void
+    {
+        $this->site->lichessReplies['/game/export/TTpS2T8k'] = "[White \"Ceshen\"]
+[Black \"Other\"]
+[Result \"*\"]
+
+1. e4 e5 2. Nf3 *
+";
+
+        $answer = $this->site->loggedInBrowser('anna')->get('/learn/tv/now', ['channel' => 'best']);
+
+        self::assertSame(200, $answer->status);
+        $json = json_decode($answer->body, true);
+        self::assertIsArray($json);
+        self::assertIsArray($json['positions'] ?? null);
+        /** @var list<array{san: string, from: string}> $positions */
+        $positions = $json['positions'];
+        // The start and three moves (B48), and the live page shows "back to the live game".
+        self::assertSame(['', 'e4', 'e5', 'Nf3'], array_column($positions, 'san'));
+        self::assertSame('g1', $positions[3]['from']);
+        self::assertStringContainsString('Back to the live game', $this->site->loggedInBrowser('anna')->get('/learn/tv')->body);
+    }
+
     public function testTheDailyPuzzleStartsOneMoveEarlierInOurTrainer(): void
     {
         // The game's moves, and the puzzle's position after the last of them.
