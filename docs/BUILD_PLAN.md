@@ -3,7 +3,7 @@
 The plan is six blocks, split into eleven large chunks.
 - **A chunk** is one distinct building block: it ends in software that works and is tested, and it stops for review before the next one starts.
 - **What each chunk names**: its scope as feature ids from [FEATURES.md](FEATURES.md), the contracts it touches from [ARCHITECTURE.md](ARCHITECTURE.md#4-contracts-rules-every-part-keeps), and the tests that prove it.
-- **Order**: a chunk starts only after the one before it is done. The one exception is C5-1, which can run alongside Block 4.
+- **Order**: a chunk starts only after the one before it is done. The one exception is C5-1, which can run alongside Block 4. Block 6 (Tutor) runs before C4-2 (A130): keeping club members matters more than tournaments.
 
 **Definition of done, for every chunk:**
 - its scope is built, and its tests and the automated checks pass;
