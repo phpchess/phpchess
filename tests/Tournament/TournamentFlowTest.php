@@ -9,6 +9,7 @@ use PhpChess\Domain\Identity\User;
 use PhpChess\Domain\Play\Game;
 use PhpChess\Domain\Play\PlayRefused;
 use PhpChess\Domain\Tournament\Pairing;
+use PhpChess\Domain\Tournament\PlayerQuery;
 use PhpChess\Domain\Tournament\TieBreaks;
 use PhpChess\Domain\Tournament\Tournament;
 use PhpChess\Domain\Tournament\TournamentPlayer;
@@ -32,6 +33,7 @@ use PHPUnit\Framework\TestCase;
  * - Real life: withdrawal, absence, replacement, disputes, corrections.
  * - Closed tournaments can be watched only by their members (A106);
  *   guest logins play only in their tournament (A109).
+ * - The calendar, planned start, rule options and player query (A113 to A116).
  */
 final class TournamentFlowTest extends TestCase
 {
@@ -384,7 +386,103 @@ final class TournamentFlowTest extends TestCase
         $this->assertSame(TieBreaks::defaultsFor(Tournament::FORMAT_SWISS), $this->tournament($swiss->id)->tieBreaks);
     }
 
+    // --- Calendar, rule options and the player query (A113 to A116) ---
+
+    public function testWithoutEarlyRoundsTheNextRoundWaitsForItsPlannedStart(): void
+    {
+        $tournament = $this->createWithPlayers(Tournament::FORMAT_ROUND_ROBIN, 4, ['early_rounds' => 'no', 'round_days' => '2']);
+        $this->parts->rounds()->start($tournament, $this->organiser, self::NOW);
+        $this->endRunningGames($tournament->id, Game::RESULT_WHITE_WON);
+
+        // Round 1 is over early: round 2 is paired, but waits for round 1's deadline.
+        $this->parts->rounds()->tick($tournament->id, self::NOW + 60);
+        $this->assertSame(2, $this->tournament($tournament->id)->currentRound);
+        $this->assertSame('paired', $this->roundState($tournament->id, 2));
+
+        $this->parts->rounds()->tick($tournament->id, self::NOW + 2 * self::DAY);
+        $this->assertSame('running', $this->roundState($tournament->id, 2));
+    }
+
+    public function testAPlannedStartStartsTheTournamentByItself(): void
+    {
+        $startsAt = self::NOW + self::DAY;
+        $tournament = $this->createWithPlayers(Tournament::FORMAT_ROUND_ROBIN, 4, ['starts_at' => date('Y-m-d', $startsAt) . 'T' . date('H:i', $startsAt)]);
+        $this->assertSame($startsAt, $tournament->startsAt);
+
+        $this->assertSame('', $this->parts->rounds()->startScheduled($tournament->id, self::NOW));
+        $this->assertSame('started', $this->parts->rounds()->startScheduled($tournament->id, $startsAt));
+        $this->assertSame(Tournament::STATUS_RUNNING, $this->tournament($tournament->id)->status);
+    }
+
+    public function testAPlannedStartWithTooFewPlayersIsClearedAndLogged(): void
+    {
+        $startsAt = self::NOW + self::DAY;
+        $tournament = $this->createWithPlayers(Tournament::FORMAT_SWISS, 1, ['starts_at' => date('Y-m-d', $startsAt) . 'T' . date('H:i', $startsAt)]);
+
+        $this->assertStringStartsWith('not started', $this->parts->rounds()->startScheduled($tournament->id, $startsAt));
+        $this->assertSame(Tournament::STATUS_REGISTRATION, $this->tournament($tournament->id)->status);
+        $this->assertNull($this->tournament($tournament->id)->startsAt);
+    }
+
+    public function testTheCalendarSkipsRestDaysAndListsEveryRound(): void
+    {
+        // With Saturday and Sunday off, no round starts or ends on a weekend.
+        $tournament = $this->createWithPlayers(Tournament::FORMAT_ROUND_ROBIN, 4, ['round_days' => '2', 'rest_weekdays' => '6,7']);
+        $this->parts->rounds()->start($tournament, $this->organiser, self::NOW);
+        $calendar = $this->parts->rounds()->calendarOf($this->tournament($tournament->id), 4);
+
+        $this->assertCount(3, $calendar);
+        $this->assertTrue($calendar[0]['isActual']);
+        foreach ($calendar as $round) {
+            $this->assertNotContains((int) date('N', $round['deadline']), [6, 7]);
+            $this->assertNotContains((int) date('N', $round['start']), [6, 7]);
+        }
+    }
+
+    public function testWithTheOptionOffAnEarlyWithdrawalKeepsTheResults(): void
+    {
+        $tournament = $this->createWithPlayers(Tournament::FORMAT_ROUND_ROBIN, 4, ['withdrawal_removes' => 'no']);
+        $this->parts->rounds()->start($tournament, $this->organiser, self::NOW);
+        $leaver = $this->playerIds($tournament->id)[0];
+
+        $this->parts->desk()->withdraw($this->tournament($tournament->id), $this->userById($leaver), $leaver, self::NOW);
+
+        $states = array_map(fn (TournamentPlayer $player): string => $player->state, array_filter($this->parts->repository()->players($tournament->id), fn (TournamentPlayer $player): bool => $player->userId === $leaver));
+        $this->assertSame([TournamentPlayer::STATE_WITHDRAWN], array_values($states));
+    }
+
+    public function testThePlayerQueryFindsTheBottomHalfAndAddsThem(): void
+    {
+        $tournament = $this->createWithPlayers(Tournament::FORMAT_SWISS, 0);
+        $ratings = $this->site->database->table('ratings');
+        foreach (['qq1' => 1000, 'qq2' => 1200, 'qq3' => 1400, 'qq4' => 1600] as $username => $rating) {
+            $userId = $this->site->createUser($username);
+            $this->site->database->run('INSERT INTO ' . $ratings . ' (user_id, speed, rating, games_played) VALUES (?, ?, ?, 20)', [$userId, Game::SPEED_CORRESPONDENCE, $rating]);
+        }
+        $query = PlayerQuery::fromInput(['name_contains' => 'qq', 'place' => PlayerQuery::PLACE_BOTTOM_HALF]);
+
+        $found = $this->parts->tournaments()->findPlayers($tournament, $this->organiser, $query, 1500, self::NOW);
+        $this->assertSame(['qq2', 'qq1'], array_map(fn (array $player): string => $player['username'], $found));
+
+        $result = $this->parts->tournaments()->addPlayers($tournament, $this->organiser, array_map(fn (array $player): int => $player['id'], $found), self::NOW);
+        $this->assertSame(['added' => 2, 'skipped' => 0], $result);
+        // Added players are not found again.
+        $lowRatings = PlayerQuery::fromInput(['name_contains' => 'qq', 'rating_to' => '1200']);
+        $this->assertSame([], $this->parts->tournaments()->findPlayers($this->tournament($tournament->id), $this->organiser, $lowRatings, 1500, self::NOW));
+    }
+
     // --- Helpers ---
+
+    private function roundState(int $tournamentId, int $number): string
+    {
+        foreach ($this->parts->repository()->rounds($tournamentId) as $round) {
+            if ($round['number'] === $number) {
+                return $round['state'];
+            }
+        }
+
+        return '';
+    }
 
     /**
      * Creates a tournament (registration by the organiser unless set) with
@@ -399,6 +497,8 @@ final class TournamentFlowTest extends TestCase
             'format' => $format,
             'registration' => Tournament::REGISTRATION_ORGANISER,
             'is_rated' => 'yes',
+            // These tests follow the games, not the calendar: rounds start as soon as the last one ends.
+            'early_rounds' => 'yes',
         ], self::NOW);
         $tournament = $this->tournament($id);
         for ($i = 1; $i <= $count; $i++) {

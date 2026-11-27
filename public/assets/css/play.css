@@ -543,3 +543,19 @@ details.confirm summary { cursor: pointer; }
 .league-status { margin-left: auto; }
 .tournament-line { margin: 0 0 var(--space-2); text-align: center; }
 .tournament-line a { display: inline-flex; align-items: center; gap: var(--space-1); }
+
+/* The tournament calendar (A114): its fields, the table, real rounds in bold. */
+.calendar-fields { border: 1px solid var(--colour-border); border-radius: 0.5rem; padding: var(--space-3); margin: var(--space-3) 0; }
+.calendar-fields > legend { display: inline-flex; align-items: center; gap: var(--space-1); font-weight: 700; padding: 0 var(--space-1); }
+.propose-dates > summary { cursor: pointer; font-weight: 700; padding: var(--space-2) 0; }
+.tournament-calendar .is-actual td { font-weight: 700; }
+
+/* The player query pop-up (A116): the whole screen on a phone, a window on wider screens (as A82). */
+.query-dialog { width: 100%; max-width: 44rem; max-height: 100vh; overflow-y: auto; border: 1px solid var(--colour-border); border-radius: 0.5rem; padding: var(--space-3); background: var(--colour-surface); color: inherit; }
+.query-dialog::backdrop { background: rgba(0, 0, 0, 0.5); }
+.query-dialog:not([open]) { display: none; }
+.pick-list { list-style: none; margin: var(--space-2) 0; padding: 0; display: grid; gap: var(--space-1); }
+.pick-list .checkbox { min-height: 2.75rem; display: flex; align-items: center; gap: var(--space-2); }
+@media (max-width: 40rem) {
+    .query-dialog[open] { position: fixed; inset: 0; max-width: none; height: 100%; border-radius: 0; margin: 0; }
+}

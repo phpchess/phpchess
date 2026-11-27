@@ -351,7 +351,7 @@ final class Kernel
                 ),
                 new GameClockJob($play->games(), $play->gameRepository(), $play->challengeRepository(), $this->now),
                 new ComputerMoveJob($play->computerGames(), $this->now),
-                new TournamentRoundJob((new TournamentParts($database, $play))->rounds(), new TournamentRepository($database), $this->now),
+                new TournamentRoundJob((new TournamentParts($database, $play))->rounds(), new TournamentRepository($database), $this->now, (new TournamentParts($database, $play))->reminders()),
                 new MoveEmailJob($moveEmails, new FeatureSwitches($settings), $settings, $this->now),
                 new PushJob($buildPushNotifications, new FeatureSwitches($settings), $settings, $this->now),
                 new NewsletterJob(new NewsletterRepository($database), $mailer, new FeatureSwitches($settings), $settings, $this->now),

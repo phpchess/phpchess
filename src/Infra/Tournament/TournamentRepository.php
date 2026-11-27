@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace PhpChess\Infra\Tournament;
 
 use PhpChess\Domain\Tournament\Pairing;
+use PhpChess\Domain\Tournament\PlayerQuery;
 use PhpChess\Domain\Tournament\Tournament;
+use PhpChess\Domain\Tournament\TournamentCalendar;
 use PhpChess\Domain\Tournament\TournamentPlayer;
 use PhpChess\Infra\Repository;
 
@@ -25,13 +27,18 @@ final class TournamentRepository extends Repository
     private const string TOURNAMENT_COLUMNS = 'id, name, description, format, status, is_paused, registration, invite_token, max_players,'
         . ' pace, days_per_move, time_control, round_days, rounds_planned, double_round, knockout_games, third_place, is_rated,'
         . ' allow_computers, confirm_pairings, forfeit_rule, bye_halves, absence_bye_halves, tie_breaks, divisions, promote_count,'
-        . ' relegate_count, season, previous_season_id, current_round, created_by, created_at, started_at, finished_at';
+        . ' relegate_count, season, previous_season_id, current_round, created_by, created_at, started_at, finished_at,'
+        . ' starts_at, round_gap_days, rest_weekdays, blocked_dates, early_rounds, forfeits_rated, armageddon_higher_black,'
+        . ' withdrawal_removes, check_in_minutes';
 
     /** The settings an organiser may change, with their column names (fixed text, never from input). */
     public const array SETTING_COLUMNS = [
         'name', 'description', 'format', 'registration', 'max_players', 'pace', 'days_per_move', 'time_control', 'round_days',
         'rounds_planned', 'double_round', 'knockout_games', 'third_place', 'is_rated', 'allow_computers', 'confirm_pairings',
         'forfeit_rule', 'bye_halves', 'absence_bye_halves', 'tie_breaks', 'divisions', 'promote_count', 'relegate_count',
+        // Migration 13: calendar and rule options (A113 to A115).
+        'starts_at', 'round_gap_days', 'rest_weekdays', 'blocked_dates', 'early_rounds', 'forfeits_rated',
+        'armageddon_higher_black', 'withdrawal_removes', 'check_in_minutes',
     ];
 
     private const string PAIRING_COLUMNS = 'id, tournament_id, round, division, board, match_number, game_number, is_armageddon,'
@@ -42,7 +49,7 @@ final class TournamentRepository extends Repository
     /**
      * Creates a tournament from its settings and returns its id.
      *
-     * @param array<string, string|int|bool> $settings  keys from SETTING_COLUMNS
+     * @param array<string, string|int|bool|null> $settings  keys from SETTING_COLUMNS
      */
     public function create(array $settings, int $createdBy, int $season, ?int $previousSeasonId, int $now): int
     {
@@ -51,7 +58,7 @@ final class TournamentRepository extends Repository
         foreach (self::SETTING_COLUMNS as $column) {
             if (array_key_exists($column, $settings)) {
                 $columns[] = $column;
-                $values[] = is_bool($settings[$column]) ? ($settings[$column] ? 1 : 0) : $settings[$column];
+                $values[] = self::settingValue($column, $settings[$column]);
             }
         }
         $columns = [...$columns, 'season', 'previous_season_id', 'created_by', 'created_at'];
@@ -68,7 +75,7 @@ final class TournamentRepository extends Repository
     /**
      * Saves changed settings. Only columns from SETTING_COLUMNS are written.
      *
-     * @param array<string, string|int|bool> $settings
+     * @param array<string, string|int|bool|null> $settings
      */
     public function updateSettings(int $tournamentId, array $settings): void
     {
@@ -77,7 +84,7 @@ final class TournamentRepository extends Repository
         foreach (self::SETTING_COLUMNS as $column) {
             if (array_key_exists($column, $settings)) {
                 $assignments[] = $column . ' = ?';
-                $values[] = is_bool($settings[$column]) ? ($settings[$column] ? 1 : 0) : $settings[$column];
+                $values[] = self::settingValue($column, $settings[$column]);
             }
         }
         if ($assignments === []) {
@@ -120,6 +127,20 @@ final class TournamentRepository extends Repository
         );
 
         return array_map(fn (array $row): Tournament => self::tournamentFrom($row), $rows);
+    }
+
+    /** @return list<int> */
+    public function scheduledToStartIds(int $now): array
+    {
+        $ids = [];
+        foreach ($this->database->fetchAll(
+            'SELECT id FROM ' . $this->table('tournaments') . ' WHERE status = ? AND starts_at IS NOT NULL AND starts_at <= ? ORDER BY id',
+            [Tournament::STATUS_REGISTRATION, self::dateTime($now)],
+        ) as $row) {
+            $ids[] = self::intOf($row['id']);
+        }
+
+        return $ids;
     }
 
     /** @return list<int> */
@@ -590,6 +611,124 @@ final class TournamentRepository extends Repository
         return self::intOrNull($this->database->fetchValue('SELECT guest_tournament_id FROM ' . $this->table('users') . ' WHERE id = ?', [$userId]));
     }
 
+    /** A setting as the database stores it: booleans as 1/0, the planned start as a date and time. */
+    private static function settingValue(string $column, string|int|bool|null $value): string|int|null
+    {
+        if (is_bool($value)) {
+            return $value ? 1 : 0;
+        }
+        if ($column === 'starts_at') {
+            return is_int($value) && $value > 0 ? self::dateTime($value) : null;
+        }
+
+        return $value;
+    }
+
+    // --- Finding players to add (A116) ---
+
+    /** Members found at most by one query; the page says when there are more. */
+    public const int MOST_FOUND = 5000;
+
+    /**
+     * Members who match a player query and are not in this tournament yet,
+     * strongest first. Only active people: no computer players, no guest
+     * logins of other tournaments. The place in the field is applied
+     * afterwards by PlayerQuery::apply().
+     *
+     * @return list<array{id: int, username: string, rating: int, games: int, joinedAt: int}>
+     */
+    public function findPlayers(PlayerQuery $query, int $tournamentId, string $speed, int $startRating, int $now): array
+    {
+        $users = $this->table('users');
+        $sql = 'SELECT u.id, u.username, u.created_at, COALESCE(r.rating, ?) AS rating, COALESCE(r.games_played, 0) AS games'
+            . ' FROM ' . $users . ' u'
+            . ' LEFT JOIN ' . $this->table('ratings') . ' r ON r.user_id = u.id AND r.speed = ?'
+            . " WHERE u.state = 'active' AND u.computer_player_id IS NULL"
+            . ' AND (u.guest_tournament_id IS NULL OR u.guest_tournament_id = ?)'
+            . ' AND u.id NOT IN (SELECT p.user_id FROM ' . $this->table('tournament_players') . ' p WHERE p.tournament_id = ?)';
+        $parameters = [$startRating, $speed, $tournamentId, $tournamentId];
+
+        // --- Each filter adds one condition with its value as a parameter (K5) ---
+        if ($query->ratingFrom !== null) {
+            $sql .= ' AND COALESCE(r.rating, ?) >= ?';
+            array_push($parameters, $startRating, $query->ratingFrom);
+        }
+        if ($query->ratingTo !== null) {
+            $sql .= ' AND COALESCE(r.rating, ?) <= ?';
+            array_push($parameters, $startRating, $query->ratingTo);
+        }
+        if ($query->gamesFrom !== null) {
+            $sql .= ' AND COALESCE(r.games_played, 0) >= ?';
+            $parameters[] = $query->gamesFrom;
+        }
+        if ($query->gamesTo !== null) {
+            $sql .= ' AND COALESCE(r.games_played, 0) <= ?';
+            $parameters[] = $query->gamesTo;
+        }
+        if ($query->joinedAfter !== null) {
+            $sql .= ' AND u.created_at >= ?';
+            $parameters[] = $query->joinedAfter . ' 00:00:00';
+        }
+        if ($query->joinedBefore !== null) {
+            $sql .= ' AND u.created_at <= ?';
+            $parameters[] = $query->joinedBefore . ' 23:59:59';
+        }
+        if ($query->activeDays !== null) {
+            $sql .= ' AND u.last_seen_at >= ?';
+            $parameters[] = self::dateTime($now - $query->activeDays * 86400);
+        }
+        if ($query->classId !== null) {
+            $sql .= ' AND u.id IN (SELECT m.user_id FROM ' . $this->table('school_class_members') . ' m WHERE m.class_id = ?)';
+            $parameters[] = $query->classId;
+        }
+        if ($query->nameContains !== '') {
+            // % and _ typed by the organiser are letters, not wildcards.
+            $sql .= ' AND u.username LIKE ?';
+            $parameters[] = '%' . addcslashes($query->nameContains, '%_\\') . '%';
+        }
+        $sql .= ' ORDER BY rating DESC, u.username LIMIT ' . self::MOST_FOUND;
+
+        return array_map(fn (array $row): array => [
+            'id' => self::intOf($row['id']),
+            'username' => self::textOf($row['username']),
+            'rating' => self::intOf($row['rating']),
+            'games' => self::intOf($row['games']),
+            'joinedAt' => self::timestampOrNull($row['created_at']) ?? 0,
+        ], $this->database->fetchAll($sql, $parameters));
+    }
+
+    // --- Check-in and reminders (A117) ---
+
+    public function checkIn(int $tournamentId, int $userId, int $round, int $now): void
+    {
+        $this->database->run(
+            'INSERT IGNORE INTO ' . $this->table('tournament_check_ins') . ' (tournament_id, user_id, round, created_at) VALUES (?, ?, ?, ?)',
+            [$tournamentId, $userId, $round, self::dateTime($now)],
+        );
+    }
+
+    /** @return list<int> the players who checked in for one round */
+    public function checkedIn(int $tournamentId, int $round): array
+    {
+        $rows = $this->database->fetchAll(
+            'SELECT user_id FROM ' . $this->table('tournament_check_ins') . ' WHERE tournament_id = ? AND round = ?',
+            [$tournamentId, $round],
+        );
+
+        return array_map(fn (array $row): int => self::intOf($row['user_id']), $rows);
+    }
+
+    /** Marks a notice as sent; false when it was sent before (each goes out once). */
+    public function markReminderSent(int $tournamentId, string $kind, int $round, int $now): bool
+    {
+        $statement = $this->database->run(
+            'INSERT IGNORE INTO ' . $this->table('tournament_reminders') . ' (tournament_id, kind, round, sent_at) VALUES (?, ?, ?, ?)',
+            [$tournamentId, $kind, $round, self::dateTime($now)],
+        );
+
+        return $statement->rowCount() === 1;
+    }
+
     // --- Turning rows into objects ---
 
     /**
@@ -634,6 +773,15 @@ final class TournamentRepository extends Repository
             self::timestampOrNull($row['created_at']) ?? 0,
             self::timestampOrNull($row['started_at']),
             self::timestampOrNull($row['finished_at']),
+            self::timestampOrNull($row['starts_at']),
+            self::intOf($row['round_gap_days']),
+            TournamentCalendar::weekdaysFrom(self::textOf($row['rest_weekdays'])),
+            TournamentCalendar::datesFrom(self::textOf($row['blocked_dates'])),
+            self::intOf($row['early_rounds']) === 1,
+            self::intOf($row['forfeits_rated']) === 1,
+            self::intOf($row['armageddon_higher_black']) === 1,
+            self::intOf($row['withdrawal_removes']) === 1,
+            self::intOf($row['check_in_minutes']),
         );
     }
 

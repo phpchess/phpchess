@@ -6,11 +6,16 @@
  * From the top:
  * 1. name, facts and the forfeit rule in plain words (A102: visible rule);
  * 2. my buttons: join / leave, my game, "I'll be away", withdraw, manage;
- * 3. tabs (easy views, A107): Overview, Standings, Rounds, Table, Log.
+ * 3. tabs (easy views, A107): Overview, Standings, Rounds, Table, Calendar, Log.
+ *
+ * The calendar (A114) is also shown on the overview while players can
+ * join, so they know the dates before joining; check-in (A117) is a big
+ * button while its window is open.
  *
  * Variables: $tournament (Tournament), $view (string), $data (from
  * TournamentView::of), $viewerId (int), $isManager (bool), $inviteToken
- * (string, on the invitation page), $basePath, $csrfToken, $t, $template.
+ * (string, on the invitation page), $calendarRounds (A114), $checkIn (array{round: int,
+ * closesAt: int, isCheckedIn: bool}|null, A117), $basePath, $csrfToken, $t, $template.
  */
 
 use PhpChess\Domain\Tournament\Tournament;
@@ -20,7 +25,7 @@ use PhpChess\Http\Web\Tournament\TournamentView;
 $tournamentPath = $basePath . '/tournaments/' . $tournament->id;
 $isPlayer = $data['isPlayer'];
 $isActivePlayer = $data['myState'] === TournamentPlayer::STATE_ACTIVE;
-$tabs = ['overview' => 'trophy', 'standings' => 'stats', 'rounds' => 'games', 'table' => 'circle', 'log' => 'news'];
+$tabs = ['overview' => 'trophy', 'standings' => 'stats', 'rounds' => 'games', 'table' => 'circle', 'calendar' => 'calendar', 'log' => 'news'];
 $partVariables = ['tournament' => $tournament, 'data' => $data, 'viewerId' => $viewerId, 'basePath' => $basePath, 'csrfToken' => $csrfToken, 't' => $t];
 ?>
 <?php // ===== 1. Name and facts ===== ?>
@@ -45,6 +50,18 @@ $partVariables = ['tournament' => $tournament, 'data' => $data, 'viewerId' => $v
 <?php endif; ?>
 
 <?php // ===== 2. My buttons ===== ?>
+<?php if ($checkIn !== null && $isActivePlayer) : ?>
+    <?php if ($checkIn['isCheckedIn']) : ?>
+        <p class="notice-success"><?= $template->render('partials/icon', ['icon' => 'check_in']) ?> <?= e($t->text('tournament.checked_in', ['round' => $checkIn['round']])) ?></p>
+    <?php else : ?>
+        <form method="post" action="<?= e($tournamentPath) ?>/check-in" class="inline-form">
+            <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+            <input type="hidden" name="round" value="<?= e($checkIn['round']) ?>">
+            <button type="submit" class="button button-large"><?= $template->render('partials/icon', ['icon' => 'check_in']) ?>
+                <?= e($t->text('tournament.check_in_button', ['round' => $checkIn['round'], 'time' => date('H:i', $checkIn['closesAt'])])) ?></button>
+        </form>
+    <?php endif; ?>
+<?php endif; ?>
 <div class="button-row">
     <?php foreach ($data['myBoards'] as $board) : ?>
         <?php if ($board->gameId !== null) : ?>
@@ -108,6 +125,10 @@ $partVariables = ['tournament' => $tournament, 'data' => $data, 'viewerId' => $v
 </nav>
 
 <?php if ($view === 'overview') : ?>
+    <?php if ($tournament->isOpenForRegistration() && $calendarRounds !== []) : ?>
+        <h2><?= e($t->text('tournament.calendar')) ?></h2>
+        <?= $template->render('tournaments/calendar', ['rounds' => $calendarRounds, 't' => $t]) ?>
+    <?php endif; ?>
     <?php if ($tournament->currentRound > 0) : ?>
         <h2><?= e($t->text('tournament.round_number', ['round' => $tournament->currentRound])) ?></h2>
         <?= $template->render('tournaments/boards', $partVariables + ['round' => $tournament->currentRound, 'isManager' => false]) ?>
@@ -125,6 +146,12 @@ $partVariables = ['tournament' => $tournament, 'data' => $data, 'viewerId' => $v
     <?php endfor; ?>
 <?php elseif ($view === 'table') : ?>
     <?= $template->render('tournaments/table', $partVariables) ?>
+<?php elseif ($view === 'calendar') : ?>
+    <?php if ($calendarRounds === []) : ?>
+        <p class="muted"><?= e($t->text($tournament->isTimed() ? 'tournament.calendar_timed' : 'tournament.calendar_none')) ?></p>
+    <?php else : ?>
+        <?= $template->render('tournaments/calendar', ['rounds' => $calendarRounds, 'icsUrl' => $tournamentPath . '/calendar.ics', 't' => $t]) ?>
+    <?php endif; ?>
 <?php else : ?>
     <?= $template->render('tournaments/log', $partVariables) ?>
 <?php endif; ?>

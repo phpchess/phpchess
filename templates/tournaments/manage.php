@@ -14,9 +14,13 @@
  * $disputes (list of dispute arrays), $disputeNames (id => name),
  * $organiserNames (id => name), $computerPlayers (list of ComputerPlayer),
  * $timeControls (list of string), $maximumDays (int), $tieBreakKeys (list of string),
- * $inviteUrl (string), $basePath, $csrfToken, $t, $template.
+ * $inviteUrl (string), $settingsValues (the settings form's values), $calendarRounds
+ * (the planned rounds, A114), $query (the query box's values), $queryFound (what it
+ * found, or null), $classes (school classes to choose from) for the player query (A116),
+ * $basePath, $csrfToken, $t, $template.
  */
 
+use PhpChess\Domain\Tournament\PlayerQuery;
 use PhpChess\Domain\Tournament\Tournament;
 use PhpChess\Domain\Tournament\TournamentDesk;
 use PhpChess\Domain\Tournament\TournamentPlayer;
@@ -65,6 +69,78 @@ $partVariables = ['tournament' => $tournament, 'data' => $data, 'viewerId' => 0,
 
     <?php if (!$tournament->isOver()) : ?>
         <h2><?= e($t->text('tournament.add_players')) ?></h2>
+        <?php // The player query (A116): a pop-up with JavaScript, a normal section without. ?>
+        <p><a class="button button-large" href="<?= e($tournamentPath) ?>/manage?view=players&amp;find=1#player-query" data-opens-dialog="player-query">
+            <?= $template->render('partials/icon', ['icon' => 'search']) ?> <?= e($t->text('tournament.find_players')) ?></a></p>
+        <dialog id="player-query" class="query-dialog"<?= $queryFound !== null ? ' open' : '' ?>>
+            <h3><?= e($t->text('tournament.find_players')) ?></h3>
+            <form method="get" action="<?= e($tournamentPath) ?>/manage#player-query" class="form">
+                <input type="hidden" name="view" value="players">
+                <input type="hidden" name="find" value="1">
+                <div class="form-row">
+                    <label><?= e($t->text('query.rating_from')) ?><input type="number" name="rating_from" min="0" max="4000" value="<?= e($query['rating_from']) ?>"></label>
+                    <label><?= e($t->text('query.rating_to')) ?><input type="number" name="rating_to" min="0" max="4000" value="<?= e($query['rating_to']) ?>"></label>
+                </div>
+                <fieldset class="choice-group">
+                    <legend><?= e($t->text('query.place')) ?></legend>
+                    <?php foreach (PlayerQuery::PLACES as $place) : ?>
+                        <label class="choice"><input type="radio" name="place" value="<?= e($place) ?>"<?= $query['place'] === $place ? ' checked' : '' ?>>
+                            <?= e($t->text('query.place.' . ($place === '' ? 'all' : $place))) ?></label>
+                    <?php endforeach; ?>
+                </fieldset>
+                <div class="form-row">
+                    <label><?= e($t->text('query.games_from')) ?><input type="number" name="games_from" min="0" value="<?= e($query['games_from']) ?>"></label>
+                    <label><?= e($t->text('query.games_to')) ?><input type="number" name="games_to" min="0" value="<?= e($query['games_to']) ?>"></label>
+                </div>
+                <div class="form-row">
+                    <label><?= e($t->text('query.joined_after')) ?><input type="date" name="joined_after" value="<?= e($query['joined_after']) ?>"></label>
+                    <label><?= e($t->text('query.joined_before')) ?><input type="date" name="joined_before" value="<?= e($query['joined_before']) ?>"></label>
+                </div>
+                <div class="form-row">
+                    <label><?= e($t->text('query.active_days')) ?><input type="number" name="active_days" min="1" max="3650" value="<?= e($query['active_days']) ?>"></label>
+                    <?php if ($classes !== []) : ?>
+                        <label><?= e($t->text('query.class')) ?>
+                            <select name="class_id">
+                                <option value=""><?= e($t->text('query.any_class')) ?></option>
+                                <?php foreach ($classes as $class) : ?>
+                                    <option value="<?= e($class['id']) ?>"<?= $query['class_id'] === (string) $class['id'] ? ' selected' : '' ?>><?= e($class['name']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </label>
+                    <?php endif; ?>
+                </div>
+                <label><?= e($t->text('query.name_contains')) ?><input type="text" name="name_contains" maxlength="40" value="<?= e($query['name_contains']) ?>" autocomplete="off"></label>
+                <div class="button-row">
+                    <button type="submit" class="button"><?= $template->render('partials/icon', ['icon' => 'search']) ?> <?= e($t->text('query.find')) ?></button>
+                    <a class="button button-quiet" href="<?= e($tournamentPath) ?>/manage?view=players" data-closes-dialog="player-query"><?= e($t->text('query.close')) ?></a>
+                </div>
+            </form>
+
+            <?php if ($queryFound !== null) : ?>
+                <?php $shown = array_slice($queryFound, 0, 50); ?>
+                <p><strong><?= e($t->text('query.found', ['count' => count($queryFound)])) ?></strong>
+                    <?php if (count($queryFound) > count($shown)) : ?><span class="muted"><?= e($t->text('query.first_shown', ['count' => count($shown)])) ?></span><?php endif; ?></p>
+                <?php if ($queryFound !== []) : ?>
+                    <form method="post" action="<?= e($tournamentPath) ?>/players/add-found" class="form">
+                        <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                        <?php foreach ($query as $field => $fieldValue) : ?>
+                            <input type="hidden" name="<?= e($field) ?>" value="<?= e($fieldValue) ?>">
+                        <?php endforeach; ?>
+                        <ul class="pick-list">
+                            <?php foreach ($shown as $found) : ?>
+                                <li><label class="checkbox"><input type="checkbox" name="pick_<?= e($found['id']) ?>" value="yes">
+                                    <?= e($found['username']) ?> <span class="muted"><?= e($found['rating']) ?> · <?= e($t->text('query.games_count', ['count' => $found['games']])) ?></span></label></li>
+                            <?php endforeach; ?>
+                        </ul>
+                        <div class="button-row">
+                            <button type="submit" name="which" value="all" class="button button-large"><?= e($t->text('query.add_all', ['count' => count($queryFound)])) ?></button>
+                            <button type="submit" name="which" value="ticked" class="button"><?= e($t->text('query.add_ticked')) ?></button>
+                        </div>
+                    </form>
+                <?php endif; ?>
+            <?php endif; ?>
+        </dialog>
+        <script src="<?= e($basePath) ?>/assets/js/tournament/player-query.js" defer></script>
         <form method="post" action="<?= e($tournamentPath) ?>/players/add" class="form form-row">
             <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
             <label><?= e($t->text('tournament.username')) ?><input type="text" name="username" required autocomplete="off"></label>
@@ -277,16 +353,8 @@ $partVariables = ['tournament' => $tournament, 'data' => $data, 'viewerId' => 0,
             <p class="hint"><?= e($t->text('tournament.settings_locked')) ?></p>
         <?php endif; ?>
         <?= $template->render('tournaments/settings_fields', [
-            'values' => [
-                'name' => $tournament->name, 'description' => $tournament->description, 'format' => $tournament->format,
-                'registration' => $tournament->registration, 'max_players' => $tournament->maxPlayers, 'pace' => $tournament->pace,
-                'days_per_move' => $tournament->daysPerMove, 'time_control' => $tournament->timeControl, 'round_days' => $tournament->roundDays,
-                'rounds_planned' => $tournament->roundsPlanned, 'double_round' => $tournament->isDoubleRound, 'knockout_games' => $tournament->knockoutGames,
-                'third_place' => $tournament->hasThirdPlaceMatch, 'is_rated' => $tournament->isRated, 'allow_computers' => $tournament->allowsComputers,
-                'confirm_pairings' => $tournament->confirmsPairings, 'forfeit_rule' => $tournament->forfeitRule, 'bye_halves' => $tournament->byeHalves,
-                'absence_bye_halves' => $tournament->absenceByeHalves, 'tie_breaks' => implode(',', $tournament->tieBreaks),
-                'divisions' => $tournament->divisions, 'promote_count' => $tournament->promoteCount, 'relegate_count' => $tournament->relegateCount,
-            ],
+            'values' => $settingsValues,
+            'calendarRounds' => $calendarRounds,
             'timeControls' => $timeControls,
             'maximumDays' => $maximumDays,
             'lockFormat' => !$tournament->isOpenForRegistration(),

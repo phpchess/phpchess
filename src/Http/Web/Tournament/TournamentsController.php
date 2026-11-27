@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace PhpChess\Http\Web\Tournament;
 
+use PhpChess\Domain\ActionRefused;
 use PhpChess\Domain\Chess\Pgn;
+use PhpChess\Domain\Tournament\IcsCalendar;
 use PhpChess\Domain\Tournament\Tournament;
 use PhpChess\Http\Request;
 use PhpChess\Http\Response;
@@ -15,7 +17,9 @@ use PhpChess\Kernel\Services;
  * The tournament pages for players and watchers (T-01, T-06 to T-08, A106 to A108).
  *
  *   GET  /tournaments                         the list: my tournaments, open for joining, running, finished
- *   GET  /tournaments/{id}                    one tournament; ?view= overview, standings, rounds, table, log
+ *   GET  /tournaments/{id}                    one tournament; ?view= overview, standings, rounds, table, calendar, log
+ *   GET  /tournaments/{id}/calendar.ics       the calendar for phones and calendar programs (A117)
+ *   POST /tournaments/{id}/check-in           check in for the next round (A117)
  *   GET  /tournaments/{id}/pgn                every finished game as one PGN file (T-07)
  *   GET  /tournaments/invite/{token}          the invitation page of an invite-only tournament
  *   POST /tournaments/{id}/join               join (open, or with the invitation token)
@@ -78,18 +82,19 @@ final class TournamentsController
         }
         $user = $this->pages->user();
         $view = $request->queryValue('view', 'overview');
-        if (!in_array($view, ['overview', 'standings', 'rounds', 'table', 'log'], true)) {
+        if (!in_array($view, ['overview', 'standings', 'rounds', 'table', 'calendar', 'log'], true)) {
             $view = 'overview';
         }
+        $data = (new TournamentView($this->services))->of($tournament, $user->id);
 
         return $this->pages->render($request, 'tournaments/show', $tournament->name, [
             'tournament' => $tournament,
             'view' => $view,
-            'data' => (new TournamentView($this->services))->of($tournament, $user->id),
+            'data' => $data,
             'viewerId' => $user->id,
             'isManager' => $this->services->tournaments()->access()->mayManage($tournament, $user),
             'inviteToken' => '',
-        ]);
+        ] + $this->calendarParts($tournament, count($this->services->tournaments()->repository()->players($tournament->id)), $user->id));
     }
 
     /**
@@ -105,15 +110,82 @@ final class TournamentsController
             return $this->pages->notFound($request);
         }
         $user = $this->pages->user();
+        $data = (new TournamentView($this->services))->of($tournament, $user->id);
 
         return $this->pages->render($request, 'tournaments/show', $tournament->name, [
             'tournament' => $tournament,
             'view' => 'overview',
-            'data' => (new TournamentView($this->services))->of($tournament, $user->id),
+            'data' => $data,
             'viewerId' => $user->id,
             'isManager' => $this->services->tournaments()->access()->mayManage($tournament, $user),
             'inviteToken' => $token,
+        ] + $this->calendarParts($tournament, count($this->services->tournaments()->repository()->players($tournament->id)), $user->id));
+    }
+
+    /**
+     * The calendar (A114) and the check-in window (A117) for the tournament page.
+     *
+     * @return array{calendarRounds: list<array{round: int, start: int, deadline: int, isActual: bool}>, checkIn: array{round: int, closesAt: int, isCheckedIn: bool}|null}
+     */
+    private function calendarParts(Tournament $tournament, int $playerCount, int $viewerId): array
+    {
+        $rounds = $this->services->tournaments()->rounds();
+        $window = $rounds->checkInWindow($tournament, $this->services->now);
+        $checkIn = null;
+        if ($window !== null) {
+            $checkedIn = $this->services->tournaments()->repository()->checkedIn($tournament->id, $window['round']);
+            $checkIn = $window + ['isCheckedIn' => in_array($viewerId, $checkedIn, true)];
+        }
+
+        return [
+            // Before the start the players so far decide the round count (at least 2).
+            'calendarRounds' => $rounds->calendarOf($tournament, max(2, $playerCount)),
+            'checkIn' => $checkIn,
+        ];
+    }
+
+    /**
+     * The calendar as an .ics file for phones and calendar programs (A117).
+     *
+     * @param array<string, string> $parts
+     */
+    public function calendarFile(Request $request, array $parts): Response
+    {
+        $tournament = $this->pages->visibleTournament($parts);
+        if ($tournament === null) {
+            return $this->pages->notFound($request);
+        }
+        $playerCount = count($this->services->tournaments()->repository()->players($tournament->id));
+        $rounds = $this->services->tournaments()->rounds()->calendarOf($tournament, $playerCount);
+        $url = $request->baseUrl() . '/tournaments/' . $tournament->id;
+        $body = IcsCalendar::of($tournament->name, $tournament->id, $rounds, $url, $request->host, $this->services->now);
+
+        return new Response(200, $body, [
+            'Content-Type' => 'text/calendar; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename="tournament-' . $tournament->id . '.ics"',
         ]);
+    }
+
+    /**
+     * A player checks in for the next round (A117).
+     *
+     * @param array<string, string> $parts
+     */
+    public function checkIn(Request $request, array $parts): Response
+    {
+        $tournament = $this->pages->visibleTournament($parts);
+        if ($tournament === null) {
+            return $this->pages->notFound($request);
+        }
+        $round = (int) $request->formValue('round');
+
+        return $this->pages->run($request, '/tournaments/' . $tournament->id, 'tournament.checked_in_done', function () use ($tournament, $round): void {
+            $window = $this->services->tournaments()->rounds()->checkInWindow($tournament, $this->services->now);
+            if ($window === null || $window['round'] !== $round) {
+                throw new ActionRefused('tournament.check_in_closed');
+            }
+            $this->services->tournaments()->tournaments()->checkIn($tournament, $this->pages->user(), $round, $this->services->now);
+        });
     }
 
     /**

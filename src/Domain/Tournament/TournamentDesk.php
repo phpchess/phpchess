@@ -114,12 +114,12 @@ final class TournamentDesk
         foreach ($pairings as $pairing) {
             if ($pairing->state === Pairing::STATE_PLAYING && $pairing->gameId !== null) {
                 $result = $pairing->whiteId === $userId ? Game::RESULT_BLACK_WON : Game::RESULT_WHITE_WON;
-                $this->games->end($pairing->gameId, $result, TournamentResults::REASON_WITHDRAWN, $now, false);
+                $this->games->end($pairing->gameId, $result, TournamentResults::REASON_WITHDRAWN, $now, $tournament->forfeitsRated);
             }
         }
 
         // --- Removed altogether, or withdrawn with forfeits ---
-        $removesResults = $tournament->hasFixedTables() && $this->playedLessThanHalf($tournament, $userId, $pairings);
+        $removesResults = $tournament->hasFixedTables() && $tournament->withdrawalRemovesResults && $this->playedLessThanHalf($tournament, $userId, $pairings);
         $state = $removesResults ? TournamentPlayer::STATE_REMOVED : TournamentPlayer::STATE_WITHDRAWN;
         $this->tournaments->markWithdrawn($tournament->id, $userId, max(1, $tournament->currentRound), $state);
         foreach ($this->tournaments->pairings($tournament->id) as $pairing) {
@@ -250,7 +250,7 @@ final class TournamentDesk
             if ($decision === self::DECIDE_DOUBLE_FORFEIT) {
                 $this->games->end($game->id, Game::RESULT_ABORTED, TournamentResults::REASON_NO_MOVES, $now, false);
             } else {
-                $this->games->end($game->id, self::gameResult($decision, $pairing, $game), TournamentResults::REASON_ORGANISER, $now, false);
+                $this->games->end($game->id, self::gameResult($decision, $pairing, $game), TournamentResults::REASON_ORGANISER, $now, $tournament->forfeitsRated);
             }
         } elseif ($game !== null && $game->result !== Game::RESULT_ABORTED && $decision !== self::DECIDE_DOUBLE_FORFEIT) {
             try {

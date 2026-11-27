@@ -8,7 +8,8 @@
  *
  * Variables: $values (array<string, string|int|bool>: the current settings,
  * or [] for a new tournament), $timeControls (list of string), $maximumDays (int),
- * $lockFormat (bool: true once players are paired), $t, $template.
+ * $lockFormat (bool: true once players are paired), $calendarRounds (optional:
+ * the planned rounds, TournamentCalendar::plan), $t, $template.
  */
 
 use PhpChess\Domain\Tournament\TieBreaks;
@@ -70,6 +71,55 @@ $formatIcons = [
     <?php endforeach; ?>
 </fieldset>
 
+<fieldset class="calendar-fields">
+    <legend><?= $template->render('partials/icon', ['icon' => 'calendar']) ?><?= e($t->text('tournament.calendar')) ?></legend>
+    <?php // The calendar (A114, A115): a planned start, round days and break, rest days. ?>
+    <label><?= e($t->text('tournament.field.starts_at')) ?>
+        <input type="datetime-local" name="starts_at" value="<?= e((string) $value('starts_at', '')) ?>">
+    </label>
+    <p class="hint"><?= e($t->text('tournament.field.starts_at_hint')) ?></p>
+    <div class="form-row">
+        <label><?= e($t->text('tournament.field.round_days')) ?>
+            <input type="number" name="round_days" min="1" max="120" value="<?= e((string) $value('round_days', 14)) ?>">
+        </label>
+        <label><?= e($t->text('tournament.field.round_gap_days')) ?>
+            <input type="number" name="round_gap_days" min="0" max="60" value="<?= e((string) $value('round_gap_days', 0)) ?>">
+        </label>
+    </div>
+    <p class="hint"><?= e($t->text('tournament.field.round_days_hint')) ?></p>
+    <fieldset class="choice-group">
+        <legend><?= e($t->text('tournament.field.rest_weekdays')) ?></legend>
+        <?php $restDays = array_map('intval', explode(',', (string) $value('rest_weekdays', ''))); ?>
+        <?php for ($weekday = 1; $weekday <= 7; $weekday++) : ?>
+            <label class="choice"><input type="checkbox" name="rest_day_<?= e($weekday) ?>" value="yes"<?= in_array($weekday, $restDays, true) ? ' checked' : '' ?>>
+                <?= e($t->text('tournament.weekday.' . $weekday)) ?></label>
+        <?php endfor; ?>
+    </fieldset>
+    <label><?= e($t->text('tournament.field.blocked_dates')) ?>
+        <textarea name="blocked_dates" rows="2" maxlength="2000" placeholder="2026-12-24, 2026-12-25"><?= e((string) $value('blocked_dates', '')) ?></textarea>
+    </label>
+    <p class="hint"><?= e($t->text('tournament.field.blocked_dates_hint')) ?></p>
+    <label class="checkbox"><input type="checkbox" name="early_rounds" value="yes"<?= ((bool) $value('early_rounds', false)) ? ' checked' : '' ?>> <?= e($t->text('tournament.field.early_rounds')) ?></label>
+
+    <details class="propose-dates">
+        <summary><?= e($t->text('tournament.propose_title')) ?></summary>
+        <p class="hint"><?= e($t->text('tournament.propose_hint')) ?></p>
+        <div class="form-row">
+            <label><?= e($t->text('tournament.field.finish_date')) ?>
+                <input type="date" name="finish_date" value="<?= e((string) $value('finish_date', '')) ?>">
+            </label>
+            <label><?= e($t->text('tournament.field.expected_players')) ?>
+                <input type="number" name="expected_players" min="2" max="200" value="<?= e((string) $value('expected_players', 8)) ?>">
+            </label>
+        </div>
+        <button type="submit" name="action" value="propose" class="button" formnovalidate><?= e($t->text('tournament.propose_button')) ?></button>
+    </details>
+
+    <?php if (($calendarRounds ?? []) !== []) : ?>
+        <?= $template->render('tournaments/calendar', ['rounds' => $calendarRounds, 't' => $t]) ?>
+    <?php endif; ?>
+</fieldset>
+
 <details class="more-settings">
     <summary><?= e($t->text('tournament.more_settings')) ?></summary>
 
@@ -90,12 +140,12 @@ $formatIcons = [
     <label><?= e($t->text('tournament.field.time_control')) ?>
         <input type="text" name="time_control" maxlength="20" value="<?= e((string) $value('time_control', '')) ?>" placeholder="10+5">
     </label>
-    <label><?= e($t->text('tournament.field.round_days')) ?>
-        <input type="number" name="round_days" min="1" max="120" value="<?= e((string) $value('round_days', 14)) ?>">
-    </label>
-    <p class="hint"><?= e($t->text('tournament.field.round_days_hint')) ?></p>
-
     <h3><?= e($t->text('tournament.field.rules')) ?></h3>
+    <?php // Rule options (A113): the defaults are the A110 rules. A hidden "no" goes first, so an unticked box is saved as no. ?>
+    <?php foreach (['forfeits_rated' => false, 'armageddon_higher_black' => true, 'withdrawal_removes' => true] as $field => $default) : ?>
+        <input type="hidden" name="<?= e($field) ?>" value="no">
+        <label class="checkbox"><input type="checkbox" name="<?= e($field) ?>" value="yes"<?= ((bool) $value($field, $default)) ? ' checked' : '' ?>> <?= e($t->text('tournament.field.' . $field)) ?></label>
+    <?php endforeach; ?>
     <fieldset class="choice-group">
         <legend><?= e($t->text('tournament.field.forfeit_rule')) ?></legend>
         <?php foreach (TournamentRounds::FORFEIT_RULES as $rule) : ?>
@@ -124,6 +174,11 @@ $formatIcons = [
             </select>
         </label>
     <?php endforeach; ?>
+
+    <label><?= e($t->text('tournament.field.check_in_minutes')) ?>
+        <input type="number" name="check_in_minutes" min="0" max="120" value="<?= e((string) $value('check_in_minutes', 0)) ?>">
+    </label>
+    <p class="hint"><?= e($t->text('tournament.field.check_in_minutes_hint')) ?></p>
 
     <h3><?= e($t->text('tournament.format.round_robin')) ?> · <?= e($t->text('tournament.format.league')) ?></h3>
     <label class="checkbox"><input type="checkbox" name="double_round" value="yes"<?= ((bool) $value('double_round', false)) ? ' checked' : '' ?>> <?= e($t->text('tournament.field.double_round')) ?></label>

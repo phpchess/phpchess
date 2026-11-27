@@ -192,6 +192,11 @@ Release 6.0 is C0-1 to C4-2, plus a check on a real shared host before release.
   - Games::end() tells TournamentResults (K3); Games::correctResult() for corrections; Games::startForTournament() for guests (A109).
   - Tests: `tests/Tournament/` (pairing tables, Dutch, tie-breaks, whole tournaments on the database).
   - Swiss: full FIDE Dutch 2026 (A112: completion by maximum matching, C5–C21, floats, topscorers); checked against bbpPairings reference cases: Dutch 2025 C5 and C9 exact, a 60-player final round 26 of 30 boards (the rest hinges on C8's exact measure), shown as incomplete.
+- **Additions (2026-11-27, A113–A117)**: built, checks not run yet.
+  - Rule options per tournament with the A110 defaults (A113); calendar with planned start, round days, break, rest weekdays and blocked dates, proposed from start and finish dates, a Calendar view and an .ics download (A114, A117); rounds wait for their planned time unless "early rounds" is on (A115).
+  - "Find players" pop-up: query members by rating, place in the field, games, member since, activity, class and name; add all or ticked (A116).
+  - Check-in for timed Swiss and tournament notices: starts in an hour, round paired, deadline in 24 hours (A117).
+  - Migration 13; `TournamentCalendar`, `PlayerQuery`, `TournamentReminders`, `IcsCalendar`; tests `TournamentCalendarTest` and new cases in `TournamentFlowTest`.
 
 ## C4-2 Special formats
 - **Scope**: T-09 to T-13.
@@ -199,6 +204,7 @@ Release 6.0 is C0-1 to C4-2, plus a check on a real shared host before release.
   - **Arena**, for timed play.
   - **Voting tournaments**: the server resolves the vote, with a stated tie rule; organisers, spectators and chat.
   - **Class tournaments** run by teachers.
+  - Added 2026-11-27 (A118): manual board swap before a round starts (logged), FIDE TRF export, Arena as above.
 - **Contracts**: K2 (a vote result is played through the move function), K3, K8.
 - **Tests**:
   - vote resolution on time with nobody online;

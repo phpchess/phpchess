@@ -7,6 +7,7 @@ namespace PhpChess\Kernel;
 use PhpChess\Domain\Tournament\LeagueDivisions;
 use PhpChess\Domain\Tournament\TournamentAccess;
 use PhpChess\Domain\Tournament\TournamentDesk;
+use PhpChess\Domain\Tournament\TournamentReminders;
 use PhpChess\Domain\Tournament\TournamentRounds;
 use PhpChess\Domain\Tournament\Tournaments;
 use PhpChess\Infra\Database;
@@ -41,6 +42,11 @@ final class TournamentParts
     public function tournaments(): Tournaments
     {
         return new Tournaments($this->repository(), $this->access(), $this->play->games(), new UserRepository($this->database), $this->play->computerGames());
+    }
+
+    public function reminders(): TournamentReminders
+    {
+        return new TournamentReminders($this->repository(), $this->play->noticeRepository());
     }
 
     public function rounds(): TournamentRounds

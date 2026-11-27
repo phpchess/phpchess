@@ -4,16 +4,24 @@
  * who may join) make a working tournament; the rest has defaults behind
  * "More settings". Afterwards the organiser lands on the manage page.
  *
- * Variables: $timeControls (list of string), $maximumDays (int),
- * $basePath, $csrfToken, $t, $template.
+ * "Propose from dates" (A114) sends the form back here with round days and a
+ * break filled in, the calendar they give and a short message; nothing is saved.
+ *
+ * Variables: $timeControls (list of string), $maximumDays (int), $values (the form's
+ * values, [] for a new form), $calendarRounds (the proposed calendar, or []),
+ * $proposalMessage (string), $basePath, $csrfToken, $t, $template.
  */
 ?>
 <h1><?= e($t->text('tournament.create_title')) ?></h1>
+<?php if ($proposalMessage !== '') : ?>
+    <p class="notice-success" role="status"><?= e($proposalMessage) ?></p>
+<?php endif; ?>
 
 <form method="post" action="<?= e($basePath) ?>/tournaments/new" class="form">
     <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
     <?= $template->render('tournaments/settings_fields', [
-        'values' => [],
+        'values' => $values,
+        'calendarRounds' => $calendarRounds,
         'timeControls' => $timeControls,
         'maximumDays' => $maximumDays,
         'lockFormat' => false,

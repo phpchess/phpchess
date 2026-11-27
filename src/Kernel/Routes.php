@@ -311,6 +311,8 @@ final class Routes
         $router->post('/tournaments/new', fn (Request $request): Response => $organiser->create($request), $members);
         $router->get('/tournaments/invite/{token}', fn (Request $request, array $parts): Response => $player->invitation($request, $parts), $members);
         $router->get('/tournaments/{id}', fn (Request $request, array $parts): Response => $player->show($request, $parts), $members);
+        $router->get('/tournaments/{id}/calendar.ics', fn (Request $request, array $parts): Response => $player->calendarFile($request, $parts), $members);
+        $router->post('/tournaments/{id}/check-in', fn (Request $request, array $parts): Response => $player->checkIn($request, $parts), $members);
         $router->get('/tournaments/{id}/pgn', fn (Request $request, array $parts): Response => $player->pgn($request, $parts), $members);
         $router->post('/tournaments/{id}/join', fn (Request $request, array $parts): Response => $player->join($request, $parts), $members);
         $router->post('/tournaments/{id}/leave', fn (Request $request, array $parts): Response => $player->leave($request, $parts), $members);
@@ -322,6 +324,7 @@ final class Routes
         $router->get('/tournaments/{id}/manage', fn (Request $request, array $parts): Response => $organiser->show($request, $parts), $members);
         $router->post('/tournaments/{id}/settings', fn (Request $request, array $parts): Response => $organiser->saveSettings($request, $parts), $members);
         $router->post('/tournaments/{id}/players/add', fn (Request $request, array $parts): Response => $organiser->addPlayer($request, $parts), $members);
+        $router->post('/tournaments/{id}/players/add-found', fn (Request $request, array $parts): Response => $organiser->addFoundPlayers($request, $parts), $members);
         $router->post('/tournaments/{id}/players/computer', fn (Request $request, array $parts): Response => $organiser->addComputer($request, $parts), $members);
         $router->post('/tournaments/{id}/players/{user}/remove', fn (Request $request, array $parts): Response => $organiser->removePlayer($request, $parts), $members);
         $router->post('/tournaments/{id}/players/{user}/withdraw', fn (Request $request, array $parts): Response => $organiser->withdrawPlayer($request, $parts), $members);

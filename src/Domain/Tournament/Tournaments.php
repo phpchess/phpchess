@@ -68,7 +68,7 @@ final class Tournaments
 
     /**
      * Saves changed settings. Allowed until the tournament starts; after
-     * that only the name and description may change.
+     * that only the name, description and calendar may change.
      *
      * @param array<string, string> $input
      */
@@ -80,7 +80,8 @@ final class Tournaments
         }
         $settings = $this->checkedSettings($input + ['format' => $tournament->format]);
         if (!$tournament->isOpenForRegistration()) {
-            $settings = ['name' => $settings['name'], 'description' => $settings['description']];
+            // Once it runs: the name, the description and the calendar of the rounds still to come (A114).
+            $settings = array_intersect_key($settings, array_flip(['name', 'description', 'round_days', 'round_gap_days', 'rest_weekdays', 'blocked_dates', 'early_rounds']));
         }
         $this->tournaments->updateSettings($tournament->id, $settings);
         if (($settings['registration'] ?? '') === Tournament::REGISTRATION_INVITE && $tournament->inviteToken === null) {
@@ -93,7 +94,7 @@ final class Tournaments
      * Turns the form fields into checked settings, with defaults.
      *
      * @param array<string, string> $input
-     * @return array<string, string|int|bool>
+     * @return array<string, string|int|bool|null>
      */
     public function checkedSettings(array $input): array
     {
@@ -139,6 +140,17 @@ final class Tournaments
             $forfeitRule = TournamentRounds::FORFEIT_LOSS_ON_TIME;
         }
 
+        // --- Calendar (A114): the planned start is a date and time in the server's time zone ---
+        $startsAtText = trim($input['starts_at'] ?? '');
+        $startsAt = null;
+        if ($startsAtText !== '') {
+            $parsed = strtotime(str_replace('T', ' ', $startsAtText));
+            if ($parsed === false) {
+                throw new ActionRefused('tournament.start_date_unknown');
+            }
+            $startsAt = $parsed;
+        }
+
         return [
             'name' => $name,
             'description' => mb_substr(trim($input['description'] ?? ''), 0, 2000),
@@ -163,6 +175,18 @@ final class Tournaments
             'divisions' => self::between((int) ($input['divisions'] ?? 1), 1, 20),
             'promote_count' => self::between((int) ($input['promote_count'] ?? 2), 0, 10),
             'relegate_count' => self::between((int) ($input['relegate_count'] ?? 2), 0, 10),
+            // --- Calendar (A114, A115) ---
+            'starts_at' => $startsAt,
+            'round_gap_days' => self::between((int) ($input['round_gap_days'] ?? 0), 0, 60),
+            'rest_weekdays' => implode(',', TournamentCalendar::weekdaysFrom($input['rest_weekdays'] ?? '')),
+            'blocked_dates' => mb_substr(implode(',', TournamentCalendar::datesFrom($input['blocked_dates'] ?? '')), 0, 2000),
+            'early_rounds' => ($input['early_rounds'] ?? '') === 'yes',
+            // --- Rule options (A113); the form always sends them, a missing field keeps the default ---
+            'forfeits_rated' => ($input['forfeits_rated'] ?? 'no') === 'yes',
+            'armageddon_higher_black' => ($input['armageddon_higher_black'] ?? 'yes') === 'yes',
+            'withdrawal_removes' => ($input['withdrawal_removes'] ?? 'yes') === 'yes',
+            // --- Check-in (A117): timed tournaments only ---
+            'check_in_minutes' => ($pace === Tournament::PACE_TIMED && $format === Tournament::FORMAT_SWISS) ? self::between((int) ($input['check_in_minutes'] ?? 0), 0, 120) : 0,
         ];
     }
 
@@ -266,6 +290,67 @@ final class Tournaments
         // The seed is the joining order for now; TournamentRounds::start() sets it from the ratings.
         $joinedRound = $lateSwiss ? $tournament->currentRound + 1 : 1;
         $this->tournaments->addPlayer($tournament->id, $userId, count($players) + 1, 0, 0, $joinedRound, $now);
+    }
+
+    // --- Finding and adding many players (A116) ---
+
+    /**
+     * The members a player query finds (strongest first), not yet in the
+     * tournament, with the place in the field applied.
+     *
+     * @return list<array{id: int, username: string, rating: int, games: int, joinedAt: int}>
+     */
+    public function findPlayers(Tournament $tournament, User $manager, PlayerQuery $query, int $startRating, int $now): array
+    {
+        $this->checkManager($tournament, $manager);
+
+        return $query->apply($this->tournaments->findPlayers($query, $tournament->id, $tournament->ratingSpeed(), $startRating, $now));
+    }
+
+    /**
+     * Adds the given members; stops quietly when the tournament is full.
+     * Returns how many were added and how many were not (already in, full).
+     *
+     * @param list<int> $userIds
+     * @return array{added: int, skipped: int}
+     */
+    public function addPlayers(Tournament $tournament, User $manager, array $userIds, int $now): array
+    {
+        $this->checkManager($tournament, $manager);
+        $added = 0;
+        $skipped = 0;
+        foreach (array_unique($userIds) as $userId) {
+            try {
+                $this->addPlayer($tournament, $userId, $now);
+                $added++;
+            } catch (ActionRefused) {
+                $skipped++;
+            }
+        }
+        $this->tournaments->log($tournament->id, $manager->id, 'players_added', $added . ' players from a query', $now);
+
+        return ['added' => $added, 'skipped' => $skipped];
+    }
+
+    // --- Check-in (A117) ---
+
+    /**
+     * A player checks in for the next round of a timed tournament with
+     * check-in. Open from check_in_minutes before the round until it starts.
+     */
+    public function checkIn(Tournament $tournament, User $player, int $round, int $now): void
+    {
+        if (!$tournament->usesCheckIn()) {
+            throw new ActionRefused('tournament.no_check_in');
+        }
+        $isPlayer = false;
+        foreach ($this->tournaments->players($tournament->id) as $entry) {
+            $isPlayer = $isPlayer || ($entry->userId === $player->id && $entry->isActive());
+        }
+        if (!$isPlayer) {
+            throw new ActionRefused('tournament.not_a_player');
+        }
+        $this->tournaments->checkIn($tournament->id, $player->id, $round, $now);
     }
 
     // --- Organisers (A98) ---

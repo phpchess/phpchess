@@ -181,6 +181,10 @@ final class MoveEmails
         if ($gameId !== null) {
             return $siteUrl . '/games/' . $gameId;
         }
+        // Tournament notices (A117) open the tournament list, where the player's tournaments are on top.
+        if (str_starts_with($kind, 'tournament_')) {
+            return $siteUrl . '/tournaments';
+        }
         if ($kind === Notices::MESSAGE_RECEIVED && $fromUsername !== '') {
             return $siteUrl . '/messages/' . rawurlencode($fromUsername);
         }

@@ -81,6 +81,12 @@ final class TournamentRounds
         if (!$this->access->mayManage($tournament, $manager)) {
             throw new ActionRefused('tournament.not_allowed');
         }
+        $this->begin($tournament, $manager->id, $now);
+    }
+
+    /** The start itself, for the organiser's button and the planned start; $actorId null = the round job. */
+    private function begin(Tournament $tournament, ?int $actorId, int $now): void
+    {
         if (!$tournament->isOpenForRegistration()) {
             throw new ActionRefused('tournament.already_started');
         }
@@ -104,8 +110,151 @@ final class TournamentRounds
         }
 
         $this->tournaments->setStatus($tournament->id, Tournament::STATUS_RUNNING, $now);
-        $this->tournaments->log($tournament->id, $manager->id, 'started', count($players) . ' players', $now);
+        $this->tournaments->log($tournament->id, $actorId, 'started', count($players) . ' players', $now);
         $this->tick($tournament->id, $now);
+    }
+
+    /**
+     * Starts a tournament at its planned time (A114), called by the round
+     * job. With too few players (or another reason not to start) it stays
+     * open for players, the planned start is cleared and the log says why,
+     * so the organiser can set a new date.
+     */
+    public function startScheduled(int $tournamentId, int $now): string
+    {
+        $tournament = $this->tournaments->find($tournamentId);
+        if ($tournament === null || !$tournament->isOpenForRegistration() || $tournament->startsAt === null || $tournament->startsAt > $now) {
+            return '';
+        }
+        try {
+            $this->begin($tournament, null, $now);
+        } catch (ActionRefused $refusal) {
+            $this->tournaments->updateSettings($tournament->id, ['starts_at' => null]);
+            $this->tournaments->log($tournament->id, null, 'start_failed', $refusal->languageKey, $now);
+
+            return 'not started: ' . $refusal->languageKey;
+        }
+
+        return 'started';
+    }
+
+    /**
+     * The calendar of a tournament (A114): the rounds already started with
+     * their real dates, then the rest as planned from there. Before the
+     * start it is planned from the planned start ($startOverride for a
+     * preview on the form). Timed tournaments have no deadlines: empty.
+     *
+     * @return list<array{round: int, start: int, deadline: int, isActual: bool}>
+     */
+    public function calendarOf(Tournament $tournament, int $playerCount, ?int $startOverride = null): array
+    {
+        if ($tournament->isTimed()) {
+            return [];
+        }
+        $calendar = $tournament->calendar();
+        $total = TournamentCalendar::roundCount($tournament, $playerCount);
+        $rounds = [];
+        $nextStart = $startOverride ?? $tournament->startsAt;
+        foreach ($this->tournaments->rounds($tournament->id) as $round) {
+            if ($round['startedAt'] === null) {
+                continue;
+            }
+            $deadline = $round['deadlineAt'] ?? $round['startedAt'];
+            $rounds[] = ['round' => $round['number'], 'start' => $round['startedAt'], 'deadline' => $deadline, 'isActual' => true];
+            $nextStart = $tournament->hasEarlyRounds ? max($deadline, $round['closedAt'] ?? 0) : $calendar->nextRoundStart($deadline, $tournament->roundGapDays);
+        }
+        if ($nextStart === null) {
+            return $rounds;
+        }
+        $planned = $calendar->plan($nextStart, max(0, $total - count($rounds)), $tournament->roundDays, $tournament->roundGapDays);
+        foreach ($planned as $round) {
+            $rounds[] = ['round' => count($rounds) + 1, 'start' => $round['start'], 'deadline' => $round['deadline'], 'isActual' => false];
+        }
+
+        return $rounds;
+    }
+
+    /**
+     * Check-in (A117, timed Swiss with check-in only): after a round closes
+     * the players have check_in_minutes to check in for the next one; for
+     * round 1 the window ends at the start. When it is over, everyone who
+     * did not check in is marked away for that round, so the pairing leaves
+     * them out (with the organiser's absence value). If nobody checked in
+     * at all, check-in is ignored for that round, so a round is never empty.
+     *
+     * @param array{number: int, state: string, startedAt: ?int, deadlineAt: ?int, closedAt: ?int}|null $lastRound
+     */
+    private function checkInIsOver(Tournament $tournament, ?array $lastRound, int $now): bool
+    {
+        if (!$tournament->usesCheckIn()) {
+            return true;
+        }
+        $windowEnd = $lastRound === null ? 0 : ($lastRound['closedAt'] ?? $now) + $tournament->checkInMinutes * 60;
+        if ($windowEnd > $now) {
+            return false;
+        }
+        $number = $tournament->currentRound + 1;
+        $checkedIn = $this->tournaments->checkedIn($tournament->id, $number);
+        if ($checkedIn === []) {
+            return true;
+        }
+        $missing = 0;
+        foreach ($this->tournaments->players($tournament->id) as $player) {
+            if ($player->isActive() && !$player->isComputer && !in_array($player->userId, $checkedIn, true)) {
+                $this->tournaments->addAbsence($tournament->id, $player->userId, $number);
+                $missing++;
+            }
+        }
+        if ($missing > 0) {
+            $this->tournaments->log($tournament->id, null, 'not_checked_in', $missing . ' players, round ' . $number, $now);
+        }
+
+        return true;
+    }
+
+    /**
+     * When check-in for the next round is open, and until when (A117);
+     * null when there is none open now.
+     *
+     * @return array{round: int, closesAt: int}|null
+     */
+    public function checkInWindow(Tournament $tournament, int $now): ?array
+    {
+        if (!$tournament->usesCheckIn()) {
+            return null;
+        }
+        if ($tournament->isOpenForRegistration()) {
+            if ($tournament->startsAt === null || $tournament->startsAt - $tournament->checkInMinutes * 60 > $now) {
+                return null;
+            }
+
+            return ['round' => 1, 'closesAt' => $tournament->startsAt];
+        }
+        $round = $this->roundRow($tournament->id, $tournament->currentRound);
+        if (!$tournament->isRunning() || $round === null || $round['state'] !== 'closed' || $round['closedAt'] === null) {
+            return null;
+        }
+
+        return ['round' => $tournament->currentRound + 1, 'closesAt' => $round['closedAt'] + $tournament->checkInMinutes * 60];
+    }
+
+    /**
+     * When a paired round may start (A115). Round 1: at once (the
+     * tournament has just started). Later rounds: after the previous
+     * round's deadline plus the break, on a playable day; with "early
+     * rounds" on, or in timed tournaments, as soon as the last one ends.
+     */
+    public function plannedStartOf(Tournament $tournament, int $number): int
+    {
+        if ($number <= 1 || $tournament->hasEarlyRounds || $tournament->isTimed()) {
+            return 0;
+        }
+        $previous = $this->roundRow($tournament->id, $number - 1);
+        if ($previous === null || $previous['deadlineAt'] === null) {
+            return 0;
+        }
+
+        return $tournament->calendar()->nextRoundStart($previous['deadlineAt'], $tournament->roundGapDays);
     }
 
     /**
@@ -116,11 +265,7 @@ final class TournamentRounds
      */
     private function seedPlayers(Tournament $tournament, array $players): void
     {
-        $speed = Game::SPEED_CORRESPONDENCE;
-        if ($tournament->isTimed()) {
-            $control = TimeControl::fromText($tournament->timeControl);
-            $speed = $control === null ? $speed : $control->speed();
-        }
+        $speed = $tournament->ratingSpeed();
         $ratings = [];
         foreach ($players as $player) {
             $ratings[$player->userId] = $this->ratings->shownRating($player->userId, $speed)['rating'];
@@ -222,6 +367,9 @@ final class TournamentRounds
 
         // --- No round yet, or the last one is closed: pair the next ---
         if ($round === null || $round['state'] === 'closed') {
+            if (!$this->checkInIsOver($tournament, $round, $now)) {
+                return ''; // players are still checking in (A117)
+            }
             if ($this->pairNextRound($tournament, $now)) {
                 return 'round ' . ($tournament->currentRound + 1) . ' paired';
             }
@@ -237,6 +385,9 @@ final class TournamentRounds
         if ($round['state'] === 'paired') {
             if ($tournament->confirmsPairings) {
                 return '';
+            }
+            if ($this->plannedStartOf($tournament, $tournament->currentRound) > $now) {
+                return ''; // waits for its planned time (A115)
             }
             $this->startRound($tournament, $tournament->currentRound, $now);
 
@@ -553,7 +704,8 @@ final class TournamentRounds
     /** Starts every board of a paired round: a real game each, or postponed for an absent player. */
     public function startRound(Tournament $tournament, int $number, int $now): void
     {
-        $deadline = $tournament->isTimed() ? null : $now + $tournament->roundDays * 86400;
+        // Round days count playable days only (A114).
+        $deadline = $tournament->isTimed() ? null : $tournament->calendar()->addPlayableDays($now, $tournament->roundDays);
         $this->tournaments->startRound($tournament->id, $number, $now, $deadline);
         $absences = $this->tournaments->absences($tournament->id);
         $players = self::playersById($this->tournaments->players($tournament->id));
@@ -625,7 +777,7 @@ final class TournamentRounds
 
             return;
         }
-        $deadline = $tournament->isTimed() ? null : $now + $tournament->roundDays * 86400;
+        $deadline = $tournament->isTimed() ? null : $tournament->calendar()->addPlayableDays($now, $tournament->roundDays);
         $this->tournaments->setPairingGame($pairing->id, $gameId, $deadline);
     }
 
@@ -669,7 +821,7 @@ final class TournamentRounds
                 continue;
             }
             if ($pairing->state === Pairing::STATE_PLAYING && $pairing->gameId !== null) {
-                $decided += $this->forfeitByRule($tournament->forfeitRule, $pairing->gameId, $now) ? 1 : 0;
+                $decided += $this->forfeitByRule($tournament->forfeitRule, $pairing->gameId, $now, $tournament->forfeitsRated) ? 1 : 0;
             } elseif ($pairing->needsOrganiser()) {
                 // An aborted game nobody replayed: nobody played, nobody scores.
                 $this->tournaments->writeOutcome($pairing->id, Pairing::OUTCOME_DOUBLE_FORFEIT, 0, 0);
@@ -681,11 +833,12 @@ final class TournamentRounds
     }
 
     /**
-     * Ends one running game by the rule, unrated, through Games::end (K3):
-     * nobody moved -> double forfeit; otherwise the player to move loses
-     * (loss on time) or it is a draw.
+     * Ends one running game by the rule through Games::end (K3): nobody
+     * moved -> double forfeit (never rated); otherwise the player to move
+     * loses (loss on time) or it is a draw. Unrated unless the tournament's
+     * rule option says forfeits are rated (A113).
      */
-    public function forfeitByRule(string $rule, int $gameId, int $now): bool
+    public function forfeitByRule(string $rule, int $gameId, int $now, bool $isRated = false): bool
     {
         $game = $this->gameRecords->find($gameId);
         if ($game === null || !$game->isRunning()) {
@@ -695,11 +848,11 @@ final class TournamentRounds
             return $this->games->end($gameId, Game::RESULT_ABORTED, TournamentResults::REASON_NO_MOVES, $now, false);
         }
         if ($rule === self::FORFEIT_DRAW) {
-            return $this->games->end($gameId, Game::RESULT_DRAW, TournamentResults::REASON_ROUND_DEADLINE, $now, false);
+            return $this->games->end($gameId, Game::RESULT_DRAW, TournamentResults::REASON_ROUND_DEADLINE, $now, $isRated);
         }
         $result = $game->sideToMove() === Position::WHITE ? Game::RESULT_BLACK_WON : Game::RESULT_WHITE_WON;
 
-        return $this->games->end($gameId, $result, TournamentResults::REASON_ROUND_DEADLINE, $now, false);
+        return $this->games->end($gameId, $result, TournamentResults::REASON_ROUND_DEADLINE, $now, $isRated);
     }
 
     // --- Closing a round and finishing ---
@@ -846,7 +999,9 @@ final class TournamentRounds
             $higher = ($seedOf[$first->whiteId] ?? 0) <= ($seedOf[(int) $first->blackId] ?? 0) ? $first->whiteId : (int) $first->blackId;
             $lower = $higher === $first->whiteId ? (int) $first->blackId : $first->whiteId;
             $isArmageddon = $match['needs'] === 'armageddon';
-            [$whiteId, $blackId] = $isArmageddon ? [$lower, $higher] : [$first->blackId ?? $lower, $first->whiteId];
+            // Armageddon: Black has draw odds; by default the higher seed gets Black (A113 rule option).
+            $armageddonColours = $tournament->armageddonHigherSeedBlack ? [$lower, $higher] : [$higher, $lower];
+            [$whiteId, $blackId] = $isArmageddon ? $armageddonColours : [$first->blackId ?? $lower, $first->whiteId];
             $pairingId = $this->tournaments->addPairing($tournament->id, $round, 0, $first->board, (int) $whiteId, $blackId, $match['match'], count($boards) + 1, $isArmageddon);
             $pairing = $this->tournaments->findPairing($pairingId);
             if ($pairing !== null && isset($players[(int) $whiteId], $players[$blackId])) {
@@ -902,7 +1057,7 @@ final class TournamentRounds
         }
         foreach ($this->tournaments->pairings($tournament->id) as $pairing) {
             if ($pairing->round === $tournament->currentRound && $pairing->state === Pairing::STATE_PLAYING && $pairing->gameId !== null) {
-                $this->forfeitByRule($tournament->forfeitRule, $pairing->gameId, $now);
+                $this->forfeitByRule($tournament->forfeitRule, $pairing->gameId, $now, $tournament->forfeitsRated);
             }
         }
         $this->tournaments->log($tournament->id, $manager->id, 'round_closed_by_organiser', 'Round ' . $tournament->currentRound, $now);

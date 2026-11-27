@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace PhpChess\Http\Web\Tournament;
 
 use PhpChess\Domain\ActionRefused;
+use PhpChess\Domain\Tournament\PlayerQuery;
 use PhpChess\Domain\Tournament\TieBreaks;
 use PhpChess\Domain\Tournament\Tournament;
+use PhpChess\Domain\Tournament\TournamentCalendar;
 use PhpChess\Domain\Tournament\TournamentDesk;
 use PhpChess\Http\Request;
 use PhpChess\Http\Response;
@@ -20,6 +22,7 @@ use PhpChess\Kernel\Services;
  *   GET  /tournaments/{id}/manage                   the organiser's desk; ?view= players, rounds, disputes, settings
  *   POST /tournaments/{id}/settings                 change the settings (until the start)
  *   POST /tournaments/{id}/players/add              add a member by name
+ *   POST /tournaments/{id}/players/add-found        add the members a player query found (A116)
  *   POST /tournaments/{id}/players/computer         add a computer player (A105)
  *   POST /tournaments/{id}/players/{user}/remove    take off the list (before the start)
  *   POST /tournaments/{id}/players/{user}/withdraw  withdraw a player (A108)
@@ -58,12 +61,18 @@ final class TournamentManageController
         return $this->pages->render($request, 'tournaments/create', $this->pages->text('tournament.create_title'), [
             'timeControls' => $this->services->play()->games()->allowedTimeControls(),
             'maximumDays' => $this->services->play()->games()->maximumDays(),
+            'values' => [],
+            'calendarRounds' => [],
+            'proposalMessage' => '',
         ]);
     }
 
     public function create(Request $request): Response
     {
         $user = $this->pages->user();
+        if ($request->formValue('action') === 'propose') {
+            return $this->showProposal($request);
+        }
         try {
             $tournamentId = $this->services->tournaments()->tournaments()->create($user, self::settingsFrom($request), $this->services->now);
         } catch (ActionRefused $refusal) {
@@ -71,6 +80,81 @@ final class TournamentManageController
         }
 
         return $this->services->pages()->redirectWithMessage($request, '/tournaments/' . $tournamentId . '/manage', 'success', $this->pages->text('tournament.created'));
+    }
+
+    /**
+     * "Propose from dates" on the create page (A114): the form comes back
+     * with round days and a break that fit between the start and finish
+     * date, and the calendar they give. Nothing is saved yet.
+     */
+    private function showProposal(Request $request): Response
+    {
+        $values = $request->form;
+        $values['rest_weekdays'] = self::settingsFrom($request)['rest_weekdays'];
+        $message = '';
+        $calendarRounds = [];
+        try {
+            $settings = $this->services->tournaments()->tournaments()->checkedSettings(self::settingsFrom($request) + ['name' => 'x']);
+            $preview = Tournament::preview($settings);
+            $players = max(2, (int) $request->formValue('expected_players', '8'));
+            $finish = strtotime($request->formValue('finish_date') . ' 23:59');
+            $start = $preview->startsAt;
+            $rounds = TournamentCalendar::roundCount($preview, $players);
+            $proposal = ($start === null || $finish === false) ? null : $preview->calendar()->propose($start, $finish, $rounds);
+            if ($proposal === null) {
+                $message = $this->pages->text('tournament.propose_impossible', ['rounds' => $rounds]);
+            } else {
+                $values['round_days'] = (string) $proposal['roundDays'];
+                $values['round_gap_days'] = (string) $proposal['gapDays'];
+                $calendarRounds = $preview->calendar()->plan((int) $start, $rounds, $proposal['roundDays'], $proposal['gapDays']);
+                $message = $this->pages->text('tournament.proposed', ['rounds' => $rounds, 'days' => $proposal['roundDays'], 'gap' => $proposal['gapDays']]);
+            }
+        } catch (ActionRefused $refusal) {
+            $message = $this->pages->text($refusal->languageKey, $refusal->values);
+        }
+
+        return $this->pages->render($request, 'tournaments/create', $this->pages->text('tournament.create_title'), [
+            'timeControls' => $this->services->play()->games()->allowedTimeControls(),
+            'maximumDays' => $this->services->play()->games()->maximumDays(),
+            'values' => $values,
+            'calendarRounds' => $calendarRounds,
+            'proposalMessage' => $message,
+        ]);
+    }
+
+    /**
+     * "Propose from dates" on the settings view (A114): works out round days
+     * and a break that fit, saves them with the other settings, and says so.
+     *
+     * @param array<string, string> $parts
+     */
+    private function proposeForTournament(Request $request, array $parts): Response
+    {
+        $tournament = $this->pages->managedTournament($parts);
+        if ($tournament === null) {
+            return $this->pages->notFound($request);
+        }
+        $back = '/tournaments/' . $tournament->id . '/manage?view=settings';
+        $players = max(2, count($this->services->tournaments()->repository()->players($tournament->id)), (int) $request->formValue('expected_players', '2'));
+        $finish = strtotime($request->formValue('finish_date') . ' 23:59');
+        $settings = self::settingsFrom($request);
+        try {
+            $preview = Tournament::preview($this->services->tournaments()->tournaments()->checkedSettings($settings + ['format' => $tournament->format]));
+        } catch (ActionRefused $refusal) {
+            return $this->services->pages()->redirectWithMessage($request, $back, 'error', $this->pages->text($refusal->languageKey, $refusal->values));
+        }
+        $rounds = TournamentCalendar::roundCount($preview, $players);
+        $start = $tournament->isOpenForRegistration() ? $preview->startsAt : $this->services->now;
+        $proposal = ($start === null || $finish === false) ? null : $preview->calendar()->propose($start, $finish, $rounds);
+        if ($proposal === null) {
+            return $this->services->pages()->redirectWithMessage($request, $back, 'error', $this->pages->text('tournament.propose_impossible', ['rounds' => $rounds]));
+        }
+        $settings['round_days'] = (string) $proposal['roundDays'];
+        $settings['round_gap_days'] = (string) $proposal['gapDays'];
+
+        return $this->pages->run($request, $back, 'tournament.saved', function () use ($tournament, $settings): void {
+            $this->services->tournaments()->tournaments()->updateSettings($tournament, $this->pages->user(), $settings, $this->services->now);
+        });
     }
 
     /**
@@ -85,12 +169,22 @@ final class TournamentManageController
             'name', 'description', 'format', 'registration', 'max_players', 'pace', 'days_per_move', 'time_control',
             'round_days', 'rounds_planned', 'double_round', 'knockout_games', 'third_place', 'is_rated', 'allow_computers',
             'confirm_pairings', 'forfeit_rule', 'bye_halves', 'absence_bye_halves', 'tie_breaks', 'divisions',
-            'promote_count', 'relegate_count',
+            'promote_count', 'relegate_count', 'starts_at', 'round_gap_days', 'blocked_dates', 'early_rounds',
+            'forfeits_rated', 'armageddon_higher_black', 'withdrawal_removes', 'check_in_minutes',
         ] as $field) {
             $settings[$field] = $request->formValue($field);
         }
         // Checkboxes send nothing when off.
         $settings['is_rated'] = $request->formValue('is_rated', 'no');
+
+        // Rest weekdays: one box per day, "rest_day_6" = Saturday (A114).
+        $restDays = [];
+        for ($weekday = 1; $weekday <= 7; $weekday++) {
+            if ($request->formValue('rest_day_' . $weekday) === 'yes') {
+                $restDays[] = $weekday;
+            }
+        }
+        $settings['rest_weekdays'] = implode(',', $restDays);
 
         // A pace button ("days:3" or "live:10+5") wins over the fields under "More settings".
         $paceChoice = $request->formValue('pace_choice');
@@ -142,7 +236,27 @@ final class TournamentManageController
             'tieBreakKeys' => TieBreaks::ALL,
             'guestLogins' => [],
             'inviteUrl' => $tournament->inviteToken === null ? '' : $request->baseUrl() . '/tournaments/invite/' . $tournament->inviteToken,
-        ]);
+            'settingsValues' => $tournament->settingsValues(),
+            'calendarRounds' => $this->services->tournaments()->rounds()->calendarOf($tournament, max(2, count($this->services->tournaments()->repository()->players($tournament->id)))),
+        ] + $this->queryParts($request, $tournament));
+    }
+
+    /**
+     * The player query (A116) on the players view: the query box's values,
+     * and what it found when the organiser pressed "Find" (?find=1).
+     *
+     * @return array{query: array<string, string>, queryFound: list<array{id: int, username: string, rating: int, games: int, joinedAt: int}>|null, classes: list<array{id: int, name: string}>}
+     */
+    private function queryParts(Request $request, Tournament $tournament): array
+    {
+        $query = PlayerQuery::fromInput($request->query);
+        $found = null;
+        if ($request->queryValue('find') === '1' && $tournament->isOpenForRegistration()) {
+            $found = $this->services->tournaments()->tournaments()->findPlayers($tournament, $this->pages->user(), $query, $this->services->play()->ratings()->startValue(), $this->services->now);
+        }
+        $classes = array_map(fn (array $class): array => ['id' => $class['id'], 'name' => $class['name']], $this->services->school()->listClasses(null));
+
+        return ['query' => $query->toInput(), 'queryFound' => $found, 'classes' => $classes];
     }
 
     // --- Settings and players ---
@@ -152,6 +266,10 @@ final class TournamentManageController
      */
     public function saveSettings(Request $request, array $parts): Response
     {
+        if ($request->formValue('action') === 'propose') {
+            return $this->proposeForTournament($request, $parts);
+        }
+
         return $this->act($request, $parts, 'settings', 'tournament.saved', function (Tournament $tournament) use ($request): void {
             $this->services->tournaments()->tournaments()->updateSettings($tournament, $this->pages->user(), self::settingsFrom($request), $this->services->now);
         });
@@ -165,6 +283,42 @@ final class TournamentManageController
         return $this->act($request, $parts, 'players', 'tournament.player_added', function (Tournament $tournament) use ($request): void {
             $this->services->tournaments()->tournaments()->addPlayerByName($tournament, $this->pages->user(), $request->formValue('username'), $this->services->now);
         });
+    }
+
+    /**
+     * "Add all N" or "Add ticked" from the player query (A116). The query
+     * runs again here, so only members it really finds are added; with
+     * "ticked", only the ticked ones among them.
+     *
+     * @param array<string, string> $parts
+     */
+    public function addFoundPlayers(Request $request, array $parts): Response
+    {
+        $tournament = $this->pages->managedTournament($parts);
+        if ($tournament === null) {
+            return $this->pages->notFound($request);
+        }
+        $user = $this->pages->user();
+        $query = PlayerQuery::fromInput($request->form);
+        $tournaments = $this->services->tournaments()->tournaments();
+        $found = array_map(fn (array $player): int => $player['id'], $tournaments->findPlayers($tournament, $user, $query, $this->services->play()->ratings()->startValue(), $this->services->now));
+        if ($request->formValue('which') === 'ticked') {
+            $ticked = [];
+            foreach ($request->form as $field => $value) {
+                if (str_starts_with((string) $field, 'pick_') && $value === 'yes') {
+                    $ticked[] = (int) substr((string) $field, 5);
+                }
+            }
+            $found = array_values(array_intersect($found, $ticked));
+        }
+        $result = $tournaments->addPlayers($tournament, $user, $found, $this->services->now);
+
+        return $this->services->pages()->redirectWithMessage(
+            $request,
+            '/tournaments/' . $tournament->id . '/manage?view=players',
+            $result['added'] > 0 ? 'success' : 'error',
+            $this->pages->text('tournament.players_added_count', ['added' => $result['added'], 'skipped' => $result['skipped']]),
+        );
     }
 
     /**
