@@ -45,7 +45,7 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--space-2);
-    min-height: 3.5rem;
+    min-height: var(--header-height);
     padding: var(--space-1) var(--side-margin);
     padding-top: max(var(--space-1), env(safe-area-inset-top));
     background: var(--colour-surface);
@@ -59,7 +59,7 @@
     min-width: 0;
     color: var(--colour-text);
     font-family: var(--font-headings);
-    font-size: 1.1rem;
+    font-size: var(--heading-box);
     font-weight: 700;
     text-decoration: none;
 }
@@ -136,7 +136,7 @@ body.has-nav { padding-bottom: calc(4rem + env(safe-area-inset-bottom)); }
     padding: var(--space-4);
     text-align: center;
     color: var(--colour-muted-text);
-    font-size: 0.875rem;
+    font-size: var(--text-compact);
 }
 
 /* ===== Boxes: the parts of a page (the Play page, the dashboard) ===== */
@@ -152,7 +152,7 @@ body.has-nav { padding-bottom: calc(4rem + env(safe-area-inset-bottom)); }
     align-items: center;
     gap: var(--space-2);
     margin: 0 0 var(--space-3);
-    font-size: 1.1rem;
+    font-size: var(--heading-box);
 }
 
 .box-grid { display: grid; gap: var(--space-4); grid-template-columns: minmax(0, 1fr); }
@@ -275,17 +275,24 @@ fieldset { border: 1px solid var(--colour-border); border-radius: var(--radius);
     border-radius: var(--radius);
 }
 
-.card-title { margin: 0; font-size: 1rem; font-weight: 600; }
+.card-title { margin: 0; font-size: var(--heading-card); font-weight: 600; }
 .card-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-2); }
 
-/* ===== Tables: the header stays on screen while scrolling (A71) ===== */
+/*
+ * ===== Tables: the header stays on screen while scrolling (A71) =====
+ * On the page the header stops below the top bar (--header-height). Inside
+ * a box that scrolls by itself (.table-wrap, a move list, a pop-up) it stops
+ * at the box's own top: the top bar's height there pushed the header down
+ * over the first rows (A119).
+ */
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; }
 th, td { padding: var(--space-2); border-bottom: 1px solid var(--colour-border); text-align: left; vertical-align: top; }
-thead th { position: sticky; top: 3.5rem; z-index: 1; background: var(--colour-surface); }
+thead th { position: sticky; top: var(--header-height); z-index: 1; background: var(--colour-surface); }
+.table-wrap thead th, .table-scroll thead th, .move-panel thead th, dialog thead th { top: 0; }
 
 /* ===== Admin (A71) ===== */
-.admin-banner h2 { margin-top: 0; font-size: 1rem; }
+.admin-banner h2 { margin-top: 0; font-size: var(--heading-card); }
 .copyable { user-select: all; white-space: pre-wrap; word-break: break-all; }
 
 /* The admin menu: groups of buttons. On a phone it sits above the page. */
@@ -361,7 +368,7 @@ dialog.pop-up-large::backdrop { background: rgba(0, 0, 0, 0.5); }
     border-bottom: 1px solid var(--colour-border);
 }
 
-.pop-up-head h2 { margin: 0; font-size: 1.2rem; }
+.pop-up-head h2 { margin: 0; font-size: var(--heading-section); }
 .pop-up-body { display: grid; gap: var(--space-6); padding: var(--space-4) var(--side-margin); }
 
 .pop-up-foot {
@@ -383,9 +390,9 @@ dialog.pop-up-large::backdrop { background: rgba(0, 0, 0, 0.5); }
     .site-frame { display: grid; grid-template-columns: 12rem minmax(0, 1fr); align-items: start; }
     .site-nav {
         position: sticky;
-        top: 3.5rem;
+        top: var(--header-height);
         inset: auto;
-        height: calc(100vh - 3.5rem);
+        height: calc(100vh - var(--header-height));
         border-top: 0;
         border-right: 1px solid var(--colour-border);
         padding: var(--space-3) var(--space-2);
@@ -410,7 +417,7 @@ dialog.pop-up-large::backdrop { background: rgba(0, 0, 0, 0.5); }
     .is-admin-page .site-frame { grid-template-columns: 10rem minmax(0, 1fr); }
     .page-admin { display: grid; grid-template-columns: 13rem minmax(0, 1fr); column-gap: var(--space-6); align-content: start; }
     .page-admin > * { grid-column: 2; }
-    .page-admin > .admin-menu { grid-column: 1; grid-row: 1 / span 200; align-self: start; position: sticky; top: 4.5rem; }
+    .page-admin > .admin-menu { grid-column: 1; grid-row: 1 / span 200; align-self: start; position: sticky; top: calc(var(--header-height) + var(--space-4)); }
     .admin-menu ul { display: grid; }
 
     .box-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }

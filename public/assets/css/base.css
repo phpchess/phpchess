@@ -11,7 +11,21 @@
  * - sizes, spacing and corners are variables too, so the look stays the same everywhere;
  * - every action is a button (A66); text links only inside running text;
  * - pages use the full width of every device with 16 px side margins (A72);
- * - no text is ever smaller than 11 px (A82): the smallest size is --text-small (12 px).
+ * - no text is ever smaller than 11 px (A82): the smallest size is --text-small (11 px).
+ *
+ * The size policy (A119): every text, heading, button and field size below
+ * is a named variable, and the other CSS files use only these names, never a
+ * number of their own. All sizes are in rem, so they follow the browser's
+ * text size and a skin's font. Pick the size by what a thing is:
+ *   texts     --text-small (labels, dates), --text-compact (hints, tables),
+ *             --text-normal (running text), --text-large (big buttons);
+ *   headings  --heading-page (h1), --heading-section (h2, pop-up titles),
+ *             --heading-box (box titles, h3), --heading-card (card titles);
+ *   buttons   .button-small, normal, .button-large (heights --control-small,
+ *             --control-normal, --control-large; small is only for desktop lists);
+ *   fields    --field-short (numbers, dates, times), --field-medium (names,
+ *             search), --field-long (everything else; never wider);
+ *   frame     --header-height: sticky things below the top bar use it.
  */
 
 /* ===== Fallback values (the default skin's light colours) ===== */
@@ -34,9 +48,29 @@
     --font-headings: var(--font-text);
 
     /* Text sizes. Never use a size below --text-small (A82). */
-    --text-small: 0.75rem;   /* 12 px */
-    --text-normal: 1rem;     /* 16 px */
-    --text-large: 1.25rem;   /* 20 px */
+    --text-small: 0.6875rem;   /* 11 px */
+    --text-compact: 0.75rem;   /* 12 px */
+    --text-normal: 0.875rem;  /* 14 px */
+    --text-large: 1rem;        /* 16 px */
+
+    /* Heading sizes */
+    --heading-page: 1.25rem;     /* 20 px, h1 */
+    --heading-section: 1.125rem; /* 18 px, h2 */
+    --heading-box: 1rem;         /* 16 px, h3 and box titles */
+    --heading-card: 0.875rem;    /* 14 px, card titles */
+
+    /* Button and field heights */
+    --control-small: 1.25rem;  /* 20 px: only in dense lists on a desktop */
+    --control-normal: 1.75rem; /* 28 px: every button and field */
+    --control-large: 2.5rem;   /* 40 px: the one main action of a page */
+
+    /* Field widths (a field is never wider than its content needs) */
+    --field-short: 10rem;
+    --field-medium: 20rem;
+    --field-long: 40rem;
+
+    /* The frame */
+    --header-height: 3.5rem;   /* the sticky top bar */
 
     /* Spacing and shapes */
     --space-1: 0.25rem;
@@ -86,9 +120,9 @@ body {
 }
 
 h1, h2, h3 { font-family: var(--font-headings); line-height: 1.25; }
-h1 { font-size: 1.5rem; margin: var(--space-2) 0 var(--space-4); }
-h2 { font-size: 1.2rem; }
-h3 { font-size: 1.05rem; }
+h1 { font-size: var(--heading-page); margin: var(--space-2) 0 var(--space-4); }
+h2 { font-size: var(--heading-section); }
+h3 { font-size: var(--heading-box); }
 
 a { color: var(--colour-accent); }
 
@@ -97,12 +131,12 @@ pre {
     padding: var(--space-3);
     border-radius: var(--radius);
     background: var(--colour-page-background);
-    font-size: 0.875rem;
+    font-size: var(--text-compact);
 }
 
 small { font-size: var(--text-small); }
 .muted, .hint { color: var(--colour-muted-text); }
-.hint { display: block; font-size: 0.875rem; font-weight: normal; }
+.hint { display: block; font-size: var(--text-compact); font-weight: normal; }
 
 /* Icons drawn by code (templates/partials/icon.php): they take the text colour. */
 .icon { flex: none; vertical-align: middle; }
@@ -126,7 +160,7 @@ small { font-size: var(--text-small); }
 .checks .check-passed { border-color: var(--colour-success); }
 .checks .check-failed { border-color: var(--colour-error); }
 .checks .check-warning { border-color: var(--colour-warning); }
-.fix { font-size: 0.875rem; color: var(--colour-muted-text); }
+.fix { font-size: var(--text-compact); color: var(--colour-muted-text); }
 
 /* ===== Notices ===== */
 .notice-error,
@@ -142,8 +176,8 @@ small { font-size: var(--text-small); }
 .form label { display: grid; gap: var(--space-1); font-weight: 600; }
 
 input, select, textarea {
-    min-height: var(--touch-size);
-    padding: 0.6rem;
+    min-height: var(--control-normal);
+    padding: var(--space-1) var(--space-2);
     border: 1px solid var(--colour-border);
     border-radius: 0.4rem;
     background: var(--colour-surface);
@@ -153,6 +187,14 @@ input, select, textarea {
 
 input[type="checkbox"], input[type="radio"] { min-height: auto; width: 1.25rem; height: 1.25rem; }
 
+/* Field widths in forms: as wide as the content needs, never the whole screen. */
+.form input, .form select, .form textarea { width: 100%; max-width: var(--field-long); }
+.form input[type="number"], .form input[type="date"], .form input[type="time"] { max-width: var(--field-short); }
+.form input[type="datetime-local"], .form input[type="search"] { max-width: var(--field-medium); }
+.form input[type="checkbox"], .form input[type="radio"] { width: 1.25rem; }
+.field-short { max-width: var(--field-short); }
+.field-medium { max-width: var(--field-medium); }
+
 /* A button: a link that does something looks exactly like this too (A66). */
 button,
 .button {
@@ -160,9 +202,9 @@ button,
     align-items: center;
     justify-content: center;
     gap: var(--space-2);
-    min-height: var(--touch-size);
+    min-height: var(--control-normal);
     margin-top: var(--space-2);
-    padding: 0.6rem 1.1rem;
+    padding: var(--space-1) var(--space-3);
     border: 2px solid var(--colour-accent);
     border-radius: var(--radius);
     background: var(--colour-accent);
@@ -175,6 +217,10 @@ button,
     cursor: pointer;
     transition: transform 0.05s, filter 0.1s;
 }
+
+/* Button sizes: small (dense lists on a desktop), normal, large (the page's main action). */
+.button-small { min-height: var(--control-small); padding: 0 var(--space-2); font-size: var(--text-compact); }
+.button-large { min-height: var(--control-large); padding: var(--space-2) var(--space-6); font-size: var(--text-large); }
 
 /* The quieter button: outline only. */
 .button-secondary {

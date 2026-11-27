@@ -81,7 +81,7 @@ body { --board-light: #eeeed2; --board-dark: #769656; }
 .header-player { display: flex; align-items: center; gap: 0.3rem; min-width: 0; overflow-wrap: anywhere; }
 .header-player-black { justify-content: flex-end; text-align: right; }
 .header-queen { width: 1.8rem; height: 1.8rem; flex: none; }
-.header-clock { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 1.1rem; text-align: center; }
+.header-clock { font-variant-numeric: tabular-nums; font-weight: 700; font-size: var(--heading-box); text-align: center; }
 .header-clock.is-short { color: var(--colour-error); }
 
 /* Timed games (G-14): each player's clock next to the name; the running one stands out. */
@@ -92,7 +92,7 @@ body { --board-light: #eeeed2; --board-dark: #769656; }
     border-radius: 0.3rem;
     font-variant-numeric: tabular-nums;
     font-weight: 700;
-    font-size: 1.1rem;
+    font-size: var(--heading-box);
     opacity: 0.6;
 }
 .player-clock.is-running { opacity: 1; background: var(--colour-accent-soft, rgba(0, 120, 0, 0.12)); }
@@ -104,7 +104,7 @@ body { --board-light: #eeeed2; --board-dark: #769656; }
     margin-top: 0;
     margin-bottom: 0.3rem;
     padding: 0.2rem 0.6rem;
-    font-size: 1rem;
+    font-size: var(--text-normal);
     border-radius: 0.4rem;
     background: var(--board-dark);
     color: #fff;
@@ -223,7 +223,6 @@ details.confirm summary { cursor: pointer; }
 .move-button[aria-current="step"] { background: var(--colour-accent); color: var(--colour-accent-text); }
 
 /* --- Lists --- */
-.button-large { font-size: 1.25rem; padding: 0.8rem 2rem; }
 .play-now { margin-bottom: 1.5rem; }
 .game-card-your-move { border-left: 4px solid var(--colour-accent); }
 .notice-unread { font-weight: 600; }
@@ -308,7 +307,7 @@ details.confirm summary { cursor: pointer; }
 
 /* The pop-up: the bigger buttons of step 1 (who). */
 .choice-group-large { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.choice-group-large .choice { min-height: 5rem; font-size: 1.1rem; }
+.choice-group-large .choice { min-height: 5rem; font-size: var(--heading-box); }
 
 /* Only the choices that fit: a person's game hides the computer's, and the other way round. */
 .new-game-form:has(input[name="opponent"][value="computer"]:checked) .for-human { display: none; }
@@ -361,7 +360,7 @@ details.confirm summary { cursor: pointer; }
 .micro-piece-black { fill: #111111; }
 
 .tile-name { font-weight: 600; max-width: 100%; overflow-wrap: anywhere; }
-.tile-icons { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-2); color: var(--colour-muted-text); font-size: 0.875rem; }
+.tile-icons { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-2); color: var(--colour-muted-text); font-size: var(--text-compact); }
 .tile-icon { display: inline-flex; align-items: center; gap: 0.2rem; }
 .tile-icon-strong { color: var(--colour-accent); }
 .tile-actions { display: flex; gap: var(--space-2); }
@@ -517,7 +516,7 @@ details.confirm summary { cursor: pointer; }
 /* The knockout bracket: rounds side by side, scrolling sideways on a phone. */
 .bracket { display: flex; gap: var(--space-3); overflow-x: auto; padding-bottom: var(--space-2); }
 .bracket-round { flex: 0 0 12rem; display: flex; flex-direction: column; justify-content: space-around; gap: var(--space-2); }
-.bracket-round h3 { margin: 0 0 var(--space-2); font-size: 1rem; }
+.bracket-round h3 { margin: 0 0 var(--space-2); font-size: var(--heading-card); }
 .bracket-match { border: 1px solid var(--colour-border); border-radius: 0.5rem; padding: var(--space-2); background: var(--colour-surface); }
 .bracket-match > div + div { border-top: 1px solid var(--colour-border); margin-top: var(--space-1); padding-top: var(--space-1); }
 .bracket-winner { font-weight: 700; }
@@ -526,7 +525,7 @@ details.confirm summary { cursor: pointer; }
 .league-editor-page { max-width: none; }
 .league-board { display: grid; gap: var(--space-3); grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); }
 .league-column { border: 1px solid var(--colour-border); border-radius: 0.5rem; padding: var(--space-2); background: var(--colour-surface); }
-.league-column h2 { font-size: 1rem; margin: 0 0 var(--space-2); }
+.league-column h2 { font-size: var(--heading-card); margin: 0 0 var(--space-2); }
 .league-column-unplaced { border-style: dashed; }
 .league-list { list-style: none; margin: 0; padding: 0; min-height: 3rem; display: grid; gap: var(--space-1); counter-reset: seed; }
 .league-card {

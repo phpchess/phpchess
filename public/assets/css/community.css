@@ -42,7 +42,7 @@
 .button-small {
     padding: 0.35rem 0.75rem;
     min-height: 2.25rem;
-    font-size: 0.9rem;
+    font-size: var(--text-compact);
 }
 
 .form-inline {

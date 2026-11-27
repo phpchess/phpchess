@@ -46,10 +46,10 @@ $bodyClasses = 'layout-' . $skin->layout . ' board-theme-' . $boardTheme
     <meta name="theme-color" content="#2f6f4f">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
-    <link rel="stylesheet" href="<?= e($basePath) ?>/assets/css/base.css">
-    <link rel="stylesheet" href="<?= e($basePath) ?>/assets/css/site.css">
-    <link rel="stylesheet" href="<?= e($basePath) ?>/assets/css/play.css?v=6"><?php // ?v=: a new address after a change, so browsers drop the old copy ?>
-    <link rel="stylesheet" href="<?= e($basePath) ?>/assets/css/community.css">
+    <link rel="stylesheet" href="<?= e($basePath) ?>/assets/css/base.css?v=2">
+    <link rel="stylesheet" href="<?= e($basePath) ?>/assets/css/site.css?v=2">
+    <link rel="stylesheet" href="<?= e($basePath) ?>/assets/css/play.css?v=7"><?php // ?v=: a new address after a change, so browsers drop the old copy ?>
+    <link rel="stylesheet" href="<?= e($basePath) ?>/assets/css/community.css?v=2">
     <script type="module" src="<?= e($basePath) ?>/assets/js/busy-buttons.js"></script>
     <script type="module" src="<?= e($basePath) ?>/assets/js/app/install.js"></script>
     <?php /* The skin comes last, so its colours replace the fallback values in base.css. */ ?>
