@@ -29,8 +29,13 @@ The plan is six blocks, split into eleven large chunks.
 | 4 Tournaments | C4-1 Tournament core | model, Round Robin, Swiss, knockout, League with drag-and-drop, tie-breaks (A97–A110) | built (2026-11-26); all checks pass, review pending |
 | | C4-2 Special formats | Team vs Team, Arena, voting, class tournaments | planned |
 | 5 Lichess | C5-1 Lichess | puzzles, study games, Lichess TV, content scanner (A74–A88; login dropped, A77) | done (2026-11-26, reviewed) |
+| 6 Tutor | C6-1 Study board | PGN with variations, annotation symbols and drawings (A121) | planned |
+| | C6-2 Game review and commentary | analysis of any own game on request, positive commentary from proven detectors (A122, A126) | planned |
+| | C6-3 Ladder | 20 chapters, 0 to 2000, lessons, puzzles, tutor games, final game (A123) | planned |
+| | C6-4 Teacher and lesson games | teacher role for classes and 1:1, lesson games with annotation by both sides, logged chat (A124, A125) | planned |
+| | C6-5 Ladder content | the lessons, chapter by chapter (A123) | planned |
 
-Release 6.0 is C0-1 to C4-2, plus a check on a real shared host before release.
+Release 6.0 is C0-1 to C6-5 (A127), plus a check on a real shared host before release.
 
 ---
 
@@ -234,3 +239,23 @@ Release 6.0 is C0-1 to C4-2, plus a check on a real shared host before release.
   - **Review round 2 (2026-11-26, A93–A96)**: the installer checks lichess.org and says so; Internet connection through a proxy with an encrypted login (SecretBox, config/secret.key); themes picked from Lichess sections and topics plus Openings and Famous games (migration 11); one Lichess page for admins (switch and content kinds) and players (live games, broadcasts, daily puzzle); study import. TV channel keys fixed after checking the live API.
   - **Replay overhaul (2026-11-26, B44, B45, B47, B48)**: one shared replay (`partials/replay.php`, `assets/js/learn/replay.js`) for study, own and broadcast games and Lichess TV: move table, seven controls (|<< << < = > >> >>|, < and > play backwards and forward), last move marked; TV gets the whole game and plays new moves spread over the 10 s until the next update. Also: the content scanner drops a long lichess.org Site address instead of the game.
   - **Not verified**: real requests to lichess.org (TV, game import, player import) were never sent; the first real check is the admin's "Test connection" on the test site.
+
+## C6 Tutor (planned; detailed scope at each chunk's Q&A)
+- **C6-1 Study board**:
+  - PGN with variations: store, edit, view, import and export.
+  - Annotation symbols (!, ?, !!, ±) and drawings (arrows, circles, highlighted squares), kept in the PGN comment format that Lichess and ChessBase read.
+  - It is the base for C6-2 to C6-4.
+- **C6-2 Game review and commentary**:
+  - The player asks for a review of their own finished game; nothing comments during play (A126).
+  - A small set of proven, deterministic detectors: hanging piece, fork, pin, skewer, mate threat, material.
+  - Positive commentary built from them (A122, A128).
+- **C6-3 Ladder**:
+  - 20 chapters of 100 rating points each, from 0 to 2000.
+  - Each chapter has 20 lessons, 100 puzzles (Lichess, CC0, by theme and rating), 10 tutor games and a final game against a computer player at the chapter's level.
+  - Progress and unlocking (A123).
+- **C6-4 Teacher and lesson games**:
+  - One teacher role with two scopes, class and 1:1 (A124).
+  - Lesson games against a person or the computer, where both sides annotate.
+  - Stronger students may teach lower-rated ones.
+  - Text chat only: an admin can switch it off, and it is always logged (A125).
+- **C6-5 Ladder content**: chapters 1–5 checked by hand first, the rest in parts.
