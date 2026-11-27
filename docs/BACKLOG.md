@@ -69,6 +69,7 @@ feature ids in [FEATURES.md](FEATURES.md)) when it is planned in
 | B61 | **Divider widths**: some dividers do not match the width of the content they separate (user, 2026-11-27; pages to be named). | 2026-11-27 | User, A119 review. |
 | B62 | **Field widths outside forms**: e.g. the log-in field on a side panel; fields outside `.form` still use the browser's width (A119). | 2026-11-27 | User, A119 review. |
 | B63 | **Touch size on phones**: buttons and fields are 28 px high (A119), below the 44 px finger size (A18); check on a real phone, maybe taller on phone screens only. | 2026-11-27 | User, A119 review. |
+| B64 | **End-to-end functionality test**: a scripted walk through the real site in a browser (install, register, play live and correspondence, tournaments of every format, admin), run before each release. Local tools only (A16). | 2026-11-27 | User. |
 
 ## Grouped: game replay overhaul (user, 2026-11-26)
 - One piece of work: B44 move table, B45 replay controls, B47 last move highlight and B48 live games like replays, for every board that replays a game (study games, own games, broadcasts, Lichess TV). Built in C5-1 (user, 2026-11-26).
