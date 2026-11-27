@@ -1558,6 +1558,7 @@ return [
     'tournament.calendar_none' => 'No planned start yet. The calendar appears once the organiser sets one or starts the tournament.',
     'tournament.calendar_timed' => 'Timed tournament: each round starts when the last one has finished.',
     'tournament.field.starts_at' => 'Planned start',
+    'tournament.field.starts_at_time' => 'Time',
     'tournament.field.starts_at_hint' => 'Optional. The tournament starts by itself at this time if it has enough players.',
     'tournament.field.round_gap_days' => 'Break between rounds (days)',
     'tournament.field.rest_weekdays' => 'No play on',

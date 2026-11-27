@@ -74,9 +74,23 @@ $formatIcons = [
 <fieldset class="calendar-fields">
     <legend><?= $template->render('partials/icon', ['icon' => 'calendar']) ?><?= e($t->text('tournament.calendar')) ?></legend>
     <?php // The calendar (A114, A115): a planned start, round days and break, rest days. ?>
-    <label><?= e($t->text('tournament.field.starts_at')) ?>
-        <input type="datetime-local" name="starts_at" value="<?= e((string) $value('starts_at', '')) ?>">
-    </label>
+    <?php
+    // The planned start: a date and a time in quarter hours (A120). Leaving the date empty means "no planned start".
+    [$startDate, $startTime] = array_pad(explode('T', (string) $value('starts_at', '')), 2, '18:00');
+    ?>
+    <div class="form-row">
+        <label><?= e($t->text('tournament.field.starts_at')) ?>
+            <input type="date" name="starts_at_date" value="<?= e($startDate) ?>">
+        </label>
+        <label><?= e($t->text('tournament.field.starts_at_time')) ?>
+            <select name="starts_at_time">
+                <?php for ($minutes = 0; $minutes < 24 * 60; $minutes += 15): ?>
+                    <?php $time = sprintf('%02d:%02d', intdiv($minutes, 60), $minutes % 60); ?>
+                    <option value="<?= e($time) ?>"<?= $time === $startTime ? ' selected' : '' ?>><?= e($time) ?></option>
+                <?php endfor; ?>
+            </select>
+        </label>
+    </div>
     <p class="hint"><?= e($t->text('tournament.field.starts_at_hint')) ?></p>
     <div class="form-row">
         <label><?= e($t->text('tournament.field.round_days')) ?>

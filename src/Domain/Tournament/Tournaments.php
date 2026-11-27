@@ -148,7 +148,8 @@ final class Tournaments
             if ($parsed === false) {
                 throw new ActionRefused('tournament.start_date_unknown');
             }
-            $startsAt = $parsed;
+            // Planned starts are on the quarter hour (A120).
+            $startsAt = $parsed - $parsed % (15 * 60);
         }
 
         return [

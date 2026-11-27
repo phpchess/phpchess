@@ -66,6 +66,9 @@ feature ids in [FEATURES.md](FEATURES.md)) when it is planned in
 | B58 | **Broadcast our tournaments to Lichess** (Lichess broadcast API, behind the "external content" switch, K9). | 2026-11-26 | User, C4-1 questions. |
 | B59 | **Guest groups from another phpChess server, live**: trust by exchanged key pair, signed move requests, behind a switch (K9, A16). | 2026-11-26 | User, C4-1 (A109). |
 | B60 | **Guest groups via encrypted file** for servers that cannot reach each other: signed, encrypted invitation and result files, correspondence only. | 2026-11-26 | User, C4-1 (A109). |
+| B61 | **Divider widths**: some dividers do not match the width of the content they separate (user, 2026-11-27; pages to be named). | 2026-11-27 | User, A119 review. |
+| B62 | **Field widths outside forms**: e.g. the log-in field on a side panel; fields outside `.form` still use the browser's width (A119). | 2026-11-27 | User, A119 review. |
+| B63 | **Touch size on phones**: buttons and fields are 28 px high (A119), below the 44 px finger size (A18); check on a real phone, maybe taller on phone screens only. | 2026-11-27 | User, A119 review. |
 
 ## Grouped: game replay overhaul (user, 2026-11-26)
 - One piece of work: B44 move table, B45 replay controls, B47 last move highlight and B48 live games like replays, for every board that replays a game (study games, own games, broadcasts, Lichess TV). Built in C5-1 (user, 2026-11-26).

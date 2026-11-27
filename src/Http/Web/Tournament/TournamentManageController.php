@@ -174,6 +174,11 @@ final class TournamentManageController
         ] as $field) {
             $settings[$field] = $request->formValue($field);
         }
+        // The planned start: a date field and a time list in quarter hours (A120).
+        $startDate = trim($request->formValue('starts_at_date'));
+        if ($startDate !== '') {
+            $settings['starts_at'] = $startDate . 'T' . $request->formValue('starts_at_time', '00:00');
+        }
         // Checkboxes send nothing when off.
         $settings['is_rated'] = $request->formValue('is_rated', 'no');
 
