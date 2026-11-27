@@ -29,7 +29,7 @@ The plan is six blocks, split into eleven large chunks.
 | 4 Tournaments | C4-1 Tournament core | model, Round Robin, Swiss, knockout, League with drag-and-drop, tie-breaks (A97–A110) | built (2026-11-26); all checks pass, review pending |
 | | C4-2 Special formats | Team vs Team, Arena, voting, class tournaments | planned |
 | 5 Lichess | C5-1 Lichess | puzzles, study games, Lichess TV, content scanner (A74–A88; login dropped, A77) | done (2026-11-26, reviewed) |
-| 6 Tutor | C6-1 Study board | PGN with variations, annotation symbols and drawings (A121, A131–A136) | built 2026-11-27, in review |
+| 6 Tutor | C6-1 Study board | PGN with variations, annotation symbols and drawings (A121, A131–A136) | done 2026-11-27, reviewed |
 | | C6-2 Game review and commentary | analysis of any own game on request, positive commentary from proven detectors (A122, A126) | planned |
 | | C6-3 Ladder | 20 chapters, 0 to 2000, lessons, puzzles, tutor games, final game (A123) | planned |
 | | C6-4 Teacher and lesson games | teacher role for classes and 1:1, lesson games with annotation by both sides, logged chat (A124, A125) | planned |

@@ -196,7 +196,7 @@ Decisions A1–A21 are in [DECISIONS.md](DECISIONS.md).
 ## TU — Tutor (C6, A121–A136)
 | Id | Feature | Origin | Chunk | Switch | Status |
 |---|---|---|---|---|---|
-| TU-01 | Study board: PGN with side lines, symbols $1–$19, `[%cal]`/`[%csl]` drawings, Lichess-style move-tree editing, import and export through the study scanner; own boards private, public after admin approval; admin chooses who may make boards (A129–A136) | new | C6-1 | none (admin setting: all, teachers, admins) | built (2026-11-27), in review |
+| TU-01 | Study board: PGN with side lines, symbols $1–$19, `[%cal]`/`[%csl]` drawings, Lichess-style move-tree editing, import and export through the study scanner; own boards private, public after admin approval; admin chooses who may make boards (A129–A136) | new | C6-1 | none (admin setting: all, teachers, admins) | done (2026-11-27), reviewed |
 
 ## Dropped by decision
 | 4.4 feature | Decision |
