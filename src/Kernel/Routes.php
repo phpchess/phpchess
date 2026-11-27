@@ -40,6 +40,7 @@ use PhpChess\Http\Web\PreferencesController;
 use PhpChess\Http\Web\SiteNewsController;
 use PhpChess\Http\Web\StrengthTestController;
 use PhpChess\Http\Web\LearnController;
+use PhpChess\Http\Web\StudyBoardController;
 use PhpChess\Http\Web\LichessPagesController;
 use PhpChess\Http\Web\PuzzlesController;
 use PhpChess\Http\Web\Admin\LichessController as AdminLichessController;
@@ -160,6 +161,19 @@ final class Routes
         $router->post('/learn/paste', fn (Request $request): Response => $learn->paste($request), Access::MEMBERS);
         $router->get('/learn/tv', fn (Request $request): Response => $learn->tv($request), Access::MEMBERS, $lichessSwitch);
         $router->get('/learn/tv/now', fn (Request $request): Response => $learn->tvNow($request), Access::MEMBERS, $lichessSwitch);
+
+        // --- Study board: side lines, symbols, drawings (C6-1, A121, A129-A136) ---
+        $boards = new StudyBoardController($services, new MemberPages($services));
+        $router->get('/learn/boards', fn (Request $request): Response => $boards->index($request), Access::MEMBERS);
+        $router->post('/learn/boards/new', fn (Request $request): Response => $boards->create($request), Access::MEMBERS);
+        $router->post('/learn/boards/import', fn (Request $request): Response => $boards->import($request), Access::MEMBERS);
+        $router->get('/learn/boards/{id}', fn (Request $request, array $parts): Response => $boards->show($request, $parts), Access::MEMBERS);
+        $router->post('/learn/boards/{id}/save', fn (Request $request, array $parts): Response => $boards->save($request, $parts), Access::MEMBERS);
+        $router->get('/learn/boards/{id}/pgn', fn (Request $request, array $parts): Response => $boards->pgn($request, $parts), Access::MEMBERS);
+        $router->post('/learn/boards/{id}/rename', fn (Request $request, array $parts): Response => $boards->rename($request, $parts), Access::MEMBERS);
+        $router->post('/learn/boards/{id}/visibility', fn (Request $request, array $parts): Response => $boards->visibility($request, $parts), Access::MEMBERS);
+        $router->post('/learn/boards/{id}/approve', fn (Request $request, array $parts): Response => $boards->approve($request, $parts), Access::ADMINS);
+        $router->post('/learn/boards/{id}/remove', fn (Request $request, array $parts): Response => $boards->remove($request, $parts), Access::MEMBERS);
 
         // --- Admin: Lichess connection, study themes and imports (C5-1: A80, A81, A87) ---
         $adminLichess = new AdminLichessController($services, $adminPages);

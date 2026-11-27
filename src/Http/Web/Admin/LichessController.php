@@ -12,6 +12,7 @@ use PhpChess\Domain\Lichess\StudyTopics;
 use PhpChess\Domain\System\FeatureSwitches;
 use PhpChess\Http\Request;
 use PhpChess\Http\Response;
+use PhpChess\Domain\Study\StudyBoards;
 use PhpChess\Http\Web\MemberPages;
 use PhpChess\Infra\Lichess\LichessClient;
 use PhpChess\Kernel\Services;
@@ -63,6 +64,7 @@ final class LichessController
             'maxOwnGames' => StudyImport::maxOwnGamesIn($settings),
             'importsPerHour' => StudyImport::importsPerHourIn($settings),
             'pasteIsOpen' => StudyImport::pasteIsOpenIn($settings),
+            'boardCreators' => StudyBoards::creatorsIn($settings),
             'ownGameDays' => StudyImport::ownGameDaysIn($settings),
             // A plain link that opens in a new tab: our server makes no request (A87).
             'lichessDatabaseLink' => 'https://database.lichess.org/',
@@ -196,6 +198,9 @@ final class LichessController
         $settings->set(StudyImport::PER_HOUR_SETTING, max(1, min(100, (int) $request->formValue('imports_per_hour', (string) StudyImport::IMPORTS_PER_HOUR))));
         $settings->set(StudyImport::PASTE_SETTING, $request->formValue('paste_for_players') === 'on');
         $settings->set(StudyImport::DAYS_SETTING, max(0, min(3650, (int) $request->formValue('own_game_days', (string) StudyImport::OWN_GAME_DAYS))));
+        // Who may make study boards (C6-1, A133).
+        $creators = $request->formValue('board_creators');
+        $settings->set(StudyBoards::CREATORS_SETTING, in_array($creators, StudyBoards::CREATORS, true) ? $creators : StudyBoards::CREATORS_ALL);
         $this->pages->audit($request, 'study.settings', 'players\' study limits and paste switch saved');
 
         return $this->pages->redirect($request, '/admin/lichess', 'success', 'admin.lichess.settings_saved');

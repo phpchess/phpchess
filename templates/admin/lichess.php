@@ -17,7 +17,7 @@
  * $sections (array<string, list<string>>, StudyTopics::SECTIONS), $ownNameSections (list of string),
  * $lichessIsOn (bool), $testPassedAt (int, 0 = not passed), $testResult (string),
  * $proxy (ProxySettings), $content (LichessContent), $contentKinds (list of string),
- * $maxGames (int), $maxBytes (int), $maxOwnGames (int), $importsPerHour (int), $pasteIsOpen (bool), $ownGameDays (int),
+ * $maxGames (int), $maxBytes (int), $maxOwnGames (int), $importsPerHour (int), $pasteIsOpen (bool), $ownGameDays (int), $boardCreators (string, StudyBoards::CREATORS),
  * $lichessDatabaseLink (string), $warnings, $currentAdminPath,
  * $basePath, $csrfToken, $t, $template.
  */
@@ -202,6 +202,14 @@
         <label><?= e($t->text('admin.lichess.imports_per_hour')) ?> <input type="number" name="imports_per_hour" min="1" max="100" value="<?= e($importsPerHour) ?>" required></label>
         <label><?= e($t->text('admin.lichess.own_game_days')) ?> <input type="number" name="own_game_days" min="0" max="3650" value="<?= e($ownGameDays) ?>" required></label>
         <label class="checkbox"><input type="checkbox" name="paste_for_players" value="on"<?= $pasteIsOpen ? ' checked' : '' ?>> <?= e($t->text('admin.lichess.paste_for_players')) ?></label>
+        <?php // Who may make study boards (C6-1, A133). ?>
+        <label><?= e($t->text('admin.lichess.board_creators')) ?>
+            <select name="board_creators">
+                <?php foreach (['all', 'teachers', 'admins'] as $creators) : ?>
+                    <option value="<?= e($creators) ?>"<?= $boardCreators === $creators ? ' selected' : '' ?>><?= e($t->text('admin.lichess.creators_' . $creators)) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
         <p class="button-row"><button type="submit" class="button"><?= e($t->text('admin.lichess.save')) ?></button></p>
     </form>
 </section>

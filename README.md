@@ -32,6 +32,7 @@ phpChess 6 is built in large chunks, each a working, tested whole. The full list
 | C4-1 Tournaments | Round Robin, Swiss, knockout, League with drag-and-drop | Built, in review |
 | C4-2 Special tournaments | Team vs Team, Arena, voting tournaments, class tournaments | Planned |
 | C5-1 Lichess | Puzzles that work offline, study games, Lichess TV; every outside game is safety-checked | ✅ Done |
+| C6-1 Study board | Side lines, symbols, arrows and circles, comments; PGN import and export | Built, in review |
 
 **Built so far**
 - Project set-up: Composer (development tools only, no runtime packages), PHPUnit tests and PHPStan analysis at its strictest level, both passing.

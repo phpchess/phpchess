@@ -189,6 +189,15 @@ $partVariables = [
         <a class="icon-button" href="<?= e($gamePath) ?>/pgn" download title="<?= e($t->text('game.download_pgn')) ?>" aria-label="<?= e($t->text('game.download_pgn')) ?>">
             <svg class="icon" aria-hidden="true"><use href="#icon-download"/></svg>
         </a>
+        <?php // An own finished game goes to the study board (C6-1, A126, A136). ?>
+        <?php if ($game->state === 'finished' && $viewerColour !== null) : ?>
+            <form method="post" action="<?= e($basePath) ?>/learn/boards/new" class="inline-form">
+                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                <input type="hidden" name="from" value="game">
+                <input type="hidden" name="id" value="<?= e($game->id) ?>">
+                <button type="submit" class="icon-button" title="<?= e($t->text('study_board.open')) ?>" aria-label="<?= e($t->text('study_board.open')) ?>"><?= $template->render('partials/icon', ['icon' => 'study_board']) ?></button>
+            </form>
+        <?php endif; ?>
 
         <?php /* Swapped by game-page.js when offers change or the game ends (B23). */ ?>
         <div class="game-buttons" id="game-buttons">

@@ -83,6 +83,12 @@ $drawings = [
     'replay-play' => '<path d="M7 5v14l11-7z"/>',
     'replay-forward' => '<path d="M5 6l6 6-6 6M12 6l6 6-6 6"/>',
     'replay-last' => '<path d="M4 6l6 6-6 6M11 6l6 6-6 6M19 5v14"/>',
+    // Study board (C6-1)
+    'study_board' => '<rect x="3" y="3" width="14" height="14"/><path d="M3 10h14M10 3v14"/><path d="M14 21l7-7"/><path d="M17 21h4v-4"/>',
+    'arrow' => '<path d="M5 19L19 5M11 5h8v8"/>',
+    'promote' => '<path d="M12 20V6M6 12l6-6 6 6M5 3h14"/>',
+    'comment' => '<path d="M4 5h16v11H10l-5 4v-4H4z"/><path d="M8 9h8M8 12h5"/>',
+    'erase' => '<path d="M7 20h12M5 14l8-8 6 6-6 6H9z"/>',
 ];
 
 $shapes = $drawings[$icon] ?? '<circle cx="12" cy="12" r="8"/>';

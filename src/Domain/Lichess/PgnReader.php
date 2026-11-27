@@ -210,10 +210,11 @@ final class PgnReader
     }
 
     /**
-     * The legal move a SAN word names, or null. Every legal move is written
+     * The legal move a SAN word names, or null (also used by the study board,
+     * C6-1). Every legal move is written
      * in SAN by our own San class and compared, so only real moves match.
      */
-    private static function findMove(Position $position, string $sanWord): ?Move
+    public static function findMove(Position $position, string $sanWord): ?Move
     {
         $wanted = self::normalise($sanWord);
 

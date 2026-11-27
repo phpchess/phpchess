@@ -193,6 +193,11 @@ Decisions A1–A21 are in [DECISIONS.md](DECISIONS.md).
 | L-02 | Login with Lichess / account link (OAuth with PKCE) | new | C5-1 | external content | dropped (A77) |
 | L-03 | Study games: PGN uploads and Lichess imports through the content scanner, study themes, links to lichess.org (A78, A81, A88) | new | C5-1 | external content (Lichess imports only) | done (2026-11-26), reviewed |
 
+## TU — Tutor (C6, A121–A136)
+| Id | Feature | Origin | Chunk | Switch | Status |
+|---|---|---|---|---|---|
+| TU-01 | Study board: PGN with side lines, symbols $1–$19, `[%cal]`/`[%csl]` drawings, Lichess-style move-tree editing, import and export through the study scanner; own boards private, public after admin approval; admin chooses who may make boards (A129–A136) | new | C6-1 | none (admin setting: all, teachers, admins) | built (2026-11-27), in review |
+
 ## Dropped by decision
 | 4.4 feature | Decision |
 |---|---|

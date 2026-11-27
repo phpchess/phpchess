@@ -48,6 +48,14 @@ $backPath ??= $theme === null ? '/learn' : '/learn/themes/' . $theme['id'];
     </div>
 <?php endif; ?>
 
+<?php // The game on the study board, to add side lines and comments (C6-1, A136). ?>
+<form method="post" action="<?= e($basePath) ?>/learn/boards/new" class="inline-form">
+    <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+    <input type="hidden" name="from" value="study">
+    <input type="hidden" name="id" value="<?= e($game['id']) ?>">
+    <button type="submit" class="button button-secondary"><?= $template->render('partials/icon', ['icon' => 'study_board']) ?> <?= e($t->text('study_board.open')) ?></button>
+</form>
+
 <?php if (!$isComplete) : ?>
     <p class="notice notice-error"><?= e($t->text('study.incomplete')) ?></p>
 <?php endif; ?>

@@ -24,6 +24,11 @@
        aria-label="<?= e($t->text('puzzles.title')) ?>" title="<?= e($t->text('puzzles.title')) ?>">
         <?= $template->render('partials/icon', ['icon' => 'puzzle', 'size' => 64]) ?>
     </a>
+    <?php // The study board: own analysis with side lines (C6-1, A136). ?>
+    <a class="play-tile play-tile-secondary" href="<?= e($basePath) ?>/learn/boards"
+       aria-label="<?= e($t->text('study_board.title')) ?>" title="<?= e($t->text('study_board.title')) ?>">
+        <?= $template->render('partials/icon', ['icon' => 'study_board', 'size' => 64]) ?>
+    </a>
     <?php if ($lichessIsOn) : ?>
         <?php // Everything from lichess.org on one page: live games, broadcasts, the daily puzzle (A96). ?>
         <a class="play-tile play-tile-secondary" href="<?= e($basePath) ?>/learn/lichess"

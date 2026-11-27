@@ -71,6 +71,7 @@ Each module is a folder under `src/Domain/`. It owns its tables and is used by o
 | Notifications | presence-aware delivery: live, in-app, push, email; quiet hours | `notifications`, `email_outbox`, `push_subscriptions` |
 | System | settings, feature switches, jobs, audit, migrations | `settings`, `jobs`, `audit_log`, `schema_migrations`, `rate_limits` |
 | Lichess | the one door to lichess.org (`Infra/Lichess/LichessClient`), the content scanner, study themes and games, TV (C5-1); puzzles live in `Domain/Puzzles` (bundled file, no table) | `study_themes`, `study_games` |
+| Study | the study board (C6-1): move tree with side lines, study PGN, study scanner (A131); the base for review, ladder and lessons (C6-2 to C6-4) | `study_boards`, `study_moves` |
 
 **Who calls whom:**
 - **Games** calls Rules and, when a game ends, Ratings and Notifications.

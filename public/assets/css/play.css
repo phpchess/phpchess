@@ -558,3 +558,43 @@ details.confirm summary { cursor: pointer; }
 @media (max-width: 40rem) {
     .query-dialog[open] { position: fixed; inset: 0; max-width: none; height: 100%; border-radius: 0; margin: 0; }
 }
+
+/* --- Study board (C6-1): board, move tree, annotation tools ---
+ * Mobile first (A18): the board is as wide as the screen allows but never
+ * taller than the screen; the moves and tools follow below it. */
+.study-board-frame { width: min(100%, calc(100dvh - 12rem)); margin-inline: auto; }
+.study-moves {
+    margin-block: var(--space-3);
+    padding: var(--space-2);
+    max-height: 12rem;
+    overflow-y: auto;
+    border: 1px solid var(--colour-border);
+    background: var(--colour-surface);
+    line-height: 2;
+}
+.study-move {
+    border: 0;
+    background: none;
+    padding: 0 var(--space-1);
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    min-height: 2rem;
+}
+.study-move-current { background: var(--colour-accent); color: var(--colour-accent-text); border-radius: 3px; }
+.study-side-line { color: var(--colour-muted-text); }
+.study-comment { white-space: pre-wrap; }
+.study-comment:empty { display: none; }
+.study-symbol { min-width: 2.75rem; }
+.study-symbol[aria-pressed="true"], .study-colour[aria-pressed="true"] { outline: 3px solid var(--colour-focus); }
+.study-comment-edit textarea { width: 100%; }
+/* The four drawing colours (A129): green good, red threat, yellow alternative, blue note. */
+.study-colour-good { color: #15781b; }
+.study-colour-threat { color: #b42318; }
+.study-colour-alternative { color: #9a6700; }
+.study-colour-note { color: #0969da; }
+@media (min-width: 60rem) {
+    .study-board { display: grid; grid-template-columns: minmax(0, 3fr) minmax(16rem, 2fr); gap: var(--space-3); align-items: start; }
+    .study-board-frame { width: 100%; grid-row: span 4; }
+    .study-moves { max-height: 24rem; margin-block: 0; }
+}

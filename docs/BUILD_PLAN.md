@@ -29,7 +29,7 @@ The plan is six blocks, split into eleven large chunks.
 | 4 Tournaments | C4-1 Tournament core | model, Round Robin, Swiss, knockout, League with drag-and-drop, tie-breaks (A97–A110) | built (2026-11-26); all checks pass, review pending |
 | | C4-2 Special formats | Team vs Team, Arena, voting, class tournaments | planned |
 | 5 Lichess | C5-1 Lichess | puzzles, study games, Lichess TV, content scanner (A74–A88; login dropped, A77) | done (2026-11-26, reviewed) |
-| 6 Tutor | C6-1 Study board | PGN with variations, annotation symbols and drawings (A121) | planned |
+| 6 Tutor | C6-1 Study board | PGN with variations, annotation symbols and drawings (A121, A131–A136) | built 2026-11-27, in review |
 | | C6-2 Game review and commentary | analysis of any own game on request, positive commentary from proven detectors (A122, A126) | planned |
 | | C6-3 Ladder | 20 chapters, 0 to 2000, lessons, puzzles, tutor games, final game (A123) | planned |
 | | C6-4 Teacher and lesson games | teacher role for classes and 1:1, lesson games with annotation by both sides, logged chat (A124, A125) | planned |
@@ -245,6 +245,10 @@ Release 6.0 is C0-1 to C6-5 (A127), plus a check on a real shared host before re
   - PGN with variations: store, edit, view, import and export.
   - Annotation symbols (!, ?, !!, ±) and drawings (arrows, circles, highlighted squares), kept in the PGN comment format that Lichess and ChessBase read.
   - It is the base for C6-2 to C6-4.
+  - Built 2026-11-27 (A131–A136), feature TU-01: `Domain/Study` (MoveTree, StudyPgn, StudyScanner, Symbols, Drawings, StudyBoards), `Infra/Study/StudyBoardRepository`, `StudyBoardController`, `templates/study/`, `public/assets/js/study/study-board.js`.
+  - Migration 14 (`study_boards`, `study_moves`): kind (study, review, ladder, lesson), visibility (private, class, public), and an author per move, ready for C6-2 to C6-4.
+  - Tests: `tests/Study/StudyBoardTest.php` (tree, PGN round trip, poisoned PGN).
+  - "Analysis challenge" and "Teaching request" game modes go to C6-4 (A136).
 - **C6-2 Game review and commentary**:
   - The player asks for a review of their own finished game; nothing comments during play (A126).
   - A small set of proven, deterministic detectors: hanging piece, fork, pin, skewer, mate threat, material.

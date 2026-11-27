@@ -21,6 +21,7 @@ use PhpChess\Infra\Lichess\LichessClient;
 use PhpChess\Infra\Lichess\ProxySettings;
 use PhpChess\Infra\System\SecretBox;
 use PhpChess\Infra\Lichess\StudyRepository;
+use PhpChess\Infra\Study\StudyBoardRepository;
 use PhpChess\Infra\Community\BuddyRepository;
 use PhpChess\Infra\Community\GameChatRepository;
 use PhpChess\Infra\Community\MessageRepository;
@@ -402,6 +403,12 @@ final class Services
     public function studies(): StudyRepository
     {
         return new StudyRepository($this->database());
+    }
+
+    /** Study boards with side lines (C6-1). */
+    public function studyBoards(): StudyBoardRepository
+    {
+        return new StudyBoardRepository($this->database());
     }
 
     public function studyImport(): StudyImport
