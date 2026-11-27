@@ -100,11 +100,11 @@ final class ProxyAndSecretsTest extends TestCase
     {
         $admin = $this->site->loggedInBrowser(InstalledSite::ADMIN_NAME, true);
         $admin->get('/admin/lichess');
-        $admin->post('/admin/lichess/proxy', ['proxy_mode' => 'proxy', 'proxy_host' => 'proxy.school.local', 'proxy_port' => '3128', 'proxy_user' => 'teacher', 'proxy_password' => 'TopSecret9']);
+        $admin->post('/admin/lichess/proxy', ['proxy_mode' => 'proxy', 'proxy_host' => 'proxy.school.local', 'proxy_port' => '3128', 'proxy_user' => 'proxyuser7', 'proxy_password' => 'TopSecret9']);
 
         $page = $admin->get('/admin/lichess')->body;
         self::assertStringContainsString('proxy.school.local', $page);
         self::assertStringNotContainsString('TopSecret9', $page);
-        self::assertStringNotContainsString('teacher', $page);
+        self::assertStringNotContainsString('proxyuser7', $page);
     }
 }
