@@ -214,7 +214,7 @@ final class StudyBoardRepository extends Repository
             $parameters,
         );
 
-        return array_values(array_map(static fn (array $row): array => self::boardOf($row), $rows));
+        return array_map(static fn (array $row): array => self::boardOf($row), $rows);
     }
 
     /**

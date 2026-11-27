@@ -117,14 +117,14 @@ final class StudyBoardTest extends TestCase
         ));
         $start = $tree->node(0);
         self::assertSame('Start here', $start?->comment);
-        self::assertSame(['Ge4'], $start?->drawings);
+        self::assertSame(['Ge4'], $start->drawings);
 
         // 2.f4 is a side line after 1...e5, with its comment and arrow.
         $e5 = $tree->mainLine()[1];
         $f4 = $tree->node($tree->childrenOf($e5)[1]);
         self::assertSame('f4', $f4?->san);
-        self::assertSame("King's Gambit", $f4?->comment);
-        self::assertSame(['Rf4e5'], $f4?->drawings);
+        self::assertSame("King's Gambit", $f4->comment);
+        self::assertSame(['Rf4e5'], $f4->drawings);
 
         $nc6 = $tree->node($tree->mainLine()[3]);
         self::assertSame([1], $nc6?->symbols);
@@ -148,7 +148,7 @@ final class StudyBoardTest extends TestCase
         $node = $game['tree']->node(1);
 
         self::assertSame([1], $node?->symbols);
-        self::assertSame('fine', $node?->comment);
+        self::assertSame('fine', $node->comment);
     }
 
     public function testAnIllegalMoveInASideLineRejectsTheGame(): void

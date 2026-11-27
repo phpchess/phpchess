@@ -361,6 +361,8 @@ final class StudyBoardController
             return $white . ' – ' . $black;
         }
 
-        return ($tags['Event'] ?? '') !== '' && ($tags['Event'] ?? '') !== '?' ? $tags['Event'] : $fallback;
+        $event = $tags['Event'] ?? '';
+
+        return $event !== '' && $event !== '?' ? $event : $fallback;
     }
 }

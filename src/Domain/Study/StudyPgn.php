@@ -263,7 +263,7 @@ final class StudyPgn
      * Writes the moves after one node: the main move, its side lines in
      * brackets, then the main line on.
      *
-     * @param list<string> $words
+     * @param array<int, string> $words
      */
     private static function writeLine(MoveTree $tree, int $parent, bool $needsNumber, array &$words): void
     {
@@ -289,7 +289,7 @@ final class StudyPgn
      * Writes one move: its number when needed, SAN, symbols, comment.
      * Returns true when a comment was written.
      *
-     * @param list<string> $words
+     * @param array<int, string> $words
      */
     private static function writeMove(MoveTree $tree, int $number, bool $needsNumber, array &$words): bool
     {

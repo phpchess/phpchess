@@ -205,8 +205,8 @@
         <?php // Who may make study boards (C6-1, A133). ?>
         <label><?= e($t->text('admin.lichess.board_creators')) ?>
             <select name="board_creators">
-                <?php foreach (['all', 'teachers', 'admins'] as $creators) : ?>
-                    <option value="<?= e($creators) ?>"<?= $boardCreators === $creators ? ' selected' : '' ?>><?= e($t->text('admin.lichess.creators_' . $creators)) ?></option>
+                <?php foreach (['all' => 'admin.lichess.creators_all', 'teachers' => 'admin.lichess.creators_teachers', 'admins' => 'admin.lichess.creators_admins'] as $creators => $textKey) : ?>
+                    <option value="<?= e($creators) ?>"<?= $boardCreators === $creators ? ' selected' : '' ?>><?= e($t->text($textKey)) ?></option>
                 <?php endforeach; ?>
             </select>
         </label>
